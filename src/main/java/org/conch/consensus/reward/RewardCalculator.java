@@ -13,7 +13,7 @@ public class RewardCalculator {
      * Reward definition, amount is the reward amount
      */
     public enum RewardDef {
-        MINT(128);
+        MINT(64);
 
         private final long amount;
 
