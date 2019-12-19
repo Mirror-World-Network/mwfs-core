@@ -155,8 +155,8 @@ class PocHolder implements Serializable {
             return;
         }
 
+        Logger.logDebugMessage("#addOrUpdateBoundPeer# add a new certified peer: %s", newPeer.toString());
         if (!inst.certifiedPeers.containsKey(accountId)) {
-            Logger.logDebugMessage("#addOrUpdateBoundPeer# add a new certified peer: %s", newPeer.toString());
             inst.certifiedPeers.put(accountId, newPeer);
             return;
         }
