@@ -2078,7 +2078,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
 
     private int getTransactionVersion(int previousBlockHeight) {
         // tx version be set to 3 after v0.1.6, see: org.conch.tx.TransactionImpl.defaultTxVersion
-        return previousBlockHeight <= Constants.POC_BLOCK_HEIGHT ? 0 : 3;
+        return previousBlockHeight <= Constants.POC_BLOCK_HEIGHT ? 1 : 3;
     }
 
     public SortedSet<UnconfirmedTransaction> selectUnconfirmedTransactions(
