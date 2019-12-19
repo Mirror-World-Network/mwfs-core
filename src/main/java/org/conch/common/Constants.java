@@ -207,7 +207,7 @@ public final class Constants {
     public static final int MAX_STORED_DATA_CHANNEL_LENGTH = 100;
     public static final int MIN_EXISTENCE_HEIGHT = 100;
 
-    public static final int POC_BLOCK_HEIGHT = 1;
+    public static final int POC_BLOCK_HEIGHT = 0;
     public static final int REFERENCED_TRANSACTION_FULL_HASH_BLOCK = 0;
     public static final int REFERENCED_TRANSACTION_FULL_HASH_BLOCK_TIMESTAMP = 0;
 
@@ -363,6 +363,7 @@ public final class Constants {
      * @return network definition
      */
     private static final String loadNetworkDefinition() {
+
         String networkInEnv = System.getProperty(RuntimeEnvironment.NETWORK_ARG);
         if (StringUtils.isNotBlank(networkInEnv)) return networkInEnv;
 
@@ -371,20 +372,20 @@ public final class Constants {
 
     private static final String parseBootNodeHost() {
         if(isMainnet()){
-            return "boot.sharder.io";
+            return "boot.mwfs.io";
         }else if(isTestnet()){
-            return "testboot.sharder.io";
+            return "testboot.mwfs.io";
         }
-        return "devboot.sharder.io";
+        return "devboot.mwfs.io";
     }
     
     private static final List<String> parseBootNodesHost() {
        if(isMainnet()){
-           return Lists.newArrayList("boot.sharder.io");
+           return Lists.newArrayList("boot.mwfs.io");
        }else if(isTestnet()){
-           return Lists.newArrayList("testboot.sharder.io","testna.sharder.io","testnb.sharder.io");
+           return Lists.newArrayList("testboot.mwfs.io","testna.mwfs.io","testnb.mwfs.io");
        }
-       return Lists.newArrayList("devboot.sharder.io");
+       return Lists.newArrayList("devboot.mwfs.io");
     }
     
     

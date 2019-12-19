@@ -354,14 +354,16 @@ final public class TransactionImpl implements Transaction {
     }
     
     public static byte defaultTxVersion(){
-        if(Conch.versionCompare("0.1.6") >=0 ) {
+//        if(Conch.versionCompare("0.1.6") >=0 ) {
+        if(Conch.versionCompare("0.0.1") >=0 ) {
             return 3;
         }
         return 1;
     }
     
     public boolean checkVersion(){
-        if(Conch.versionCompare("0.1.6") >=0 ) {
+//        if(Conch.versionCompare("0.1.6/") >=0 ) {
+        if(Conch.versionCompare("0.0.1") >=0 ) {
             return 3 <= this.version;
         }
         return 1 <= this.version;

@@ -52,7 +52,7 @@ public class GenesisRecipient {
                                 96,-113,-69,-43,112,85,13,83,58,34,-32,77,-93,-76,-54,108,-41,-104,39,-112,103,74,126})
         );
 
-        //10 billion -> Miners: 70 million, R&D: 1.2 billion, Investors: 1 billion, Foundation: 0.8 billion
+        //10 billion -> Miners: 7 billion, R&D: 1.2 billion, Investors: 1 billion, Foundation: 0.8 billion
         List<GenesisRecipient> testnetRecipients = Lists.newArrayList(
                 // boot node
                 new GenesisRecipient(-7290871798082871685L, 10000000L,
