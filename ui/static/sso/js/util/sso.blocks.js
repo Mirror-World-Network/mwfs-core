@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright © 2017 sharder.org.                             *
+ * Copyright © 2017 mwfs.io.                             *
  * Copyright © 2014-2017 ichaoj.com.                                     *
  *                                                                            *
  * See the LICENSE.txt file at the top-level directory of this distribution   *

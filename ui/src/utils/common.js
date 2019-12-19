@@ -317,7 +317,7 @@ export default {
      */
     byIPtoCoordinates(params) {
         let xhr = new XMLHttpRequest();
-        xhr.open("POST", "https://sharder.org/api/front/coordinates/ip");
+        xhr.open("POST", "https://mwfs.io/api/front/coordinates/ip");
         xhr.setRequestHeader("content-type", "application/json;charset=UTF-8");
         return new Promise(function (resolve, reject) {
             xhr.onload = function () {

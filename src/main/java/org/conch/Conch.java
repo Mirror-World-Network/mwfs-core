@@ -812,7 +812,7 @@ public final class Conch {
                 long currentTime = System.currentTimeMillis();
                 Logger.logMessage("Initialization took " + (currentTime - startTime) / 1000 + " seconds");
                 Logger.logMessage("COS server " + getFullVersion() + " " + getCosUpgradeDate() + " started successfully.");
-                Logger.logMessage("Copyright © 2017 sharder.org.");
+                Logger.logMessage("Copyright © 2017 mwfs.io.");
                 Logger.logMessage("Distributed under MIT.");
                 if (API.getWelcomePageUri() != null) Logger.logMessage("Client UI URL is " + API.getWelcomePageUri());
 

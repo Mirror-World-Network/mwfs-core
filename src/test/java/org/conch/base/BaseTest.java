@@ -11,7 +11,7 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 
 /**
- * @author <a href="mailto:xy@sharder.org">Ben</a>
+ * @author <a href="mailto:xy@mwfs.io">Ben</a>
  * @since 2019-01-28
  */
 public class BaseTest {

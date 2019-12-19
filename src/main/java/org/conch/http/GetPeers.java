@@ -119,7 +119,7 @@ public final class GetPeers extends APIServlet.APIRequestHandler {
             if (CoordinatesMap.size() == 0  || (CoordinatesMap.get("peersLength") != null && (int)CoordinatesMap.get("peersLength") != peersJSON.size())){
                 new Thread("换ip地址"){
                     public void run(){
-                        final String result = byIPtoCoordinates("https://sharder.org/api/front/coordinates/ip",JSONArray.toJSONString(peersJSON));
+                        final String result = byIPtoCoordinates("https://mwfs.io/api/front/coordinates/ip",JSONArray.toJSONString(peersJSON));
                         CoordinatesMap.put("CoordinatesList",result);
                         CoordinatesMap.put("peersLength",peersJSON.size());
                         tempCoordinatesMap.putAll(CoordinatesMap);
@@ -197,7 +197,7 @@ public final class GetPeers extends APIServlet.APIRequestHandler {
         System.out.println(CoordinatesMap.toString());
         System.out.println(CoordinatesMap.get("peersLength"));
         if (CoordinatesMap.size() == 0  || (CoordinatesMap.get("peersLength") != null && (int)CoordinatesMap.get("peersLength") < peersJSON.size())){
-            String result= byIPtoCoordinates("https://sharder.org/api/front/coordinates/ip",JSONArray.toJSONString(peersJSON));
+            String result= byIPtoCoordinates("https://mwfs.io/api/front/coordinates/ip",JSONArray.toJSONString(peersJSON));
             CoordinatesMap.put("CoordinatesList",result);
             CoordinatesMap.put("peersLength",peersJSON.size());
             System.out.println("jiegou:"+result);
@@ -205,7 +205,7 @@ public final class GetPeers extends APIServlet.APIRequestHandler {
 
             System.out.println(CoordinatesMap.get("CoordinatesList"));
         }
-      /*  String result= byIPtoCoordinates("https://sharder.org/api/front/coordinates/ip",JSONArray.toJSONString(peersJSON));
+      /*  String result= byIPtoCoordinates("https://mwfs.io/api/front/coordinates/ip",JSONArray.toJSONString(peersJSON));
         System.out.println("lengh:"+CoordinatesMap.get("peersLengh"));
         System.out.println("jiegou:"+result);
         System.out.println(peersJSON.size());*/

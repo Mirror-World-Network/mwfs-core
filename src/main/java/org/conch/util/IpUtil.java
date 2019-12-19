@@ -92,7 +92,7 @@ public class IpUtil {
         if(StringUtils.isEmpty(host)) return false;
         
         if(host.endsWith("sharder.io") 
-        || host.endsWith("sharder.org")
+        || host.endsWith("mwfs.io")
         || host.endsWith("sharder.network")){
             return true;
         }

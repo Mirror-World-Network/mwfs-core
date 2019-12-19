@@ -372,7 +372,7 @@ const en = {
 
             'bind_btn': " Link MW account to access application",
             'bind_btn_tip1': " Pool creation rights can also be obtained through events, please stay tuned for official info!",
-            'bind_btn_tip2': "sharder.org",
+            'bind_btn_tip2': "mwfs.io",
             'bind_address': "Link Address",
             'bind_address_tip': " Please confirm whether your wallet has a TMW address then select an address for linking ",
             'address': "Address:",
@@ -970,7 +970,7 @@ const en = {
         "exchange_success": "For successful.There may be a delay in the arrival, please check back later.",
         "exchange_error": "For failure",
         "transfer_failed": "Transfer failed",
-        "sharder_binding_acconut": "Please go to the official website sharder.org to link the address",
+        "sharder_binding_acconut": "Please go to the official website mwfs.io to link the address",
         "miner_acconut": "Insufficient mining balance cannot be exchanged",
         "binding_account": "Linked account",
         "no_binding_account": "No account linked",
