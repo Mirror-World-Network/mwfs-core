@@ -242,9 +242,9 @@ public final class Conch {
         static {
             //preset params
             presetMap.clear();
-            presetMap.put(Constants.Network.DEVNET, new PresetParam(Constants.Network.DEVNET, 9218, 9215, 9217));
-            presetMap.put(Constants.Network.TESTNET, new PresetParam(Constants.Network.TESTNET, 7218, 7215, 7217));
-            presetMap.put(Constants.Network.MAINNET, new PresetParam(Constants.Network.MAINNET, 3218, 3215, 3217));
+            presetMap.put(Constants.Network.DEVNET, new PresetParam(Constants.Network.DEVNET, 9219, 9216, 9218));
+            presetMap.put(Constants.Network.TESTNET, new PresetParam(Constants.Network.TESTNET, 7219, 7216, 7218));
+            presetMap.put(Constants.Network.MAINNET, new PresetParam(Constants.Network.MAINNET, 3219, 3216, 3218));
         }
 
         public static void print(){

@@ -1,5 +1,5 @@
-# Sharder #
-Sharder is a blockchain-based multi-chain storage network.
+# MWFS #
+MWFS is a storage public chain.
 
 ## Project Structure ##
 Java project，the UI uses the vue.
@@ -10,7 +10,7 @@ Java project，the UI uses the vue.
         |- lib/             // 3rd party or required library 
         |- html/            // compiled UI html file
         |- logs/            // logs 
-        |- sharder_*_db/    // sharder-chain database
+        |- mwfs_*_db/       // mwfs-chain database
         |- src/             // sharder-chain source code 
         |- ui/              // UI source code 
         |- run.sh           // shell for linux and osx 
@@ -20,11 +20,11 @@ Java project，the UI uses the vue.
         |- README.md 
 NOTE：If you manually specify the compiled directory, you must then set the compiled directory to the above classes folder. Otherwise, the run.sh and run.bat files will not run normally. 
 
-## Running the Sharder Client ##
+## Running the MWFS Client ##
 You can use the following methods to run the client：
 * Method one
     
-        1. Download the client from [official site](https://sharder.org) according to your OS.
+        1. Download the client from [official site](https://mwfs.io) according to your OS.
         2. Install the client on your computer.
         3. Run the client program.
 * Method two
@@ -38,16 +38,16 @@ You can use the following methods to run the client：
 Please read the [MINER-GUIDE.md](./MINER-GUIDE.md)
 
 ## Follow Us ##
-  - Website: https://sharder.org
-  - Twitter: @SharderChain
-  - Telegram: https://t.me/sharder_talk
-  - Medium: https://medium.com/@SharderChain
-  - Github: https://github.com/Sharders/sharder-chain
-  - Wechat: supersharder
+  - Website: https://mwfs.io
+  - Twitter: #
+  - Telegram: #
+  - Medium: #
+  - Github: https://github.com/CryptoDWH/cdwh-chain
+  - Wechat: #
 ----
 
-# 豆匣 #
-豆匣是多链架构区块链存储网络。
+# 镜像世界 #
+镜像世界文件系统是一个数据存储公链。
 
 ## 工程说明 ##
 Java工程，UI使用vue。
@@ -58,7 +58,7 @@ Java工程，UI使用vue。
         |- lib/             // 第三方或则依赖的代码库
         |- html/            // 编译后的UI文件
         |- logs/            // 日志 
-        |- sharder_*_db/    // 数据库
+        |- mwfs_*_db/       // 数据库
         |- src/             // 源代码
         |- ui/              // UI源代码
         |- run.sh           // linux和osx操作系统的启动脚本 
@@ -68,13 +68,13 @@ Java工程，UI使用vue。
         |- README.md 
 注意：如果你手动指定编译目录的话，需要将编译目录设置到上面的classes文件夹，否则run.sh和run.bat无法正常运行。
 
-## 运行豆匣客户端 ##
-你可以采用下面两种方式运行豆匣客户端：
+## 运行客户端 ##
+你可以采用下面两种方式运行客户端：
 * 方式一
     
-        1. 在[官网](https://sharder.org)下载对应操作系统的客户端
-        2. 安装豆匣客户端
-        3. 运行豆匣客户端
+        1. 在[官网](https://mwfs.io)下载对应操作系统的客户端
+        2. 安装客户端
+        3. 运行客户端
 * 方式二
     
         1. 将本工程克隆到本地磁盘
@@ -86,9 +86,9 @@ Java工程，UI使用vue。
 请阅读[MINER-GUIDE.md](./MINER-GUIDE.md)
 
 ## 关注我们 ##
-  - 官方网站: https://sharder.org
-  - Twitter: @SharderChain
-  - Telegram: https://t.me/sharder_talk
-  - Medium: https://medium.com/@SharderChain
-  - Github: https://github.com/Sharders/sharder-chain
-  - 微信: 豆匣咨讯
+  - Website: https://mwfs.io
+  - Twitter: #
+  - Telegram: #
+  - Medium: #
+  - Github: https://github.com/CryptoDWH/cdwh-chain
+  - Wechat: #
