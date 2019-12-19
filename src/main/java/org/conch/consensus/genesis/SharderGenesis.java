@@ -25,16 +25,17 @@ import java.util.*;
  */
 public class SharderGenesis {
 
-    public static final long GENESIS_BLOCK_ID = 6840612405442242239L;
-    public static final long CREATOR_ID = 7690917826419382695L;
-    public static final long KEEPER_ID = -4542396882408079631L;
+//    public static final long GENESIS_BLOCK_ID = 6840612405442242239L;
+    public static final long GENESIS_BLOCK_ID = 6840612405442248888L;
+    public static final long CREATOR_ID = 7235585442644638682L;
+    public static final long KEEPER_ID = 1868021154578573726L;
     public static final byte[] CREATOR_PUBLIC_KEY = {
-            -36, 27, -52, -114, -28, 115, -4, -120, 50, -66, -107, 70, -54, -95, 61, -14,
-            79, 123, -18, -57, -99, 10, -34, 75, -48, -72, -25, 96, -53, -63, -1, 43
+            -16, 19, -45, 77, 65, 92, 81, 43, 65, 91, 39, 41, -50, 115, 21, 108, -105,
+            113, -58, 127, -27, 43, -123, 89, -78, 6, -50, -1, -32, 120, -84, 14
     };
     public static final byte[] CREATOR_SIGNATURES = {
-            -79, 103, -74, -56, -6, 72, -57, -20, 59, 14, 92, 111, -116, 61, 7, -106, 38, 43, -105, 82, -112, -30, 55, -111, 3, 81, -15, 89, 5, -5, 20, 14, 58, -44, 
-            122, 99, 123, 119, 54, 66, -19, -107, 71, -115, -89, -55, -27, 121, -122, 12, 31, -126, -98, -91, 92, -88, 48, 30, 43, 80, 94, 90, 98, -109
+            -38, 59, -46, -46, -97, -10, 105, 100, -68, -4, -113, 83, -2, -42, -128, -119,
+            -53, -38, 126, 26, -76, -66, -52, -60, 51, -102, 23, 83, -41, -83, -85, 33
     };
 
 //    public static final byte[] GENESIS_BLOCK_SIGNATURE = new byte[]{
@@ -80,15 +81,15 @@ public class SharderGenesis {
         static Map<Constants.Network, List<GenesisPeer>> genesisPeers = new HashMap<>();
         static {
             List<GenesisPeer> devnetPeers = Lists.newArrayList(
-                    new GenesisPeer("devboot.sharder.io",Peer.Type.FOUNDATION, 6219247923802955552L),
-                    new GenesisPeer("devna.sharder.io",Peer.Type.FOUNDATION, 3790328149872734783L),
-                    new GenesisPeer("devnb.sharder.io",Peer.Type.FOUNDATION, 90778548339644322L)
+                    new GenesisPeer("devboot.mwfs.io",Peer.Type.FOUNDATION, 6219247923802955552L),
+                    new GenesisPeer("devna.mwfs.io",Peer.Type.FOUNDATION, 3790328149872734783L),
+                    new GenesisPeer("devnb.mwfs.io",Peer.Type.FOUNDATION, 90778548339644322L)
             );
 
             List<GenesisPeer> testnetPeers = Lists.newArrayList(
-                    new GenesisPeer("testboot.sharder.io",Peer.Type.FOUNDATION, -4542396882408079631L),
-                    new GenesisPeer("testna.sharder.io",Peer.Type.COMMUNITY, -6802345313304048560L),
-                    new GenesisPeer("testnb.sharder.io",Peer.Type.HUB, 6066546424236439063L)
+                    new GenesisPeer("testboot.mwfs.io",Peer.Type.FOUNDATION, -4542396882408079631L),
+                    new GenesisPeer("testna.mwfs.io",Peer.Type.COMMUNITY, -6802345313304048560L),
+                    new GenesisPeer("testnb.mwfs.io",Peer.Type.HUB, 6066546424236439063L)
             );
 
             List<GenesisPeer> mainnetPeers = Lists.newArrayList(

@@ -111,8 +111,8 @@ public final class Conch {
     public static final DirProvider dirProvider;
 
     private static final Properties DEFAULT_PROPERTIES = new Properties();
-    private static final String FOUNDATION_URL = "sharder.org";
-    private static final String FOUNDATION_TEST_URL = "test.sharder.org";
+    private static final String FOUNDATION_URL = "mwfs.io";
+    private static final String FOUNDATION_TEST_URL = "test.mwfs.io";
 
     public static final Peer.RunningMode runningMode;
     //TODO refactor myAddress, serialNum, nodeIp and nodeType into systemInfo

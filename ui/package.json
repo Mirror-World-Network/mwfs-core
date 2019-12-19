@@ -1,5 +1,5 @@
 {
-  "name": "MWFSClient",
+  "name": "MwfsClient",
   "version": "1.0.0",
   "description": "MWFS Client",
   "main": "src/index.js",
