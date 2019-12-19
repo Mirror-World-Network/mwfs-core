@@ -80,15 +80,15 @@ public class SharderGenesis {
         static Map<Constants.Network, List<GenesisPeer>> genesisPeers = new HashMap<>();
         static {
             List<GenesisPeer> devnetPeers = Lists.newArrayList(
-                    new GenesisPeer("devboot.sharder.io",Peer.Type.FOUNDATION, 6219247923802955552L),
-                    new GenesisPeer("devna.sharder.io",Peer.Type.FOUNDATION, 3790328149872734783L),
-                    new GenesisPeer("devnb.sharder.io",Peer.Type.FOUNDATION, 90778548339644322L)
+                    new GenesisPeer("devboot.mwfs.io",Peer.Type.FOUNDATION, 6219247923802955552L),
+                    new GenesisPeer("devna.mwfs.io",Peer.Type.FOUNDATION, 3790328149872734783L),
+                    new GenesisPeer("devnb.mwfs.io",Peer.Type.FOUNDATION, 90778548339644322L)
             );
 
             List<GenesisPeer> testnetPeers = Lists.newArrayList(
-                    new GenesisPeer("testboot.sharder.io",Peer.Type.FOUNDATION, -4542396882408079631L),
-                    new GenesisPeer("testna.sharder.io",Peer.Type.COMMUNITY, -6802345313304048560L),
-                    new GenesisPeer("testnb.sharder.io",Peer.Type.HUB, 6066546424236439063L)
+                    new GenesisPeer("testboot.mwfs.io",Peer.Type.FOUNDATION, -4542396882408079631L),
+                    new GenesisPeer("testna.mwfs.io",Peer.Type.COMMUNITY, -6802345313304048560L),
+                    new GenesisPeer("testnb.mwfs.io",Peer.Type.HUB, 6066546424236439063L)
             );
 
             List<GenesisPeer> mainnetPeers = Lists.newArrayList(

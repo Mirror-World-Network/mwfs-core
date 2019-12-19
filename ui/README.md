@@ -1,4 +1,4 @@
-# Sharder Client UI #
+# MWFS Client UI #
 
 ## Compile and run in npm
 0. run `npm i`
@@ -6,7 +6,7 @@
 2. run `npm run dev`
 3. access URL: [http://localhost:4000](http://localhost:4000)
 
-## Build and run in Sharder-Client
+## Build and run in MWFS Client
 1. run `npm run build`
-2. startup Sharder
+2. startup MWFS service
 3. access URL: [http://localhost:8215](http://localhost:8215)
