@@ -207,7 +207,7 @@ public final class Constants {
     public static final int MAX_STORED_DATA_CHANNEL_LENGTH = 100;
     public static final int MIN_EXISTENCE_HEIGHT = 100;
 
-    public static final int POC_BLOCK_HEIGHT = 0;
+    public static final int POC_BLOCK_HEIGHT = 1;
     public static final int REFERENCED_TRANSACTION_FULL_HASH_BLOCK = 0;
     public static final int REFERENCED_TRANSACTION_FULL_HASH_BLOCK_TIMESTAMP = 0;
 
