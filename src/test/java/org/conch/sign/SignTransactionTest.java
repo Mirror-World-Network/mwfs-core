@@ -138,9 +138,9 @@ public final class SignTransactionTest extends BaseTest {
      * @throws ConchException.NotValidException
      */
     public static void main(String[] args) throws ConchException.NotValidException {
-        newTx();
+//        newTx();
     //        System.out.println("genesis1=>");
-//            blockHash(SharderGenesis.genesisBlock());
+            blockHash(SharderGenesis.genesisBlock());
 //        signPocWeightTx(getSpFromConsole());
 
 //        signCoinbaseTx(getSpFromConsole());
