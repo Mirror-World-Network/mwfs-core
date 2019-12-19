@@ -43,8 +43,8 @@ public class PocProcessorImpl implements PocProcessor {
      * !! Don't use this instance directly,
      * please call org.conch.Conch#getPocProcessor() to get instance
      **/
-    public static PocProcessorImpl instance = getOrCreate();
 
+    public static PocProcessorImpl instance = getOrCreate();
     // execute once when restart the cos application
     private static boolean oldPocTxsProcess = false;
 
