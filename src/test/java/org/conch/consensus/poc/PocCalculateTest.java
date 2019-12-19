@@ -1,7 +1,7 @@
 package org.conch.consensus.poc;
 
 /**
- * @author <a href="mailto:xy@sharder.org">Ben</a>
+ * @author <a href="mailto:xy@mwfs.io">Ben</a>
  * @since 2019-03-25
  */
 public class PocCalculateTest {

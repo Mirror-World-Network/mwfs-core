@@ -89,7 +89,7 @@
                 if (_this.hubsetting.sharderAccount !== '' && _this.hubsetting.sharderPwd !== '' && _this.hubsetting.openPunchthrough) {
                     formData.append("username", _this.hubsetting.sharderAccount);
                     formData.append("password", _this.hubsetting.sharderPwd);
-                    _this.$http.post('https://taskhall.sharder.org/bounties/hubDirectory/check.ss', formData).then(res => {
+                    _this.$http.post('https://taskhall.mwfs.io/bounties/hubDirectory/check.ss', formData).then(res => {
                         if (res.data.status === 'success') {
                             _this.hubsetting.address = res.data.data.natServiceAddress;
                             _this.hubsetting.port = res.data.data.natServicePort;

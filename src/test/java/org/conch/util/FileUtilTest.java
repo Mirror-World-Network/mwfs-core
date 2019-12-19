@@ -18,11 +18,11 @@ public class FileUtilTest {
 
     private static final String ZIP_SUFFIX = ".zip";
     private static final String SAVE_PATH = "temp/cos-hub-";
-    private static final String DYNAMIC_DOWNLOAD_URL = "https://oss.sharder.org/cos/client/release/cos-hub-";
-    private static final String VERSION_URL = "https://oss.sharder.org/cos/client/release/cos-latest-version";
-    private static final String LATEST_VERSION_DEV_URL = "https://oss.sharder.org/cos/client/dev/cos-latest-version";
-    private static final String DOWNLOAD_URL_0_1_1 = "https://oss.sharder.org/cos/client/release/cos-hub-0.1.1.zip";
-    private static final String DOWNLOAD_URL_0_1_0 = "https://oss.sharder.org/cos/client/release/cos-hub-0.1.0.zip";
+    private static final String DYNAMIC_DOWNLOAD_URL = "https://oss.mwfs.io/cos/client/release/cos-hub-";
+    private static final String VERSION_URL = "https://oss.mwfs.io/cos/client/release/cos-latest-version";
+    private static final String LATEST_VERSION_DEV_URL = "https://oss.mwfs.io/cos/client/dev/cos-latest-version";
+    private static final String DOWNLOAD_URL_0_1_1 = "https://oss.mwfs.io/cos/client/release/cos-hub-0.1.1.zip";
+    private static final String DOWNLOAD_URL_0_1_0 = "https://oss.mwfs.io/cos/client/release/cos-hub-0.1.0.zip";
 
     public static void fetchUpgradePackageViaVersion() throws IOException, ConchException.NotValidException {
         String version = getNewestHubVersion();

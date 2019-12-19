@@ -1,7 +1,7 @@
 package org.conch.util;
 
 /**
- * @author <a href="mailto:xy@sharder.org">Ben</a>
+ * @author <a href="mailto:xy@mwfs.io">Ben</a>
  * @since 2019-03-28
  */
 public class IpUtilTest {

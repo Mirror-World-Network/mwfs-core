@@ -709,7 +709,7 @@
             return {
                 //dialog
                 src: "",
-                requestUrl:"https://sharder.org",
+                requestUrl:"https://mwfs.io",
                 sendSuccess: false, //true验证码发送 false验证码未发送
                 time: 60 , //时间
                 sendMessageDialog: false,

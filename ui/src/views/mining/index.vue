@@ -6,7 +6,7 @@
            <!-- <el-radio-button label="welfare" class="btn">{{$t('mining.index.free_collar')}}</el-radio-button>-->
             <el-radio-button label="exchange" class="btn">{{$t('mining.index.ss_exchange')}}</el-radio-button>
         </el-radio-group>
-        <!--豆匣矿场-->
+        <!--MW矿场-->
         <div v-if="tabTitle === 'mining' && tabMenu === 'mining'" class="mining-page">
             <div class="pool-top">
                 <div class="mining-content">
@@ -944,7 +944,7 @@
     }
 
 </style>
-<!--豆匣矿场-->
+<!--MW矿场-->
 <style>
 
     .mining-content {
