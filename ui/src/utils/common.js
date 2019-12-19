@@ -4,8 +4,8 @@
 
 export default {
     loginState: 'hub',
-    sharderFoundationHost: 'sharder.org',
-    sharderFoundationTestHost: 'test.sharder.org',
+    sharderFoundationHost: 'mwfs.io',
+    sharderFoundationTestHost: 'test.mwfs.io',
     apiUrl: '',
     cfg: {defaultInterval: 90000, soonInterval: 30000, slowInterval: 180000},
     epochBeginning: -1,
