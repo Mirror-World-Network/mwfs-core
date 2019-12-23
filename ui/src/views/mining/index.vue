@@ -411,7 +411,7 @@
 
             }, SSO.downloadingBlockchain ? this.$global.cfg.soonInterval : this.$global.cfg.defaultInterval);
     
-            document.getElementsByClassName('header')[0].style.display = 'none'
+            // document.getElementsByClassName('header')[0].style.display = 'none'
         },
         created(){
             let _this = this;
