@@ -1049,19 +1049,19 @@
         },
         methods: {
     
-            menuAdapter() {
-                document.getElementsByClassName('header')[0].style.display = 'block'
-                var menuLi = document.querySelectorAll('.navbar .el-menu li')
-                for (let i = 0; i < menuLi.length; i++) {
-                    if (i === 0) {
-                        menuLi[i].setAttribute('class', 'el-menu-item is-active')
-                        menuLi[i].style.borderBottomColor = '#409EFF'
-                    } else {
-                        menuLi[i].setAttribute('class', 'el-menu-item')
-                        menuLi[i].style.borderBottomColor = 'transparent'
-                    }
-                }
-            },
+            // menuAdapter() {
+            //     document.getElementsByClassName('header')[0].style.display = 'block'
+            //     var menuLi = document.querySelectorAll('.navbar .el-menu li')
+            //     for (let i = 0; i < menuLi.length; i++) {
+            //         if (i === 0) {
+            //             menuLi[i].setAttribute('class', 'el-menu-item is-active')
+            //             menuLi[i].style.borderBottomColor = '#409EFF'
+            //         } else {
+            //             menuLi[i].setAttribute('class', 'el-menu-item')
+            //             menuLi[i].style.borderBottomColor = 'transparent'
+            //         }
+            //     }
+            // },
             
             //定时器
             finish() {
@@ -2738,7 +2738,7 @@
                 _this.validationReceiver("transfer");
             });
     
-            this.menuAdapter()
+            // this.menuAdapter()
         },
     };
 </script>

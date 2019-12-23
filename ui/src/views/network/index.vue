@@ -539,7 +539,7 @@
                 }
             }, SSO.downloadingBlockchain ? this.$global.cfg.soonInterval : this.$global.cfg.defaultInterval);
     
-            this.menuAdapter();
+            // this.menuAdapter();
         },
         filters: {
             generatorRSFilter(val) {
@@ -551,20 +551,6 @@
             }
         },
         methods: {
-            menuAdapter() {
-                document.getElementsByClassName('header')[0].style.display = 'block'
-                var menuLi = document.querySelectorAll('.navbar .el-menu li')
-                for (let i = 0; i < menuLi.length; i++) {
-                    if (i === 1) {
-                        menuLi[i].setAttribute('class', 'el-menu-item is-active')
-                        menuLi[i].style.borderBottomColor = '#409EFF'
-                    } else {
-                        menuLi[i].setAttribute('class', 'el-menu-item')
-                        menuLi[i].style.borderBottomColor = 'transparent'
-                    }
-                }
-            },
-            
             init() {
                 const _this = this;
                 _this.networkUrlBlocks();
@@ -724,6 +710,19 @@
             dateFormat(val) {
                 return this.$global.myFormatTime(val.hitTime, "YMDHMS", true);
             }
+            // menuAdapter() {
+            //     document.getElementsByClassName('header')[0].style.display = 'block'
+            //     var menuLi = document.querySelectorAll('.navbar .el-menu li')
+            //     for (let i = 0; i < menuLi.length; i++) {
+            //         if (i === 1) {
+            //             menuLi[i].setAttribute('class', 'el-menu-item is-active')
+            //             menuLi[i].style.borderBottomColor = '#409EFF'
+            //         } else {
+            //             menuLi[i].setAttribute('class', 'el-menu-item')
+            //             menuLi[i].style.borderBottomColor = 'transparent'
+            //         }
+            //     }
+            // }
         }
 
     };
