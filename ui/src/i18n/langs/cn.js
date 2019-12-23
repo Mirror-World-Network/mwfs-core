@@ -997,7 +997,7 @@ const cn = {
         "status_refuse":"拒绝发放",
     },
     poc: {
-        'block_reward_tips_phase1': "开放测试网络第一阶段90%的挖矿奖励分配给Hub矿工，剩余10%的挖矿奖励分配给其余矿工。",
+        'block_reward_tips_phase1': "。",
         'creator': "创建者",
         'type': "类型",
         'nodeType': "节点类型",

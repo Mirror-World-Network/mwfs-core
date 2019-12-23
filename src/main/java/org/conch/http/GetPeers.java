@@ -120,9 +120,13 @@ public final class GetPeers extends APIServlet.APIRequestHandler {
                 new Thread("换ip地址"){
                     public void run(){
                         final String result = byIPtoCoordinates("https://mwfs.io/api/front/coordinates/ip",JSONArray.toJSONString(peersJSON));
-                        CoordinatesMap.put("CoordinatesList",result);
-                        CoordinatesMap.put("peersLength",peersJSON.size());
-                        tempCoordinatesMap.putAll(CoordinatesMap);
+                        if (result.substring(0,8).equals("ErrorInfo")){
+                            return;
+                        }else{
+                            CoordinatesMap.put("CoordinatesList",result);
+                            CoordinatesMap.put("peersLength",peersJSON.size());
+                            tempCoordinatesMap.putAll(CoordinatesMap);
+                        }
                     }
                 }.start();
             }
@@ -196,15 +200,9 @@ public final class GetPeers extends APIServlet.APIRequestHandler {
         System.out.println(peersJSON.size());
         System.out.println(CoordinatesMap.toString());
         System.out.println(CoordinatesMap.get("peersLength"));
-        if (CoordinatesMap.size() == 0  || (CoordinatesMap.get("peersLength") != null && (int)CoordinatesMap.get("peersLength") < peersJSON.size())){
-            String result= byIPtoCoordinates("https://mwfs.io/api/front/coordinates/ip",JSONArray.toJSONString(peersJSON));
-            CoordinatesMap.put("CoordinatesList",result);
-            CoordinatesMap.put("peersLength",peersJSON.size());
-            System.out.println("jiegou:"+result);
-        }else{
+        String result= byIPtoCoordinates("http://localhost:8080/api/front/coordinates/ip",JSONArray.toJSONString(peersJSON));
+        System.out.println("jiegou:"+result);
 
-            System.out.println(CoordinatesMap.get("CoordinatesList"));
-        }
       /*  String result= byIPtoCoordinates("https://mwfs.io/api/front/coordinates/ip",JSONArray.toJSONString(peersJSON));
         System.out.println("lengh:"+CoordinatesMap.get("peersLengh"));
         System.out.println("jiegou:"+result);

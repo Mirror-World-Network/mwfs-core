@@ -214,9 +214,10 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             int limitConnectedSize = Math.min(1, defaultNumberOfForkConfirmations);
             connectedPublicPeers = Peers.getPublicPeers(Peer.State.CONNECTED, true);
             int connectedSize = connectedPublicPeers.size();
-            if (connectedSize <= limitConnectedSize) {
+            if (!Generator.isBootNode
+                && connectedSize < limitConnectedSize) {
                 if (Logger.printNow(Constants.BlockchainProcessor_P_downloadPeer)) {
-                    Logger.logDebugMessage("No enough connected peers[limit size=" + (limitConnectedSize + 1) + ",current connected size=" + connectedSize + "], break syn blocks...");
+                    Logger.logDebugMessage("No enough connected peers[limit size=" + (limitConnectedSize) + ",current connected size=" + connectedSize + "], break syn blocks...");
 //                    Logger.logDebugMessage("Current peers => " + Arrays.toString(connectedPublicPeers.toArray()));
                 }
 

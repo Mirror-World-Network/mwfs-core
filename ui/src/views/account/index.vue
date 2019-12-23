@@ -449,7 +449,7 @@
                                   v-if="hubsetting.openPunchthrough" prop="clientSecretkey">
                         <el-input v-model="hubsetting.clientSecretkey" :disabled="true"></el-input>
                     </el-form-item>
-                    <el-form-item :label="$t('hubsetting.public_ip_address')" prop="publicAddress">
+                    <el-form-item :label="$t('hubsetting.public_ip_address')" v-if="hubsetting.openPunchthrough" prop="publicAddress">
                         <el-input v-model="hubsetting.publicAddress" :disabled="hubsetting.openPunchthrough"></el-input>
                     </el-form-item>
                     <!--<el-form-item class="create_account" :label="$t('hubsetting.token_address')" prop="SS_Address">-->
