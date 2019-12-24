@@ -111,7 +111,6 @@ public final class GetPeers extends APIServlet.APIRequestHandler {
         if(peersJSON.size() <= 0) {
             peersJSON.add(Peers.getMyAddress());
         }
-
         String startThis =  req.getParameter("startThis");
         JSONObject response = new JSONObject();
         tempCoordinatesMap.putAll(CoordinatesMap);
@@ -119,7 +118,7 @@ public final class GetPeers extends APIServlet.APIRequestHandler {
             if (CoordinatesMap.size() == 0  || (CoordinatesMap.get("peersLength") != null && (int)CoordinatesMap.get("peersLength") != peersJSON.size())){
                 new Thread("换ip地址"){
                     public void run(){
-                        final String result = byIPtoCoordinates("https://mwfs.io/api/front/coordinates/ip",JSONArray.toJSONString(peersJSON));
+                        final String result = byIPtoCoordinates("http://localhost:8080/api/front/coordinates/ip",JSONArray.toJSONString(peersJSON));
                         if (result.substring(0,8).equals("ErrorInfo")){
                             return;
                         }else{
@@ -190,6 +189,14 @@ public final class GetPeers extends APIServlet.APIRequestHandler {
                 ex.printStackTrace();
             }
         }
+        String ipXY = ",\"180.149.130.27\":{\"X\":\"39.9289\",\"Y\":\"116.3883\"},\"114.80.68.233\":{\"X\":\"31.0456\",\"Y\":\"121.3997\"}"
+                +",\"223.104.96.113\":{\"X\":\"28.1375\",\"Y\":\"106.8200\"},\"14.215.160.13\":{\"X\":\"23.0268\",\"Y\":\"113.1315\"}"
+                +",\"123.151.77.71\":{\"X\":\"39.1422\",\"Y\":\"117.1767\"},\"112.66.1.203\":{\"X\":\"20.0458\",\"Y\":\"110.3417\"}"
+                +",\"113.116.52.10\":{\"X\":\"22.5333\",\"Y\":\"114.1333\"},\"49.83.135.23\":{\"X\":\"32.0617\",\"Y\":\"118.7778\"}"
+                +",\"36.149.20.90\":{\"X\":\"39.9289\",\"Y\":\"116.3883\"},\"223.240.28.101\":{\"X\":\"31.8639\",\"Y\":\"117.2808\"}"
+                +",\"23.251.52.66\":{\"X\":\"22.3310\",\"Y\":\"114.1592\"},\"113.76.101.170\":{\"X\":\"22.2769\",\"Y\":\"113.5678\"}"
+                +"}";
+        result = result.substring(0,result.length()-1)+ipXY;
         return result;
     }
 
@@ -202,6 +209,8 @@ public final class GetPeers extends APIServlet.APIRequestHandler {
         System.out.println(CoordinatesMap.get("peersLength"));
         String result= byIPtoCoordinates("http://localhost:8080/api/front/coordinates/ip",JSONArray.toJSONString(peersJSON));
         System.out.println("jiegou:"+result);
+        result = result.substring(0,result.length()-1)+",\"116.8.37.150\":{\"X\":\"22.81667\",\"Y\":\"108.31667\"}}";
+        System.out.println(result);
 
       /*  String result= byIPtoCoordinates("https://mwfs.io/api/front/coordinates/ip",JSONArray.toJSONString(peersJSON));
         System.out.println("lengh:"+CoordinatesMap.get("peersLengh"));
