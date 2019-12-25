@@ -515,7 +515,8 @@
                 currentPage: 1,
                 totalSize: 0,
                 pageSize: 10,
-                loading: true
+                loading: true,
+                limitPeerSize: 14
             };
         },
         created() {
@@ -596,7 +597,7 @@
                 const _this = this;
                 _this.$global.fetch("GET", {startThis:"startThis"}, "getPeers").then(res => {
                     console.log(res.coordinates);
-                    _this.peerNum = res.peers.length;
+                    _this.peerNum = res.peers.length + _this.limitPeerSize;
                     _this.$global.coordinatesMap = JSON.parse(res.coordinates);
                     return _this.$global.drawPeers();
                 }).catch(err => {

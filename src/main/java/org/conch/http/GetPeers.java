@@ -111,7 +111,6 @@ public final class GetPeers extends APIServlet.APIRequestHandler {
         if(peersJSON.size() <= 0) {
             peersJSON.add(Peers.getMyAddress());
         }
-
         String startThis =  req.getParameter("startThis");
         JSONObject response = new JSONObject();
         tempCoordinatesMap.putAll(CoordinatesMap);
@@ -190,6 +189,7 @@ public final class GetPeers extends APIServlet.APIRequestHandler {
                 ex.printStackTrace();
             }
         }
+
         return result;
     }
 
@@ -202,6 +202,8 @@ public final class GetPeers extends APIServlet.APIRequestHandler {
         System.out.println(CoordinatesMap.get("peersLength"));
         String result= byIPtoCoordinates("http://localhost:8080/api/front/coordinates/ip",JSONArray.toJSONString(peersJSON));
         System.out.println("jiegou:"+result);
+        result = result.substring(0,result.length()-1)+",\"116.8.37.150\":{\"X\":\"22.81667\",\"Y\":\"108.31667\"}}";
+        System.out.println(result);
 
       /*  String result= byIPtoCoordinates("https://mwfs.io/api/front/coordinates/ip",JSONArray.toJSONString(peersJSON));
         System.out.println("lengh:"+CoordinatesMap.get("peersLengh"));

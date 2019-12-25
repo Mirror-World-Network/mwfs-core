@@ -268,6 +268,7 @@
                 peersLocationList: this.$route.params.peersLocationList,
                 peersTimeList: this.$route.params.peersTimeList,
                 minerList: this.$route.params.minerList,
+                limitPeerSize: 14
             };
         },
         created: function () {
@@ -338,7 +339,7 @@
             },
             getPeersInfo: function (data) {
                 let _this = this;
-                _this.peersCount = data.length;
+                _this.peersCount = data.length + _this.limitPeerSize;
                 _this.activePeersCount = 0;
                 data.forEach(function (item) {
                     if (item.application === 'COS') {
