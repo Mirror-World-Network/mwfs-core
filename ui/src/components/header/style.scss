@@ -298,7 +298,7 @@
     }
     .header {
         min-width: 300px;
-        height: 100px;
+        height: 120px;
     }
     .header .pc,
     .pc,
@@ -350,7 +350,7 @@
             img {
                 position: absolute;
                 right: 15px;
-                top: 13px;
+                top: 23px;
                 width: 15px;
                 height: 15px;
             }
@@ -366,7 +366,7 @@
                 font-size: 13px;
                 outline: none;
                 transition: 500ms width;
-                margin-top: 5px;
+                margin-top: 15px;
 
             }
 
@@ -406,7 +406,9 @@
 
     .modal,
     .modal_info {
-        width: 350px;
+        width: auto;
+        margin: 0 15px;
+        padding: 15px;
     }
 
     .modal-content .el-form {
@@ -434,17 +436,23 @@
         overflow-y: auto;
     }
 
-    #account_info .modal-body .table  {
+    .container #account_info .modal-body .table  {
         th {
-            padding-left: 15px;
+            padding-left: 0;
         }
         td {
             padding-left: 8px;
-            padding-right: 10px;
+            //padding-right: 10px;
         }
     }
+    .modal_info .modal-header .close {
+        top: 5px;
+    }
+    .modal .modal-dialog .modal-content .modal-header .close {
+        top: 20px;
+    }
     #account_transaction .modal-body div {
-        max-height: 450px;
+        max-height: 400px;
         overflow-y: auto;
     }
     #account_info .modal-body .account_allInfo .account_list #account_info_table_body {
@@ -453,10 +461,30 @@
     .modal .modal-dialog .modal-content .modal-body {
         margin: 0;
     }
-    #block_info.modal_info .modal-body {
-        max-height: 400px;
-        margin: 65px 20px 40px !important;
+   .main-content .container #block_info .modal-body {
+        max-height: 450px;
+        margin: 20px 0 !important;
     }
+
+    #block_info .modal-header {
+        padding: 0;
+        .close {
+            top: 20px;
+        }
+    }
+
+    .main-content .container #block_info .modal-body .blockInfo {
+        max-height: 400px;
+        .table {
+            th {
+                width: 25%;
+            }
+            td {
+                width: 75%;
+            }
+        }
+    }
+
     .block_receiptDisbursement .w {
         display: flex;
         flex-direction: column;
@@ -477,7 +505,8 @@
             padding-left: 15px;
         }
         .list_table {
-            margin-top: 30px;
+            width: auto;
+            margin: 30px 15px 50px;
 
             .list_pagination {
                 height: 150px;
@@ -512,9 +541,10 @@
         align-items: center;
 
         .block_blue {
-            width: 350px;
-            margin-right: 0;
-            margin-top: 15px;
+            width: calc(100% - 30px);
+            margin: 15px 15px 0;
+            //margin-right: 0;
+            //margin-top: 15px;
 
             .last_block {
                 display: flex;
@@ -536,5 +566,46 @@
         display: flex;
         height: 38px;
         align-items: center;
+    }
+
+    .main-content .container #account_transaction .modal-header {
+        display: flex;
+        align-items: center;
+        padding: 0;
+        .close {
+            right: 0;
+        }
+    }
+    .main-content .container #account_transaction .modal-body {
+        .account_preInfo {
+            padding-left: 15px;
+        }
+        .account_transactionInfo {
+            margin: 20px 0;
+            p {
+                margin-left: 0;
+            }
+            .table {
+                th {
+                    width: 25%;
+                }
+                td {
+                    width: 75%;
+                }
+            }
+        }
+    }
+    .container #account_info .modal-header {
+        padding: 0;
+    }
+
+    .el-table__expanded-cell[class*=cell] {
+        padding: 20px 15px;
+    }
+
+    .container #block_info .modal-body .account_list .table td.mobile-td,
+    .mobile-th {
+        text-align: left;
+        text-indent: 15px;
     }
 }

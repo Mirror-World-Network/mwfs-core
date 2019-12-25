@@ -867,7 +867,7 @@ const cn = {
         'account_transaction_transaction_serial_number': "交易序列号",
         'account_transaction_time': "时间",
         'account_transaction_type': "类型",
-        'account_transaction_id': "ID",
+        'account_transaction_id': "交易ID",
         'account_transaction_signatureHash': "哈希签名",
         'account_transaction_sender': "发送者",
         'account_transaction_amount': "金额",

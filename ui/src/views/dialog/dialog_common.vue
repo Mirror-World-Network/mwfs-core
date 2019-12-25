@@ -178,7 +178,7 @@
                         <tbody>
                         <tr>
                             <th class="pc-table">{{$t('dialog.account_transaction_time')}}</th>
-                            <th>{{$t('dialog.account_transaction_id')}}</th>
+                            <th class="mobile-th">{{$t('dialog.account_transaction_id')}}</th>
                             <th class="pc-table">{{$t('dialog.account_transaction_type')}}</th>
                             <th class="pc-table">{{$t('dialog.account_transaction_amount')}}</th>
                             <th class="pc-table">{{$t('dialog.account_info_fee')}}</th>
@@ -191,7 +191,7 @@
                                 <span>{{$global.myFormatTime(transaction.timestamp,'YMDHMS',true)}}</span><br>
                                 <span class="utc-time">{{$global.formatTime(transaction.timestamp)}} +UTC</span>
                             </td>
-                            <td class="linker" @click="openTransactionDialog(transaction.transaction)">{{transaction.transaction}}</td>
+                            <td class="linker mobile-td" @click="openTransactionDialog(transaction.transaction)">{{transaction.transaction}}</td>
                             <td class="transaction-img pc-table">
                                 <span class="bg" :class="'type' + transaction.type + transaction.subtype"></span>
                                 <span>{{$global.getTransactionTypeStr(transaction)}}</span>

@@ -123,12 +123,13 @@
 
     .block_peers .trading_situation {
         width: 100%;
+        padding: 0 15px;
         display: flex;
         flex-wrap: wrap;
-        justify-content: space-around;
+        justify-content: space-between;
 
         .trading_situation_info {
-            width: 170px;
+            width: 48%;
         }
     }
 
