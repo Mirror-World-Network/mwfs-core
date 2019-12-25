@@ -9,7 +9,7 @@
                 <div class="w pt60">
                     <div class="account_address">
                         <span>{{accountInfo.accountRS}}</span>
-                        <img class="csp" src="../../assets/img/copy.svg" v-clipboard:copy="accountInfo.accountRS"
+                        <img class="csp pc" src="../../assets/img/copy.svg" v-clipboard:copy="accountInfo.accountRS"
                              v-clipboard:success="copySuccess" v-clipboard:error="copyError"/>
                     </div>
                     <p class="account_info" @click="isUserInfoDialog(true)">{{$t('account.account_info')}}</p>
