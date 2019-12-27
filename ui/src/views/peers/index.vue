@@ -296,6 +296,7 @@
                 _this.$http.post(window.api.simulatedPositioningUrl).then(res => {
                     if (res.data){
                         _this.peersList = res.data.concat(_this.peersList);
+                        _this.totalSize = _this.peersList.length;
                     }
                 });
             },
