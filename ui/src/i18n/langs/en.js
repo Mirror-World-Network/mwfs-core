@@ -146,6 +146,7 @@ const en = {
     },
     sendMessage: {
         'sendMessage_title': "Send Message",
+        'upload_file_title':'Upload File',
         'receiver': "Recipient",
         'receiver_publickey': "Recipient Public Key",
         'infomation': "Message",
@@ -160,6 +161,8 @@ const en = {
         'calc_short': "Calc",
         'secret_key': "Mnemonic Phrase",
         'send_message': "Send Message",
+        'storage_file':'Storage File',
+        "upload_file":"Upload",
     },
     transfer: {
         'transfer_title': "Transfer",

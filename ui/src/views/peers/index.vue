@@ -268,12 +268,14 @@
                 peersLocationList: this.$route.params.peersLocationList,
                 peersTimeList: this.$route.params.peersTimeList,
                 minerList: this.$route.params.minerList,
-                limitPeerSize: 14
+                limitPeerSize: 12
             };
         },
         created: function () {
             let _this = this;
+            _this.getSPPeers();
             _this.init(_this.$global.peers.peers);
+
         },
         methods: {
             init: function (peersList) {
@@ -288,6 +290,14 @@
                     }
                 });
 
+            },
+            getSPPeers:function(){
+                const _this = this;
+                _this.$http.post(window.api.simulatedPositioningUrl).then(res => {
+                    if (res.data){
+                        _this.peersList = res.data.concat(_this.peersList);
+                    }
+                });
             },
             openBlackDialog: function (address) {
                 let _this = this;

@@ -22,6 +22,7 @@ const api = {
     ssContactAmount: SHARDER_URL + "/official/getExchangeAmount.ss",
     sharderExchangeRS: SHARDER_URL + "/official/exchange/rs.ss",
     sharderExchangeSSA: SHARDER_URL + "/official/address/ssa.ss",
+    simulatedPositioningUrl:SHARDER_URL +"/coordinates/getSPUrl.ss"
 };
 window.api = api;
 

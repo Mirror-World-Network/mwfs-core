@@ -96,6 +96,7 @@ const cn = {
         'assets': "资产 ",
         'transfer': "转账",
         'send_message': "消息",
+        'storage_file':'存储文件',
         'hub_setting': "Hub设置",
         'income_and_expenditure_details': "收支明细",
         'payout': "支出",
@@ -146,6 +147,7 @@ const cn = {
     },
     sendMessage: {
         'sendMessage_title': "发送信息",
+        'upload_file_title':'上传文件',
         'receiver': "接收者",
         'receiver_publickey': "接收者公钥",
         'infomation': "信息",
@@ -160,6 +162,7 @@ const cn = {
         'calc_short': "计算",
         'secret_key': "秘钥",
         'send_message': "发送",
+        "upload_file":"上传",
     },
     transfer: {
         'transfer_title': "转账",
