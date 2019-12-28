@@ -4,8 +4,7 @@
             <el-row :gutter="20" >
                 <el-col :xl="12" :lg="12" :md="12" :sm="24" :xs="24" >
                     <el-card shadow="hover" class="content">
-
-                        <p v-if="rowData.recipientRS === rowData.accountRS || rowData.accountRS === rowData.senderRS" class="node-type">
+                        <p v-if="(rowData.recipientRS === rowData.accountRS || rowData.accountRS === rowData.senderRS) && typeof(secretPhrase) !== 'undefined'" class="node-type">
                             <span v-if="rowData.messageInfo.encryptedMessage">
                                 <strong>{{$t('transaction.message_data')}} : </strong>{{formatMessageData(rowData)}}<br>
                                 <strong>{{$t('transaction.is_compressed')}} : </strong>{{ rowData.messageInfo.encryptedMessage.isCompressed }}<br>
@@ -15,8 +14,12 @@
                                 <strong>{{$t('transaction.message_data')}}:</strong>{{ rowData.messageInfo.message}}<br>
                                 <strong>{{$t('transaction.is_text')}}:</strong>{{ rowData.messageInfo.messageIsText}}
                             </span>
+                            <span v-else>
+                                <strong>{{$t('transaction.operation_data')}}:</strong>{{$t('transaction.update_account_name')}}<br>
+                                <strong>{{$t('dialog.block_info_total_fee')}}:</strong>{{$global.getBlockTotalFeeNQT(100000000)}} MW<br>
+                            </span>
                         </p>
-                        <p v-if="rowData.recipientRS !== rowData.accountRS && rowData.accountRS !== rowData.senderRS" class="node-type">
+                        <p v-if="typeof(secretPhrase) === 'undefined' || (rowData.recipientRS !== rowData.accountRS && rowData.accountRS !== rowData.senderRS)" class="node-type">
                             <span v-if="rowData.messageInfo.encryptedMessage" >
                                 <strong>{{$t('transaction.message_data')}} : </strong>{{$t('transaction.encrypted_message')}}<br>
                                 <strong>{{$t('transaction.is_compressed')}} : </strong>{{ rowData.messageInfo.encryptedMessage.isCompressed }}<br>
@@ -25,6 +28,10 @@
                             <span v-if="rowData.messageInfo.message">
                                 <strong>{{$t('transaction.message_data')}}:</strong>{{$t('transaction.encrypted_message')}}<br>
                                 <strong>{{$t('transaction.is_text')}}:</strong>{{ rowData.messageInfo.messageIsText}}
+                            </span>
+                            <span v-else>
+                                <strong>{{$t('transaction.operation_data')}}:</strong>{{$t('transaction.update_account_name')}}<br>
+                                <strong>{{$t('dialog.block_info_total_fee')}}:</strong>{{$global.getBlockTotalFeeNQT(100000000)}} MW<br>
                             </span>
                         </p>
 
@@ -39,8 +46,10 @@
 
 <script>
 
+    import Peers from "../peers/index";
     export default {
         name: "MessageTxDetail",
+        components: {Peers},
         props: {
             rowData: {}
         },

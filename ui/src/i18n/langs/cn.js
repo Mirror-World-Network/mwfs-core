@@ -96,6 +96,7 @@ const cn = {
         'assets': "资产 ",
         'transfer': "转账",
         'send_message': "消息",
+        'storage_file':'存储文件',
         'hub_setting': "Hub设置",
         'income_and_expenditure_details': "收支明细",
         'payout': "支出",
@@ -112,6 +113,8 @@ const cn = {
         'encrypted_message_hash':"加密信息Hash",
         'recipient_public_key':"接受者公钥",
         'message_data':"信息内容",
+        'operation_data':'操作内容',
+        'update_account_name':'修改账户名称',
         'encrypted_message':"您无权查看此信息内容!",
         'is_compressed':"是否压缩信息",
         'is_text':"是否文本信息",
@@ -146,6 +149,7 @@ const cn = {
     },
     sendMessage: {
         'sendMessage_title': "发送信息",
+        'upload_file_title':'上传文件',
         'receiver': "接收者",
         'receiver_publickey': "接收者公钥",
         'infomation': "信息",
@@ -160,6 +164,7 @@ const cn = {
         'calc_short': "计算",
         'secret_key': "秘钥",
         'send_message': "发送",
+        "upload_file":"上传",
     },
     transfer: {
         'transfer_title': "转账",

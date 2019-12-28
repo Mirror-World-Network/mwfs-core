@@ -39,6 +39,16 @@
                             </span>
                             <span>{{$t('account.send_message')}}</span>
                         </button>
+                        <button class="common_btn imgBtn writeBtn" @click="openStorageFileDialog">
+                            <span class="icon">
+                                <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 171.43 137.08">
+                                    <path class="cls-1"
+                                          d="M173.41,143.1a10.26,10.26,0,0,1-10.24,10.25H36.84A10.26,10.26,0,0,1,26.59,143.1v-92A10.25,10.25,0,0,1,36.84,40.88H163.16a10.25,10.25,0,0,1,10.24,10.24v92ZM163.16,28.57H36.84A22.57,22.57,0,0,0,14.29,51.12v92a22.57,22.57,0,0,0,22.55,22.55H163.16a22.57,22.57,0,0,0,22.55-22.55v-92A22.57,22.57,0,0,0,163.16,28.57ZM151.88,65L100,94.89,47.26,65a6.31,6.31,0,0,0-8.39,2.31,6.16,6.16,0,0,0,2.31,8.39L100,109.07l58-33.44a6.16,6.16,0,0,0,2.26-8.41,6.33,6.33,0,0,0-8.4-2.25h0Z"
+                                          transform="translate(-14.29 -28.57)"></path>
+                                </svg>
+                            </span>
+                            <span>{{$t('account.storage_file')}}</span>
+                        </button>
                         <!-- Setting Hub Button -->
                         <button class="common_btn imgBtn writeBtn" v-if="whetherShowHubSettingBtn()"
                                 @click="openHubSettingDialog">
@@ -318,6 +328,46 @@
                     <div class="modal-footer">
                         <button type="button" class="btn common_btn writeBtn" @click="sendMessageInfo">
                             {{$t('sendMessage.send_message')}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--view storage file dialog-->
+        <div class="modal" id="storage_file_modal" v-show="storageFileDialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button class="close" @click="closeDialog"></button>
+                        <h4 class="modal-title">{{$t('sendMessage.upload_file_title')}}</h4>
+                    </div>
+                    <div class="modal-body modal-message">
+                        <el-form>
+                            <el-form-item :label="$t('sendMessage.file')">
+                                <el-input :placeholder="$t('sendMessage.file_tip')" class="input-with-select"
+                                          v-model="messageForm.fileName" :readonly="true">
+                                    <el-button slot="append" v-if="storagefile === null">{{$t('sendMessage.browse')}}
+                                    </el-button>
+                                    <el-button slot="append" @click="delStorageFile" v-else>{{$t('sendMessage.delete')}}
+                                    </el-button>
+                                </el-input>
+                                <input id="storageFile" ref="storageFile" type="file" @change="storageFileChange" v-if="storagefile === null"/>
+                            </el-form-item>
+                            <el-form-item :label="$t('sendMessage.fee')">
+                                <el-button class="calculate_fee" @click="getMessageFee()">
+                                    {{$t('sendMessage.calc_short')}}
+                                </el-button>
+                                <input class="el-input__inner" v-model="messageForm.fee" type="number"/>
+                                <label class="input_suffix">{{$global.unit}}</label>
+                            </el-form-item>
+                            <el-form-item :label="$t('sendMessage.secret_key')" v-if="!secretPhrase">
+                                <el-input v-model="messageForm.password" type="password"></el-input>
+                            </el-form-item>
+                        </el-form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn common_btn writeBtn" @click="uploadFile">
+                            {{$t('sendMessage.upload_file')}}
                         </button>
                     </div>
                 </div>
@@ -717,6 +767,7 @@
                 sendSuccess: false, //true验证码发送 false验证码未发送
                 time: 60 , //时间
                 sendMessageDialog: false,
+                storageFileDialog: false,
                 tranferAccountsDialog: false,
                 hubSettingDialog: false,
                 hubInitDialog: false,
@@ -773,6 +824,7 @@
                     fee: 1
                 },
                 file: null,
+                storagefile: null,
                 transfer: {
                     receiver: "CDW-____-____-____-_____",
                     number: 0,
@@ -1842,6 +1894,29 @@
                     });
                 });
             },
+            uploadFile:function(){
+                const _this = this;
+                let formData = new FormData();
+                formData.append("feeNQT", _this.messageForm.fee * 100000000);
+                formData.append("secretPhrase", _this.messageForm.password || _this.secretPhrase);
+                formData.append("name",_this.messageForm.fileName);
+               /* formData.append("data",_this.storagefile);*/
+                formData.append("file",_this.storagefile);
+
+                let config = {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                };
+                _this.$http.post('/sharder?requestType=storeData', formData, config).then(res => {
+                    console.log(res);
+
+                }).catch(err => {
+                    console.log(err);
+                    _this.$message.error(err.message);
+                });
+
+            },
             sendMessageInfo: function () {
                 const _this = this;
                 let options = {};
@@ -2138,6 +2213,14 @@
                 this.$store.state.mask = true;
                 this.sendMessageDialog = true;
             },
+            openStorageFileDialog: function () {
+                if (SSO.downloadingBlockchain) {
+                    this.$message.warning(this.$t("account.synchronization_block"));
+                    return;
+                }
+                this.$store.state.mask = true;
+                this.storageFileDialog = true;
+            },
             openTransferDialog: function () {
                 if (SSO.downloadingBlockchain) {
                     return this.$message.warning(this.$t("account.synchronization_block"));
@@ -2297,6 +2380,7 @@
 
                 this.$store.state.mask = false;
                 this.sendMessageDialog = false;
+                this.storageFileDialog = false;
                 this.tranferAccountsDialog = false;
                 this.hubSettingDialog = false;
                 this.hubInitDialog = false;
@@ -2318,7 +2402,7 @@
                 _this.messageForm.password = "";
                 _this.messageForm.fee = 1;
                 _this.file = null;
-
+                _this.storagefile = null;
                 _this.transfer.receiver = "CDW-____-____-____-_____";
                 _this.transfer.number = 0;
                 _this.transfer.fee = 1;
@@ -2390,6 +2474,13 @@
                 _this.file = null;
                 _this.messageForm.isFile = false;
             },
+            delStorageFile: function () {
+                const _this = this;
+                $('#storageFile').val("");
+                _this.messageForm.fileName = "";
+                _this.storagefile = null;
+                _this.messageForm.isFile = false;
+            },
             fileChange: function (e) {
                 const _this = this;
                 _this.messageForm.fileName = e.target.files[0].name;
@@ -2397,6 +2488,19 @@
 
                 if (_this.file.size > 1024 * 1024 * 5) {
                     _this.delFile();
+                    _this.$message.error(_this.$t('notification.file_exceeds_max_limit'));
+                    return;
+                }
+                _this.messageForm.isFile = true;
+                _this.messageForm.message = "";
+            },
+            storageFileChange: function (e) {
+                const _this = this;
+                _this.messageForm.fileName = e.target.files[0].name;
+                _this.storagefile = document.getElementById("storageFile").files[0];
+                console.log(_this.storagefile);
+                if (_this.storagefile.size > 1024 * 1024 * 10) {
+                    _this.delStorageFile();
                     _this.$message.error(_this.$t('notification.file_exceeds_max_limit'));
                     return;
                 }

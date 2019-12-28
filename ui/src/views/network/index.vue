@@ -516,7 +516,7 @@
                 totalSize: 0,
                 pageSize: 10,
                 loading: true,
-                limitPeerSize: 14
+                limitPeerSize: 12
             };
         },
         created() {

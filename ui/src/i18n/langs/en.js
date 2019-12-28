@@ -112,6 +112,8 @@ const en = {
         'encrypted_message_hash':"Encrypted Message Hash",
         'recipient_public_key':"recipient Public Key",
         'message_data':"Message Data",
+        'operation_data':'Operation Content',
+        'update_account_name':'Update Account Name',
         'encrypted_message':"you are not authorized to view it!",
         'is_compressed':"Is Compressed",
         'is_text':"Is Text",
@@ -146,6 +148,7 @@ const en = {
     },
     sendMessage: {
         'sendMessage_title': "Send Message",
+        'upload_file_title':'Upload File',
         'receiver': "Recipient",
         'receiver_publickey': "Recipient Public Key",
         'infomation': "Message",
@@ -160,6 +163,8 @@ const en = {
         'calc_short': "Calc",
         'secret_key': "Mnemonic Phrase",
         'send_message': "Send Message",
+        'storage_file':'Storage File',
+        "upload_file":"Upload",
     },
     transfer: {
         'transfer_title': "Transfer",
