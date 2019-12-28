@@ -283,6 +283,9 @@
 .pc {
     display: block;
 }
+.pc-i {
+    display: initial;
+}
 .pc-table {
     display: table-cell;
 }
@@ -302,6 +305,7 @@
     }
     .header .pc,
     .pc,
+    .pc-i,
     .pc-table {
         display: none;
     }

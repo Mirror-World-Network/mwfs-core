@@ -9,7 +9,7 @@
                 <div class="w pt60">
                     <div class="account_address">
                         <span>{{accountInfo.accountRS}}</span>
-                        <img class="csp pc" src="../../assets/img/copy.svg" v-clipboard:copy="accountInfo.accountRS"
+                        <img class="csp pc-i" src="../../assets/img/copy.svg" v-clipboard:copy="accountInfo.accountRS"
                              v-clipboard:success="copySuccess" v-clipboard:error="copyError"/>
                     </div>
                     <p class="account_info" @click="isUserInfoDialog(true)">{{$t('account.account_info')}}</p>
@@ -1086,6 +1086,7 @@
             _this.getYieldData();
             _this.$global.setBlockchainState(_this).then(res => {
                 _this.blockchainState = res.data;
+                _this.getLatestHubVersion();
             });
             SSO.getState();
             _this.$global.getUserConfig(_this).then(res => {
@@ -1095,7 +1096,7 @@
                 _this.hubsetting.publicAddress = res["sharder.myAddress"];
                 //_this.hubsetting.SS_Address = res["sharder.HubBindAddress"];
             });
-            _this.getLatestHubVersion();
+            // _this.getLatestHubVersion();
             _this.getPicVCode();
             _this.getPocScore();
         },
@@ -1256,11 +1257,9 @@
                             _this.accountInfo.pocScore = '--';
                         }
                     }
-
                 }).catch(err => {
                     console.info("error", err);
                 });
-
             },
 
             getLatestHubVersion() {

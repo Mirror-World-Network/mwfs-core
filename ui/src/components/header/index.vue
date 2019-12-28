@@ -338,6 +338,8 @@
                 _this.blocksLeft = SSO.blocksLeft;
                 _this.$global.setBlockchainState(_this).then(res => {
                     _this.blockchainStatus = res.data;
+    
+                    _this.getLatestHubVersion();
                     /*if(_this.$global.isOpenConsole){
                         _this.$global.addToConsole("/sharder?requestType=getBlockchainStatus",'GET',res);
                     }*/
@@ -358,7 +360,7 @@
                     SSO.addToConsole("/sharder?requestType=getPeers", 'GET', res.data, res);
                 });
                 // }
-                _this.getLatestHubVersion();
+                // _this.getLatestHubVersion();
                 _this.downloadingBlockChain();
             },
             downloadingBlockChain(){
