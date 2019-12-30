@@ -249,3 +249,17 @@
         }
     }
 }
+
+
+@media only screen and (max-width: 780px) {
+    .block_account .w {
+        width: auto;
+        margin: 0 15px;
+    }
+
+    .block_receiptDisbursement .w {
+        width: auto;
+        margin: 0 15px;
+        height: 400px;
+    }
+}

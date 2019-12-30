@@ -64,7 +64,9 @@
     min-width: 1000px !important;
 }
 
-
+//.block_peers.fr {
+//    display: inline;
+//}
 .block_peers {
     display: grid;
     margin-bottom: 20px;
@@ -114,4 +116,21 @@
             }
         }
     }
+}
+
+
+@media only screen and (max-width: 780px) {
+
+    .block_peers .trading_situation {
+        width: 100%;
+        padding: 0 15px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+
+        .trading_situation_info {
+            width: 48%;
+        }
+    }
+
 }

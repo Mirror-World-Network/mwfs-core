@@ -872,7 +872,7 @@ const cn = {
         'account_transaction_transaction_serial_number': "交易序列号",
         'account_transaction_time': "时间",
         'account_transaction_type': "类型",
-        'account_transaction_id': "ID",
+        'account_transaction_id': "交易ID",
         'account_transaction_signatureHash': "哈希签名",
         'account_transaction_sender': "发送者",
         'account_transaction_amount': "金额",
@@ -1002,7 +1002,7 @@ const cn = {
         "status_refuse":"拒绝发放",
     },
     poc: {
-        'block_reward_tips_phase1': "开放测试网络第一阶段90%的挖矿奖励分配给Hub矿工，剩余10%的挖矿奖励分配给其余矿工。",
+        'block_reward_tips_phase1': "。",
         'creator': "创建者",
         'type': "类型",
         'nodeType': "节点类型",

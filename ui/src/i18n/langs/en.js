@@ -1002,7 +1002,7 @@ const en = {
         "status_refuse":"Refuse",
     },
     poc: {
-        'block_reward_tips_phase1': "Testnet phase 1 testing rewards distribution: 90% - hub miners, 10% - other miners.",
+        'block_reward_tips_phase1': "",
         'creator': "Creator",
         'type': "Type",
         'nodeType': "Node Type",
@@ -1021,7 +1021,7 @@ const en = {
         'box_node': "Box Node",
         'hub_node': "Hub Node",
         'community_node': "Community Node",
-        'sharder_node': "Sharder Node",
+        'sharder_node': "MWFS Node",
         'fork_convergence_speed': "Fork Convergence Speed(Deduction)",
         'amount_of_loss_blocks': "Amount of Loss Blocks(Deduction)",
         'block_missing': "Block Missing",

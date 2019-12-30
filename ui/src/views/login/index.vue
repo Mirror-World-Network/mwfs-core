@@ -61,14 +61,14 @@
             console.info("Net work type is:", SSO.netWorkType);
 
             this.$global.getUserConfig(this).then(res => {
-                console.log(res, "getUserConfiggetUserConfiggetUserConfiggetUserConfiggetUserConfiggetUserConfig");
+                // console.log(res, "getUserConfiggetUserConfiggetUserConfiggetUserConfiggetUserConfiggetUserConfig");
                 _this.$store.state.isHubInit = res["sharder.HubBindAddress"] ? false : true;
                 _this.$store.state.userConfig = res;
                 _this.hubBind = res["sharder.HubBind"];
                 _this.hubBindAddress = res["sharder.HubBindAddress"];
                 _this.autoLogin(res);
             });
-
+    
             SSO.init();
         },
         methods: {

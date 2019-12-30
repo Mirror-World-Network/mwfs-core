@@ -9,7 +9,7 @@
                 <div class="w pt60">
                     <div class="account_address">
                         <span>{{accountInfo.accountRS}}</span>
-                        <img class="csp" src="../../assets/img/copy.svg" v-clipboard:copy="accountInfo.accountRS"
+                        <img class="csp pc-i" src="../../assets/img/copy.svg" v-clipboard:copy="accountInfo.accountRS"
                              v-clipboard:success="copySuccess" v-clipboard:error="copyError"/>
                     </div>
                     <p class="account_info" @click="isUserInfoDialog(true)">{{$t('account.account_info')}}</p>
@@ -180,16 +180,17 @@
                                 <th>{{$t('transaction.transaction_time')}}</th>
                                 <th>{{$t('transaction.block_height')}}</th>
                                 <th>{{$t('transaction.transaction_id')}}</th>
-                                <th>{{$t('transaction.transaction_type')}}</th>
-                                <th>{{$t('transaction.transaction_amount')}}</th>
-                                <th>{{$t('transaction.transaction_fee')}}</th>
-                                <th class="dbw w300">{{$t('transaction.transaction_account')}}</th>
-                                <th>{{$t('transaction.transaction_confirm_quantity')}}</th>
-                                <th>{{$t('transaction.operating')}}</th>
+                                <th class="pc-table">{{$t('transaction.transaction_type')}}</th>
+                                <th class="pc-table">{{$t('transaction.transaction_amount')}}</th>
+                                <th class="pc-table">{{$t('transaction.transaction_fee')}}</th>
+                                <th class="dbw w300 pc-table">{{$t('transaction.transaction_account')}}</th>
+                                <th class="pc-table">{{$t('transaction.transaction_confirm_quantity')}}</th>
+                                <th class="pc-table">{{$t('transaction.operating')}}</th>
+                                <th class="mobile"></th>
                             </tr>
                             </thead>
                             <tbody>
-                            <tr v-for="(transaction,index) in accountTransactionList">
+                            <tr v-for="(transaction,index) in accountTransactionList" @click="mobileViewDetail(transaction.transaction)">
                                 <td class="tc pl0">
                                     <span>{{$global.myFormatTime(transaction.timestamp, 'YMDHMS',true)}}</span><br>
                                     <span class="utc-time">{{$global.formatTime(transaction.timestamp)}} +UTC</span>
@@ -198,13 +199,13 @@
                                     {{$global.returnObj(transaction.block,transaction.height)}}
                                 </td>
                                 <td>{{transaction.transaction}}</td>
-                                <td class="transaction-img">
+                                <td class="transaction-img pc-table">
                                     <span class="bg" :class="'type' + transaction.type + transaction.subtype"></span>
                                     <span>{{$global.getTransactionTypeStr(transaction)}}</span>
                                 </td>
-                                <td>{{$global.getTransactionAmountNQT(transaction,accountInfo.accountRS)}}</td>
-                                <td>{{$global.getTransactionFeeNQT(transaction)}}</td>
-                                <td class=" image_text w300">
+                                <td class="pc-table">{{$global.getTransactionAmountNQT(transaction,accountInfo.accountRS)}}</td>
+                                <td class="pc-table">{{$global.getTransactionFeeNQT(transaction)}}</td>
+                                <td class=" image_text w300 pc-table">
                                     <span class="linker" v-if="transaction.type === 9">Coinbase</span>
                                     <span class="linker" @click="openAccountInfoDialog(transaction.senderRS)"
                                           v-else-if="transaction.senderRS === accountInfo.accountRS && transaction.type !== 9">
@@ -246,10 +247,11 @@
                                     </span>
 
                                 </td>
-                                <td>{{$global.returnObj(transaction.block,transaction.confirmations)}}</td>
-                                <td class="linker" @click="openTradingInfoDialog(transaction.transaction)">
+                                <td class="pc-table">{{$global.returnObj(transaction.block,transaction.confirmations)}}</td>
+                                <td class="linker pc-table" @click="openTradingInfoDialog(transaction.transaction)">
                                     {{$t('transaction.view_details')}}
                                 </td>
+                                <td class="mobile icon-box"><i class="el-icon-arrow-right"></i></td>
                             </tr>
                             </tbody>
                         </table>
@@ -257,12 +259,13 @@
                     <div class="list_pagination"> <!--v-if="totalSize > pageSize">-->
                         <div class="list_pagination">
                             <el-pagination
-                                    @size-change="handleSizeChange"
-                                    @current-change="handleCurrentChange"
-                                    :current-page.sync="currentPage"
-                                    :page-size="pageSize"
-                                    layout="total, prev, pager, next, jumper"
-                                    :total="totalSize">
+                                :small="isMobile"
+                                @size-change="handleSizeChange"
+                                @current-change="handleCurrentChange"
+                                :current-page.sync="currentPage"
+                                :page-size="pageSize"
+                                layout="total, prev, pager, next, jumper"
+                                :total="totalSize">
                             </el-pagination>
                         </div>
                     </div>
@@ -496,7 +499,7 @@
                                   v-if="hubsetting.openPunchthrough" prop="clientSecretkey">
                         <el-input v-model="hubsetting.clientSecretkey" :disabled="true"></el-input>
                     </el-form-item>
-                    <el-form-item :label="$t('hubsetting.public_ip_address')" prop="publicAddress">
+                    <el-form-item :label="$t('hubsetting.public_ip_address')" v-if="hubsetting.openPunchthrough" prop="publicAddress">
                         <el-input v-model="hubsetting.publicAddress" :disabled="hubsetting.openPunchthrough"></el-input>
                     </el-form-item>
                     <!--<el-form-item class="create_account" :label="$t('hubsetting.token_address')" prop="SS_Address">-->
@@ -757,6 +760,7 @@
                 this.$t('rules.mustRequired')
             );
             return {
+                isMobile: false,
                 //dialog
                 src: "",
                 requestUrl:"https://mwfs.io",
@@ -1062,6 +1066,10 @@
             };
         },
         created() {
+            if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) { //移动端
+                this.isMobile = true
+            }
+            
             const _this = this;
             _this.getAccount(_this.accountInfo.accountRS).then(res => {
                 _this.accountInfo.account = res.account;
@@ -1078,6 +1086,7 @@
             _this.getYieldData();
             _this.$global.setBlockchainState(_this).then(res => {
                 _this.blockchainState = res.data;
+                _this.getLatestHubVersion();
             });
             SSO.getState();
             _this.$global.getUserConfig(_this).then(res => {
@@ -1087,13 +1096,26 @@
                 _this.hubsetting.publicAddress = res["sharder.myAddress"];
                 //_this.hubsetting.SS_Address = res["sharder.HubBindAddress"];
             });
-            _this.getLatestHubVersion();
+            // _this.getLatestHubVersion();
             _this.getPicVCode();
             _this.getPocScore();
         },
         methods: {
-
-
+    
+            // menuAdapter() {
+            //     document.getElementsByClassName('header')[0].style.display = 'block'
+            //     var menuLi = document.querySelectorAll('.navbar .el-menu li')
+            //     for (let i = 0; i < menuLi.length; i++) {
+            //         if (i === 0) {
+            //             menuLi[i].setAttribute('class', 'el-menu-item is-active')
+            //             menuLi[i].style.borderBottomColor = '#409EFF'
+            //         } else {
+            //             menuLi[i].setAttribute('class', 'el-menu-item')
+            //             menuLi[i].style.borderBottomColor = 'transparent'
+            //         }
+            //     }
+            // },
+            
             //定时器
             finish() {
                 //禁用以下表单
@@ -1235,11 +1257,9 @@
                             _this.accountInfo.pocScore = '--';
                         }
                     }
-
                 }).catch(err => {
                     console.info("error", err);
                 });
-
             },
 
             getLatestHubVersion() {
@@ -2232,6 +2252,11 @@
                 this.trading = trading;
                 this.tradingInfoDialog = true;
             },
+            mobileViewDetail: function (trading) {
+                if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) { //移动端
+                    this.openTradingInfoDialog(trading)
+                }
+            },
             isUserInfoDialog: function (bool) {
                 this.userInfoDialog = bool;
                 this.$store.state.mask = bool;
@@ -2815,6 +2840,8 @@
             $('#tranfer_receiver').on("blur", function () {
                 _this.validationReceiver("transfer");
             });
+    
+            // this.menuAdapter()
         },
     };
 </script>
