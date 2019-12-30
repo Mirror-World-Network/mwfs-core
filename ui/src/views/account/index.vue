@@ -1908,6 +1908,7 @@
                     }
                 };
                 _this.$http.post('/sharder?requestType=storeData', formData, config).then(res => {
+                    //TODO 处理上传文件后的结果
                     console.log(res);
 
                 }).catch(err => {
