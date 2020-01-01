@@ -96,6 +96,7 @@ const en = {
         'assets': "Assets ",
         'transfer': "Transfer",
         'send_message': "Message",
+        'storage_file':'Data',
         'hub_setting': "Settings",
         'income_and_expenditure_details': "Balance Details",
         'payout': "Payouts",
@@ -163,7 +164,6 @@ const en = {
         'calc_short': "Calc",
         'secret_key': "Mnemonic Phrase",
         'send_message': "Send Message",
-        'storage_file':'Storage File',
         "upload_file":"Upload",
     },
     transfer: {
