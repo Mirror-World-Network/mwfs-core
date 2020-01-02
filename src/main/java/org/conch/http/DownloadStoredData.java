@@ -23,10 +23,13 @@ package org.conch.http;
 
 import org.conch.Conch;
 import org.conch.common.ConchException;
+import org.conch.storage.Ssid;
 import org.conch.storage.tx.StorageTxProcessorImpl;
 import org.conch.tx.Attachment;
 import org.conch.tx.Transaction;
 import org.conch.util.Convert;
+import org.conch.util.JSON;
+import org.json.simple.JSONObject;
 import org.json.simple.JSONStreamAware;
 
 import javax.servlet.http.HttpServletRequest;
@@ -43,12 +46,20 @@ public final class DownloadStoredData extends APIServlet.APIRequestHandler {
     static final DownloadStoredData instance = new DownloadStoredData();
 
     private DownloadStoredData() {
-        super(new APITag[] {APITag.DATA_STORAGE}, "transaction");
+        super(new APITag[] {APITag.DATA_STORAGE}, "transaction","ssid");
     }
 
     @Override
     protected JSONStreamAware processRequest(HttpServletRequest request, HttpServletResponse response) throws ConchException {
         String transactionIdString = Convert.emptyToNull(request.getParameter("transaction"));
+        String ssid = Convert.emptyToNull(request.getParameter("ssid"));
+        if (ssid != null){
+            JSONObject json = new JSONObject();
+            json.put("Code", 200);
+            json.put("ipfsHashId",Ssid.decode(ssid));
+            json.put("port",Conch.getStringProperty("sharder.storage.ipfs.gateway.port"));
+            return JSON.prepare(json);
+        }
         if (transactionIdString == null) {
             return MISSING_TRANSACTION;
         }
@@ -113,4 +124,6 @@ public final class DownloadStoredData extends APIServlet.APIRequestHandler {
     protected JSONStreamAware processRequest(HttpServletRequest request) throws ConchException {
         throw new UnsupportedOperationException();
     }
+
+
 }

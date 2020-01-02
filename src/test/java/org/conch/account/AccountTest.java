@@ -84,6 +84,7 @@ public class AccountTest extends BaseTest {
         accountInfoPrint(secretPhrase);
         accountSignInfo(secretPhrase);
 //        getAccountInfoViaBindRS("SSA-EF9Z-8J9G-LLHC-9VU5U");
+        //System.out.println("CESHI:"+Account.rsAccountToId("CDW-0000-0000-0000-00000"));
 
     }
 }

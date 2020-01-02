@@ -888,7 +888,7 @@
                     value: 1.5,
                     label: this.$t('transaction.transaction_type_account')
                 }, {
-                    value: 6,
+                    value: 11,
                     label: this.$t('transaction.transaction_type_storage_service')
                 }, {
                     value: 8,
@@ -1899,8 +1899,8 @@
                 formData.append("feeNQT", _this.messageForm.fee * 100000000);
                 formData.append("secretPhrase", _this.messageForm.password || _this.secretPhrase);
                 formData.append("name",_this.messageForm.fileName);
-               /* formData.append("data",_this.storagefile);*/
                 formData.append("file",_this.storagefile);
+                formData.append("deadline", '1440');
 
                 let config = {
                     headers: {
@@ -1908,9 +1908,16 @@
                     }
                 };
                 _this.$http.post('/sharder?requestType=storeData', formData, config).then(res => {
-                    //TODO 处理上传文件后的结果
-                    console.log(res);
-
+                    if (typeof res.data.errorDescription === 'undefined') {
+                        if (res.data.broadcasted) {
+                            _this.$message.success(_this.$t('notification.upload_success'));
+                            _this.closeDialog();
+                        } else {
+                            console.log(res.data);
+                        }
+                    } else {
+                        _this.$message.error(res.data.errorDescription);
+                    }
                 }).catch(err => {
                     console.log(err);
                     _this.$message.error(err.message);
