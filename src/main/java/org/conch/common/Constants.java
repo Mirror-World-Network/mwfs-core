@@ -90,6 +90,9 @@ public final class Constants {
     public static final boolean isOffline = Conch.getBooleanProperty("sharder.isOffline");
     public static final boolean isLightClient = Conch.getBooleanProperty("sharder.isLightClient");
     public static final boolean isStorageClient = Conch.getBooleanProperty("sharder.enableStorage");
+    public static final Double BURN_RATE = 0.5;
+    public static final Long BURN_START_HEIGHT = 10000L;
+    public static final Long BURN_ADDRESS_ID = -1L;
     public static final List<String> bootNodesHost = parseBootNodesHost();
     public static final String bootNodeHost = parseBootNodeHost();
 
@@ -318,6 +321,8 @@ public final class Constants {
         configFee.add(fee == 0 ? configFee.get(configFee.size() - 1) : fee);
         fee = (long)Conch.getIntProperty("sharder.fee.data10M");
         configFee.add(fee == 0 ? configFee.get(configFee.size() - 1) : fee);
+        // TransactionType = 18
+        configFee.add(0L);
     }
 
     // Network

@@ -530,9 +530,14 @@
         padding-left: 15px;
     }
 
+    .list_pagination .el-pagination--small .el-pagination__total {
+        float: right;
+        margin-top: 34px;
+    }
     .list_pagination .el-pagination--small .el-pagination__jump {
-        display: block;
-        margin-top: 10px;
+        display: initial;
+        float: right;
+        margin-top: 32px;
     }
 
     .block_list .list_table .list_pagination {

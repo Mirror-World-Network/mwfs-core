@@ -1048,7 +1048,7 @@ final public class TransactionImpl implements Transaction {
         }
         
         if (timestamp == 0 ? (deadline != 0 || feeNQT != 0) : (deadline < 1 || ((feeNQT < 0 && type instanceof TransactionType.CoinBase)
-                || feeNQT <= 0 && !(type instanceof TransactionType.CoinBase)))
+                || feeNQT <= 0 && !(type instanceof TransactionType.CoinBase || type instanceof TransactionType.BurnDeal)))
                 || feeNQT > Constants.MAX_BALANCE_NQT
                 || amountNQT < 0
                 || amountNQT > Constants.MAX_BALANCE_NQT
@@ -1200,13 +1200,14 @@ final public class TransactionImpl implements Transaction {
      */
     private static com.alibaba.fastjson.JSONObject isFixedFee(byte transactionType){
         com.alibaba.fastjson.JSONObject feeMap = new com.alibaba.fastjson.JSONObject();
-        if(transactionType == TransactionType.TYPE_COIN_BASE){
+        if(transactionType == TransactionType.TYPE_COIN_BASE ||
+                transactionType == TransactionType.TYPE_BURN_DEAL){
             feeMap.put(IS_FIXED,true);
             feeMap.put(FEE,0L);
         }else if(transactionType == TransactionType.TYPE_POC){
             feeMap.put(IS_FIXED,true);
             feeMap.put(FEE,1L);
-        }else {
+        } else {
             feeMap.put(IS_FIXED,false);
         }
         return feeMap;
@@ -1218,6 +1219,10 @@ final public class TransactionImpl implements Transaction {
         com.alibaba.fastjson.JSONObject feeMap = isFixedFee(transactionType);
         if(feeMap.getBooleanValue(IS_FIXED)){
             return feeMap.getLongValue(FEE);
+        }
+
+        if (transactionType == TransactionType.TYPE_BURN_DEAL) {
+            return Constants.configFee.get(transactionType);
         }
         
         if(transactionType != TransactionType.TYPE_DATA && Constants.configFee.get(transactionType) == 0){

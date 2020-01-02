@@ -721,7 +721,7 @@
     span.type0 {
         background-image: url("../../assets/img/pay.svg");
     }
-    
+
     span.type00 {
         background-image: url("../../assets/img/pay.svg");
     }
@@ -742,12 +742,12 @@
     span.type80 {
         background-image: url("../../assets/img/forge_pool.svg");
     }
-    
+
     //SUBTYPE_SHARDER_POOL_DESTROY
     span.type81 {
         background-image: url("../../assets/img/forge_pool.svg");
     }
-    
+
     //SUBTYPE_SHARDER_POOL_JOIN
     span.type82 {
         background-image: url("../../assets/img/forge_pool.svg");
@@ -790,6 +790,12 @@
     // bc speed
     span.type125 {
         background-image: url("../../assets/img/POC.svg");
+    }
+
+    // burn
+    span.type180 {
+        background-image: url("../../assets/img/destroy.svg");
+        background-size: 16px;
     }
 
 }
