@@ -1,5 +1,5 @@
-# MWFS #
-MWFS is a storage public chain.
+# CDWH #
+CDWH is a data storage public chain that also provides R&D and tech support of the blockchain storage.
 
 ## Project Structure ##
 Java project，the UI uses the vue.
@@ -10,7 +10,7 @@ Java project，the UI uses the vue.
         |- lib/             // 3rd party or required library 
         |- html/            // compiled UI html file
         |- logs/            // logs 
-        |- mwfs_*_db/       // mwfs-chain database
+        |- cdwh_*_db/       // database
         |- src/             // sharder-chain source code 
         |- ui/              // UI source code 
         |- run.sh           // shell for linux and osx 
@@ -20,34 +20,26 @@ Java project，the UI uses the vue.
         |- README.md 
 NOTE：If you manually specify the compiled directory, you must then set the compiled directory to the above classes folder. Otherwise, the run.sh and run.bat files will not run normally. 
 
-## Running the MWFS Client ##
+## Running the Client ##
 You can use the following methods to run the client：
-* Method one
-    
-        1. Download the client from [official site](https://mwfs.io) according to your OS.
-        2. Install the client on your computer.
-        3. Run the client program.
-* Method two
-    
-        1. Clone this project to your local disk.
-        2. Modify the conf/sharder.properties to set the network attribute to `sharder.network=$NETWORK`. The values of $NETWORK are: `Testnet` or `Mainnet`, the default value is `Testnet`.
-        3. Enter the UI folder and run `npm run build` to compile UI files, the location of compiled files is at `html` folder。
-        4. Run the `Main` method of `org.conch.Conch` or execute the `run.sh/run.bat` to start the Sharder Client.
-
+```
+1. Clone this project to your local disk.
+2. Modify the conf/cdwh.properties to set the network attribute to `cdwh.network=$NETWORK`. The values of $NETWORK are: `Testnet` or `Mainnet`, the default value is `Testnet`.
+3. Enter the UI folder and run `npm run build` to compile UI files, the location of compiled files is at `html` folder。
+4. Run the `Main` method of `org.conch.Conch` or execute the `run.sh/run.bat` to start the Sharder Client.
+```
 ## Start Mining ##
 Please read the [MINER-GUIDE.md](./MINER-GUIDE.md)
 
 ## Follow Us ##
-  - Website: https://mwfs.io
-  - Twitter: #
-  - Telegram: #
-  - Medium: #
-  - Github: https://github.com/CryptoDWH/cdwh-chain
-  - Wechat: #
+```
+Website: #
+Github: https://github.com/CryptoDWH/cdwh-chain
+```
 ----
 
-# 镜像世界 #
-镜像世界文件系统是一个数据存储公链。
+# 加密存储仓库 #
+加密存储仓库是一个数据存储公链。并提供区块链存储的相关技术支持。
 
 ## 工程说明 ##
 Java工程，UI使用vue。
@@ -58,7 +50,7 @@ Java工程，UI使用vue。
         |- lib/             // 第三方或则依赖的代码库
         |- html/            // 编译后的UI文件
         |- logs/            // 日志 
-        |- mwfs_*_db/       // 数据库
+        |- cdwh_*_db/       // 数据库
         |- src/             // 源代码
         |- ui/              // UI源代码
         |- run.sh           // linux和osx操作系统的启动脚本 
@@ -70,25 +62,17 @@ Java工程，UI使用vue。
 
 ## 运行客户端 ##
 你可以采用下面两种方式运行客户端：
-* 方式一
-    
-        1. 在[官网](https://mwfs.io)下载对应操作系统的客户端
-        2. 安装客户端
-        3. 运行客户端
-* 方式二
-    
-        1. 将本工程克隆到本地磁盘
-        2. 在conf/sharder.properties设置连入的网络`sharder.network=$NETWORK`。$NETWORK可以设置为`Testnet`或`Mainnet`，默认值为`Testnet`。
-        3. 进入ui目录，运行`npm run build`编译ui文件。编译出的ui文件位于`html`文件夹。
-        4. 运行org.conch.Conch中的main方法，或则运行`run.sh/run.bat`以启动客户端。
-
+```
+1. 将本工程克隆到本地磁盘
+2. 在conf/cdwh.properties设置连入的网络`cdwh.network=$NETWORK`。$NETWORK可以设置为`Testnet`或`Mainnet`，默认值为`Testnet`。
+3. 进入ui目录，运行`npm run build`编译ui文件。编译出的ui文件位于`html`文件夹。
+4. 运行org.conch.Conch中的main方法，或则运行`run.sh/run.bat`以启动客户端。
+```
 ## 开始挖矿 
 请阅读[MINER-GUIDE.md](./MINER-GUIDE.md)
 
 ## 关注我们 ##
-  - Website: https://mwfs.io
-  - Twitter: #
-  - Telegram: #
-  - Medium: #
-  - Github: https://github.com/CryptoDWH/cdwh-chain
-  - Wechat: #
+```
+Website: #
+Github: https://github.com/CryptoDWH/cdwh-chain
+```

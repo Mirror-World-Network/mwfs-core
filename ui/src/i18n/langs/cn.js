@@ -96,7 +96,7 @@ const cn = {
         'assets': "资产 ",
         'transfer': "转账",
         'send_message': "消息",
-        'storage_file':'存储文件',
+        'storage_file':'数据',
         'hub_setting': "Hub设置",
         'income_and_expenditure_details': "收支明细",
         'payout': "支出",
