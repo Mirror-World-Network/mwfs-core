@@ -114,7 +114,7 @@ const en = {
         'recipient_public_key':"recipient Public Key",
         'message_data':"Message Data",
         'operation_data':'Operation Content',
-        'update_account_name':'Update Account Name',
+        'update_account_name':'Update Account Name ',
         'encrypted_message':"you are not authorized to view it!",
         'is_compressed':"Is Compressed",
         'is_text':"Is Text",

@@ -31,7 +31,7 @@
                                 <strong>{{$t('transaction.is_text')}}:</strong>{{ rowData.messageInfo.messageIsText}}
                             </span>
                             <span v-else>
-                                <strong>{{$t('transaction.operation_data')}}:</strong>{{$t('transaction.update_account_name')}}<br>
+                                 <strong>{{$t('transaction.operation_data')}}:</strong>{{$t('transaction.update_account_name')}}:{{rowData.messageInfo.name}}<br>
                                 <strong>{{$t('dialog.block_info_total_fee')}}:</strong>{{$global.getBlockTotalFeeNQT(100000000)}} MW<br>
                             </span>
                         </p>
@@ -46,7 +46,7 @@
                                 <strong>{{$t('transaction.is_text')}}:</strong>{{ rowData.messageInfo.messageIsText}}
                             </span>
                             <span v-else>
-                                <strong>{{$t('transaction.operation_data')}}:</strong>{{$t('transaction.update_account_name')}}<br>
+                                <strong>{{$t('transaction.operation_data')}}:</strong>{{$t('transaction.update_account_name')}}:{{rowData.messageInfo.name}}<br>
                                 <strong>{{$t('dialog.block_info_total_fee')}}:</strong>{{$global.getBlockTotalFeeNQT(100000000)}} MW<br>
                             </span>
                         </p>
