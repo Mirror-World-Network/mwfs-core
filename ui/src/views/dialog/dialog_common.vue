@@ -164,13 +164,12 @@
             </div>
             <div class="modal-body">
                 <el-radio-group v-model="tabTitle" class="title">
-                    <el-radio-button label="account" class="btn">{{$t('dialog.block_info_all_transaction')}}
-                    </el-radio-button>
-                    <el-radio-button label="blockInfo" class="btn">{{$t('dialog.block_info_all_block_detail')}}
-                    </el-radio-button>
+                    <el-radio-button label="account" class="btn">{{$t('dialog.block_info_all_transaction')}}</el-radio-button>
+                    <el-radio-button label="blockInfo" class="btn">{{$t('dialog.block_info_all_block_detail')}}</el-radio-button>
                     <el-radio-button v-if="pocInfoList.length > 0" label="pocInfo" class="btn">PoC</el-radio-button>
                     <el-radio-button v-if="poolInfoList.length > 0" label="poolInfo" class="btn">Pool</el-radio-button>
                     <el-radio-button v-if="messageInfoList.length > 0" label="messageInfo" class="btn">{{$t('sendMessage.infomation')}}</el-radio-button>
+                    <el-radio-button v-if="storageFileInfo.length > 0 && typeof(secretPhrase) !== 'undefined'" label="storageFileInfo" class="btn">{{$t('transaction.transaction_type_storage_service')}}</el-radio-button>
                 </el-radio-group>
 
                 <div v-if="tabTitle === 'account'" class="account_list">
@@ -471,6 +470,40 @@
                         </el-table-column>
                     </el-table>
                 </div>
+                <div v-if="tabTitle === 'storageFileInfo'" class="blockInfo">
+                    <el-table :data="storageFileInfo" class="poc" style="width: 100%">
+                        <el-table-column
+                            prop="senderRS"
+                            align="center"
+                            :label="$t('poc.creator')">
+                        </el-table-column>
+                        <el-table-column
+                            prop="subType"
+                            align="center"
+                            :label="$t('poc.type')"
+                            :formatter="parseSubTypePool">
+                        </el-table-column>
+                        <el-table-column
+                            prop="height"
+                            align="center"
+                            :label="$t('poc.started_height')">
+                        </el-table-column>
+                        <el-table-column
+                            prop="transaction"
+                            align="center"
+                            :label="$t('poc.tx')">
+                        </el-table-column>
+                        <el-table-column
+                            align="center"
+                            :label="$t('network.block_list_operating')">
+                            <template slot-scope="scope">
+                                <el-button
+                                    @click="downloadFile(scope.row)">下载</el-button>
+                            </template>
+                        </el-table-column>
+
+                    </el-table>
+                </div>
             </div>
         </div>
         <!--view account transaction dialog-->
@@ -563,7 +596,6 @@
             generatorRS: '',
             trading: '',
             height: '',
-
         },
         data() {
             return {
@@ -582,8 +614,10 @@
                 poolInfoList:[],
                 messageInfoList:[],
                 accountIdMap:[],
+                storageFileInfo:[],
                 tradingInfoDialog: this.tradingInfoOpen,
                 rs:'',
+                secretPhrase:SSO.secretPhrase,
             }
         },
         methods: {
@@ -623,6 +657,7 @@
                 _this.pocInfoList = [];
                 _this.poolInfoList = [];
                 _this.messageInfoList = [];
+                _this.storageFileInfo =[];
                 return new Promise((resolve, reject) => {
                     _this.$http.get('/sharder?requestType=getBlock', {
                         params: {
@@ -671,6 +706,16 @@
                                         subType:t.subtype,
                                         recipientRS:t.recipientRS,
                                         accountRS:SSO.accountRS,
+                                    });
+                                }else if(t.type === 11){
+                                    _this.storageFileInfo.push({
+                                        fileInfo:t.attachment,
+                                        senderRS:t.senderRS,
+                                        block:t.block,
+                                        height:t.height,
+                                        transaction:t.transaction,
+                                        type:t.type,
+                                        feeNQT:t.feeNQT,
                                     });
                                 }
 
@@ -873,7 +918,7 @@
             },
             parseSubTypePool(row, column) {
                 let subtype = row.subType;
-                console.log("pool")
+                if(row.type === 11) return  this.$root.$t("transaction.transaction_type_storage_service");
                 switch (subtype) {
                     case 0:
                         return this.$root.$t("transaction.transaction_type_pool_create");
@@ -909,6 +954,33 @@
                 let subtype = row.subType;
                 if (subtype === 0) return _this.$root.$t("transaction.transaction_type_information");
                 if (subtype === 5) return _this.$root.$t("transaction.transaction_type_account");
+            },
+            downloadFile(row,column){
+                const _this = this;
+                let formData = new FormData();
+                formData.append("ssid",row.fileInfo.ssid);
+                _this.$http.post('/sharder?requestType=downloadStoredData', formData).then(res => {
+                    let url = "http://localhost:"+res.data.port+"/ipfs/"+res.data.ipfsHashId;
+                    _this.$http.get(url,{responseType: 'blob'}).then(res =>{
+                        let contentType = res.headers['content-type'];
+                        const blob = new Blob([res.data], {type: contentType});
+                        // 文件名命名
+                        const fileName = row.fileInfo.name;
+                        // 创建a标签，指定标签通过createObjectURL关联blob对象
+                        const link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(blob);
+                        // 通过download属性规定下载文件名
+                        link.download = fileName;
+                        // click触发下载
+                        link.click();
+                        // 通过revokeObjectURL释放url对象
+                        window.URL.revokeObjectURL(link.href);
+                    })
+                }).catch(err => {
+                    console.log(err);
+                    _this.$message.error(err.message);
+                });
+
             },
 
         },

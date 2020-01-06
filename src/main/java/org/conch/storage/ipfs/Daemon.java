@@ -179,7 +179,7 @@ public class Daemon {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                swarmKey = new File(getIpfsStorePath(), "swarm.key");
+              /*  swarmKey = new File(getIpfsStorePath(), "swarm.key");
                 if (!swarmKey.exists()) {
                     print(
                             "move swarm key file from "
@@ -193,7 +193,7 @@ public class Daemon {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                }
+                }*/
                                 // Config
                 File configFile = new File(getIpfsStorePath(), "config");
                 JsonNode configRootNode = null;
