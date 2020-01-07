@@ -22,8 +22,6 @@
 package org.conch.chain;
 
 import com.google.common.collect.Lists;
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
-import org.apache.commons.collections.CollectionUtils;
 import org.conch.Conch;
 import org.conch.account.Account;
 import org.conch.account.AccountLedger;
@@ -51,9 +49,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONStreamAware;
 import org.json.simple.JSONValue;
-import sun.applet.Main;
 
-import javax.lang.model.element.VariableElement;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.sql.*;
