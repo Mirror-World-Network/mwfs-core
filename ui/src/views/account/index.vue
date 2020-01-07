@@ -712,15 +712,27 @@
                         </td>
                     </tr>
                     <tr>
-                        <th>{{$t('account_info.account_balance')}}</th>
+                        <th>
+                            {{$t('account_info.account_balance')}}
+                            <el-tooltip class="item" effect="dark" :content="$t('account_info.account_balance_explain')" placement="top-start">
+                                <p class="el-icon-info"></p>
+                            </el-tooltip>
+                        </th>
                         <td>{{$global.getSSNumberFormat(accountInfo.balanceNQT)}}</td>
                     </tr>
                     <tr>
-                        <th>{{$t('account_info.account_available_balance')}}</th>
+                        <th>
+                            {{$t('account_info.account_available_balance')}}
+                            <el-tooltip class="item" effect="dark" :content="$t('account_info.account_name_not_set_explain')" placement="top-start">
+                                <p class="el-icon-info"></p>
+                            </el-tooltip>
+                        </th>
                         <td>{{$global.getSSNumberFormat(accountInfo.effectiveBalanceNQT)}}</td>
                     </tr>
                     <tr>
-                        <th>{{$t('account_info.frozen_balance_nqt')}}</th>
+                        <th>
+                            {{$t('account_info.frozen_balance_nqt')}}
+                        </th>
                         <td>{{$global.getSSNumberFormat(accountInfo.frozenBalanceNQT)}}</td>
                     </tr>
                     <tr>
