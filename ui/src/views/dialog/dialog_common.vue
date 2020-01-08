@@ -958,9 +958,11 @@
                 const _this = this;
                 let formData = new FormData();
                 formData.append("ssid",row.fileInfo.ssid);
-                _this.$http.post('/sharder?requestType=downloadStoredData', formData).then(res => {
+                _this.$http.post('/sharder?requestType=downloadStoredData',formData).then(res => {
                     let contentType = res.headers['content-type'];
-                    const blob = new Blob([res.data.data], {type: contentType});
+                    console.log(contentType);
+                    console.log(res);
+                    const blob = new Blob([res.data], {type: contentType});
                     // 文件名命名
                     const fileName = row.fileInfo.name;
                     // 创建a标签，指定标签通过createObjectURL关联blob对象
