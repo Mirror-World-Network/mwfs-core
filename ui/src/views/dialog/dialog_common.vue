@@ -956,9 +956,7 @@
             },
             downloadFile(row,column){
                 const _this = this;
-                let formData = new FormData();
-                formData.append("ssid",row.fileInfo.ssid);
-                _this.$http.post('/sharder?requestType=downloadStoredData',formData).then(res => {
+                _this.$http.get('/sharder?requestType=downloadStoredData&ssid='+row.fileInfo.ssid).then(res => {
                     let contentType = res.headers['content-type'];
                     console.log(contentType);
                     console.log(res);
