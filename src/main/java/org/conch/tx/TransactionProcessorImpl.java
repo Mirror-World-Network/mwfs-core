@@ -488,6 +488,11 @@ public final class TransactionProcessorImpl implements TransactionProcessor {
     public void broadcast(Transaction transaction) throws ConchException.ValidationException {
         BlockchainImpl.getInstance().writeLock();
         try {
+            if (transaction.getSenderId() == Constants.BURN_ADDRESS_ID) {
+                Logger.logErrorMessage("Transaction can not create, sender can not be BURN_ADDRESS_ID");
+                return;
+            }
+
             if (TransactionDb.hasTransaction(transaction.getId())) {
                 Logger.logMessage("Transaction " + transaction.getStringId() + " already in blockchain, will not broadcast again");
                 return;

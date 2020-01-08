@@ -287,6 +287,7 @@
                     </table>
                 </div>
                 <div v-if="tabTitle === 'pocInfo'" class="blockInfo">
+                    <!-- pc -->
                     <el-table :data="pocInfoList" class="poc pc" style="width: 100%">
                         <el-table-column type="expand">
                             <template slot-scope="props">
@@ -352,7 +353,8 @@
                     </el-table>
                 </div>
                 <div v-if="tabTitle === 'poolInfo'" class="blockInfo">
-                    <el-table :data="poolInfoList" class="poc" style="width: 100%">
+                    <!-- pc -->
+                    <el-table :data="poolInfoList" class="poc pc" style="width: 100%">
                         <el-table-column type="expand">
                             <template slot-scope="props">
                                 <el-form label-position="left" inline>
@@ -390,9 +392,28 @@
                             :label="$t('poc.tx')">
                         </el-table-column>
                     </el-table>
+    
+                    <!-- mobile -->
+                    <el-table :data="poolInfoList" class="poc mobile" style="width: 100%">
+                        <el-table-column type="expand">
+                            <template slot-scope="props">
+                                <el-form label-position="left" inline>
+                                    <el-row>
+                                        <PoolTxDetail :rowData="props.row"></PoolTxDetail>
+                                    </el-row>
+                                </el-form>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                            prop="transaction"
+                            align="center"
+                            :label="$t('poc.tx')">
+                        </el-table-column>
+                    </el-table>
                 </div>
                 <div v-if="tabTitle === 'messageInfo'" class="blockInfo">
-                    <el-table :data="messageInfoList" class="poc" style="width: 100%">
+                    <!-- pc -->
+                    <el-table :data="messageInfoList" class="poc pc" style="width: 100%">
                         <el-table-column type="expand">
                             <template slot-scope="props">
                                 <el-form label-position="left" inline>
@@ -429,6 +450,25 @@
                             :label="$t('poc.tx')">
                         </el-table-column>
                     </el-table>
+    
+                    <!-- mobile -->
+                    <el-table :data="messageInfoList" class="poc mobile" style="width: 100%">
+                        <el-table-column type="expand">
+                            <template slot-scope="props">
+                                <el-form label-position="left" inline>
+                                    <el-row>
+                                        <MessageTxDetail :rowData="props.row"></MessageTxDetail>
+                                    </el-row>
+                                </el-form>
+                            </template>
+                        </el-table-column>
+        
+                        <el-table-column
+                            prop="transaction"
+                            align="center"
+                            :label="$t('poc.tx')">
+                        </el-table-column>
+                    </el-table>
                 </div>
                 <div v-if="tabTitle === 'storageFileInfo'" class="blockInfo">
                     <el-table :data="storageFileInfo" class="poc" style="width: 100%">
@@ -457,8 +497,7 @@
                             align="center"
                             :label="$t('network.block_list_operating')">
                             <template slot-scope="scope">
-                                <el-button
-                                    @click="downloadFile(scope.row)">下载</el-button>
+                                <el-button @click="downloadFile(scope.row)">{{$t('network.download')}}</el-button>
                             </template>
                         </el-table-column>
 
@@ -920,7 +959,8 @@
                 let formData = new FormData();
                 formData.append("ssid",row.fileInfo.ssid);
                 _this.$http.post('/sharder?requestType=downloadStoredData', formData).then(res => {
-                    let url = "http://localhost:"+res.data.port+"/ipfs/"+res.data.ipfsHashId;
+                    let ipAddr = window.location.hostname;
+                    let url = "http://"+ ipAddr +":"+ res.data.port+"/ipfs/"+res.data.ipfsHashId;
                     _this.$http.get(url,{responseType: 'blob'}).then(res =>{
                         let contentType = res.headers['content-type'];
                         const blob = new Blob([res.data], {type: contentType});

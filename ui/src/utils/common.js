@@ -812,6 +812,11 @@ export default {
                 return this.$vue.$t("transaction.transaction_type_poc");
             }
         }
+        if (t.type === 18) {
+            if (t.subtype === 0) {
+                return this.$vue.$t("transaction.transaction_type_burn")
+            }
+        }
     },
     /**
      * 获得交易金额
