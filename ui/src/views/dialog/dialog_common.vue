@@ -497,7 +497,7 @@
                             align="center"
                             :label="$t('network.block_list_operating')">
                             <template slot-scope="scope">
-                                <el-button @click="downloadFile(scope.row)">下载</el-button>
+                                <el-button @click="downloadFile(scope.row)">{{$t('network.download')}}</el-button>
                             </template>
                         </el-table-column>
 
@@ -959,8 +959,8 @@
                 let formData = new FormData();
                 formData.append("ssid",row.fileInfo.ssid);
                 _this.$http.post('/sharder?requestType=downloadStoredData', formData).then(res => {
-                    let ipAddr = window.api.apiUrl;
-                    let url = ipAddr.substring(0,ipAddr.length - 5)+":"+res.data.port+"/ipfs/"+res.data.ipfsHashId;
+                    let ipAddr = window.location.hostname;
+                    let url = "http://"+ ipAddr +":"+ res.data.port+"/ipfs/"+res.data.ipfsHashId;
                     _this.$http.get(url,{responseType: 'blob'}).then(res =>{
                         let contentType = res.headers['content-type'];
                         const blob = new Blob([res.data], {type: contentType});
