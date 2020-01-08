@@ -261,6 +261,7 @@ const cn = {
         'block_list_generator': "出块者",
         'block_list_operating': "操作",
         'view_details': "查看详情",
+        'download':"下载"
     },
     peers: {
         'tag_node': "标记节点",
