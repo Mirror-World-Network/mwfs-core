@@ -58,6 +58,7 @@ public class Daemon {
     private String swarmPort = Conch.getStringProperty("sharder.storage.ipfs.swarm.port");
     private String apiPort = Conch.getStringProperty("sharder.storage.ipfs.api.port");
     private String gatewayPort = Conch.getStringProperty("sharder.storage.ipfs.gateway.port");
+    private String accessPath = parseAccessPathByConfig();
 
     private String ipfsStorePathStr =
             Conch.getStringProperty("sharder.storage.ipfs.storepath", "storage/ipfs/.ipfs");
@@ -70,6 +71,16 @@ public class Daemon {
     private Consumer<Process> gobbler;
     private Consumer<String> printer;
     private File binpath = storepath;
+
+    /**
+     *   127.0.0.1 means can be accessed locally
+     *   0.0.0.0 means anyone can accessed
+     * @return
+     */
+    private static String parseAccessPathByConfig(){
+        boolean everyOneAccess = "all".equalsIgnoreCase(Conch.getStringProperty("sharder.storage.ipfs.access"));
+        return everyOneAccess ? "/ip4/0.0.0.0/tcp/" : "/ip4/127.0.0.1/tcp/";
+    }
 
     public static enum OS {
         WINDOWS,
@@ -218,6 +229,7 @@ public class Daemon {
                             ((ObjectNode) configRootNode)
                                     .putPOJO("Bootstrap", defaultBootstrapNodes.toArray());
                         }
+
                         JsonNode addressNode = configRootNode.path("Addresses");
                         JsonNode apiNode = addressNode.path("API");
                         // 127.0.0.1 means can be accessed locally
@@ -225,11 +237,11 @@ public class Daemon {
                         // API: call api; Gateway: get and view the file by ssid; Swarm : connect to other
                         // node
                         if (!apiNode.isNull()) {
-                            ((ObjectNode) addressNode).put("API", "/ip4/127.0.0.1/tcp/" + apiPort);
+                            ((ObjectNode) addressNode).put("API", accessPath + apiPort);
                         }
                         JsonNode gatewayNode = addressNode.path("Gateway");
                         if (!gatewayNode.isNull()) {
-                            ((ObjectNode) addressNode).put("Gateway", "/ip4/127.0.0.1/tcp/" + gatewayPort);
+                            ((ObjectNode) addressNode).put("Gateway", accessPath + gatewayPort);
                         }
                         JsonNode swarmNode = addressNode.path("Swarm");
 
@@ -451,8 +463,8 @@ public class Daemon {
         this.attached = false;
         while (!attached) {
             try {
-                ipfs = new IPFS("/ip4/127.0.0.1/tcp/" + apiPort);
-                //                ipfs.refs.local();
+                ipfs = new IPFS(accessPath + apiPort);
+                //ipfs.refs.local();
                 attached = true;
             } catch (Exception e) {
                 e.printStackTrace();
