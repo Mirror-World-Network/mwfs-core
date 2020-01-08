@@ -50,6 +50,7 @@ public final class DownloadStoredData extends APIServlet.APIRequestHandler {
         super(new APITag[] {APITag.DATA_STORAGE}, "transaction","ssid");
     }
 
+    static private String ipfsAccessPort = Conch.getStringProperty("sharder.storage.ipfs.gateway.port");
     /**
      * Used to fetch the ssid details before download the stored object
      * @param ssid
@@ -61,7 +62,7 @@ public final class DownloadStoredData extends APIServlet.APIRequestHandler {
         JSONObject json = new JSONObject();
         json.put("Code", 200);
         json.put("ipfsHashId",Ssid.decode(ssid));
-        json.put("port",Conch.getStringProperty("sharder.storage.ipfs.gateway.port"));
+        json.put("port", ipfsAccessPort);
         return JSON.prepare(json);
     }
 
@@ -134,15 +135,22 @@ public final class DownloadStoredData extends APIServlet.APIRequestHandler {
         return null;
     }
 
-//    /**
-//     * Forward the download request to ipfs server.
-//     * e.g. localhost/downloadStoredData/ssid -> localhost:8088/ipfs/{ssid}
-//     * @param ssid
-//     * @return
-//     */
-//    private void forwardDownloadLink(HttpServletResponse response){
-//        response.sendRedirect("/ipfs/");
-//    }
+    /**
+     * Redirect the download request to ipfs server.
+     * e.g. localhost/downloadStoredData/ssid -> localhost:8088/ipfs/{ssid}
+     * @return
+     */
+    private boolean redirectDownloadLink(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String ipfsHashId = Convert.emptyToNull(request.getParameter("ipfsHashId"));
+        boolean justRedirect = StringUtils.isNotEmpty(ipfsHashId);
+
+        if(justRedirect) {
+            response.sendRedirect("http://" + request.getRemoteHost() + ":" + ipfsAccessPort + "/ipfs/" + ipfsHashId);
+            return true;
+        }
+
+        return false;
+    }
 
     @Override
     protected JSONStreamAware processRequest(HttpServletRequest request, HttpServletResponse response) throws ConchException {
@@ -152,7 +160,13 @@ public final class DownloadStoredData extends APIServlet.APIRequestHandler {
         if(justFetch){
             return fetchSsidInfo(ssid);
         }else {
-            return downloadSsObejctStream(request, response);
+            boolean redirectSuccess = false;
+            try {
+                redirectSuccess = redirectDownloadLink(request, response);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return redirectSuccess ? null : downloadSsObejctStream(request, response);
         }
     }
 
