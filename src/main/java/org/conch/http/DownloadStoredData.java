@@ -69,18 +69,17 @@ public final class DownloadStoredData extends APIServlet.APIRequestHandler {
 
         System.out.println(request.getServerName());
         String ipfsHashId = Ssid.decode(ssid);
-        String ipfsUrl = "http://" + request.getServerName() + ":" + ipfsAccessPort + "/ipfs/" + ipfsHashId;
+        /*String ipfsUrl = "http://" + request.getServerName() + ":" + ipfsAccessPort + "/ipfs/" + ipfsHashId;
         String res = null;
         try {
             res = getContent(ipfsUrl);
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
         JSONObject json = new JSONObject();
         json.put("Code", 200);
         json.put("ipfsHashId", ipfsHashId);
         json.put("port", ipfsAccessPort);
-        json.put("data", res);
         return JSON.prepare(json);
     }
 
@@ -159,15 +158,14 @@ public final class DownloadStoredData extends APIServlet.APIRequestHandler {
      * @return
      */
     private boolean redirectDownloadLink(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String ipfsHashId = Convert.emptyToNull(request.getParameter("ipfsHashId"));
-        boolean justRedirect = StringUtils.isNotEmpty(ipfsHashId);
+        String ssid = Convert.emptyToNull(request.getParameter("ssid"));
+        if (StringUtils.isEmpty(ssid)) return false;
 
-        if(justRedirect) {
-            response.sendRedirect("http://" + request.getServerName() + ":" + ipfsAccessPort + "/ipfs/" + ipfsHashId);
-            return true;
-        }
+        String ipfsHashId = Ssid.decode(ssid);
+        if (StringUtils.isEmpty(ipfsHashId)) return false;
 
-        return false;
+        response.sendRedirect("http://" + request.getServerName() + ":" + ipfsAccessPort + "/ipfs/" + ipfsHashId);
+        return true;
     }
 
     /**
@@ -199,8 +197,8 @@ public final class DownloadStoredData extends APIServlet.APIRequestHandler {
 
     @Override
     protected JSONStreamAware processRequest(HttpServletRequest request, HttpServletResponse response) throws ConchException {
-        JSONStreamAware ssidInfoResJson = fetchSsidInfo(request);
-        if(ssidInfoResJson != null) return ssidInfoResJson;
+       /* JSONStreamAware ssidInfoResJson = fetchSsidInfo(request);
+        if(ssidInfoResJson != null) return ssidInfoResJson;*/
 
         boolean redirectSuccess = false;
         try {
