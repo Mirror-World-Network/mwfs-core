@@ -956,7 +956,10 @@
             },
             downloadFile(row,column){
                 const _this = this;
-                _this.$http.get('/sharder?requestType=downloadStoredData&ssid='+row.fileInfo.ssid).then(res => {
+                let formData = new FormData();
+                formData.append("ssid",row.fileInfo.ssid);
+                window.open("/sharder?requestType=downloadStoredData&ssid="+row.fileInfo.ssid,"_blank");
+               /* _this.$http.get('/sharder?requestType=downloadStoredData&ssid='+row.fileInfo.ssid).then(res => {
                     let contentType = res.headers['content-type'];
                     console.log(contentType);
                     console.log(res);
@@ -975,7 +978,7 @@
                 }).catch(err => {
                     console.log(err);
                     _this.$message.error(err.message);
-                });
+                });*/
 
             },
 
