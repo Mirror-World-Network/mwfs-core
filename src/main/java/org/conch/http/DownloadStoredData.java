@@ -35,10 +35,12 @@ import org.json.simple.JSONStreamAware;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
 
 import static org.conch.http.JSONResponses.*;
 
@@ -53,16 +55,32 @@ public final class DownloadStoredData extends APIServlet.APIRequestHandler {
     static private String ipfsAccessPort = Conch.getStringProperty("sharder.storage.ipfs.gateway.port");
     /**
      * Used to fetch the ssid details before download the stored object
-     * @param ssid
      * @return
      */
-    private JSONStreamAware fetchSsidInfo(String ssid){
-        if (ssid == null) return null;
+    private JSONStreamAware fetchSsidInfo(HttpServletRequest request){
+        String ssid = Convert.emptyToNull(request.getParameter("ssid"));
+        if (StringUtils.isEmpty(ssid)) return null;
 
+//        JSONObject json = new JSONObject();
+//        json.put("Code", 200);
+//        json.put("ipfsHashId",Ssid.decode(ssid));
+//        json.put("port", ipfsAccessPort);
+//        return JSON.prepare(json);
+
+        System.out.println(request.getServerName());
+        String ipfsHashId = Ssid.decode(ssid);
+        String ipfsUrl = "http://" + request.getServerName() + ":" + ipfsAccessPort + "/ipfs/" + ipfsHashId;
+        String res = null;
+        try {
+            res = getContent(ipfsUrl);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         JSONObject json = new JSONObject();
         json.put("Code", 200);
-        json.put("ipfsHashId",Ssid.decode(ssid));
+        json.put("ipfsHashId", ipfsHashId);
         json.put("port", ipfsAccessPort);
+        json.put("data", res);
         return JSON.prepare(json);
     }
 
@@ -152,22 +170,45 @@ public final class DownloadStoredData extends APIServlet.APIRequestHandler {
         return false;
     }
 
+    /**
+     * Redirect the download request to ipfs server.
+     * e.g. localhost/downloadStoredData/ssid -> localhost:8088/ipfs/{ssid}
+     * @return
+     */
+    private String getContent(String url) throws Exception {
+        String content = null;
+        URLConnection urlConnection = new URL(url).openConnection();
+        HttpURLConnection connection = (HttpURLConnection) urlConnection;
+        connection.setRequestMethod("GET");
+        //连接
+        connection.connect();
+        //得到响应码
+        int responseCode = connection.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader
+                    (connection.getInputStream(), StandardCharsets.UTF_8));
+            StringBuilder bs = new StringBuilder();
+            String l;
+            while ((l = bufferedReader.readLine()) != null) {
+                bs.append(l).append("\n");
+            }
+            content = bs.toString();
+        }
+        return content;
+    }
+
     @Override
     protected JSONStreamAware processRequest(HttpServletRequest request, HttpServletResponse response) throws ConchException {
-        String ssid = Convert.emptyToNull(request.getParameter("ssid"));
-        boolean justFetch = StringUtils.isNotEmpty(ssid);
+        JSONStreamAware ssidInfoResJson = fetchSsidInfo(request);
+        if(ssidInfoResJson != null) return ssidInfoResJson;
 
-        if(justFetch){
-            return fetchSsidInfo(ssid);
-        }else {
-            boolean redirectSuccess = false;
-            try {
-                redirectSuccess = redirectDownloadLink(request, response);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return redirectSuccess ? null : downloadSsObejctStream(request, response);
+        boolean redirectSuccess = false;
+        try {
+            redirectSuccess = redirectDownloadLink(request, response);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        return redirectSuccess ? null : downloadSsObejctStream(request, response);
     }
 
     @Override
