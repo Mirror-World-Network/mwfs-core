@@ -163,7 +163,7 @@ public final class DownloadStoredData extends APIServlet.APIRequestHandler {
         boolean justRedirect = StringUtils.isNotEmpty(ipfsHashId);
 
         if(justRedirect) {
-            response.sendRedirect("http://" + request.getRemoteHost() + ":" + ipfsAccessPort + "/ipfs/" + ipfsHashId);
+            response.sendRedirect("http://" + request.getServerName() + ":" + ipfsAccessPort + "/ipfs/" + ipfsHashId);
             return true;
         }
 
