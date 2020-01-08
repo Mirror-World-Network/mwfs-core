@@ -960,7 +960,8 @@
                 let formData = new FormData();
                 formData.append("ssid",row.fileInfo.ssid);
                 _this.$http.post('/sharder?requestType=downloadStoredData', formData).then(res => {
-                    let url = "http://localhost:"+res.data.port+"/ipfs/"+res.data.ipfsHashId;
+                    let ipAddr = window.api.apiUrl;
+                    let url = ipAddr.substring(0,ipAddr.length - 4)+res.data.port+"/ipfs/"+res.data.ipfsHashId;
                     _this.$http.get(url,{responseType: 'blob'}).then(res =>{
                         let contentType = res.headers['content-type'];
                         const blob = new Blob([res.data], {type: contentType});
