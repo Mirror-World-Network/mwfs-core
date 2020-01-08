@@ -21,6 +21,7 @@
 
 package org.conch.http;
 
+import org.apache.commons.lang3.StringUtils;
 import org.conch.Conch;
 import org.conch.common.ConchException;
 import org.conch.storage.Ssid;
@@ -49,17 +50,31 @@ public final class DownloadStoredData extends APIServlet.APIRequestHandler {
         super(new APITag[] {APITag.DATA_STORAGE}, "transaction","ssid");
     }
 
-    @Override
-    protected JSONStreamAware processRequest(HttpServletRequest request, HttpServletResponse response) throws ConchException {
+    static private String ipfsAccessPort = Conch.getStringProperty("sharder.storage.ipfs.gateway.port");
+    /**
+     * Used to fetch the ssid details before download the stored object
+     * @param ssid
+     * @return
+     */
+    private JSONStreamAware fetchSsidInfo(String ssid){
+        if (ssid == null) return null;
+
+        JSONObject json = new JSONObject();
+        json.put("Code", 200);
+        json.put("ipfsHashId",Ssid.decode(ssid));
+        json.put("port", ipfsAccessPort);
+        return JSON.prepare(json);
+    }
+
+    /**
+     * Fetch the ss object and return the stream to response
+     * @param request
+     * @param response
+     * @return
+     * @throws ParameterException
+     */
+    private JSONStreamAware downloadSsObejctStream(HttpServletRequest request, HttpServletResponse response) throws ParameterException {
         String transactionIdString = Convert.emptyToNull(request.getParameter("transaction"));
-        String ssid = Convert.emptyToNull(request.getParameter("ssid"));
-        if (ssid != null){
-            JSONObject json = new JSONObject();
-            json.put("Code", 200);
-            json.put("ipfsHashId",Ssid.decode(ssid));
-            json.put("port",Conch.getStringProperty("sharder.storage.ipfs.gateway.port"));
-            return JSON.prepare(json);
-        }
         if (transactionIdString == null) {
             return MISSING_TRANSACTION;
         }
@@ -120,10 +135,44 @@ public final class DownloadStoredData extends APIServlet.APIRequestHandler {
         return null;
     }
 
+    /**
+     * Redirect the download request to ipfs server.
+     * e.g. localhost/downloadStoredData/ssid -> localhost:8088/ipfs/{ssid}
+     * @return
+     */
+    private boolean redirectDownloadLink(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String ipfsHashId = Convert.emptyToNull(request.getParameter("ipfsHashId"));
+        boolean justRedirect = StringUtils.isNotEmpty(ipfsHashId);
+
+        if(justRedirect) {
+            response.sendRedirect("http://" + request.getRemoteHost() + ":" + ipfsAccessPort + "/ipfs/" + ipfsHashId);
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    protected JSONStreamAware processRequest(HttpServletRequest request, HttpServletResponse response) throws ConchException {
+        String ssid = Convert.emptyToNull(request.getParameter("ssid"));
+        boolean justFetch = StringUtils.isNotEmpty(ssid);
+
+        if(justFetch){
+            return fetchSsidInfo(ssid);
+        }else {
+            boolean redirectSuccess = false;
+            try {
+                redirectSuccess = redirectDownloadLink(request, response);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return redirectSuccess ? null : downloadSsObejctStream(request, response);
+        }
+    }
+
     @Override
     protected JSONStreamAware processRequest(HttpServletRequest request) throws ConchException {
         throw new UnsupportedOperationException();
     }
-
 
 }
