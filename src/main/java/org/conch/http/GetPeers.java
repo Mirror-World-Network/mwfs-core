@@ -119,7 +119,7 @@ public final class GetPeers extends APIServlet.APIRequestHandler {
                 new Thread("换ip地址"){
                     public void run(){
                         final String result = byIPtoCoordinates("https://mwfs.io/api/front/coordinates/ip",JSONArray.toJSONString(peersJSON));
-                        if (result.substring(0,8).equals("ErrorInfo")){
+                        if (result.contains("ErrorInfo")){
                             return;
                         }else{
                             CoordinatesMap.put("CoordinatesList",result);
