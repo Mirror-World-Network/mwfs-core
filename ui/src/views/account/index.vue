@@ -712,27 +712,15 @@
                         </td>
                     </tr>
                     <tr>
-                        <th>
-                            {{$t('account_info.account_balance')}}
-                            <el-tooltip class="item" effect="dark" :content="$t('account_info.account_balance_explain')" placement="top-start">
-                                <p class="el-icon-info"></p>
-                            </el-tooltip>
-                        </th>
+                        <th>{{$t('account_info.account_balance')}}</th>
                         <td>{{$global.getSSNumberFormat(accountInfo.balanceNQT)}}</td>
                     </tr>
                     <tr>
-                        <th>
-                            {{$t('account_info.account_available_balance')}}
-                            <el-tooltip class="item" effect="dark" :content="$t('account_info.account_name_not_set_explain')" placement="top-start">
-                                <p class="el-icon-info"></p>
-                            </el-tooltip>
-                        </th>
+                        <th>{{$t('account_info.account_available_balance')}}</th>
                         <td>{{$global.getSSNumberFormat(accountInfo.effectiveBalanceNQT)}}</td>
                     </tr>
                     <tr>
-                        <th>
-                            {{$t('account_info.frozen_balance_nqt')}}
-                        </th>
+                        <th>{{$t('account_info.frozen_balance_nqt')}}</th>
                         <td>{{$global.getSSNumberFormat(accountInfo.frozenBalanceNQT)}}</td>
                     </tr>
                     <tr>
@@ -900,7 +888,7 @@
                     value: 1.5,
                     label: this.$t('transaction.transaction_type_account')
                 }, {
-                    value: 11,
+                    value: 6,
                     label: this.$t('transaction.transaction_type_storage_service')
                 }, {
                     value: 8,
@@ -1291,8 +1279,14 @@
                 });
             },
             drawBarchart: function (barchat) {
+    
+                var dom = document.getElementById("transaction_amount_bar");
+                if (!dom) {
+                    console.log("dom transaction_amount_bar got faild，echarts can not load")
+                    return
+                }
                 const _this = this;
-                const barchart = _this.$echarts.init(document.getElementById("transaction_amount_bar"), null, {renderer: 'svg'});
+                const barchart = _this.$echarts.init(dom, null, {renderer: 'svg'});
                 const option = {
                     grid: {
                         left: '15%',
@@ -1321,8 +1315,13 @@
                 }
             },
             drawYield: function (yields) {
+                var dom = document.getElementById("yield_curve")
+                if (!dom) {
+                    console.log("dom yield_curve got faild, echarts can not load")
+                    return
+                }
                 const _this = this;
-                const yieldCurve = _this.$echarts.init(document.getElementById("yield_curve"), null, {renderer: 'svg'});
+                const yieldCurve = _this.$echarts.init(dom, null, {renderer: 'svg'});
                 const option = {
                     grid: {
                         left: '15%',
@@ -1357,7 +1356,16 @@
                         data: yields.xAxis,
                     },
                     yAxis: {
-                        type: 'value'
+                        type: 'value',
+                        axisLabel: {
+                            formatter: function(value) {
+                                if(value > 10000000) {
+                                    return value/10000000 + 'M'
+                                } else if(value > 1000) {
+                                    return value/1000 + 'K'
+                                }
+                            }
+                        }
                     },
                     series: [{
                         data: yields.series,
@@ -1911,8 +1919,8 @@
                 formData.append("feeNQT", _this.messageForm.fee * 100000000);
                 formData.append("secretPhrase", _this.messageForm.password || _this.secretPhrase);
                 formData.append("name",_this.messageForm.fileName);
+               /* formData.append("data",_this.storagefile);*/
                 formData.append("file",_this.storagefile);
-                formData.append("deadline", '1440');
 
                 let config = {
                     headers: {
@@ -1920,16 +1928,8 @@
                     }
                 };
                 _this.$http.post('/sharder?requestType=storeData', formData, config).then(res => {
-                    if (typeof res.data.errorDescription === 'undefined') {
-                        if (res.data.broadcasted) {
-                            _this.$message.success(_this.$t('notification.upload_success'));
-                            _this.closeDialog();
-                        } else {
-                            console.log(res.data);
-                        }
-                    } else {
-                        _this.$message.error(res.data.errorDescription);
-                    }
+                    console.log(res);
+
                 }).catch(err => {
                     console.log(err);
                     _this.$message.error(err.message);
@@ -2567,10 +2567,13 @@
                 params.append("type", "0");
                 _this.$http.get('/sharder?requestType=getBlockchainTransactions', {params}).then(res => {
                     res.data.transactions.forEach(function (value, index, array) {
-                        if (value.senderRS === SSO.accountRS) {
-                            barchat.xAxis.push(_this.$t('account.payout'));
-                        } else {
-                            barchat.xAxis.push(_this.$t('account.income'));
+                        
+                        if(_this.$i18n) {
+                            if (value.senderRS === SSO.accountRS) {
+                                barchat.xAxis.push(_this.$t('account.payout'));
+                            } else {
+                                barchat.xAxis.push(_this.$t('account.income'));
+                            }
                         }
                         barchat.series.push(value.amountNQT / 100000000);
                     });
@@ -2578,7 +2581,8 @@
                         barchat.xAxis.push("");
                         barchat.series.push(0);
                     }
-                    this.drawBarchart(barchat);
+                    
+                    _this.drawBarchart(barchat);
                 });
             },
             getYieldData() {
