@@ -657,8 +657,13 @@ export default {
      * 渲染节点坐标
      */
     drawPeers() {
+        var dom = document.getElementById("peers-map")
+        if (!dom) {
+            console.log('dom peers-map got faild，echarts can not load')
+            return
+        }
         let _this = this.$vue;
-        let myChart = _this.$echarts.init(document.getElementById("peers-map"));
+        let myChart = _this.$echarts.init(dom);
 
         function parseData (coordinatesMap) {
             if(undefined == coordinatesMap || null == coordinatesMap) return;
@@ -773,7 +778,7 @@ export default {
         if (t.type === 0) return this.$vue.$t("transaction.transaction_type_payment");
         if (t.type === 1 && t.subtype === 0) return this.$vue.$t("transaction.transaction_type_information");
         if (t.type === 1 && t.subtype === 5) return this.$vue.$t("transaction.transaction_type_account");
-        if (t.type === 11) return this.$vue.$t("transaction.transaction_type_storage_service");
+        if (t.type === 6) return this.$vue.$t("transaction.transaction_type_storage_service");
         if (t.type === 8) {
             if (t.subtype === 0) {
                 return this.$vue.$t("transaction.transaction_type_pool_create");
@@ -847,6 +852,8 @@ export default {
             return "+" + amountNQT + this.unit
         }else if (amountNQT <= 0) {
             return this.placeholder
+        } else if (t.type === 18) {
+            return -amountNQT + this.unit
         } else if (t.senderRS === accountRS && t.type !== 9) {
             return -amountNQT + this.unit
         } else {
