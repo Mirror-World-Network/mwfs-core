@@ -778,7 +778,7 @@ export default {
         if (t.type === 0) return this.$vue.$t("transaction.transaction_type_payment");
         if (t.type === 1 && t.subtype === 0) return this.$vue.$t("transaction.transaction_type_information");
         if (t.type === 1 && t.subtype === 5) return this.$vue.$t("transaction.transaction_type_account");
-        if (t.type === 6) return this.$vue.$t("transaction.transaction_type_storage_service");
+        if (t.type === 11) return this.$vue.$t("transaction.transaction_type_storage_service");
         if (t.type === 8) {
             if (t.subtype === 0) {
                 return this.$vue.$t("transaction.transaction_type_pool_create");
