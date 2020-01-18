@@ -166,7 +166,7 @@
                     <p v-if="lastBlockHeight">{{$t("account.the_latest_block")}} : {{lastBlockHeight}}</p>
                 </div>
                 <div class="download_block_progress">
-                    <el-progress color="rgba(73, 62, 218)" :text-inside="true" :stroke-width="18"
+                    <el-progress color="rgba(27,201,142)" :text-inside="true" :stroke-width="18"
                                  :percentage="percentageTotal"></el-progress>
                 </div>
             </div>

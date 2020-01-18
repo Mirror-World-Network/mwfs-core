@@ -438,7 +438,7 @@
                 </h4>
             </div>
             <div class="modal-body">
-                <el-form label-position="left" style=" max-height: 700px;overflow: auto;" v-loading="hubsetting.loadingData" :model="hubsetting" status-icon :rules="formRules"
+                <el-form label-position="left" style=" max-height: 500px;overflow: auto;" v-loading="hubsetting.loadingData" :model="hubsetting" status-icon :rules="formRules"
                          :label-width="this.$i18n.locale === 'en'? '200px':'160px'" ref="initForm">
                     <el-form-item :label="$t('hubsetting.enable_nat_traversal')">
                         <el-checkbox v-model="hubsetting.openPunchthrough"></el-checkbox>
@@ -2702,7 +2702,7 @@
                 return this.secretPhrase
                     && this.initHUb
                     && this.userConfig.nodeType === 'Hub';
-                /*return true;*/
+               /* return true;*/
             },
             whetherShowUseNATServiceBtn() {
                 /*
