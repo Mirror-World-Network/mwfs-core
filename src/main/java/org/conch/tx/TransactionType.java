@@ -704,7 +704,7 @@ public abstract class TransactionType {
 
             @Override
             public AccountLedger.LedgerEvent getLedgerEvent() {
-                return AccountLedger.LedgerEvent.COIN_BASE;
+                return AccountLedger.LedgerEvent.BURN;
             }
 
             @Override
@@ -733,7 +733,7 @@ public abstract class TransactionType {
             @Override
             public void applyAttachment(Transaction transaction, Account account, Account recipientAccount) {
                 long amount = transaction.getAmountNQT();
-                account.addBalanceAddUnconfirmed(getLedgerEvent(), transaction.getId(), amount, 0);
+//                account.addBalanceAddUnconfirmed(getLedgerEvent(), transaction.getId(), amount, 0);
                 Logger.logDebugMessage("[burn apply] burn %d of %s and add it in mined amount of tx %d at height %d",
                         amount, account.getRsAddress(), transaction.getId() , transaction.getHeight());
             }
