@@ -730,9 +730,7 @@
                         <td>{{$global.getSSNumberFormat(accountInfo.effectiveBalanceNQT)}}</td>
                     </tr>
                     <tr>
-                        <th>
-                            {{$t('account_info.frozen_balance_nqt')}}
-                        </th>
+                        <th>{{$t('account_info.frozen_balance_nqt')}}</th>
                         <td>{{$global.getSSNumberFormat(accountInfo.frozenBalanceNQT)}}</td>
                     </tr>
                     <tr>
@@ -1291,8 +1289,14 @@
                 });
             },
             drawBarchart: function (barchat) {
+    
+                var dom = document.getElementById("transaction_amount_bar");
+                if (!dom) {
+                    console.log("dom transaction_amount_bar got faild，echarts can not load")
+                    return
+                }
                 const _this = this;
-                const barchart = _this.$echarts.init(document.getElementById("transaction_amount_bar"), null, {renderer: 'svg'});
+                const barchart = _this.$echarts.init(dom, null, {renderer: 'svg'});
                 const option = {
                     grid: {
                         left: '15%',
@@ -1321,8 +1325,13 @@
                 }
             },
             drawYield: function (yields) {
+                var dom = document.getElementById("yield_curve")
+                if (!dom) {
+                    console.log("dom yield_curve got faild, echarts can not load")
+                    return
+                }
                 const _this = this;
-                const yieldCurve = _this.$echarts.init(document.getElementById("yield_curve"), null, {renderer: 'svg'});
+                const yieldCurve = _this.$echarts.init(dom, null, {renderer: 'svg'});
                 const option = {
                     grid: {
                         left: '15%',
@@ -1357,7 +1366,16 @@
                         data: yields.xAxis,
                     },
                     yAxis: {
-                        type: 'value'
+                        type: 'value',
+                        axisLabel: {
+                            formatter: function(value) {
+                                if(value > 10000000) {
+                                    return value/10000000 + 'M'
+                                } else if(value > 1000) {
+                                    return value/1000 + 'K'
+                                }
+                            }
+                        }
                     },
                     series: [{
                         data: yields.series,
@@ -2567,10 +2585,13 @@
                 params.append("type", "0");
                 _this.$http.get('/sharder?requestType=getBlockchainTransactions', {params}).then(res => {
                     res.data.transactions.forEach(function (value, index, array) {
-                        if (value.senderRS === SSO.accountRS) {
-                            barchat.xAxis.push(_this.$t('account.payout'));
-                        } else {
-                            barchat.xAxis.push(_this.$t('account.income'));
+                        
+                        if(_this.$i18n) {
+                            if (value.senderRS === SSO.accountRS) {
+                                barchat.xAxis.push(_this.$t('account.payout'));
+                            } else {
+                                barchat.xAxis.push(_this.$t('account.income'));
+                            }
                         }
                         barchat.series.push(value.amountNQT / 100000000);
                     });
@@ -2578,7 +2599,8 @@
                         barchat.xAxis.push("");
                         barchat.series.push(0);
                     }
-                    this.drawBarchart(barchat);
+                    
+                    _this.drawBarchart(barchat);
                 });
             },
             getYieldData() {

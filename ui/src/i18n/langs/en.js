@@ -262,6 +262,7 @@ const en = {
         'block_list_generator': "Block Generator",
         'block_list_operating': "Details",
         'view_details': "View Details",
+        'download':"Download"
     },
     peers: {
         'tag_node': "Tag node",

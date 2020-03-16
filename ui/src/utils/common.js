@@ -657,8 +657,13 @@ export default {
      * 渲染节点坐标
      */
     drawPeers() {
+        var dom = document.getElementById("peers-map")
+        if (!dom) {
+            console.log('dom peers-map got faild，echarts can not load')
+            return
+        }
         let _this = this.$vue;
-        let myChart = _this.$echarts.init(document.getElementById("peers-map"));
+        let myChart = _this.$echarts.init(dom);
 
         function parseData (coordinatesMap) {
             if(undefined == coordinatesMap || null == coordinatesMap) return;
@@ -847,6 +852,8 @@ export default {
             return "+" + amountNQT + this.unit
         }else if (amountNQT <= 0) {
             return this.placeholder
+        } else if (t.type === 18) {
+            return -amountNQT + this.unit
         } else if (t.senderRS === accountRS && t.type !== 9) {
             return -amountNQT + this.unit
         } else {

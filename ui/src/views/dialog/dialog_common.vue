@@ -502,6 +502,7 @@
                         </el-table-column>
 
                     </el-table>
+
                 </div>
             </div>
         </div>
@@ -575,7 +576,9 @@
                     </tr>
                     </tbody>
                 </table>
+
             </div>
+
 
         </div>
     </div>
@@ -955,31 +958,8 @@
                 if (subtype === 5) return _this.$root.$t("transaction.transaction_type_account");
             },
             downloadFile(row,column){
-                const _this = this;
-                let formData = new FormData();
-                formData.append("ssid",row.fileInfo.ssid);
-                _this.$http.post('/sharder?requestType=downloadStoredData', formData).then(res => {
-                    let ipAddr = window.location.hostname;
-                    let url = "http://"+ ipAddr +":"+ res.data.port+"/ipfs/"+res.data.ipfsHashId;
-                    _this.$http.get(url,{responseType: 'blob'}).then(res =>{
-                        let contentType = res.headers['content-type'];
-                        const blob = new Blob([res.data], {type: contentType});
-                        // 文件名命名
-                        const fileName = row.fileInfo.name;
-                        // 创建a标签，指定标签通过createObjectURL关联blob对象
-                        const link = document.createElement('a');
-                        link.href = window.URL.createObjectURL(blob);
-                        // 通过download属性规定下载文件名
-                        link.download = fileName;
-                        // click触发下载
-                        link.click();
-                        // 通过revokeObjectURL释放url对象
-                        window.URL.revokeObjectURL(link.href);
-                    })
-                }).catch(err => {
-                    console.log(err);
-                    _this.$message.error(err.message);
-                });
+
+                window.open("/sharder?requestType=downloadStoredData&ssid="+row.fileInfo.ssid+"&filename="+row.fileInfo.name,"_blank");
 
             },
 
