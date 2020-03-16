@@ -48,8 +48,8 @@ public class AliyunOssUtil {
         if(!Generator.isBootNode) return false;
 
         if(StringUtils.isEmpty(ACCESS_KEY_ID)
-            || StringUtils.isEmpty(ACCESS_KEY_SECRET)
-            || StringUtils.isEmpty(BUCKET_NAME) ) return false;
+                || StringUtils.isEmpty(ACCESS_KEY_SECRET)
+                || StringUtils.isEmpty(BUCKET_NAME) ) return false;
 
         return true;
     }
@@ -177,11 +177,21 @@ public class AliyunOssUtil {
         for (OSSObjectSummary objectSummary : listing.getObjectSummaries()) {
             files.add(objectSummary.getKey());
         }
-
         // 遍历所有commonPrefix。
-        System.out.println();
         for (String commonPrefix : listing.getCommonPrefixes()) {
             getFile(commonPrefix, files);
+        }
+    }
+
+    public static void delByPath(String path) {
+        List<String> files = new ArrayList<>();
+        if (path != null){
+            AliyunOssUtil.getFile(path,files);
+        }else {
+            return;
+        }
+        if (files != null && files.size() > 0) {
+            AliyunOssUtil.delFile(files);
         }
     }
 
@@ -219,6 +229,6 @@ public class AliyunOssUtil {
         /*解密并输出压缩文件*/
         //SxqFileUtils.byteToFile(AESCoder.decrypt(SxqFileUtils.fileToByte(s1),"7b03d498836943d3ab0fac2abcf29365"), s1);
         /*把压缩文件进行解压*/
-/*        SxqFileUtils.unZipFiles(s1, s1.substring(0, s1.length() - 7));*/
+        /*        SxqFileUtils.unZipFiles(s1, s1.substring(0, s1.length() - 7));*/
     }
 }

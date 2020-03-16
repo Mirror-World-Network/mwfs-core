@@ -88,6 +88,8 @@ public class ArchiveDbTool {
         }
 
         Logger.logInfoMessage("New a thread to archive and upload the archive to OSS...");
+        // set the archive height before processing to avoid the duplicate archiving
+        lastArchiveHeight = Conch.getHeight();
         Thread dbArchiveThread = new Thread(() -> {
             String[] dbArchiveArray = archiveDb(null);
             if(dbArchiveArray == null || dbArchiveArray.length == 0) {
@@ -105,42 +107,45 @@ public class ArchiveDbTool {
      * @return String[2]: String[0]- db archive file path; String[1]- db archive memo file path
      */
     private static String[] archiveDb(String path) {
-            String[] archiveArray = new String[2];
-            String pathStr;
-            String fileNameStr;
-            try {
-                Conch.getBlockchain().updateLock();
-                Path appRootPath = Paths.get(".");
+        String[] archiveArray = new String[2];
+        String pathStr;
+        String fileNameStr;
+        try {
+            Conch.getBlockchain().updateLock();
+            Path appRootPath = Paths.get(".");
 
-                pathStr = (path == null) ? appRootPath.resolve("ARCHIVE/").toString() : path;
-                if(!pathStr.endsWith(File.separator)) {
-                    pathStr += File.separator;
-                }
-
-                //db archive file
-                fileNameStr = Db.getName() + "_" + Conch.getHeight() +".zip";
-
-                File bakFolder = new File(pathStr);
-                if(!bakFolder.exists()) {
-                    bakFolder.mkdirs();
-                }
-
-                // generate db archive
-                String dbArchivePath = pathStr + fileNameStr;
-                FileUtil.ZipFile(pathStr + Db.getName(), pathStr + fileNameStr);
-
-                // return values
-                archiveArray[0] = dbArchivePath;
-                archiveArray[1] = generateArchiveMemoFile(pathStr);
-
-                deleteOldBackupFiles(pathStr, Lists.newArrayList(fileNameStr));
-
-                return archiveArray;
-            } finally {
-                Conch.getBlockchain().updateUnlock();
+            pathStr = (path == null) ? appRootPath.resolve("ARCHIVE/").toString() : path;
+            if(!pathStr.endsWith(File.separator)) {
+                pathStr += File.separator;
             }
 
+            //db archive file
+            fileNameStr = Db.getName() + "_" + Conch.getHeight() +".zip";
+
+            File bakFolder = new File(pathStr);
+            if(!bakFolder.exists()) {
+                bakFolder.mkdirs();
+            }
+
+            // generate db archive
+            String dbArchivePath = pathStr + fileNameStr;
+            FileUtil.ZipFile(pathStr + Db.getName(), pathStr + fileNameStr);
+
+            // return values
+            archiveArray[0] = dbArchivePath;
+            archiveArray[1] = generateArchiveMemoFile(pathStr);
+
+            // upload to OSS
+            AliyunOssUtil.delFile(Lists.newArrayList(OSS_DB_ARCHIVE_MEMO_PATH));
+            AliyunOssUtil.uploadFile(archiveArray[0], dbArchivePath, true);
+            AliyunOssUtil.uploadFile(archiveArray[1], dbArchivePath, true);
+
+            return archiveArray;
+        } finally {
+            Conch.getBlockchain().updateUnlock();
         }
+
+    }
 
     private static String generateArchiveMemoFile(String path){
         FileWriter writer = null;
