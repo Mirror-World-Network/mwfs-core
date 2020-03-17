@@ -597,8 +597,14 @@
                 const _this = this;
                 _this.$global.fetch("GET", {startThis:"startThis"}, "getPeers").then(res => {
                     _this.peerNum = res.peers.length + _this.limitPeerSize;
-                    _this.$global.coordinatesMap = JSON.parse(res.coordinates);
-                    _this.$global.drawPeers();
+                    try {
+                        _this.$global.coordinatesMap = JSON.parse(res.coordinates);
+                    }catch (e) {
+                        console.log(e);
+                    }finally {
+                        _this.$global.drawPeers();
+                    }
+
                 }).catch(err => {
                     console.info("error", err);
                 });

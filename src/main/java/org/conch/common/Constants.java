@@ -262,7 +262,9 @@ public final class Constants {
 
     //Coinbase
     public static final int MAX_COINBASE_TYPE_LENGTH = 16;
-    
+
+    //OSS
+    public static final String OSS_PREFIX = "https://mwfs.oss-cn-shenzhen.aliyuncs.com/";
     /**
      * chain begin time
      * @param index 0: conch chain, 1: testnet of sharder, otherwise is mainnet of sharder
