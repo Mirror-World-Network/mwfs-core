@@ -26,9 +26,11 @@ import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.model.*;
 import org.apache.commons.lang3.StringUtils;
 import org.conch.Conch;
-import org.conch.mint.Generator;
+
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 
 public class AliyunOssUtil {
@@ -45,8 +47,6 @@ public class AliyunOssUtil {
      * @return
      */
     protected static boolean openAutoBackDB(){
-        if(!Generator.isBootNode) return false;
-
         if(StringUtils.isEmpty(ACCESS_KEY_ID)
                 || StringUtils.isEmpty(ACCESS_KEY_SECRET)
                 || StringUtils.isEmpty(BUCKET_NAME) ) return false;
