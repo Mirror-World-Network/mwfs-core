@@ -206,7 +206,7 @@
                                 <td class="pc-table">{{$global.getTransactionAmountNQT(transaction,accountInfo.accountRS)}}</td>
                                 <td class="pc-table">{{$global.getTransactionFeeNQT(transaction)}}</td>
                                 <td class=" image_text w300 pc-table">
-                                    <span class="linker" v-if="transaction.type === 9">Coinbase</span>
+                                    <span class="linker" v-if="transaction.type === 9 || transaction.type === 18">Coinbase</span>
                                     <span class="linker" @click="openAccountInfoDialog(transaction.senderRS)"
                                           v-else-if="transaction.senderRS === accountInfo.accountRS && transaction.type !== 9">
                                          <span class="linker" @click="openAccountInfoDialog(transaction.recipientRS)" v-if="transaction.type === 8 && transaction.subtype === 3 &&transaction.recipientRS !== accountInfo.accountRS">
@@ -222,15 +222,20 @@
                                     </span>
 
                                     <img src="../../assets/img/right_arrow.svg"/>
+                                    
                                     <span class="linker" @click="openAccountInfoDialog(transaction.senderRS)" v-if="transaction.type === 9">
                                         {{$t('transaction.self')}}
+                                    </span>
+                                    <span v-else-if="transaction.type === 18">
+                                        <span class="linker" @click="openAccountInfoDialog(transaction.recipientRS)">
+                                            {{ $t('transaction.transaction_burn_account') }}
+                                        </span>
                                     </span>
                                     <span class="linker" v-else-if="transaction.type === 8 && transaction.subtype === 3">
                                         <span class="linker" @click="openAccountInfoDialog(transaction.recipientRS)" v-if="transaction.recipientRS !== accountInfo.accountRS && transaction.type !== 9 && transaction.senderRS === accountInfo.accountRS">
                                         {{$t('transaction.transaction_type_forge_pool')}}:{{transaction.attachment.poolId}}
                                         </span>
                                         <span class="linker" v-else>{{$t('transaction.transaction_type_forge_pool')}}:{{transaction.attachment.poolId}}</span>
-
                                     </span>
                                     <span class="linker" v-else-if="transaction.type === 8 && transaction.subtype === 2">
                                         {{$t('transaction.transaction_type_forge_pool')}}:{{transaction.attachment.poolId}}
@@ -909,6 +914,9 @@
                 }, {
                     value: 12,
                     label: this.$t('transaction.transaction_type_poc')
+                }, {
+                    value: 18,
+                    label: this.$t('transaction.transaction_type_burn')
                 }],
                 trading: '',
                 accountTransactionList: [],

@@ -2019,7 +2019,8 @@ public final class Account {
         if (amountNQT == 0 && feeNQT == 0) {
             return;
         }
-
+//        Logger.logInfoMessage(">>>  事件: " + event.name() + ", 当前账户: " + this.getRsAddress() + " : [余额:" + this.balanceNQT + ", 未确认余额: " +
+//                this.unconfirmedBalanceNQT + ", 待确认金额: " + amountNQT + ", 手续费: " + feeNQT + "]");
         amountNQT = balanceAmountValidation(amountNQT);
         
         long totalAmountNQT = Math.addExact(amountNQT, feeNQT);

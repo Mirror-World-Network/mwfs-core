@@ -91,7 +91,9 @@ public final class Constants {
     public static final boolean isLightClient = Conch.getBooleanProperty("sharder.isLightClient");
     public static final boolean isStorageClient = Conch.getBooleanProperty("sharder.storage.enable");
     public static final Double BURN_RATE = 0.5;
+    public static final Double BURN_NEW_RATE = 0.2;
     public static final Long BURN_START_HEIGHT = 10000L;
+    public static final Long BURN_NEW_START_HEIGHT = 40000L;
     public static final Long BURN_ADDRESS_ID = -1L;
     public static final List<String> bootNodesHost = parseBootNodesHost();
     public static final String bootNodeHost = parseBootNodeHost();
@@ -260,7 +262,9 @@ public final class Constants {
 
     //Coinbase
     public static final int MAX_COINBASE_TYPE_LENGTH = 16;
-    
+
+    //OSS
+    public static final String OSS_PREFIX = "https://mwfs.oss-cn-shenzhen.aliyuncs.com/";
     /**
      * chain begin time
      * @param index 0: conch chain, 1: testnet of sharder, otherwise is mainnet of sharder

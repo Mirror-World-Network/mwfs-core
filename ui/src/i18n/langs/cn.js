@@ -145,6 +145,7 @@ const cn = {
         'transaction_type_storage':'存储交易',
         'transaction_type_poc': "PoC交易",
         'transaction_type_burn': "烧毁交易",
+        'transaction_burn_account': "烧毁账号",
         'transaction_type_pool_join_tx': "加入交易",
         'self': "您",
         'view_details': "查看详情",
