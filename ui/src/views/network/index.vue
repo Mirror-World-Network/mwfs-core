@@ -620,6 +620,7 @@
                     _this.newestTime = _this.$global.myFormatTime(res.blocks[0].timestamp, 'YMDHMS', true);
                     if (_this.currentPage === 1) {
                       //   _this.blocklist.splice(0,_this.blocklist.length)
+                        console.log(res.blocks);
                         _this.blocklist = res.blocks
                     }
                 }).catch(error => {
