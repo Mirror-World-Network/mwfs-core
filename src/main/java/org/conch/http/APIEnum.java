@@ -311,6 +311,7 @@ public enum APIEnum {
     START_STORING("startStoring", StartStoring.instance),
     STOP_STORING("stopStoring", StopStoring.instance),
     STORE_DATA("storeData", StoreData.instance),
+    ON_CHAIN("onChain",OnChain.instance),
     GET_STORED_DATA("getStoredData", GetStoredData.instance), // get off-chain file content
     DOWNLOAD_STORED_DATA("downloadStoredData", DownloadStoredData.instance), // download off-chain file
     // poc

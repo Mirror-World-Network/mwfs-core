@@ -49,6 +49,18 @@
                             </span>
                             <span>{{$t('account.storage_file')}}</span>
                         </button>
+                        <button class="common_btn imgBtn writeBtn" @click="openOnChainDialog">
+                            <span class="icon">
+                                <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 162.5">
+                                    <path
+                                        d="M49,73.87H61.21v49.19a8.21,8.21,0,0,0,8.19,8.19h61.2a8.19,8.19,0,0,0,8.19-8.19h0V73.86H151a6.29,6.29,0,0,0,6.36-6.21,6.13,6.13,0,0,0-1.41-3.9,3.49,3.49,0,0,0-.66-0.73l-48.63-42a8.67,8.67,0,0,0-5.91-2.3,8.39,8.39,0,0,0-5.7,2.14L44.72,63a4.49,4.49,0,0,0-.79.87,6.13,6.13,0,0,0-1.32,3.8A6.3,6.3,0,0,0,49,73.87h0Z"
+                                        transform="translate(-25 -18.75)"></path>
+                                    <rect y="150" width="150" height="12.5"></rect>
+                                    <rect y="127.01" width="150" height="12.5"></rect>
+                                </svg>
+                            </span>
+                            <span>{{$t('account.on_chain')}}</span>
+                        </button>
                         <!-- Setting Hub Button -->
                         <button class="common_btn imgBtn writeBtn" v-if="whetherShowHubSettingBtn()"
                                 @click="openHubSettingDialog">
@@ -372,6 +384,46 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn common_btn writeBtn" @click="uploadFile">
+                            {{$t('sendMessage.upload_file')}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--view on chain file dialog-->
+        <div class="modal" id="on_chain_file_modal" v-show="onChainDialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button class="close" @click="closeDialog"></button>
+                        <h4 class="modal-title">{{$t('sendMessage.upload_file_title')}}</h4>
+                    </div>
+                    <div class="modal-body modal-message">
+                        <el-form>
+                            <el-form-item :label="$t('sendMessage.file')">
+                                <el-input :placeholder="$t('sendMessage.file_tip')" class="input-with-select"
+                                          v-model="messageForm.fileName" :readonly="true">
+                                    <el-button slot="append" v-if="onchainfile === null">{{$t('sendMessage.browse')}}
+                                    </el-button>
+                                    <el-button slot="append" @click="delOnChainFile" v-else>{{$t('sendMessage.delete')}}
+                                    </el-button>
+                                </el-input>
+                                <input id="onChainFile" ref="onChainFile" type="file" @change="onChainFileChange" v-if="onchainfile === null"/>
+                            </el-form-item>
+                            <el-form-item :label="$t('sendMessage.fee')">
+                                <el-button class="calculate_fee" @click="getMessageFee()">
+                                    {{$t('sendMessage.calc_short')}}
+                                </el-button>
+                                <input class="el-input__inner" v-model="messageForm.fee" type="number"/>
+                                <label class="input_suffix">{{$global.unit}}</label>
+                            </el-form-item>
+                            <el-form-item :label="$t('sendMessage.secret_key')" v-if="!secretPhrase">
+                                <el-input v-model="messageForm.password" type="password"></el-input>
+                            </el-form-item>
+                        </el-form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn common_btn writeBtn" @click="onChain">
                             {{$t('sendMessage.upload_file')}}
                         </button>
                     </div>
@@ -783,6 +835,7 @@
                 time: 60 , //时间
                 sendMessageDialog: false,
                 storageFileDialog: false,
+                onChainDialog:false,
                 tranferAccountsDialog: false,
                 hubSettingDialog: false,
                 hubInitDialog: false,
@@ -840,6 +893,7 @@
                 },
                 file: null,
                 storagefile: null,
+                onchainfile:null,
                 transfer: {
                     receiver: "CDW-____-____-____-_____",
                     number: 0,
@@ -1962,6 +2016,42 @@
                 });
 
             },
+            onChain:function(){
+                const _this = this;
+                let formData = new FormData();
+                formData.append("feeNQT", _this.messageForm.fee * 100000000);
+                formData.append("secretPhrase", _this.messageForm.password || _this.secretPhrase);
+                formData.append("phased", 'false');
+                formData.append("phasingLinkedFullHash", '');
+                formData.append("phasingHashedSecret", '');
+                formData.append("phasingHashedSecretAlgorithm", '2');
+                formData.append("name",_this.messageForm.fileName);
+                formData.append("file",_this.onchainfile);
+                formData.append("deadline", '1440');
+                formData.append("onChain","true");
+                formData.append("messageIsText", 'true');
+               // formData.append("message", "ceshiyiha");
+                let config = {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                };
+                _this.$http.post('/sharder?requestType=onChain', formData, config).then(res => {
+                    if (typeof res.data.errorDescription === 'undefined') {
+                        if (res.data.broadcasted) {
+                            _this.$message.success(_this.$t('notification.upload_success'));
+                            _this.closeDialog();
+                        } else {
+                            console.log(res.data);
+                        }
+                    } else {
+                        _this.$message.error(res.data.errorDescription);
+                    }
+                }).catch(err => {
+                    console.log(err);
+                    _this.$message.error(err.message);
+                });
+            },
             sendMessageInfo: function () {
                 const _this = this;
                 let options = {};
@@ -2266,6 +2356,15 @@
                 this.$store.state.mask = true;
                 this.storageFileDialog = true;
             },
+            openOnChainDialog: function () {
+                if (SSO.downloadingBlockchain) {
+                    this.$message.warning(this.$t("account.synchronization_block"));
+                    return;
+                }
+                this.$store.state.mask = true;
+                this.onChainDialog = true;
+            },
+
             openTransferDialog: function () {
                 if (SSO.downloadingBlockchain) {
                     return this.$message.warning(this.$t("account.synchronization_block"));
@@ -2426,6 +2525,7 @@
                 this.$store.state.mask = false;
                 this.sendMessageDialog = false;
                 this.storageFileDialog = false;
+                this.onChainDialog = false;
                 this.tranferAccountsDialog = false;
                 this.hubSettingDialog = false;
                 this.hubInitDialog = false;
@@ -2526,6 +2626,13 @@
                 _this.storagefile = null;
                 _this.messageForm.isFile = false;
             },
+            delOnChainFile:function(){
+                const _this = this;
+                $('#onChainFile').val("");
+                _this.messageForm.fileName = "";
+                _this.onchainfile = null;
+                _this.messageForm.isFile = false;
+            },
             fileChange: function (e) {
                 const _this = this;
                 _this.messageForm.fileName = e.target.files[0].name;
@@ -2546,6 +2653,19 @@
                 console.log(_this.storagefile);
                 if (_this.storagefile.size > 1024 * 1024 * 10) {
                     _this.delStorageFile();
+                    _this.$message.error(_this.$t('notification.file_exceeds_max_limit'));
+                    return;
+                }
+                _this.messageForm.isFile = true;
+                _this.messageForm.message = "";
+            },
+            onChainFileChange:function(e){
+                const _this = this;
+                _this.messageForm.fileName = e.target.files[0].name;
+                _this.onchainfile = document.getElementById("onChainFile").files[0];
+                console.log(_this.onchainfile);
+                if (_this.onchainfile.size > 1024 * 1024 * 10) {
+                    _this.delOnChainFile();
                     _this.$message.error(_this.$t('notification.file_exceeds_max_limit'));
                     return;
                 }

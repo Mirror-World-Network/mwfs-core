@@ -21,6 +21,7 @@
 
 package org.conch.tx;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.Tika;
 import org.apache.tika.mime.MediaType;
 import org.conch.Conch;
@@ -74,6 +75,7 @@ public abstract class TransactionType {
     public static final byte TYPE_STORAGE = 11;
     public static final byte TYPE_POC = 12;
     public static final byte TYPE_BURN_DEAL = 18;
+    public static final byte TYPE_SAVE_HASH = 19;
 
     private static final byte SUBTYPE_PAYMENT_ORDINARY_PAYMENT = 0;
 
@@ -207,9 +209,9 @@ public abstract class TransactionType {
             case TYPE_ACCOUNT_CONTROL:
                 switch (subtype) {
                     case SUBTYPE_ACCOUNT_CONTROL_EFFECTIVE_BALANCE_LEASING:
-                        return TransactionType.AccountControl.EFFECTIVE_BALANCE_LEASING;
+                        return AccountControl.EFFECTIVE_BALANCE_LEASING;
                     case SUBTYPE_ACCOUNT_CONTROL_PHASING_ONLY:
-                        return TransactionType.AccountControl.SET_PHASING_ONLY;
+                        return AccountControl.SET_PHASING_ONLY;
                     default:
                         return null;
                 }
@@ -259,6 +261,8 @@ public abstract class TransactionType {
                 return PocTxWrapper.findTxType(subtype);
             case TYPE_BURN_DEAL:
                 return BurnDeal.ORDINARY;
+            case TYPE_SAVE_HASH:
+                return SaveHash.ORDINARY;
             default:
                 return null;
         }
@@ -283,7 +287,7 @@ public abstract class TransactionType {
 
     public abstract AbstractAttachment parseAttachment(ByteBuffer buffer, byte transactionVersion) throws ConchException.NotValidException;
 
-    public abstract Attachment.AbstractAttachment parseAttachment(JSONObject attachmentData) throws ConchException.NotValidException;
+    public abstract AbstractAttachment parseAttachment(JSONObject attachmentData) throws ConchException.NotValidException;
 
     public abstract void validateAttachment(Transaction transaction) throws ConchException.ValidationException;
 
@@ -663,7 +667,6 @@ public abstract class TransactionType {
 
     }
 
-
     public static abstract class BurnDeal extends TransactionType {
         private BurnDeal() {}
 
@@ -745,6 +748,99 @@ public abstract class TransactionType {
         };
     }
 
+
+    public static abstract class SaveHash extends TransactionType {
+        private SaveHash() {}
+
+        @Override
+        public byte getType() {
+            return TransactionType.TYPE_SAVE_HASH;
+        }
+
+        @Override
+        public final boolean applyAttachmentUnconfirmed(Transaction transaction, Account senderAccount) {
+            return true;
+        }
+
+        @Override
+        public final void undoAttachmentUnconfirmed(Transaction transaction, Account senderAccount) {}
+
+        @Override
+        public final boolean canHaveRecipient() {
+            return true;
+        }
+
+        @Override
+        public final boolean isPhasingSafe() {
+            return false;
+        }
+
+        @Override
+        public boolean mustHaveRecipient() {
+            return false;
+        }
+
+        public static final TransactionType ORDINARY = new SaveHash() {
+
+            @Override
+            public byte getSubtype() {
+                return 0;
+            }
+
+            @Override
+            public AccountLedger.LedgerEvent getLedgerEvent() {
+                return AccountLedger.LedgerEvent.SAVE_HASH;
+            }
+
+            @Override
+            public AbstractAttachment parseAttachment(ByteBuffer buffer, byte transactionVersion) throws ConchException.NotValidException {
+                return Attachment.ARBITRARY_SAVEHASH;
+            }
+
+            @Override
+            public AbstractAttachment parseAttachment(JSONObject attachmentData) throws ConchException.NotValidException {
+                return Attachment.ARBITRARY_SAVEHASH;
+            }
+
+            @Override
+            public void validateAttachment(Transaction transaction) throws ConchException.ValidationException {
+                System.out.println("transaction = [" + transaction.toString() + "]");
+
+                /*Attachment attachment = transaction.getAttachment();
+                if (transaction.getAmountNQT() != 0) {
+                    throw new ConchException.NotValidException("Invalid arbitrary message: " + attachment.getJSONObject());
+                }*/
+              /*  System.out.println("saveHash:>>>>>>>>>>>"+transaction.getAttachment());
+                Attachment attachment = transaction.getAttachment();
+                System.out.println(">>>>>>>>>>>>>>>>>>>>>"+attachment.getTransactionType());*/
+                Appendix.SaveHash saveHash = (Appendix.SaveHash) transaction.getAttachment();
+                if (StringUtils.isEmpty(saveHash.getFileHash())) {
+                    throw new ConchException.NotValidException("hash can not be empty");
+                }
+            }
+
+            @Override
+            public boolean isDuplicate(Transaction transaction, Map<TransactionType, Map<String, Integer>> duplicates) {
+                return isDuplicate(SaveHash.ORDINARY, "SaveHash", duplicates, true);
+            }
+
+            @Override
+            public void applyAttachment(Transaction transaction, Account account, Account recipientAccount) {
+                long feeNQT = transaction.getFeeNQT();
+                account.addBalanceAddUnconfirmed(getLedgerEvent(), transaction.getId(), 0, feeNQT);
+                Logger.logDebugMessage("[SaveHash apply] SaveHash %d of %s and add it in mined feeNQT of tx %d at height %d",
+                        feeNQT, account.getRsAddress(), transaction.getId() , transaction.getHeight());
+
+//                Attachment.SaveHash attachment = (Attachment.SaveHash) transaction.getAttachment();
+//                TaggedData.add((TransactionImpl) transaction, attachment);
+            }
+
+            @Override
+            public String getName() {
+                return "SaveHash";
+            }
+        };
+    }
 
     public static abstract class Messaging extends TransactionType {
 
@@ -2116,7 +2212,7 @@ public abstract class TransactionType {
 
         }
 
-        public static final TransactionType ASK_ORDER_PLACEMENT = new ColoredCoins.ColoredCoinsOrderPlacement() {
+        public static final TransactionType ASK_ORDER_PLACEMENT = new ColoredCoinsOrderPlacement() {
 
             @Override
             public final byte getSubtype() {
@@ -2170,7 +2266,7 @@ public abstract class TransactionType {
 
         };
 
-        public final static TransactionType BID_ORDER_PLACEMENT = new ColoredCoins.ColoredCoinsOrderPlacement() {
+        public final static TransactionType BID_ORDER_PLACEMENT = new ColoredCoinsOrderPlacement() {
 
             @Override
             public final byte getSubtype() {
@@ -2252,7 +2348,7 @@ public abstract class TransactionType {
 
         }
 
-        public static final TransactionType ASK_ORDER_CANCELLATION = new ColoredCoins.ColoredCoinsOrderCancellation() {
+        public static final TransactionType ASK_ORDER_CANCELLATION = new ColoredCoinsOrderCancellation() {
 
             @Override
             public final byte getSubtype() {
@@ -2305,7 +2401,7 @@ public abstract class TransactionType {
 
         };
 
-        public static final TransactionType BID_ORDER_CANCELLATION = new ColoredCoins.ColoredCoinsOrderCancellation() {
+        public static final TransactionType BID_ORDER_CANCELLATION = new ColoredCoinsOrderCancellation() {
 
             @Override
             public final byte getSubtype() {

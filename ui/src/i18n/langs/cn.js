@@ -97,6 +97,7 @@ const cn = {
         'transfer': "转账",
         'send_message': "消息",
         'storage_file':'数据',
+        'on_chain':'上链存证',
         'hub_setting': "Hub设置",
         'income_and_expenditure_details': "收支明细",
         'payout': "支出",

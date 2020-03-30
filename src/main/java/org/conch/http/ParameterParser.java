@@ -611,6 +611,14 @@ public final class ParameterParser {
         }
     }
 
+    public static Appendix getFileHash(HttpServletRequest req) {
+       // JSONObject jsonAttachment = new JSONObject();
+        //todo 通过上传的文件计算文件hash
+        String hash = "dddddddffffffffffff";
+      //  jsonAttachment.put("fileHash",hash);
+        return new Appendix.SaveHash(hash);
+    }
+
     public static Appendix getPlainMessage(HttpServletRequest req, boolean prunable) throws ParameterException {
         String messageValue = Convert.emptyToNull(req.getParameter("message"));
         boolean messageIsText = !"false".equalsIgnoreCase(req.getParameter("messageIsText"));
@@ -891,7 +899,9 @@ public final class ParameterParser {
         return new Attachment.DataStorageUpload(name, description, type, ssid, channel, existence_height, replicated_number);
     }
 
+
     private ParameterParser() {} // never
+
 
     public static class FileData {
         private final Part part;

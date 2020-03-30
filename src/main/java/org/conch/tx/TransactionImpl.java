@@ -60,6 +60,7 @@ final public class TransactionImpl implements Transaction {
         private long recipientId;
         private byte[] referencedTransactionFullHash;
         private byte[] signature;
+        private Attachment.SaveHash saveHash;
         private Appendix.Message message;
         private Appendix.EncryptedMessage encryptedMessage;
         private Appendix.EncryptToSelfMessage encryptToSelfMessage;
@@ -137,6 +138,12 @@ final public class TransactionImpl implements Transaction {
         @Override
         public BuilderImpl appendix(Appendix.Message message) {
             this.message = message;
+            return this;
+        }
+
+        @Override
+        public Builder appendix(Appendix.SaveHash saveHash) {
+            this.saveHash = saveHash;
             return this;
         }
 
@@ -250,6 +257,7 @@ final public class TransactionImpl implements Transaction {
     private final byte version;
     private final int timestamp;
     private final byte[] signature;
+    private final Attachment.SaveHash saveHash;
     private final Attachment.AbstractAttachment attachment;
     private final Appendix.Message message;
     private final Appendix.EncryptedMessage encryptedMessage;
@@ -298,6 +306,9 @@ final public class TransactionImpl implements Transaction {
         List<Appendix.AbstractAppendix> list = new ArrayList<>();
         if ((this.attachment = builder.attachment) != null) {
             list.add(this.attachment);
+        }
+        if ((this.saveHash  = builder.saveHash) != null) {
+            list.add(this.saveHash);
         }
         if ((this.message  = builder.message) != null) {
             list.add(this.message);
@@ -637,6 +648,11 @@ final public class TransactionImpl implements Transaction {
         return prunableEncryptedMessage;
     }
 
+    @Override
+    public Appendix.SaveHash getSaveHash() {
+        return saveHash;
+    }
+
     public boolean hasPrunableEncryptedMessage() {
         return prunableEncryptedMessage != null;
     }
@@ -704,7 +720,7 @@ final public class TransactionImpl implements Transaction {
         return bytes;
     }
 
-    public static TransactionImpl.BuilderImpl newTransactionBuilder(byte[] bytes) throws ConchException.NotValidException {
+    public static BuilderImpl newTransactionBuilder(byte[] bytes) throws ConchException.NotValidException {
         try {
             ByteBuffer buffer = ByteBuffer.wrap(bytes);
             buffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -734,7 +750,7 @@ final public class TransactionImpl implements Transaction {
                 ecBlockId = buffer.getLong();
             }
             TransactionType transactionType = TransactionType.findTransactionType(type, subtype);
-            TransactionImpl.BuilderImpl builder = new BuilderImpl(version, senderPublicKey, amountNQT, feeNQT,
+            BuilderImpl builder = new BuilderImpl(version, senderPublicKey, amountNQT, feeNQT,
                     deadline, transactionType.parseAttachment(buffer, version))
                     .timestamp(timestamp)
                     .referencedTransactionFullHash(referencedTransactionFullHash)
@@ -783,7 +799,12 @@ final public class TransactionImpl implements Transaction {
                             Logger.logWarningMessage("It is a bad or vicious PocNodeType tx, it will be ignored in the execution of the PocProcessor. Don't throw a exception now");
                         }
                     }
-                }else{
+                }
+                // TODO edit
+                else if (builder.type.isType(TransactionType.TYPE_SAVE_HASH)) {
+                    Logger.logWarningMessage(">>>> Transaction bytes: " + buffer.remaining());
+                }
+                else{
                     throw new ConchException.NotValidException("Transaction bytes too long, " + buffer.remaining() + " extra bytes");
                 }
             }
@@ -794,7 +815,7 @@ final public class TransactionImpl implements Transaction {
         }
     }
 
-    public static TransactionImpl.BuilderImpl newTransactionBuilder(byte[] bytes, JSONObject prunableAttachments) throws ConchException.NotValidException {
+    public static BuilderImpl newTransactionBuilder(byte[] bytes, JSONObject prunableAttachments) throws ConchException.NotValidException {
         BuilderImpl builder = newTransactionBuilder(bytes);
         if (prunableAttachments != null) {
             Attachment.ShufflingProcessing shufflingProcessing = Attachment.ShufflingProcessing.parse(prunableAttachments);
@@ -883,7 +904,7 @@ final public class TransactionImpl implements Transaction {
         return transaction;
     }
 
-    public static TransactionImpl.BuilderImpl newTransactionBuilder(JSONObject transactionData) throws ConchException.NotValidException {
+    public static BuilderImpl newTransactionBuilder(JSONObject transactionData) throws ConchException.NotValidException {
         try {
             byte type = ((Long) transactionData.get("type")).byteValue();
             byte subtype = ((Long) transactionData.get("subtype")).byteValue();
@@ -908,7 +929,7 @@ final public class TransactionImpl implements Transaction {
             if (transactionType == null) {
                 throw new ConchException.NotValidException("Invalid transaction type: " + type + ", " + subtype);
             }
-            TransactionImpl.BuilderImpl builder = new BuilderImpl(version, senderPublicKey,
+            BuilderImpl builder = new BuilderImpl(version, senderPublicKey,
                     amountNQT, feeNQT, deadline,
                     transactionType.parseAttachment(attachmentData))
                     .timestamp(timestamp)
@@ -1222,6 +1243,10 @@ final public class TransactionImpl implements Transaction {
         }
 
         if (transactionType == TransactionType.TYPE_BURN_DEAL) {
+            return Constants.configFee.get(transactionType);
+        }
+
+        if (transactionType == TransactionType.TYPE_SAVE_HASH) {
             return Constants.configFee.get(transactionType);
         }
         

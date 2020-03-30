@@ -92,8 +92,8 @@ public final class Constants {
     public static final boolean isStorageClient = Conch.getBooleanProperty("sharder.storage.enable");
     public static final Double BURN_RATE = 0.5;
     public static final Double BURN_NEW_RATE = 0.2;
-    public static final Long BURN_START_HEIGHT = 10000L;
-    public static final Long BURN_NEW_START_HEIGHT = 40000L;
+    public static final Long BURN_START_HEIGHT = 1L;
+    public static final Long BURN_NEW_START_HEIGHT = 2L;
     public static final Long BURN_ADDRESS_ID = -1L;
     public static final List<String> bootNodesHost = parseBootNodesHost();
     public static final String bootNodeHost = parseBootNodeHost();
@@ -136,6 +136,7 @@ public final class Constants {
     public static final int MAX_ALIAS_LENGTH = 100;
 
     public static final int MAX_ARBITRARY_MESSAGE_LENGTH = 160;
+
     public static final int MAX_ENCRYPTED_MESSAGE_LENGTH = 160 + 16;
 
     public static final int MAX_PRUNABLE_MESSAGE_LENGTH = 42 * 1024;
@@ -326,6 +327,8 @@ public final class Constants {
         fee = (long)Conch.getIntProperty("sharder.fee.data10M");
         configFee.add(fee == 0 ? configFee.get(configFee.size() - 1) : fee);
         // TransactionType = 18
+        configFee.add(0L);
+        // TransactionType = 19
         configFee.add(0L);
     }
 

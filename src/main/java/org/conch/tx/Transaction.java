@@ -38,6 +38,8 @@ public interface Transaction {
 
         Builder appendix(Appendix.Message message);
 
+        Builder appendix(Appendix.SaveHash saveHash);
+
         Builder appendix(Appendix.EncryptedMessage encryptedMessage);
 
         Builder appendix(Appendix.EncryptToSelfMessage encryptToSelfMessage);
@@ -129,6 +131,8 @@ public interface Transaction {
     Appendix.PrunablePlainMessage getPrunablePlainMessage();
 
     Appendix.PrunableEncryptedMessage getPrunableEncryptedMessage();
+
+    Appendix.SaveHash getSaveHash();
 
     List<? extends Appendix> getAppendages();
 
