@@ -170,6 +170,14 @@ const cn = {
         'send_message': "发送",
         "upload_file":"上传",
     },
+    joinNet:{
+        'join':'加入',
+        'joinNet':'加入网络',
+        'disk_capacity':'磁盘容量(1T ~ 192T)',
+        'mortgage':'抵押数量(根据所选磁盘容量计算对应抵押MW)',
+        'privateKey':'账户私钥',
+        'inputPK':'请输入账户私钥以确认身份',
+    },
     transfer: {
         'transfer_title': "转账",
         'receiver': "接收者",

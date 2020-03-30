@@ -61,6 +61,12 @@
                             </span>
                             <span>{{$t('account.on_chain')}}</span>
                         </button>
+                        <button class="common_btn imgBtn writeBtn" @click="openJionNetDialog">
+                            <div>
+                               <img src="../../assets/img/join_net.svg" style="vertical-align:middle" hspace="5" width="18">
+                                {{$t('joinNet.join')}}
+                            </div>
+                        </button>
                         <!-- Setting Hub Button -->
                         <button class="common_btn imgBtn writeBtn" v-if="whetherShowHubSettingBtn()"
                                 @click="openHubSettingDialog">
@@ -425,6 +431,39 @@
                     <div class="modal-footer">
                         <button type="button" class="btn common_btn writeBtn" @click="onChain">
                             {{$t('sendMessage.upload_file')}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--view join net dialog-->
+        <div class="modal" id="join_net_modal" v-show="joinNetDialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button class="close" @click="closeDialog"></button>
+                        <h4 class="modal-title">{{$t('joinNet.joinNet')}}</h4>
+                    </div>
+                    <div class="modal-body modal-message">
+                        <el-form>
+                            <el-form-item :label="$t('joinNet.disk_capacity')">
+                                <el-slider v-model="capacity" :format-tooltip="formatTooltip" :max="maxCapacity" @change="calculationNumber"></el-slider>
+                            </el-form-item>
+                            <el-form-item :label="$t('joinNet.mortgage')">
+                                <input class="el-input__inner" v-model="mortgageFee" @blur="calculationCapacity"/>
+                                <label class="input_suffix">{{$global.unit}}</label>
+                            </el-form-item>
+                            <el-form-item :label="$t('joinNet.privateKey')">
+                                <el-input type="textarea"
+                                       :autosize="{ minRows: 3, maxRows: 4}"
+                                       :placeholder="$t('joinNet.inputPK')"
+                                       v-model="accountSecret"/>
+                            </el-form-item>
+                        </el-form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn common_btn writeBtn" @click="joinNet">
+                            {{$t('joinNet.joinNet')}}
                         </button>
                     </div>
                 </div>
@@ -836,6 +875,7 @@
                 sendMessageDialog: false,
                 storageFileDialog: false,
                 onChainDialog:false,
+                joinNetDialog:false,
                 tranferAccountsDialog: false,
                 hubSettingDialog: false,
                 hubInitDialog: false,
@@ -984,6 +1024,11 @@
                 bakMode: '',
                 isUpdate: false,
                 loading: true,
+
+                capacity:0,
+                maxCapacity:192,
+                mortgageFee:0,
+                accountSecret:"",
 
                 params: [],
                 temporaryName: '',
@@ -2052,6 +2097,10 @@
                     _this.$message.error(err.message);
                 });
             },
+
+            joinNet:function(){
+                //todo joinNet
+            },
             sendMessageInfo: function () {
                 const _this = this;
                 let options = {};
@@ -2365,6 +2414,31 @@
                 this.onChainDialog = true;
             },
 
+            openJionNetDialog:function(){
+                if (SSO.downloadingBlockchain) {
+                    this.$message.warning(this.$t("account.synchronization_block"));
+                    return;
+                }
+                this.$store.state.mask = true;
+                this.joinNetDialog = true;
+            },
+
+            formatTooltip:function(val){
+                return val+" T";
+            },
+            calculationNumber:function(val){
+                this.mortgageFee = val*64;
+            },
+            calculationCapacity:function(){
+                let val = Math.ceil(this.mortgageFee/64);
+                if (val <= 192){
+                    this.capacity = val;
+                } else {
+                    this.capacity = 192;
+                }
+
+            },
+
             openTransferDialog: function () {
                 if (SSO.downloadingBlockchain) {
                     return this.$message.warning(this.$t("account.synchronization_block"));
@@ -2526,6 +2600,10 @@
                 this.sendMessageDialog = false;
                 this.storageFileDialog = false;
                 this.onChainDialog = false;
+                this.joinNetDialog = false;
+                this.capacity = 0;
+                this.accountSecret="";
+                this.mortgageFee = 0;
                 this.tranferAccountsDialog = false;
                 this.hubSettingDialog = false;
                 this.hubInitDialog = false;

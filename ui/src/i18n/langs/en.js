@@ -169,6 +169,14 @@ const en = {
         'send_message': "Send Message",
         "upload_file":"Upload",
     },
+    joinNet:{
+        'join':'Join',
+        'joinNet':'Join Net',
+        'disk_capacity':'Disk Capacity(1T ~ 192T)',
+        'mortgage':'Mortgage(calculate corresponding MW based on selected disk capacity)',
+        'privateKey':'private Key',
+        'inputPK':'Please enter the account private key to confirm your identity',
+    },
     transfer: {
         'transfer_title': "Transfer",
         'receiver': "Recipient",
