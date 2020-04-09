@@ -2284,20 +2284,6 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     .build(secretPhrase);
             sortedTransactions.add(new UnconfirmedTransaction(transaction, System.currentTimeMillis()));
 
-            // @Deprecated burn transaction
-            if (previousBlock.getHeight() >= Constants.BURN_START_HEIGHT && previousBlock.getHeight() < Constants.BURN_NEW_START_HEIGHT) {
-                long burn = Math.round(RewardCalculator.mintReward() / Constants.ONE_SS * Constants.BURN_RATE);
-                TransactionImpl burnTransaction = new TransactionImpl.BuilderImpl(
-                        publicKey,
-                        burn * Constants.ONE_SS,
-                        0,
-                        (short) 10,
-                        new Attachment.BurnDeal(Constants.BURN_ADDRESS_ID))
-                        .timestamp(blockTimestamp)
-                        .recipientId(Constants.BURN_ADDRESS_ID)
-                        .build(secretPhrase);
-                sortedTransactions.add(new UnconfirmedTransaction(burnTransaction, System.currentTimeMillis()));
-            }
         } catch (ConchException.NotValidException e) {
             Logger.logErrorMessage("Can't create coin base transaction[current miner=" + creator.getRsAddress() + ", id=" + creator.getId() + "]", e);
         }
@@ -2379,7 +2365,11 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
 
         try {
             // burn transaction
-            boolean startBurn = Constants.BURN_NEW_START_HEIGHT < previousBlock.getHeight();
+            boolean startBurn = false;
+            if(Constants.BURN_NEW_START_HEIGHT != -1L
+            && Constants.BURN_NEW_START_HEIGHT < previousBlock.getHeight()){
+                startBurn = true;
+            }
             if (totalFeeNQT > 0 && startBurn) {
                 long burnNQT = Math.round(totalFeeNQT * Constants.BURN_NEW_RATE);
                 TransactionImpl transaction =

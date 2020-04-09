@@ -30,7 +30,6 @@ import org.conch.storage.Storer;
 import org.conch.storage.tx.StorageTxProcessorImpl;
 import org.conch.tx.*;
 import org.conch.util.Convert;
-import org.conch.util.JSON;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONStreamAware;
 
@@ -165,7 +164,6 @@ public abstract class CreateTransaction extends APIServlet.APIRequestHandler {
         String referencedTransactionFullHash = Convert.emptyToNull(req.getParameter("referencedTransactionFullHash"));
         String secretPhrase = ParameterParser.getSecretPhrase(req, false);
         String publicKeyValue = Convert.emptyToNull(req.getParameter("publicKey"));
-        String onChain = Convert.emptyToNull(req.getParameter("onChain"));
         boolean broadcast = !"false".equalsIgnoreCase(req.getParameter("broadcast")) && secretPhrase != null;
         Appendix.EncryptedMessage encryptedMessage = null;
         Appendix.Message message = null;
@@ -226,8 +224,6 @@ public abstract class CreateTransaction extends APIServlet.APIRequestHandler {
         }
 
         JSONObject response = new JSONObject();
-        System.out.println(">>>>>>>>>>>>>>>>>attachment");
-        System.out.println(attachment.toString());
         // shouldn't try to get publicKey from senderAccount as it may have not been set yet
         byte[] publicKey = secretPhrase != null ? Crypto.getPublicKey(secretPhrase) : Convert.parseHexString(publicKeyValue);
 
@@ -237,13 +233,6 @@ public abstract class CreateTransaction extends APIServlet.APIRequestHandler {
             if (attachment.getTransactionType().canHaveRecipient()) {
                 builder.recipientId(recipientId);
             }
-            if (onChain != null){
-                System.out.println(">>>>>>>>>>>>>>>>>保存信息");
-                System.out.println(attachment.toString());
-                saveHash = (Appendix.SaveHash) ParameterParser.getFileHash(req);
-
-            }
-            builder.appendix(saveHash);
             builder.appendix(encryptedMessage);
             builder.appendix(message);
             builder.appendix(publicKeyAnnouncement);

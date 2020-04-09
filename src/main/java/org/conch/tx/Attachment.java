@@ -43,9 +43,6 @@ import org.json.simple.JSONObject;
 
 import java.io.*;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
 import java.security.MessageDigest;
 import java.util.*;
 
@@ -73,7 +70,7 @@ public interface Attachment extends Appendix {
         }
     }
 
-    abstract class AbstractAttachment extends AbstractAppendix implements Attachment {
+    abstract class AbstractAttachment extends Appendix.AbstractAppendix implements Attachment {
 
         public AbstractAttachment(ByteBuffer buffer, byte transactionVersion) {
             super(buffer, transactionVersion);
@@ -171,11 +168,11 @@ public interface Attachment extends Appendix {
     };
 
     final class CoinBase extends AbstractAttachment {
-        
+
         public enum CoinBaseType {
             GENESIS,
-            BLOCK_REWARD, 
-            FOUNDING_TX, 
+            BLOCK_REWARD,
+            FOUNDING_TX,
             SPECIAL_LOGIC;
 
             public static CoinBaseType getType(String name) {
@@ -190,9 +187,9 @@ public interface Attachment extends Appendix {
 
         private final CoinBaseType coinBaseType;
         //miner id
-        private final long creator; 
+        private final long creator;
         //pool id or account id
-        private final long generatorId; 
+        private final long generatorId;
         private final Map<Long, Long> consignors;
 
         public CoinBase(ByteBuffer buffer, byte transactionVersion) throws ConchException.NotValidException {
@@ -239,8 +236,8 @@ public interface Attachment extends Appendix {
 //            if(Constants.isDevnet()) {
 //                System.out.println(toString());
 //            }
-            return 2 + coinBaseType.name().getBytes().length 
-                    + 8 + 8 
+            return 2 + coinBaseType.name().getBytes().length
+                    + 8 + 8
                     + consignors.size() * 2 * 8;
         }
 
@@ -255,7 +252,7 @@ public interface Attachment extends Appendix {
                 buffer.putLong(entry.getValue());
             }
         }
-        
+
         @Override
         public void putMyJSON(JSONObject attachment) {
             attachment.put("coinBaseType",  String.valueOf(coinBaseType));
@@ -312,7 +309,7 @@ public interface Attachment extends Appendix {
                 return map;
             }
         }
-        
+
         public boolean isType(CoinBaseType type){
             return (type != null && this.coinBaseType != null) && (type == this.coinBaseType);
         }
@@ -360,82 +357,6 @@ public interface Attachment extends Appendix {
             return receiver;
         }
     }
-
-//    final class SaveHash extends TaggedDataAttachment {
-    /*final class SaveHash extends AbstractAttachment {
-
-        private final String fileHash;
-
-
-        public SaveHash(ByteBuffer buffer, byte transactionVersion) throws ConchException.NotValidException {
-            super(buffer, transactionVersion);
-            fileHash = Convert.readString(buffer, buffer.get(), Constants.MAX_ALIAS_LENGTH).trim();
-
-        }
-
-        public SaveHash(JSONObject attachmentData) {
-            super(attachmentData);
-            fileHash = Convert.nullToEmpty((String) attachmentData.get("fileHash")).trim();
-        }
-
-        public SaveHash(String fileHash) {
-
-            this.fileHash = fileHash;
-
-        }
-
-        @Override
-        public int getMySize() {
-            return 1  + this.fileHash.length();
-        }
-
-        @Override
-        public void putMyBytes(ByteBuffer buffer) {
-            byte[] fileHash = Convert.toBytes(this.fileHash);
-            buffer.put((byte) fileHash.length);
-            buffer.put(fileHash);
-        }
-
-        @Override
-        public void putMyJSON(JSONObject attachment) {
-            attachment.put("fileHash", fileHash);
-        }
-
-        @Override
-        public TransactionType getTransactionType() {
-            return TransactionType.SaveHash.ORDINARY;
-        }
-
-        public String getFileHash() {
-            return fileHash;
-        }
-
-        *//*@Override
-        long getTaggedDataId(Transaction transaction) {
-            return transaction.getId();
-        }
-
-        @Override
-        public void restorePrunableData(Transaction transaction, int blockTimestamp, int height) {
-            TaggedData.restore(transaction, this, blockTimestamp, height);
-        }
-*//*
-
-        @Override
-        public boolean verifyVersion(byte txVer) {
-            return true;
-        }
-
-    }*/
-
-    EmptyAttachment ARBITRARY_SAVEHASH = new EmptyAttachment() {
-        @Override
-        public TransactionType getTransactionType() {
-            return TransactionType.SaveHash.ORDINARY;
-        }
-
-    };
-
 
     // the message payload is in the Appendix
     EmptyAttachment ARBITRARY_MESSAGE = new EmptyAttachment() {
@@ -3719,7 +3640,7 @@ public interface Attachment extends Appendix {
             return filename;
         }
 
-        public byte[] getData() {
+        public final byte[] getData() {
             if (taggedData != null) {
                 return taggedData.getData();
             }
@@ -3742,8 +3663,7 @@ public interface Attachment extends Appendix {
 
     }
 
-    final class TaggedDataUpload extends TaggedDataAttachment
-    {
+    final class TaggedDataUpload extends TaggedDataAttachment {
 
         public static TaggedDataUpload parse(JSONObject attachmentData) {
             if (!Appendix.hasAppendix(TransactionType.Data.TAGGED_DATA_UPLOAD.getName(), attachmentData)) {

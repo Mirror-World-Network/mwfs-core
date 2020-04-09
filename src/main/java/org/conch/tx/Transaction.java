@@ -38,8 +38,6 @@ public interface Transaction {
 
         Builder appendix(Appendix.Message message);
 
-        Builder appendix(Appendix.SaveHash saveHash);
-
         Builder appendix(Appendix.EncryptedMessage encryptedMessage);
 
         Builder appendix(Appendix.EncryptToSelfMessage encryptToSelfMessage);

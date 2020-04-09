@@ -308,6 +308,7 @@ public interface Appendix {
         }
 
     }
+
     class SaveHash extends AbstractAppendix {
 
         private final String fileHash;
@@ -331,9 +332,7 @@ public interface Appendix {
         }
 
         public SaveHash(String fileHash) {
-
             this.fileHash = fileHash;
-
         }
 
         @Override

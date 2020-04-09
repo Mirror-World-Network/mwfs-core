@@ -3,7 +3,6 @@ package org.conch.http;
 import org.conch.account.Account;
 import org.conch.common.ConchException;
 import org.conch.common.Constants;
-import org.conch.tx.Attachment;
 import org.json.simple.JSONStreamAware;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,10 +24,8 @@ public class OnChain extends CreateTransaction{
         }
         Account account = ParameterParser.getSenderAccount(req);
 
-       /* Attachment.SaveHash attachment = ParameterParser.getFileHash(req);
-        System.out.println(attachment.toString());*/
 
-        return createTransaction(req, account,Attachment.ARBITRARY_SAVEHASH);
+        return null;
 
     }
 }

@@ -174,7 +174,7 @@ const en = {
         'joinNet':'Join Net',
         'disk_capacity':'Disk Capacity(1T ~ 192T)',
         'mortgage':'Mortgage(calculate corresponding MW based on selected disk capacity)',
-        'privateKey':'private Key',
+        'privateKey':'Private Key',
         'inputPK':'Please enter the account private key to confirm your identity',
     },
     transfer: {

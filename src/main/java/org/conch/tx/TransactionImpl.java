@@ -142,12 +142,6 @@ final public class TransactionImpl implements Transaction {
         }
 
         @Override
-        public Builder appendix(Appendix.SaveHash saveHash) {
-            this.saveHash = saveHash;
-            return this;
-        }
-
-        @Override
         public BuilderImpl appendix(Appendix.EncryptedMessage encryptedMessage) {
             this.encryptedMessage = encryptedMessage;
             return this;

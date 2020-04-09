@@ -794,12 +794,12 @@ public abstract class TransactionType {
 
             @Override
             public AbstractAttachment parseAttachment(ByteBuffer buffer, byte transactionVersion) throws ConchException.NotValidException {
-                return Attachment.ARBITRARY_SAVEHASH;
+                return null;
             }
 
             @Override
             public AbstractAttachment parseAttachment(JSONObject attachmentData) throws ConchException.NotValidException {
-                return Attachment.ARBITRARY_SAVEHASH;
+                return null;
             }
 
             @Override
@@ -826,13 +826,6 @@ public abstract class TransactionType {
 
             @Override
             public void applyAttachment(Transaction transaction, Account account, Account recipientAccount) {
-                long feeNQT = transaction.getFeeNQT();
-                account.addBalanceAddUnconfirmed(getLedgerEvent(), transaction.getId(), 0, feeNQT);
-                Logger.logDebugMessage("[SaveHash apply] SaveHash %d of %s and add it in mined feeNQT of tx %d at height %d",
-                        feeNQT, account.getRsAddress(), transaction.getId() , transaction.getHeight());
-
-//                Attachment.SaveHash attachment = (Attachment.SaveHash) transaction.getAttachment();
-//                TaggedData.add((TransactionImpl) transaction, attachment);
             }
 
             @Override

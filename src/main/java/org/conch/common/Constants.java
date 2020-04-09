@@ -90,10 +90,8 @@ public final class Constants {
     public static final boolean isOffline = Conch.getBooleanProperty("sharder.isOffline");
     public static final boolean isLightClient = Conch.getBooleanProperty("sharder.isLightClient");
     public static final boolean isStorageClient = Conch.getBooleanProperty("sharder.storage.enable");
-    public static final Double BURN_RATE = 0.5;
-    public static final Double BURN_NEW_RATE = 0.2;
-    public static final Long BURN_START_HEIGHT = 1L;
-    public static final Long BURN_NEW_START_HEIGHT = 2L;
+    public static final Double BURN_NEW_RATE = 0.3;
+    public static final Long BURN_NEW_START_HEIGHT = isTestnetOrDevnet() ? (-1L) : 10L;
     public static final Long BURN_ADDRESS_ID = -1L;
     public static final List<String> bootNodesHost = parseBootNodesHost();
     public static final String bootNodeHost = parseBootNodeHost();

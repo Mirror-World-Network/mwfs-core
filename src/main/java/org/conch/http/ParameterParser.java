@@ -612,10 +612,8 @@ public final class ParameterParser {
     }
 
     public static Appendix getFileHash(HttpServletRequest req) {
-       // JSONObject jsonAttachment = new JSONObject();
-        //todo 通过上传的文件计算文件hash
+        //TODO 通过上传的文件计算文件hash
         String hash = "dddddddffffffffffff";
-      //  jsonAttachment.put("fileHash",hash);
         return new Appendix.SaveHash(hash);
     }
 
