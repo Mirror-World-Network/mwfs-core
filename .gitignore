@@ -27,7 +27,9 @@ DestroyedPools
 
 logs
 sharder_db
+mw_db
 sharder_test_db
+mw_test_db
 
 # storage/ipfs/bin
 # storage/

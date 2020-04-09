@@ -152,8 +152,8 @@ public class ClientUpgradeTool {
     }
     
     /**
-     * testLastArchive=sharder_test_db_12118
-     * testKnownArchive=sharder_test_db_268
+     * testLastArchive=mw_test_db_12118
+     * testKnownArchive=mw_test_db_268
      * @return latest db archive
      * @throws IOException
      */

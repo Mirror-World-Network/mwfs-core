@@ -211,12 +211,12 @@ public class FileUtil {
                     //db folder
                     if(!containDbFolder) {
                         containDbFolder = StringUtils.isNotEmpty(folderName)
-                                          && ("sharder_test_db".equals(folderName) || "sharder_db".equals(folderName));
+                                          && ("mw_test_db".equals(folderName) || "mw_db".equals(folderName));
                         // delete db folder only once
                         if(containDbFolder) {
-                            File dbFile = new File(appRootPath.resolve("sharder_test_db").toString());
+                            File dbFile = new File(appRootPath.resolve("mw_test_db").toString());
                             if(!dbFile.exists()) {
-                                dbFile = new File(appRootPath.resolve("sharder_db").toString());
+                                dbFile = new File(appRootPath.resolve("mw_db").toString());
                             }
                             
                             if(deleteSource){

@@ -53,7 +53,7 @@ public class DbBackupTask extends Task{
                 DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmSS");
                 String now = currentDateTime.format(dateTimeFormatter);
                 int height = Conch.getBlockchain().getHeight();
-                fileNameStr = "sharder_db_backup_"+now+"_"+ height +".zip";
+                fileNameStr = "mw_db_backup_"+now+"_"+ height +".zip";
             }else {
                 fileNameStr = fileName + (fileName.contains(".zip")?"":".zip");
             }
