@@ -1,5 +1,6 @@
 package org.conch.consensus.reward;
 
+import org.conch.Conch;
 import org.conch.common.Constants;
 
 /**
@@ -26,7 +27,8 @@ public class RewardCalculator {
         
     }
     
-    private static final int HALVE_COUNT = 210240;
+//    private static final int HALVE_COUNT = 210240;
+    private static final int MINER_JOINING_PHASE = 1600;
     /**
      * mint reward calculate
      * @return
@@ -41,6 +43,9 @@ public class RewardCalculator {
         double rate = Math.pow(0.5d,turn);
         return (long)(Constants.ONE_SS * RewardDef.MINT.getAmount() * rate);
         **/
+
+        // No block rewards in the miner joining phase
+        if(Conch.getHeight() <= MINER_JOINING_PHASE) return 1L;
 
         return Constants.ONE_SS * RewardDef.MINT.getAmount();
     }
