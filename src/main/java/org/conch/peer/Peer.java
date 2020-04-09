@@ -42,11 +42,11 @@ public interface Peer extends Comparable<Peer> {
      */
     @JSONType(deserializer = PeerTypeEnumDeserializer.class)
     enum Type {
-        BOX(5, "MWFS Box", 1, "Box"),
-        HUB(4, "MWFS Hub", 0,"Hub"),
+        CENTER(5, "Center Node", 1, "Center"),
+        SOUL(4, "Soul Node", 0,"Soul"),
         NORMAL(3, "Normal Node", 2,"Normal"),
         COMMUNITY(2, "Community Node", 3, "Community"),
-        FOUNDATION(1, "MWFS Node",4, "Foundation");
+        FOUNDATION(1, "Foundation Node",4, "Foundation");
         private final int code;
         private final String name;
         private final int simpleCode;

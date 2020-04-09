@@ -197,7 +197,7 @@ public class PocProcessorImpl implements PocProcessor {
      */
     @Override
     public boolean isCertifiedPeerBind(long accountId, int height) {
-        boolean hubBindAccount = PocHolder.isBoundPeer(Peer.Type.HUB, accountId);
+        boolean hubBindAccount = PocHolder.isBoundPeer(Peer.Type.SOUL, accountId);
         boolean communityBindAccount = PocHolder.isBoundPeer(Peer.Type.COMMUNITY, accountId);
         boolean foundationBindAccount = PocHolder.isBoundPeer(Peer.Type.FOUNDATION, accountId);
         boolean isGenesisAccount = SharderGenesis.isGenesisCreator(accountId) || SharderGenesis.isGenesisRecipients(accountId);

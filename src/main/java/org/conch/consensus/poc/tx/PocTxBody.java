@@ -291,8 +291,8 @@ public interface PocTxBody {
             Map<Integer, Integer> nodeTypeTP = new HashMap<>();
             nodeTypeTP.put(Peer.Type.FOUNDATION.getCode(), pocTemplate.getFoundationNodeScore().intValue());
             nodeTypeTP.put(Peer.Type.COMMUNITY.getCode(), pocTemplate.getCommunityNodeScore().intValue());
-            nodeTypeTP.put(Peer.Type.HUB.getCode(), pocTemplate.getHubNodeScore().intValue());
-            nodeTypeTP.put(Peer.Type.BOX.getCode(), pocTemplate.getBoxNodeScore().intValue());
+            nodeTypeTP.put(Peer.Type.SOUL.getCode(), pocTemplate.getHubNodeScore().intValue());
+            nodeTypeTP.put(Peer.Type.CENTER.getCode(), pocTemplate.getBoxNodeScore().intValue());
             nodeTypeTP.put(Peer.Type.NORMAL.getCode(), pocTemplate.getNormalNodeScore().intValue());
 
             Map<Long, Integer> serverOpenTP = new HashMap<>();
@@ -340,8 +340,8 @@ public interface PocTxBody {
             Map<Peer.Type, Map<Integer, Integer>> onlineRateMap = new HashMap<>();
             onlineRateMap.put(Peer.Type.FOUNDATION, onlineRateFoundationTP);
             onlineRateMap.put(Peer.Type.COMMUNITY, onlineRateCommunityTP);
-            onlineRateMap.put(Peer.Type.HUB, onlineRateHubBoxTP);
-            onlineRateMap.put(Peer.Type.BOX, onlineRateHubBoxTP);
+            onlineRateMap.put(Peer.Type.SOUL, onlineRateHubBoxTP);
+            onlineRateMap.put(Peer.Type.CENTER, onlineRateHubBoxTP);
             onlineRateMap.put(Peer.Type.NORMAL, onlineRateNormalTP);
 
             Map<Integer, Integer> blockingMissTemplate = new HashMap<>();
