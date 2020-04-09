@@ -292,7 +292,7 @@
                             </el-table-column>
                             <el-table-column :label="$t('dialog.account_info_account')" width="220">
                                 <template slot-scope="scope">
-                                    <div v-html="scope.row.accountRS" v-if="scope.row.accountRS === accountRS" style="color:#14c6fc;"></div>
+                                    <div v-html="scope.row.accountRS" v-if="scope.row.accountRS === accountRS" style="color:#1bc98e;"></div>
                                     <div v-html="scope.row.accountRS" v-if="scope.row.accountRS !== accountRS" style=""></div>
                                 </template>
                             </el-table-column>
@@ -539,7 +539,7 @@
                     clearInterval(networkDataLoader);
                 }
             }, SSO.downloadingBlockchain ? this.$global.cfg.soonInterval : this.$global.cfg.defaultInterval);
-    
+
             // this.menuAdapter();
         },
         filters: {
@@ -608,7 +608,7 @@
                 }).catch(err => {
                     console.info("error", err);
                 });
-                
+
             },
             networkUrlBlocks() {
                 const _this = this;
@@ -758,12 +758,12 @@
         font-weight: normal;
         text-align: center;
     }
-    
+
 
     .last_block {
         text-align: left!important;
         font-size: 12px!important;
-        
+
         .generator {
             margin-right: 10px;
         }
