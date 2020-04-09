@@ -353,7 +353,7 @@ public final class Constants {
     
     //default gap of mainnet & testnet is 7 min
     private static final int blockGapInProperties = isDevnet() ?  Conch.getIntProperty("sharder.devnetBlockGap") : 
-            ( isTestnet() ? Conch.getIntProperty("sharder.testnetBlockGap", 7) : Conch.getIntProperty("sharder.blockGap", 7));
+            ( isTestnet() ? Conch.getIntProperty("sharder.testnetBlockGap", 10) : Conch.getIntProperty("sharder.blockGap", 10));
 
     /**
      * interval between two block generation, the min is 1min
