@@ -2284,8 +2284,8 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     .build(secretPhrase);
             sortedTransactions.add(new UnconfirmedTransaction(transaction, System.currentTimeMillis()));
 
-            // burn transaction
-            if (previousBlock.getHeight() >= Constants.BURN_START_HEIGHT) {
+            // @Deprecated burn transaction
+            if (previousBlock.getHeight() >= Constants.BURN_START_HEIGHT && previousBlock.getHeight() < Constants.BURN_NEW_START_HEIGHT) {
                 long burn = Math.round(RewardCalculator.mintReward() / Constants.ONE_SS * Constants.BURN_RATE);
                 TransactionImpl burnTransaction = new TransactionImpl.BuilderImpl(
                         publicKey,
@@ -2374,6 +2374,32 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 }
                 payloadLength += transaction.getFullSize();
             }
+        }
+
+
+        try {
+            // burn transaction
+            boolean startBurn = Constants.BURN_NEW_START_HEIGHT < previousBlock.getHeight();
+            if (totalFeeNQT > 0 && startBurn) {
+                long burnNQT = Math.round(totalFeeNQT * Constants.BURN_NEW_RATE);
+                TransactionImpl transaction =
+                        new TransactionImpl.BuilderImpl(
+                                publicKey,
+                                burnNQT,
+                                0,
+                                (short) 10,
+                                new Attachment.BurnDeal(Constants.BURN_ADDRESS_ID))
+                                .timestamp(blockTimestamp)
+                                .recipientId(Constants.BURN_ADDRESS_ID)
+                                .build(secretPhrase);
+                blockTransactions.add(transaction);
+                digest.update(transaction.bytes());
+                totalAmountNQT += transaction.getAmountNQT();
+                payloadLength += transaction.getFullSize();
+                Logger.logInfoMessage("create burn transaction: burn " + burnNQT + " SS");
+            }
+        } catch (ConchException.ValidationException e) {
+            e.printStackTrace();
         }
 
         byte[] payloadHash = digest.digest();

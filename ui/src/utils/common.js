@@ -853,7 +853,7 @@ export default {
         }else if (amountNQT <= 0) {
             return this.placeholder
         } else if (t.type === 18) {
-            return -amountNQT + this.unit
+            return amountNQT + this.unit
         } else if (t.senderRS === accountRS && t.type !== 9) {
             return -amountNQT + this.unit
         } else {
@@ -901,7 +901,7 @@ export default {
      * 获得发送者
      */
     getSenderRSOrWo(t) {
-        if (t.type === 9) {
+        if (t.type === 9 || t.type === 18) {
             return "System";
         } else if (this.$vue.$store.state.account !== t.senderRS) {
             return t.senderRS

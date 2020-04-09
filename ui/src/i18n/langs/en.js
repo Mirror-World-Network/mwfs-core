@@ -145,6 +145,7 @@ const en = {
         'transaction_type_storage':'Storage Data',
         'transaction_type_poc': "PoC",
         'transaction_type_burn': "Burn",
+        'transaction_burn_account': "Burn Account",
         'transaction_type_pool_join_tx': "Join Tx",
         'self': "You",
         'view_details': "View Details",
