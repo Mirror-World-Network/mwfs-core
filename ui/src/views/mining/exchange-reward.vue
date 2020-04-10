@@ -10,7 +10,7 @@
                     <li v-if="sharderAccount" style="color: #e64242;font-size: small">{{$t('mining.diamond_exchange.description')}}{{$t("reward.exchange_tip")}} </li>
                     <li v-else>
                         {{$t("reward.no_binding_account")}} ?
-                        <a href="https://mwfs.io">{{$t("reward.immediately_binding")}}</a>
+                        <a href="https://mw.run">{{$t("reward.immediately_binding")}}</a>
                     </li>
                 </span>
             </p>

@@ -60,7 +60,7 @@ var Sso = (function (NRS, $, undefined) {
         is_store_remembered_passphrase: (window["cordova"] !== undefined), // too early to use feature detection
         is_simulate_app: false,
         is_testnet: false,
-        remote_node_address: "node.mwfs.io",
+        remote_node_address: "testboot.mw.run",
         remote_node_port: 8215,
         is_remote_node_ssl: false,
         validators_count: 3,

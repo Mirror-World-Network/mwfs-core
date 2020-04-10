@@ -240,7 +240,7 @@
                                     </span>
 
                                     <img src="../../assets/img/right_arrow.svg"/>
-                                    
+
                                     <span class="linker" @click="openAccountInfoDialog(transaction.senderRS)" v-if="transaction.type === 9">
                                         {{$t('transaction.self')}}
                                     </span>
@@ -869,7 +869,7 @@
                 isMobile: false,
                 //dialog
                 src: "",
-                requestUrl:"https://mwfs.io",
+                requestUrl:"https://mw.run",
                 sendSuccess: false, //true验证码发送 false验证码未发送
                 time: 60 , //时间
                 sendMessageDialog: false,
@@ -1186,7 +1186,7 @@
             if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) { //移动端
                 this.isMobile = true
             }
-            
+
             const _this = this;
             _this.getAccount(_this.accountInfo.accountRS).then(res => {
                 _this.accountInfo.account = res.account;
@@ -1218,7 +1218,7 @@
             _this.getPocScore();
         },
         methods: {
-    
+
             // menuAdapter() {
             //     document.getElementsByClassName('header')[0].style.display = 'block'
             //     var menuLi = document.querySelectorAll('.navbar .el-menu li')
@@ -1232,7 +1232,7 @@
             //         }
             //     }
             // },
-            
+
             //定时器
             finish() {
                 //禁用以下表单
@@ -1396,7 +1396,7 @@
                 });
             },
             drawBarchart: function (barchat) {
-    
+
                 var dom = document.getElementById("transaction_amount_bar");
                 if (!dom) {
                     console.log("dom transaction_amount_bar got faild，echarts can not load")
@@ -2791,7 +2791,7 @@
                 params.append("type", "0");
                 _this.$http.get('/sharder?requestType=getBlockchainTransactions', {params}).then(res => {
                     res.data.transactions.forEach(function (value, index, array) {
-                        
+
                         if(_this.$i18n) {
                             if (value.senderRS === SSO.accountRS) {
                                 barchat.xAxis.push(_this.$t('account.payout'));
@@ -2805,7 +2805,7 @@
                         barchat.xAxis.push("");
                         barchat.series.push(0);
                     }
-                    
+
                     _this.drawBarchart(barchat);
                 });
             },
@@ -3088,7 +3088,7 @@
             $('#tranfer_receiver').on("blur", function () {
                 _this.validationReceiver("transfer");
             });
-    
+
             // this.menuAdapter()
         },
     };

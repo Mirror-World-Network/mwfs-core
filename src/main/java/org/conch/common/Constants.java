@@ -382,20 +382,20 @@ public final class Constants {
 
     private static final String parseBootNodeHost() {
         if(isMainnet()){
-            return "boot.mwfs.io";
+            return "boot.mw.run";
         }else if(isTestnet()){
-            return "testboot.mwfs.io";
+            return "testboot.mw.run";
         }
-        return "devboot.mwfs.io";
+        return "devboot.mw.run";
     }
     
     private static final List<String> parseBootNodesHost() {
        if(isMainnet()){
-           return Lists.newArrayList("boot.mwfs.io");
+           return Lists.newArrayList("boot.mw.run");
        }else if(isTestnet()){
-           return Lists.newArrayList("testboot.mwfs.io","testna.mwfs.io","testnb.mwfs.io");
+           return Lists.newArrayList("testboot.mw.run","testna.mw.run","testnb.mw.run");
        }
-       return Lists.newArrayList("devboot.mwfs.io");
+       return Lists.newArrayList("devboot.mw.run");
     }
     
     

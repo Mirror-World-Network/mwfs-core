@@ -4,8 +4,8 @@
 
 export default {
     loginState: 'hub',
-    sharderFoundationHost: 'mwfs.io',
-    sharderFoundationTestHost: 'test.mwfs.io',
+    sharderFoundationHost: 'mw.run',
+    sharderFoundationTestHost: 'test.mw.run',
     apiUrl: '',
     cfg: {defaultInterval: 90000, soonInterval: 30000, slowInterval: 180000},
     epochBeginning: -1,
@@ -317,7 +317,7 @@ export default {
      */
     byIPtoCoordinates(params) {
         let xhr = new XMLHttpRequest();
-        xhr.open("POST", "https://mwfs.io/api/front/coordinates/ip");
+        xhr.open("POST", "https://mw.run/api/front/coordinates/ip");
         xhr.setRequestHeader("content-type", "application/json;charset=UTF-8");
         return new Promise(function (resolve, reject) {
             xhr.onload = function () {
