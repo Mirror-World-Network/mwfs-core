@@ -794,10 +794,6 @@ final public class TransactionImpl implements Transaction {
                         }
                     }
                 }
-                // TODO edit
-                else if (builder.type.isType(TransactionType.TYPE_SAVE_HASH)) {
-                    Logger.logWarningMessage(">>>> Transaction bytes: " + buffer.remaining());
-                }
                 else{
                     throw new ConchException.NotValidException("Transaction bytes too long, " + buffer.remaining() + " extra bytes");
                 }

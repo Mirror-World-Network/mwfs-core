@@ -69,6 +69,12 @@ public class PocCalculator implements Serializable {
         } else if (nodeType.getType().equals(Peer.Type.NORMAL)) {
             typeScore = typeWeight.multiply(predefineNodeTypeLevel(Peer.Type.NORMAL)).multiply(SCORE_MULTIPLIER).divide(PERCENT_DIVISOR);
         }
+
+        // disk calculate
+        if(nodeType instanceof PocTxBody.PocNodeTypeV3){
+            long diskCapacity = ((PocTxBody.PocNodeTypeV3) nodeType).getDiskCapacity();
+        }
+
         pocScore.nodeTypeScore = typeScore;
     }
 

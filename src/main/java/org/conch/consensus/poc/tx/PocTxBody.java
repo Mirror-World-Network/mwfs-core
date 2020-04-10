@@ -90,8 +90,57 @@ public interface PocTxBody {
         }
     }
     
+    class PocNodeTypeV3 extends PocNodeTypeV2 {
+        // unit is KB
+        private long diskCapacity;
+
+        public long getDiskCapacity() {
+            return diskCapacity;
+        }
+
+        public PocNodeTypeV3(String ip, Peer.Type type, long accountId, long diskCapacity) {
+            super(ip, type, accountId);
+            this.diskCapacity = diskCapacity;
+        }
+
+        public PocNodeTypeV3(PocNodeTypeV2 typeV2, long diskCapacity) {
+            super(typeV2.ip, typeV2.type, typeV2.accountId);
+            this.diskCapacity = diskCapacity;
+        }
+
+        public PocNodeTypeV3(ByteBuffer buffer, byte transactionVersion) {
+            super(buffer, transactionVersion);
+            this.accountId = buffer.getLong();
+        }
+
+        public PocNodeTypeV3(JSONObject attachmentData) {
+            super(attachmentData);
+            this.accountId = (Long) attachmentData.get("accountId");
+            this.accountId = (Long) attachmentData.get("diskCapacity");
+        }
+
+        @Override
+        public int getMySize() {
+            return super.getMySize() + 8 + 8;
+        }
+
+        @Override
+        public void putMyBytes(ByteBuffer buffer) {
+            super.putMyBytes(buffer);
+            buffer.putLong(accountId);
+            buffer.putLong(diskCapacity);
+        }
+
+        @Override
+        public void putMyJSON(JSONObject attachment) {
+            super.putMyJSON(attachment);
+            attachment.put("accountId", this.accountId);
+            attachment.put("diskCapacity", this.diskCapacity);
+        }
+    }
+
     class PocNodeTypeV2 extends PocNodeType {
-        private long accountId;
+        protected long accountId;
 
         public long getAccountId() {
             return accountId;

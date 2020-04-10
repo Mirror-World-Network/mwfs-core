@@ -188,12 +188,15 @@ public abstract class PocTxApi {
                             accountId
                     );
                 }
-                
+
                 if(pocNodeType == null) {
                     String errorMsg = "can't create node type tx from input data " + nodeTypeJson.toString();
                     Logger.logErrorMessage(errorMsg);
                     throw new ConchException.NotValidException(errorMsg);
                 }
+
+                // v3 need disk capacity
+                pocNodeType = new PocTxBody.PocNodeTypeV3(pocNodeType, nodeTypeJson.getLong("diskCapacity"));
 
                 Logger.logInfoMessage("creating node type tx %s", pocNodeType.toString());
                 createTransaction(request, account, 0, 0, pocNodeType);
