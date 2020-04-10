@@ -75,11 +75,19 @@ public class SharderGenesis {
         public String domain;
         public Peer.Type type;
         public long accountId;
+        public long diskCapacity;
 
         private GenesisPeer(String domain,Peer.Type type, long accountId){
             this.domain = domain;
             this.type = type;
             this.accountId = accountId;
+        }
+
+        private GenesisPeer(String domain,Peer.Type type, long accountId, long diskCapacity){
+            this.domain = domain;
+            this.type = type;
+            this.accountId = accountId;
+            this.diskCapacity = diskCapacity;
         }
 
         static Map<Constants.Network, List<GenesisPeer>> genesisPeers = new HashMap<>();
@@ -90,10 +98,11 @@ public class SharderGenesis {
                     new GenesisPeer("devnb.mw.run",Peer.Type.FOUNDATION, 90778548339644322L)
             );
 
+            // 1T=1073741824L
             List<GenesisPeer> testnetPeers = Lists.newArrayList(
-                    new GenesisPeer("testboot.mw.run",Peer.Type.FOUNDATION, -7290871798082871685L),
-                    new GenesisPeer("testna.mw.run",Peer.Type.FOUNDATION, -6802345313304048560L),
-                    new GenesisPeer("testnb.mw.run",Peer.Type.FOUNDATION, 6066546424236439063L)
+                    new GenesisPeer("testboot.mw.run",Peer.Type.FOUNDATION, -7290871798082871685L, 1073741824L),
+                    new GenesisPeer("testna.mw.run",Peer.Type.FOUNDATION, -6802345313304048560L, 1073741824L),
+                    new GenesisPeer("testnb.mw.run",Peer.Type.FOUNDATION, 6066546424236439063L, 1073741824L)
             );
 
             List<GenesisPeer> mainnetPeers = Lists.newArrayList(
@@ -224,7 +233,8 @@ public class SharderGenesis {
         List<TransactionImpl> transactions = Lists.newArrayList();
 
         GenesisPeer.getAll().forEach(genesisPeer -> {
-            Attachment.AbstractAttachment attachment = new PocTxBody.PocNodeTypeV2(genesisPeer.domain,genesisPeer.type,genesisPeer.accountId);
+//            Attachment.AbstractAttachment attachment = new PocTxBody.PocNodeTypeV2(genesisPeer.domain,genesisPeer.type,genesisPeer.accountId);
+            Attachment.AbstractAttachment attachment = new PocTxBody.PocNodeTypeV3(genesisPeer.domain,genesisPeer.type,genesisPeer.accountId,genesisPeer.diskCapacity);
             try {
                 transactions.add(new TransactionImpl.BuilderImpl(
                         SharderGenesis.CREATOR_PUBLIC_KEY,
