@@ -17,6 +17,7 @@ public class PocTemplate implements Serializable {
   private Long nodeTypeWeight;
   private Long serverOpenWeight;
   private Long ssHoldWeight;
+  // 磁盘容量
   private Long hardwareConfWeight;
   private Long netWorkConfWeight;
   private Long txHandlePerformanceWeight;
@@ -91,16 +92,16 @@ public class PocTemplate implements Serializable {
     this.ip = ip;
     this.port = port;
 
-    this.nodeTypeWeight = 30L;
-    this.ssHoldWeight = 40L;
-    this.hardwareConfWeight = 5L;
-    this.netWorkConfWeight = 5L;
+    this.nodeTypeWeight = 25L;
+    this.ssHoldWeight = 17L;
+    this.hardwareConfWeight = 45L;
+    this.netWorkConfWeight = 8L;
     this.txHandlePerformanceWeight = 5L;
 
     this.foundationNodeScore = 10L;
-    this.communityNodeScore = 8L;
+    this.communityNodeScore = 10L;
+    this.BoxNodeScore = 8L;
     this.hubNodeScore = 6L;
-    this.BoxNodeScore = 6L;
     this.NormalNodeScore = 3L;
 
     this.minerScore = 4L;
@@ -109,8 +110,8 @@ public class PocTemplate implements Serializable {
     this.storageScore = 4L;
     this.proverScore = 4L;
 
-    this.badTxScore = 3L;
-    this.middleTxScore = 6L;
+    this.badTxScore = 6L;
+    this.middleTxScore = 8L;
     this.goodTxScore = 10L;
 
     this.badHardwareScore = 3L;
@@ -118,8 +119,8 @@ public class PocTemplate implements Serializable {
     this.goodHardwareScore = 10L;
 
     this.poorNetworkScore = 0L;
-    this.badNetworkScore = 3L;
-    this.middleNetworkScore = 6L;
+    this.badNetworkScore = 6L;
+    this.middleNetworkScore = 8L;
     this.goodNetworkScore = 10L;
 
     this.badBlockingMissScore = -10L;

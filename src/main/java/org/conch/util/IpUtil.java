@@ -39,6 +39,8 @@ public class IpUtil {
     }
     
     private final static List<String> natServers = Lists.newArrayList(
+            "nat.mw.run",
+            "nat.mwfs.io",
             "nat.sharder.network",
             "nat.sharder.org",
             "nat.sharder.io");
@@ -93,6 +95,7 @@ public class IpUtil {
         
         if(host.endsWith("sharder.io") 
         || host.endsWith("mwfs.io")
+        || host.endsWith("mw.run")
         || host.endsWith("sharder.network")){
             return true;
         }

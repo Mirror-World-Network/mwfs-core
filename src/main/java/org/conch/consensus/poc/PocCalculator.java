@@ -22,6 +22,9 @@ public class PocCalculator implements Serializable {
     // poc score converter
     private static final BigInteger SCORE_MULTIPLIER = BigInteger.valueOf(125000L);
 
+    // hardware score converter
+    private static final BigInteger HD_SCORE_MULTIPLIER = BigInteger.valueOf(13888L);
+
     // the final poc score should divide the PERCENT_DIVISOR
     private static final BigInteger PERCENT_DIVISOR = BigInteger.valueOf(100L);
 
@@ -55,6 +58,12 @@ public class PocCalculator implements Serializable {
     private static BigInteger predefineNodeTypeLevel(Peer.Type peerType){
        return BigInteger.valueOf(inst.pocWeightTable.getNodeTypeTemplate().get(peerType.getCode()).longValue());
     }
+
+    /**
+     * node type score and hardware score
+     * @param pocScore
+     * @param nodeType
+     */
     static void nodeTypeCal(PocScore pocScore,PocTxBody.PocNodeType nodeType) {
         BigInteger typeScore = BigInteger.ZERO;
         BigInteger typeWeight = getWeight(PocTxBody.WeightTableOptions.NODE_TYPE);
@@ -69,13 +78,13 @@ public class PocCalculator implements Serializable {
         } else if (nodeType.getType().equals(Peer.Type.NORMAL)) {
             typeScore = typeWeight.multiply(predefineNodeTypeLevel(Peer.Type.NORMAL)).multiply(SCORE_MULTIPLIER).divide(PERCENT_DIVISOR);
         }
+        pocScore.nodeTypeScore = typeScore;
 
         // disk calculate
         if(nodeType instanceof PocTxBody.PocNodeTypeV3){
             long diskCapacity = ((PocTxBody.PocNodeTypeV3) nodeType).getDiskCapacity();
+            hardwareCal(pocScore, diskCapacity);
         }
-
-        pocScore.nodeTypeScore = typeScore;
     }
 
     private static BigInteger predefineHardwareLevel(PocTxBody.DeviceLevels deviceLevels){
@@ -90,9 +99,18 @@ public class PocCalculator implements Serializable {
         return BigInteger.valueOf(inst.pocWeightTable.getTxPerformanceTemplate().get(deviceLevels.getLevel()).longValue());
     }
 
+    /**
+     * calculate the disk capacity
+     */
+    private static void hardwareCal(PocScore pocScore, long diskCapacity){
+        BigInteger hardwareWeight = getWeight(PocTxBody.WeightTableOptions.HARDWARE_CONFIG);
+        BigInteger hardwareScore = BigInteger.valueOf(diskCapacity / 1024 / 1024 / 1024);
+        pocScore.hardwareScore = hardwareWeight.multiply(hardwareScore.multiply(SCORE_MULTIPLIER)).divide(PERCENT_DIVISOR);
+    }
+
     static void nodeConfCal(PocScore pocScore, PocTxBody.PocNodeConf nodeConf) {
 
-        BigInteger serverScore = BigInteger.ZERO, hardwareScore = BigInteger.ZERO , networkScore = BigInteger.ZERO , performanceScore = BigInteger.ZERO;
+        BigInteger serverScore = BigInteger.ZERO, networkScore = BigInteger.ZERO , performanceScore = BigInteger.ZERO;
         BigInteger serverWeight = getWeight(PocTxBody.WeightTableOptions.SERVER_OPEN);
         Long[] openedServices = nodeConf.getSystemInfo().getOpenServices();
         if (openedServices != null && openedServices.length > 0) {
@@ -104,16 +122,6 @@ public class PocCalculator implements Serializable {
             }
             pocScore.serverScore = serverScore.multiply(serverWeight).multiply(SCORE_MULTIPLIER).divide(PERCENT_DIVISOR);
         }
-
-        BigInteger hardwareWeight = getWeight(PocTxBody.WeightTableOptions.HARDWARE_CONFIG);
-        if (nodeConf.getSystemInfo().getCore() >= 8 && nodeConf.getSystemInfo().getAverageMHz() >= 3600 && nodeConf.getSystemInfo().getMemoryTotal() >= 15 && nodeConf.getSystemInfo().getHardDiskSize() >= 10 * 1000) {
-            hardwareScore = predefineHardwareLevel(PocTxBody.DeviceLevels.GOOD);
-        } else if (nodeConf.getSystemInfo().getCore() >= 4 && nodeConf.getSystemInfo().getAverageMHz() >= 3100 && nodeConf.getSystemInfo().getMemoryTotal() >= 7 && nodeConf.getSystemInfo().getHardDiskSize() >= 1000) {
-            hardwareScore = predefineHardwareLevel(PocTxBody.DeviceLevels.MIDDLE);
-        } else if (nodeConf.getSystemInfo().getCore() >= 2 && nodeConf.getSystemInfo().getAverageMHz() >= 2400 && nodeConf.getSystemInfo().getMemoryTotal() >= 3 && nodeConf.getSystemInfo().getHardDiskSize() >= 100) {
-            hardwareScore = predefineHardwareLevel(PocTxBody.DeviceLevels.BAD);
-        }
-        pocScore.hardwareScore = hardwareWeight.multiply(hardwareScore.multiply(SCORE_MULTIPLIER)).divide(PERCENT_DIVISOR);
 
         BigInteger networkWeight = getWeight(PocTxBody.WeightTableOptions.NETWORK_CONFIG);
         if (nodeConf.getSystemInfo().isHadPublicIp()) {
