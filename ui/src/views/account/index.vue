@@ -27,7 +27,7 @@
                             </span>
                             <span>{{$t('account.transfer')}}</span>
                         </button>
-                        <button class="common_btn imgBtn writeBtn" @click="openSendMessageDialog">
+                        <button class="common_btn imgBtn writeBtn" v-if="whetherShowSendMsgBtn()" @click="openSendMessageDialog">
                             <span class="icon">
                                 <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 171.43 137.08">
                                     <path class="cls-1"
@@ -37,7 +37,7 @@
                             </span>
                             <span>{{$t('account.send_message')}}</span>
                         </button>
-                        <button class="common_btn imgBtn writeBtn" @click="openStorageFileDialog">
+                        <button class="common_btn imgBtn writeBtn" v-if="whetherShowStorageBtn()" @click="openStorageFileDialog">
                             <span class="icon">
                                 <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 162.5">
                                     <path
@@ -49,7 +49,7 @@
                             </span>
                             <span>{{$t('account.storage_file')}}</span>
                         </button>
-                        <button class="common_btn imgBtn writeBtn" @click="openOnChainDialog">
+                        <button class="common_btn imgBtn writeBtn" v-if="whetherShowOnChainBtn()" @click="openOnChainDialog">
                             <span class="icon">
                                 <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 162.5">
                                     <path
@@ -61,7 +61,7 @@
                             </span>
                             <span>{{$t('account.on_chain')}}</span>
                         </button>
-                        <button class="common_btn imgBtn writeBtn" @click="openJionNetDialog">
+                        <button class="common_btn imgBtn writeBtn" v-if="whetherShowJoinNetBtn()" @click="openJoinNetDialog">
                             <div>
                                <img src="../../assets/img/join_net.svg" style="vertical-align:middle" hspace="5" width="18">
                                 {{$t('joinNet.join')}}
@@ -567,7 +567,7 @@
                         <el-input v-model="registerSharderSiteUser.pictureVerificationCode" @blur="checkPicVerificationCode"></el-input>
                         <el-image :src="src" style="width:112px;height:38px;position: absolute;right:1px;top:1px " @click="getPicVCode()">
                             <div slot="placeholder" class="image-slot">
-                                加载中<span class="dot">...</span>
+                                Loding<span class="dot">...</span>
                             </div>
                         </el-image>
                     </el-form-item>
@@ -581,7 +581,7 @@
                         <el-input v-model="userConfig.siteAccount" ></el-input>
                     </el-form-item>
                     <el-form-item :label="$t('hubsetting.sharder_account_password')" prop="sharderPwd" v-if="!hubsetting.registerSiteAccount">
-                        <el-input type="password" v-model="hubsetting.sharderPwd" @blur="checkSharder"></el-input>
+                        <el-input type="password" v-model="hubsetting.sharderPwd" @blur="checkSiteAccount"></el-input>
                     </el-form-item>
                     <el-form-item :label="$t('hubsetting.nat_traversal_address')" v-if="hubsetting.openPunchthrough"
                                   prop="address">
@@ -652,7 +652,7 @@
                         <el-input v-model="userConfig.siteAccount"></el-input>
                     </el-form-item>
                     <el-form-item :label="$t('hubsetting.sharder_account_password')" prop="sharderPwd">
-                        <el-input type="password" v-model="hubsetting.sharderPwd" @blur="checkSharder"></el-input>
+                        <el-input type="password" v-model="hubsetting.sharderPwd" @blur="checkSiteAccount"></el-input>
                     </el-form-item>
                     <el-form-item :label="$t('hubsetting.nat_traversal_address')" v-if="hubsetting.openPunchthrough">
                         <el-input v-model="hubsetting.address" :disabled="true"></el-input>
@@ -718,7 +718,7 @@
                         <el-input v-model="userConfig.siteAccount"></el-input>
                     </el-form-item>
                     <el-form-item :label="$t('hubsetting.sharder_account_password')" prop="sharderPwd">
-                        <el-input type="password" v-model="hubsetting.sharderPwd" @blur="checkSharder"></el-input>
+                        <el-input type="password" v-model="hubsetting.sharderPwd" @blur="checkSiteAccount"></el-input>
                     </el-form-item>
                     <el-form-item :label="$t('hubsetting.register_status')" v-if="hubsetting.openPunchthrough">
                         <el-input v-model="hubsetting.register_status_text" :disabled="true"></el-input>
@@ -1806,7 +1806,7 @@
                 });
             },
             checkPicVerificationCode(){},
-            checkSharder() {
+            checkSiteAccount() {
                 const _this = this;
                 let formData = new FormData();
                 if (_this.userConfig.siteAccount !== ''
@@ -2414,7 +2414,7 @@
                 this.onChainDialog = true;
             },
 
-            openJionNetDialog:function(){
+            openJoinNetDialog:function(){
                 if (SSO.downloadingBlockchain) {
                     this.$message.warning(this.$t("account.synchronization_block"));
                     return;
@@ -2885,6 +2885,18 @@
                     return this.$t('hubsetting.register_status_pending');
                 }
             },
+            whetherShowSendMsgBtn() {
+                return true;
+            },
+            whetherShowStorageBtn() {
+                return true;
+            },
+            whetherShowJoinNetBtn() {
+                return false;
+            },
+            whetherShowOnChainBtn() {
+                return false;
+            },
             whetherShowHubSettingBtn() {
                 /*
                 At the same time satisfy the following conditions:
@@ -2895,7 +2907,7 @@
                 */
                 return this.secretPhrase
                     && !this.initHUb
-                    && this.userConfig.nodeType === 'Hub'
+                    && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center')
                     && this.userConfig.ssAddress === this.accountInfo.accountRS;
             },
             whetherShowHubInitBtn() {
@@ -2907,7 +2919,7 @@
                 */
                 return this.secretPhrase
                     && this.initHUb
-                    && this.userConfig.nodeType === 'Hub';
+                    && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center');
                /* return true;*/
             },
             whetherShowUseNATServiceBtn() {
@@ -2918,12 +2930,13 @@
                 3. didn't use NAT service；
                 4. NAT configuration is empty;
                  */
-                return this.secretPhrase
-                    && !this.userConfig.useNATService
-                    && this.userConfig.nodeType === 'Normal'
-                    && !this.userConfig.natClientSecretKey
-                    && !this.userConfig.natPort
-                    && !this.userConfig.natAddress;
+                // return this.secretPhrase
+                //     && !this.userConfig.useNATService
+                //     && this.userConfig.nodeType === 'Normal'
+                //     && !this.userConfig.natClientSecretKey
+                //     && !this.userConfig.natPort
+                //     && !this.userConfig.natAddress;
+                return false;
             },
             whetherShowConfigureNATServiceBtn() {
                 /*
@@ -2933,13 +2946,14 @@
                 3. using NAT service；
                 4. NAT configuration is not empty;
                  */
-                return this.secretPhrase
-                    && this.userConfig.useNATService
-                    && this.userConfig.nodeType === 'Normal'
-                    && this.userConfig.natClientSecretKey
-                    && this.userConfig.publicAddress
-                    && this.userConfig.natPort
-                    && this.userConfig.natAddress;
+                // return this.secretPhrase
+                //     && this.userConfig.useNATService
+                //     && this.userConfig.nodeType === 'Normal'
+                //     && this.userConfig.natClientSecretKey
+                //     && this.userConfig.publicAddress
+                //     && this.userConfig.natPort
+                //     && this.userConfig.natAddress;
+                return false;
             },
             getAccountRsBySecret() {
                 let publicKey = global.SSO.getPublicKey(this.hubsetting.modifyMnemonicWord, false);

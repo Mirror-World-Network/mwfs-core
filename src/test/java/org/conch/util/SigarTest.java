@@ -2,6 +2,7 @@ package org.conch.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.conch.consensus.poc.hardware.GetNodeHardware;
 import org.hyperic.sigar.*;
 
 public class SigarTest {
@@ -86,6 +87,13 @@ public class SigarTest {
             System.out.println("fileSystemUsage diskReads：" + fileSystemUsage.getDiskReads());
             System.out.println("fileSystemUsage diskWrites：" + fileSystemUsage.getDiskWrites());
 //            System.err.println("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+            try {
+                System.out.println(">>DiskSize：" + GetNodeHardware.diskCapacity(GetNodeHardware.DISK_UNIT_TYPE_KB) + " KB");
+                System.out.println(">>DiskSize：" + GetNodeHardware.diskCapacity(GetNodeHardware.DISK_UNIT_TYPE_GB) + " GB");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

@@ -28,6 +28,7 @@ import org.conch.account.Account;
 import org.conch.common.ConchException;
 import org.conch.common.Constants;
 import org.conch.common.UrlManager;
+import org.conch.consensus.poc.hardware.GetNodeHardware;
 import org.conch.mint.pool.SharderPoolProcessor;
 import org.conch.mq.Message;
 import org.conch.mq.MessageManager;
@@ -288,6 +289,7 @@ public final class ReConfig extends APIServlet.APIRequestHandler {
         jsonObject.put("ip", myAddress);
         jsonObject.put("type", req.getParameter("nodeType"));
         jsonObject.put("network", Conch.getNetworkType());
+        jsonObject.put("diskCapacity", GetNodeHardware.diskCapacity(GetNodeHardware.DISK_UNIT_TYPE_KB));
         jsonObject.put("bindRs", rsAddress);
         jsonObject.put("from", "NodeInitialStage#Reconfig");
         Message message = new Message()
