@@ -469,25 +469,31 @@ public class PocProcessorImpl implements PocProcessor {
         if (tx == null)  return false;
 
         PocTxBody.PocNodeTypeV2 nodeTypeV2 = null;
+        PocTxBody.PocNodeTypeV3 nodeTypeV3 = null;
         Attachment attachment = tx.getAttachment();
         String summary = "";
-        if(attachment instanceof PocTxBody.PocNodeTypeV2){
+        if(attachment instanceof PocTxBody.PocNodeTypeV3){
+            nodeTypeV3 = (PocTxBody.PocNodeTypeV3) attachment;
+            summary = "V3 host=" + nodeTypeV3.getIp() + ",type=" + nodeTypeV3.getType().getName() + ",accountId=" + nodeTypeV3.getAccountId() + ", disk capacity=" + nodeTypeV3.getDiskCapacity();
+        }
+        else if(attachment instanceof PocTxBody.PocNodeTypeV2){
             nodeTypeV2 = (PocTxBody.PocNodeTypeV2) attachment;
-            summary = "host=" + nodeTypeV2.getIp() + ",type=" + nodeTypeV2.getType().getName() + ",accountId=" + nodeTypeV2.getAccountId();
-        }else if(attachment instanceof PocTxBody.PocNodeType) {
+            summary = "V2 host=" + nodeTypeV2.getIp() + ",type=" + nodeTypeV2.getType().getName() + ",accountId=" + nodeTypeV2.getAccountId();
+        }
+        else if(attachment instanceof PocTxBody.PocNodeType) {
             PocTxBody.PocNodeType nodeType = (PocTxBody.PocNodeType) attachment;
-            summary = "host=" + nodeType.getIp() + ",type=" + nodeType.getType().getName();
+            summary = "V1 host=" + nodeType.getIp() + ",type=" + nodeType.getType().getName();
             nodeTypeV2 = CheckSumValidator.isPreAccountsInTestnet(nodeType.getIp(), height);
         }
         
-        if(nodeTypeV2 == null) {
+        if(nodeTypeV3 == null && nodeTypeV2 == null) {
             Logger.logWarningMessage("NodeType tx[id=%d,height=%d] summary[%s] is v1 that missing the account id, can't process it correctly", tx.getId(), tx.getHeight(), summary);
             return false;
         }
-        long accountId = nodeTypeV2.getAccountId();
+        long accountId = nodeTypeV3 != null ? nodeTypeV3.getAccountId() : nodeTypeV2.getAccountId();
         
         PocScore pocScoreToUpdate = PocHolder.getPocScore(height, accountId);
-        PocHolder.saveOrUpdate(pocScoreToUpdate.setHeight(height).nodeTypeCal(nodeTypeV2));
+        PocHolder.saveOrUpdate(pocScoreToUpdate.setHeight(height).nodeTypeCal(nodeTypeV3 != null ? nodeTypeV3 : nodeTypeV2));
         
         if(StringUtils.isEmpty(nodeTypeV2.getIp()) || nodeTypeV2.getType() == null) {
             Logger.logWarningMessage("NodeType tx[id=%d,height=%d,summary=%s] is a bad tx, don't add the certified peer", tx.getId(), tx.getHeight(), summary);

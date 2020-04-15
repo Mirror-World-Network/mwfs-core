@@ -100,7 +100,7 @@ public class SharderGenesis {
 
             // 1T=1073741824L
             List<GenesisPeer> testnetPeers = Lists.newArrayList(
-                    new GenesisPeer("testboot.mw.run",Peer.Type.FOUNDATION, -7290871798082871685L, 1073741824L),
+                    new GenesisPeer("testboot.mw.run",Peer.Type.FOUNDATION, -5748075279486471936L, 1073741824L),
                     new GenesisPeer("testna.mw.run",Peer.Type.FOUNDATION, -6802345313304048560L, 1073741824L),
                     new GenesisPeer("testnb.mw.run",Peer.Type.FOUNDATION, 6066546424236439063L, 1073741824L)
             );
