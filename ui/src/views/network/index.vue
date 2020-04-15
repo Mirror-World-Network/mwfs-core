@@ -338,18 +338,6 @@
                                                 </el-col>
                                             </el-row>
                                             <el-row>
-                                                <el-col :sm="12" :xs="12">
-                                                    <el-form-item :label="$t('network.mining_time')">
-                                                        <span>{{ dateFormat(props.row.hitTime) }}</span>
-                                                    </el-form-item>
-                                                </el-col>
-                                                <el-col :sm="12" :xs="12">
-                                                    <el-form-item :label="$t('network.poc_score_ss')">
-                                                        <span>{{ props.row.detailedPocScore.ssScore }}</span>
-                                                    </el-form-item>
-                                                </el-col>
-                                            </el-row>
-                                            <el-row>
 <!--                                                <el-col :sm="12" :xs="12">-->
 <!--                                                    <el-form-item :label="$t('network.poc_score_server')">-->
 <!--                                                        <span>{{ props.row.detailedPocScore.serverScore }}</span>-->
@@ -394,6 +382,17 @@
                                                         <span>{{ props.row.detailedPocScore.performanceScore }}</span>
                                                     </el-form-item>
                                                 </el-col>
+                                            </el-row>
+
+                                            <el-row>
+                                                <el-form-item :label="$t('network.poc_score_ss')">
+                                                    <span>{{ props.row.detailedPocScore.ssScore }}</span>
+                                                </el-form-item>
+                                            </el-row>
+                                            <el-row>
+                                                <el-form-item :label="$t('network.mining_time')">
+                                                    <span>{{ dateFormat(props.row.hitTime) }}</span>
+                                                </el-form-item>
                                             </el-row>
 <!--                                            <el-row>-->
 <!--                                                <el-col :sm="12" :xs="12">-->
