@@ -447,10 +447,10 @@
                     <div class="modal-body modal-message">
                         <el-form>
                             <el-form-item :label="$t('joinNet.disk_capacity')">
-                                <el-slider v-model="capacity" :format-tooltip="formatTooltip" :max="maxCapacity" @change="calculationNumber"></el-slider>
+                                <el-slider v-model="capacity" :format-tooltip="formatInputDiskCapacity" :max="maxCapacity" @change="calculatePledge"></el-slider>
                             </el-form-item>
                             <el-form-item :label="$t('joinNet.mortgage')">
-                                <input class="el-input__inner" v-model="mortgageFee" @blur="calculationCapacity"/>
+                                <input class="el-input__inner" v-model="diskPledge" @blur="calPledgeCapacityByBalance"/>
                                 <label class="input_suffix">{{$global.unit}}</label>
                             </el-form-item>
                             <el-form-item :label="$t('joinNet.privateKey')">
@@ -469,7 +469,7 @@
                 </div>
             </div>
         </div>
-        <!--view transfer account dialog-->
+        <!-- view transfer account dialog -->
         <div class="modal" id="transfer_accounts_modal" v-show="tranferAccountsDialog">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -526,7 +526,7 @@
                 </div>
             </div>
         </div>
-        <!--view hub init setting dialog-->
+        <!-- view client init setting dialog -->
         <div class="modal_hubSetting" id="hub_init_setting" v-show="hubInitDialog">
             <div class="modal-header" @click="displaySerialNo('initial')">
                 <h4 class="modal-title">
@@ -536,46 +536,50 @@
             <div class="modal-body">
                 <el-form label-position="left" style=" max-height: 500px;overflow: auto;" v-loading="hubsetting.loadingData" :model="hubsetting" status-icon :rules="formRules"
                          :label-width="this.$i18n.locale === 'en'? '200px':'160px'" ref="initForm">
-                    <el-form-item :label="$t('hubsetting.enable_nat_traversal')">
-                        <el-checkbox v-model="hubsetting.openPunchthrough"></el-checkbox>
-                    </el-form-item>
+<!--                    <el-form-item :label="$t('hubsetting.enable_nat_traversal')">-->
+<!--                        <el-checkbox v-model="hubsetting.openPunchthrough"></el-checkbox>-->
+<!--                    </el-form-item>-->
                     <el-form-item :label="$t('hubsetting.token_address')" v-if="userConfig.ssAddress">
                         <el-input v-model="userConfig.ssAddress" :disabled="true"></el-input>
                     </el-form-item>
                     <el-form-item :label="$t('hubsetting.serial_no')" v-show="userConfig.xxx&&hubsetting.initialSerialClickCount>=5">
                         <el-input v-model="userConfig.xxx" :disabled="true"></el-input>
                     </el-form-item>
+                    <el-form-item :label="$t('hubsetting.disk_capacity')"  v-if="userConfig.diskCapacity>0">
+                        <el-input  v-model="this.formatDiskCapacity()" :format="formatDiskCapacity" :disabled="true"></el-input>
+                    </el-form-item>
 
-                    <el-form-item :label="$t('hubsetting.register_sharder_account')">
-                        <el-checkbox v-model="hubsetting.registerSiteAccount"></el-checkbox>
-                    </el-form-item>
-                    <el-form-item :label="$t('hubsetting.sharder_account_phone_or_email')"  v-if="hubsetting.registerSiteAccount">
-                        <el-input v-model="registerSharderSiteUser.sharderAccountPhoneOrEmail" ></el-input>
-                    </el-form-item>
-                    <el-form-item :label="$t('hubsetting.verification_code')" v-if="hubsetting.registerSiteAccount">
-                        <el-input v-model="registerSharderSiteUser.verificationCode" ></el-input><el-button type="primary" style="position: absolute;right:0px;top:0px " @click="sendVCode()" :disabled="sendSuccess">
-                        {{sendSuccess?time+"s 可"+$t('hubsetting.resend_verification_code'):$t('hubsetting.send_verification_code')}}
-                    </el-button>
-                    </el-form-item>
-                    <el-form-item :label="$t('hubsetting.set_sharder_account_password')"  v-if="hubsetting.registerSiteAccount">
-                        <el-input type="password" v-model="registerSharderSiteUser.setSharderPwd"></el-input>
-                    </el-form-item>
-                    <el-form-item :label="$t('hubsetting.confirm_sharder_account_password')"  v-if="hubsetting.registerSiteAccount">
-                        <el-input type="password" v-model="registerSharderSiteUser.confirmSharderPwd"></el-input>
-                    </el-form-item>
-                    <el-form-item :label="$t('hubsetting.picture_verification_code')"  v-if="hubsetting.registerSiteAccount">
-                        <el-input v-model="registerSharderSiteUser.pictureVerificationCode" @blur="checkPicVerificationCode"></el-input>
-                        <el-image :src="src" style="width:112px;height:38px;position: absolute;right:1px;top:1px " @click="getPicVCode()">
-                            <div slot="placeholder" class="image-slot">
-                                Loding<span class="dot">...</span>
-                            </div>
-                        </el-image>
-                    </el-form-item>
-                    <el-form-item >
-                        <el-button type="primary" v-if="hubsetting.registerSiteAccount" style="float: right" @click="registerSharderSite()">
-                            {{$t('hubsetting.register_sharder_account')}}
-                        </el-button>
-                    </el-form-item>
+                    <!-- register the new site account                   -->
+<!--                    <el-form-item :label="$t('hubsetting.register_sharder_account')">-->
+<!--                        <el-checkbox v-model="hubsetting.registerSiteAccount"></el-checkbox>-->
+<!--                    </el-form-item>-->
+<!--                    <el-form-item :label="$t('hubsetting.sharder_account_phone_or_email')"  v-if="hubsetting.registerSiteAccount">-->
+<!--                        <el-input v-model="registerSharderSiteUser.sharderAccountPhoneOrEmail" ></el-input>-->
+<!--                    </el-form-item>-->
+<!--                    <el-form-item :label="$t('hubsetting.verification_code')" v-if="hubsetting.registerSiteAccount">-->
+<!--                        <el-input v-model="registerSharderSiteUser.verificationCode" ></el-input><el-button type="primary" style="position: absolute;right:0px;top:0px " @click="sendVCode()" :disabled="sendSuccess">-->
+<!--                        {{sendSuccess?time+"s 可"+$t('hubsetting.resend_verification_code'):$t('hubsetting.send_verification_code')}}-->
+<!--                    </el-button>-->
+<!--                    </el-form-item>-->
+<!--                    <el-form-item :label="$t('hubsetting.set_sharder_account_password')"  v-if="hubsetting.registerSiteAccount">-->
+<!--                        <el-input type="password" v-model="registerSharderSiteUser.setSharderPwd"></el-input>-->
+<!--                    </el-form-item>-->
+<!--                    <el-form-item :label="$t('hubsetting.confirm_sharder_account_password')"  v-if="hubsetting.registerSiteAccount">-->
+<!--                        <el-input type="password" v-model="registerSharderSiteUser.confirmSharderPwd"></el-input>-->
+<!--                    </el-form-item>-->
+<!--                    <el-form-item :label="$t('hubsetting.picture_verification_code')"  v-if="hubsetting.registerSiteAccount">-->
+<!--                        <el-input v-model="registerSharderSiteUser.pictureVerificationCode" @blur="checkPicVerificationCode"></el-input>-->
+<!--                        <el-image :src="src" style="width:112px;height:38px;position: absolute;right:1px;top:1px " @click="getPicVCode()">-->
+<!--                            <div slot="placeholder" class="image-slot">-->
+<!--                                Loding<span class="dot">...</span>-->
+<!--                            </div>-->
+<!--                        </el-image>-->
+<!--                    </el-form-item>-->
+<!--                    <el-form-item >-->
+<!--                        <el-button type="primary" v-if="hubsetting.registerSiteAccount" style="float: right" @click="registerSharderSite()">-->
+<!--                            {{$t('hubsetting.register_sharder_account')}}-->
+<!--                        </el-button>-->
+<!--                    </el-form-item>-->
 
                     <el-form-item :label="$t('hubsetting.sharder_account')" prop="sharderAccount" v-if="!hubsetting.registerSiteAccount">
                         <el-input v-model="userConfig.siteAccount" ></el-input>
@@ -583,21 +587,24 @@
                     <el-form-item :label="$t('hubsetting.sharder_account_password')" prop="sharderPwd" v-if="!hubsetting.registerSiteAccount">
                         <el-input type="password" v-model="hubsetting.sharderPwd" @blur="checkSiteAccount"></el-input>
                     </el-form-item>
-                    <el-form-item :label="$t('hubsetting.nat_traversal_address')" v-if="hubsetting.openPunchthrough"
-                                  prop="address">
-                        <el-input v-model="hubsetting.address" :disabled="true"></el-input>
-                    </el-form-item>
-                    <el-form-item :label="$t('hubsetting.nat_traversal_port')" v-if="hubsetting.openPunchthrough"
-                                  prop="port">
-                        <el-input v-model="hubsetting.port" :disabled="true"></el-input>
-                    </el-form-item>
-                    <el-form-item :label="$t('hubsetting.nat_traversal_clent_privateKey')"
-                                  v-if="hubsetting.openPunchthrough" prop="clientSecretkey">
-                        <el-input v-model="hubsetting.clientSecretkey" :disabled="true"></el-input>
-                    </el-form-item>
-                    <el-form-item :label="$t('hubsetting.public_ip_address')" v-if="hubsetting.openPunchthrough" prop="publicAddress">
-                        <el-input v-model="hubsetting.publicAddress" :disabled="hubsetting.openPunchthrough"></el-input>
-                    </el-form-item>
+
+                    <!-- NAT Seeting by site account -->
+<!--                    <el-form-item :label="$t('hubsetting.nat_traversal_address')" v-if="hubsetting.openPunchthrough"-->
+<!--                                  prop="address">-->
+<!--                        <el-input v-model="hubsetting.address" :disabled="true"></el-input>-->
+<!--                    </el-form-item>-->
+<!--                    <el-form-item :label="$t('hubsetting.nat_traversal_port')" v-if="hubsetting.openPunchthrough"-->
+<!--                                  prop="port">-->
+<!--                        <el-input v-model="hubsetting.port" :disabled="true"></el-input>-->
+<!--                    </el-form-item>-->
+<!--                    <el-form-item :label="$t('hubsetting.nat_traversal_clent_privateKey')"-->
+<!--                                  v-if="hubsetting.openPunchthrough" prop="clientSecretkey">-->
+<!--                        <el-input v-model="hubsetting.clientSecretkey" :disabled="true"></el-input>-->
+<!--                    </el-form-item>-->
+<!--                    <el-form-item :label="$t('hubsetting.public_ip_address')" v-if="hubsetting.openPunchthrough" prop="publicAddress">-->
+<!--                        <el-input v-model="hubsetting.publicAddress" :disabled="hubsetting.openPunchthrough"></el-input>-->
+<!--                    </el-form-item>-->
+
                     <!--<el-form-item class="create_account" :label="$t('hubsetting.token_address')" prop="SS_Address">-->
                     <!--<el-input v-model="hubsetting.SS_Address"></el-input>-->
                     <!--&lt;!&ndash;<a @click="register"><span>$t('hubsetting.create_account')</span></a>&ndash;&gt;-->
@@ -638,14 +645,17 @@
             <div class="modal-body">
                 <el-form label-position="left" label-width="160px" :rules="formRules"
                          :model="hubsetting" v-loading="registerNatLoading" ref="reconfigureForm" status-icon>
-                    <el-form-item :label="$t('hubsetting.enable_nat_traversal')">
-                        <el-checkbox v-model="hubsetting.openPunchthrough"></el-checkbox>
-                    </el-form-item>
+<!--                    <el-form-item :label="$t('hubsetting.enable_nat_traversal')">-->
+<!--                        <el-checkbox v-model="hubsetting.openPunchthrough"></el-checkbox>-->
+<!--                    </el-form-item>-->
                     <el-form-item :label="$t('hubsetting.token_address')" v-if="userConfig.ssAddress">
                         <el-input v-model="userConfig.ssAddress" :disabled="true"></el-input>
                     </el-form-item>
                     <el-form-item :label="$t('hubsetting.serial_no')" v-show="userConfig.xxx&&hubsetting.settingSerialClickCount>=5">
                         <el-input v-model="userConfig.xxx" :disabled="true"></el-input>
+                    </el-form-item>
+                    <el-form-item :label="$t('hubsetting.disk_capacity')" v-if="userConfig.diskCapacity>0">
+                        <el-input v-model="userConfig.diskCapacity" :disabled="true"></el-input>
                     </el-form-item>
 
                     <el-form-item :label="$t('hubsetting.sharder_account')" prop="sharderAccount">
@@ -705,14 +715,17 @@
             <div class="modal-body">
                 <el-form label-position="left" :model="hubsetting" status-icon :rules="formRules"
                          :label-width="this.$i18n.locale === 'en'? '200px':'160px'" ref="useNATForm">
-                    <el-form-item :label="$t('hubsetting.enable_nat_traversal')">
-                        <el-checkbox v-model="hubsetting.openPunchthrough"></el-checkbox>
-                    </el-form-item>
+<!--                    <el-form-item :label="$t('hubsetting.enable_nat_traversal')">-->
+<!--                        <el-checkbox v-model="hubsetting.openPunchthrough"></el-checkbox>-->
+<!--                    </el-form-item>-->
                     <el-form-item :label="$t('hubsetting.token_address')" v-if="userConfig.ssAddress&&userConfig.ssAddress!==''">
                         <el-input v-model="userConfig.ssAddress" :disabled="true"></el-input>
                     </el-form-item>
                     <el-form-item :label="$t('hubsetting.serial_no')" v-show="userConfig.xxx&&hubsetting.natSerialClickCount>=5">
                         <el-input v-model="userConfig.xxx" :disabled="true"></el-input>
+                    </el-form-item>
+                    <el-form-item :label="$t('hubsetting.disk_capacity')" v-if="userConfig.diskCapacity>0">
+                        <el-input v-model="userConfig.diskCapacity" :disabled="true"></el-input>
                     </el-form-item>
                     <el-form-item :label="$t('hubsetting.sharder_account')" prop="sharderAccount">
                         <el-input v-model="userConfig.siteAccount"></el-input>
@@ -891,6 +904,7 @@
                 userConfig: {
                     nodeType: this.$store.state.userConfig['sharder.NodeType'],
                     xxx: this.$store.state.userConfig['sharder.xxx'],
+                    diskCapacity: this.$store.state.userConfig['sharder.diskCapacity'],
                     useNATService: this.$store.state.userConfig['sharder.useNATService'] === 'true',
                     natClientSecretKey: this.$store.state.userConfig['sharder.NATClientKey'],
                     publicAddress: this.$store.state.userConfig['sharder.myAddress'],
@@ -951,6 +965,7 @@
                     openPunchthrough: false,
                     loadingData: false,
                     sharderPwd: '',
+                    diskCapacity: -1,
                     address: '',
                     port: '',
                     clientSecretkey: '',
@@ -1026,8 +1041,8 @@
                 loading: true,
 
                 capacity:0,
-                maxCapacity:192,
-                mortgageFee:0,
+                maxCapacity: 192,
+                diskPledge: 0,
                 accountSecret:"",
 
                 params: [],
@@ -1276,7 +1291,6 @@
 
                 });
             },
-
             registerSharderSite(){
                 const _this = this;
                 let sharderAccount = _this.registerSharderSiteUser.sharderAccountPhoneOrEmail;
@@ -1345,7 +1359,6 @@
                 });
 
             },
-
             getPicVCode(){
                 const _this = this;
                 _this.src = _this.requestUrl+"/captcha.svl?_"+Math.random();
@@ -1353,7 +1366,6 @@
             activeSelectType(type) {
                 return this.selectType === type ? 'active' : ''
             },
-
             getPocScore(){
                 const _this = this;
 
@@ -1378,7 +1390,6 @@
                     console.info("error", err);
                 });
             },
-
             getLatestHubVersion() {
                 const _this = this;
                 _this.$http.get('/sharder?requestType=getLatestCosVersion').then(res => {
@@ -1822,7 +1833,6 @@
                     _this.$http.post(getCommonFoundationApiUrl(FoundationApiUrls.fetchNatServiceConfig), formData)
                         .then(res => {
                             _this.hubsetting.loadingData = false;
-                            // console.log(`获取NAT服务响应：${JSON.stringify(res)}`);
                             if (res.data.success && res.data.data) {
                                 _this.hubsetting.address = res.data.data.natServiceIp;
                                 _this.hubsetting.port = res.data.data.natServicePort;
@@ -1833,7 +1843,6 @@
                                 _this.hubsetting.register_status = res.data.data.status;
                                 _this.needRegister = false;
                             } else if (res.data.success && !res.data.data) {
-                                console.info('HUB配置信息不存在, 需要注册NAT...');
                                 _this.clearHubSetting();
                                 _this.needRegister = true;
                                 _this.$message.error(_this.$t('notification.hubsetting_sharder_account_no_permission'));
@@ -2413,7 +2422,6 @@
                 this.$store.state.mask = true;
                 this.onChainDialog = true;
             },
-
             openJoinNetDialog:function(){
                 if (SSO.downloadingBlockchain) {
                     this.$message.warning(this.$t("account.synchronization_block"));
@@ -2422,23 +2430,25 @@
                 this.$store.state.mask = true;
                 this.joinNetDialog = true;
             },
-
-            formatTooltip:function(val){
-                return val+" T";
+            formatInputDiskCapacity:function(val){
+                return val + " T";
             },
-            calculationNumber:function(val){
-                this.mortgageFee = val*64;
+            calculatePledge:function(val){
+                this.diskPledge = val * 133;
             },
-            calculationCapacity:function(){
-                let val = Math.ceil(this.mortgageFee/64);
+            calPledgeCapacityByBalance:function() {
+                const _this = this;
+                let accountBalance = _this.accountInfo.effectiveBalanceNQT / 100000000;
+                let val = Math.ceil(accountBalance / 133);
                 if (val <= 192){
                     this.capacity = val;
                 } else {
                     this.capacity = 192;
                 }
-
             },
-
+            formatDiskCapacity: function() {
+                return parseFloat(this.userConfig.diskCapacity / 1024 / 1024).toFixed(2) + " GB";
+            },
             openTransferDialog: function () {
                 if (SSO.downloadingBlockchain) {
                     return this.$message.warning(this.$t("account.synchronization_block"));
@@ -2892,7 +2902,7 @@
                 return true;
             },
             whetherShowJoinNetBtn() {
-                return false;
+                return true;
             },
             whetherShowOnChainBtn() {
                 return false;
@@ -2905,6 +2915,7 @@
                 3. NodeType is Hub；
                 4. Hub bind MW address must equals to user account address。
                 */
+                return true;
                 return this.secretPhrase
                     && !this.initHUb
                     && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center')
@@ -2917,6 +2928,7 @@
                 2. using secretPhrase to login；
                 3. NodeType is Hub。
                 */
+                return true;
                 return this.secretPhrase
                     && this.initHUb
                     && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center');
@@ -3153,7 +3165,7 @@
     }
 
     .modal_hubSetting .modal-header .modal-title {
-        /*margin: 0!important;*/
+        margin-left: 0!important;
     }
 
     .modal_hubSetting .modal-body {
@@ -3185,4 +3197,6 @@
     .modal_hubSetting .modal-header .long {
         width: 110px;
     }
+
+
 </style>

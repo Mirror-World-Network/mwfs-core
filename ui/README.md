@@ -1,4 +1,4 @@
-# CDWH Client UI #
+# MW Client UI #
 
 ## Compile and run in npm
 0. run `npm i`
@@ -8,5 +8,5 @@
 
 ## Build and run in Client
 1. run `npm run build`
-2. startup CDWH service
+2. startup MW Client service
 3. access URL: [http://localhost:8215](http://localhost:8215)

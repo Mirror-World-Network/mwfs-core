@@ -43,6 +43,7 @@ const en = {
         'public_ip_address': "Public IP Address",
         'token_address': "Linked MW Address",
         'serial_no': "Serial No",
+        'disk_capacity': "Disk Capacity",
         'enable_auto_mining': "Enable Mining",
         'set_mnemonic_phrase': "Mnemonic Phrase",
         'set_password': "Set Admin Password",

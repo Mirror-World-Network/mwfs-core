@@ -991,7 +991,7 @@ public final class Peers {
     public static void init() {
         Init.init();
 //        ThreadPool.scheduleThread("GetCertifiedPeer", Peers.GET_CERTIFIED_PEER_THREAD, 1, TimeUnit.MINUTES);
-        ThreadPool.scheduleThread("PeerHardwareTesting", Peers.HARDWARE_TESTING_THREAD, 60);
+        ThreadPool.scheduleThread("PeerHardwareTesting", Peers.HARDWARE_TESTING_THREAD, 7, TimeUnit.DAYS);
     }
 
     public static void shutdown() {

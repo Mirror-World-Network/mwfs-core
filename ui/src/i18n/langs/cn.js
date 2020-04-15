@@ -44,6 +44,7 @@ const cn = {
         'public_ip_address': "公网地址",
         'token_address': "关联MW地址",
         'serial_no': "硬件编号",
+        'disk_capacity': "磁盘容量",
         'enable_auto_mining': "是否开启挖矿",
         'set_mnemonic_phrase': "绑定密钥",
         'set_password': "设置管理员密码",
@@ -1018,7 +1019,7 @@ const cn = {
         "status_refuse":"拒绝发放",
     },
     poc: {
-        'block_reward_tips_phase1': "。",
+        'block_reward_tips_phase1': "",
         'creator': "创建者",
         'type': "类型",
         'nodeType': "节点类型",
