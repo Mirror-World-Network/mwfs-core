@@ -20,10 +20,10 @@ public class PocCalculator implements Serializable {
     static PocCalculator inst = new PocCalculator();
     
     // poc score converter
-    private static final BigInteger SCORE_MULTIPLIER = BigInteger.valueOf(125000L);
+    private static final BigInteger SCORE_MULTIPLIER = BigInteger.valueOf(1250L);
 
     // hardware score converter
-    private static final BigInteger HD_SCORE_MULTIPLIER = BigInteger.valueOf(138880L);
+    private static final BigInteger HD_SCORE_MULTIPLIER = BigInteger.valueOf(1388L);
 
     // the final poc score should divide the PERCENT_DIVISOR
     private static final BigInteger PERCENT_DIVISOR = BigInteger.valueOf(100L);

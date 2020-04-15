@@ -519,7 +519,7 @@
                         </el-form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn common_btn writeBtn" @click="sendTransferInfo">
+                        <button type="button" v-loading="transfer.executing" class="btn common_btn writeBtn" @click="sendTransferInfo">
                             {{$t('transfer.transfer_send')}}
                         </button>
                     </div>
@@ -955,6 +955,7 @@
                     hasMessage: false,
                     message: "",
                     isEncrypted: false,
+                    executing: false,
                     password: "",
                     hasPublicKey: false,
                     publicKey: "",
@@ -2227,7 +2228,7 @@
                 let options = {};
                 let encrypted = {};
                 let formData = new FormData();
-
+                _this.transfer.executing = true;
                 if (_this.transfer.receiver === "CDW-____-____-____-_____" ||
                     _this.transfer.receiver === "___-____-____-____-_____" ||
                     _this.transfer.receiver === "CDW" ||
@@ -2293,6 +2294,7 @@
                         }
                     }
                     _this.sendTransfer(formData);
+                    _this.transfer.executing = false;
                 });
             },
             sendTransfer: function (formData) {

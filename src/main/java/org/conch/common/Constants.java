@@ -217,7 +217,7 @@ public final class Constants {
 
     public static final int FXT_BLOCK = isTestnetOrDevnet() ? 10000 : 10000; 
     
-    public static final int LAST_KNOWN_BLOCK = isDevnet() ?  1 : (isTestnet() ? 268 : 500);
+    public static final int LAST_KNOWN_BLOCK = isDevnet() ?  1 : (isTestnet() ? 0 : 0);
     
     public static final int TESTNET_PHASE_ONE = 500000;
     public static final int TESTNET_PHASE_TWO = 990000;

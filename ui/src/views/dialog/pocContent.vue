@@ -12,9 +12,9 @@
             <p v-if="pocInfo.nodeTypeTemplate">
                 <strong>{{$t('poc.node_type_score')}}</strong>
 <!--                <span>{{$t('poc.sharder_node')}}: {{pocInfo.nodeTypeTemplate["1"]}}</span>-->
-                <span>{{$t('poc.community_node')}}: {{pocInfo.nodeTypeTemplate["2"]}}</span>
-                <span>{{$t('poc.hub_node')}}: {{pocInfo.nodeTypeTemplate["4"]}}</span>
+                <span>{{$t('poc.community_node')}}: {{pocInfo.nodeTypeTemplate["1"]}}</span>
                 <span>{{$t('poc.box_node')}}: {{pocInfo.nodeTypeTemplate["5"]}}</span>
+                <span>{{$t('poc.hub_node')}}: {{pocInfo.nodeTypeTemplate["4"]}}</span>
                 <span>{{$t('poc.normal_node')}}: {{pocInfo.nodeTypeTemplate["3"]}}</span>
             </p>
 <!--            <p v-if="pocInfo.serverOpenTemplate">-->
