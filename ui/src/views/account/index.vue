@@ -546,7 +546,7 @@
                         <el-input v-model="userConfig.xxx" :disabled="true"></el-input>
                     </el-form-item>
                     <el-form-item :label="$t('hubsetting.disk_capacity')"  v-if="userConfig.diskCapacity>0">
-                        <el-input  v-model="this.formatDiskCapacity()" :format="formatDiskCapacity" :disabled="true"></el-input>
+                        <el-input  v-model="this.formatDiskCapacity()" :disabled="true"></el-input>
                     </el-form-item>
 
                     <!-- register the new site account                   -->
@@ -655,7 +655,7 @@
                         <el-input v-model="userConfig.xxx" :disabled="true"></el-input>
                     </el-form-item>
                     <el-form-item :label="$t('hubsetting.disk_capacity')" v-if="userConfig.diskCapacity>0">
-                        <el-input v-model="userConfig.diskCapacity" :disabled="true"></el-input>
+                        <el-input  v-model="this.formatDiskCapacity()" :disabled="true"></el-input>
                     </el-form-item>
 
                     <el-form-item :label="$t('hubsetting.sharder_account')" prop="sharderAccount">
@@ -725,7 +725,7 @@
                         <el-input v-model="userConfig.xxx" :disabled="true"></el-input>
                     </el-form-item>
                     <el-form-item :label="$t('hubsetting.disk_capacity')" v-if="userConfig.diskCapacity>0">
-                        <el-input v-model="userConfig.diskCapacity" :disabled="true"></el-input>
+                        <el-input  v-model="this.formatDiskCapacity()" :disabled="true"></el-input>
                     </el-form-item>
                     <el-form-item :label="$t('hubsetting.sharder_account')" prop="sharderAccount">
                         <el-input v-model="userConfig.siteAccount"></el-input>
