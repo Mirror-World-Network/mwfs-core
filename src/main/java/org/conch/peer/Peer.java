@@ -46,7 +46,7 @@ public interface Peer extends Comparable<Peer> {
         SOUL(4, "Soul Node", 0,"Soul"),
         NORMAL(3, "Normal Node", 2,"Normal"),
         COMMUNITY(2, "Community Node", 3, "Community"),
-        FOUNDATION(1, "Foundation Node",4, "Foundation");
+        FOUNDATION(1, "Community Node",4, "Foundation");
         private final int code;
         private final String name;
         private final int simpleCode;

@@ -2225,10 +2225,10 @@
             },
             sendTransferInfo: function () {
                 const _this = this;
+                _this.transfer.executing = true;
                 let options = {};
                 let encrypted = {};
                 let formData = new FormData();
-                _this.transfer.executing = true;
                 if (_this.transfer.receiver === "CDW-____-____-____-_____" ||
                     _this.transfer.receiver === "___-____-____-____-_____" ||
                     _this.transfer.receiver === "CDW" ||
@@ -2457,6 +2457,7 @@
                 }
                 this.$store.state.mask = true;
                 this.tranferAccountsDialog = true;
+                this.transfer.executing = false;
             },
             openHubSettingDialog: function () {
                 const _this = this;

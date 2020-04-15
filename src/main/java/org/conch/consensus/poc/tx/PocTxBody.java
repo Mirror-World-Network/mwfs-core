@@ -110,31 +110,28 @@ public interface PocTxBody {
 
         public PocNodeTypeV3(ByteBuffer buffer, byte transactionVersion) {
             super(buffer, transactionVersion);
-            this.accountId = buffer.getLong();
+            this.diskCapacity = buffer.getLong();
         }
 
         public PocNodeTypeV3(JSONObject attachmentData) {
             super(attachmentData);
-            this.accountId = (Long) attachmentData.get("accountId");
-            this.accountId = (Long) attachmentData.get("diskCapacity");
+            this.diskCapacity = (Long) attachmentData.get("diskCapacity");
         }
 
         @Override
         public int getMySize() {
-            return super.getMySize() + 8 + 8;
+            return super.getMySize() + 8;
         }
 
         @Override
         public void putMyBytes(ByteBuffer buffer) {
             super.putMyBytes(buffer);
-            buffer.putLong(accountId);
             buffer.putLong(diskCapacity);
         }
 
         @Override
         public void putMyJSON(JSONObject attachment) {
             super.putMyJSON(attachment);
-            attachment.put("accountId", this.accountId);
             attachment.put("diskCapacity", this.diskCapacity);
         }
     }
