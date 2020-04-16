@@ -138,7 +138,7 @@ const cn = {
         'transaction_type_system_reward': "系统奖励",
         'transaction_type_block_reward': "出块奖励",
         'transaction_type_genesis_reward': "创世交易",
-        'transaction_type_poc_node_type': "PoC节点类型",
+        'transaction_type_poc_node_type': "PoC节点声明",
         'transaction_type_poc_node_config': "PoC节点配置",
         'transaction_type_poc_weight_table': "PoC权重表",
         'transaction_type_poc_block_missing': "PoC出块错过",

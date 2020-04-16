@@ -137,7 +137,7 @@ const en = {
         'transaction_type_system_reward': "Rewards",
         'transaction_type_block_reward': "Mining Rewards",
         'transaction_type_genesis_reward': "Genesis",
-        'transaction_type_poc_node_type': "PoC Node Type",
+        'transaction_type_poc_node_type': "PoC Node Statement",
         'transaction_type_poc_node_config': "PoC Node Config",
         'transaction_type_poc_weight_table': "PoC Weight Table",
         'transaction_type_poc_block_missing': "PoC Block Missing",
