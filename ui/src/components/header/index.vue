@@ -382,8 +382,7 @@
                     }
                 };
                 if (b) {
-
-                    if(SSO.accountInfo.balanceNQT/ 100000000 + SSO.accountInfo.frozenBalanceNQT / 100000000 < 20000){
+                    if(SSO.accountInfo.balanceNQT/ 100000000 + SSO.accountInfo.frozenBalanceNQT / 100000000 < 133){
                         return _this.$message.error(_this.$t('notification.ss_not_enough'));
                     }
 
