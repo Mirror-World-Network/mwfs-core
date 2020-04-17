@@ -389,6 +389,10 @@ public class Generator implements Comparable<Generator> {
             Logger.logDebugMessage(old + " is already mining");
             return old;
         }
+        if(sortedMiners != null) {
+            sortedMiners.add(generator);
+        }
+
         listeners.notify(generator, Event.START_MINING);
         Logger.logDebugMessage(generator + " started");
         return generator;
