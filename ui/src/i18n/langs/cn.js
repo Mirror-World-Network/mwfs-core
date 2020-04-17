@@ -17,7 +17,7 @@ const cn = {
         'init_hub': "初始化",
         'use_nat_server': "穿透服务",
         'config_nat_server': "穿透服务",
-        'login_binding_hub_account_tip':"此Hub已绑定TMW地址 ",
+        'login_binding_hub_account_tip':"此矿机已绑定MW地址 ",
     },
     hubsetting: {
         'register_nat_server': "申请穿透服务",
@@ -99,7 +99,7 @@ const cn = {
         'send_message': "消息",
         'storage_file':'数据',
         'on_chain':'上链存证',
-        'hub_setting': "Hub设置",
+        'hub_setting': "矿机设置",
         'income_and_expenditure_details': "收支明细",
         'payout': "支出",
         'income': "收入",
@@ -287,7 +287,7 @@ const cn = {
         'certificate_services': "证明服务",
         'return_network': "返回网络",
         'total_peers': "节点数量",
-        'active_hub': "Hub运行数",
+        'active_hub': "矿机运行数",
         'active_peers': "活跃节点数",
         'peer_list': "节点列表",
         'peer_list_link': "(至少需要连接2个节点才能正常出块)",
@@ -568,7 +568,7 @@ const cn = {
             'poc_tip2': "测试网络运行PoC权重表可以在创世区块中查看，每个矿工都根据权重表计算其PoC算力。",
             'reward_distribution': "奖励分配",
             'reward_distribution_tip1': "经测算从1亿系统奖励中解锁 11,700,000 MW(ERC20)用于测试网的奖励。",
-            'reward_distribution_tip2': "第一阶段测试(2019.Q2前)，Hub节点可获得出块奖励的90%，普通节点和基金会节点可获得出块奖励的10%。",
+            'reward_distribution_tip2': "第一阶段测试(2019.Q2前)，矿机节点可获得出块奖励的90%，普通节点和基金会节点可获得出块奖励的10%。",
         }
     },
     sso: {
@@ -921,8 +921,8 @@ const cn = {
     notification: {
         'update_success': "更新成功",
         'restart_success': "请稍后再次打开页面",
-        'hubsetting_no_sharder_account': "请输入Sharder账号获取Hub配置",
-        'hubsetting_sharder_account_no_permission': "请联系管理员获取Hub设置",
+        'hubsetting_no_sharder_account': "请输入官网账号获取H矿机配置",
+        'hubsetting_sharder_account_no_permission': "请联系管理员获取矿机设置",
         'hubsetting_account_address_error_format': "关联MW地址格式错误！",
         'hubsetting_no_mnemonic_word': "开启矿池必须填写助记词！",
         'hubsetting_not_matched_mnemonic_word': "助记词和的登录用的助记词不一致",
