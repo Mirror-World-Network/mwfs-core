@@ -217,7 +217,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             if (!Generator.isBootNode
                     && connectedSize < limitConnectedSize) {
                 if (Logger.printNow(Constants.BlockchainProcessor_P_downloadPeer)) {
-                    Logger.logDebugMessage("No enough connected peers[limit size=" + (limitConnectedSize) + ",current connected size=" + connectedSize + "], break syn blocks...");
+                    Logger.logInfoMessage("No enough connected peers[limit size=" + (limitConnectedSize) + ",current connected size=" + connectedSize + "], break syn blocks...");
 //                    Logger.logDebugMessage("Current peers => " + Arrays.toString(connectedPublicPeers.toArray()));
                 }
 

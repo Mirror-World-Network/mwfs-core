@@ -2918,7 +2918,7 @@
                 3. NodeType is Hub；
                 4. Hub bind MW address must equals to user account address。
                 */
-                // return true;
+                //return true;
                 return this.secretPhrase
                     && !this.initHUb
                     && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center')
@@ -2931,7 +2931,7 @@
                 2. using secretPhrase to login；
                 3. NodeType is Hub。
                 */
-                // return true;
+                return true;
                 return this.secretPhrase
                     && this.initHUb
                     && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center');
