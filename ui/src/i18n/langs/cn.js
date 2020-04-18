@@ -220,7 +220,7 @@ const cn = {
         'forging_error_no_admin_password': "无法确定挖矿状态，请先设置节点管理密码",
         'forging_error_exceeds_account_volume': "只能使用关联地址挖矿,请用绑关联地址的密钥重新登陆",
         'no_forging': "未挖矿",
-        'started_forging': "已启动",
+        'started_forging': "挖矿中",
         'exit': "退出",
         'start_forging': "开启挖矿",
         'admin_password': "管理密码",
