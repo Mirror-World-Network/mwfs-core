@@ -17,7 +17,7 @@ const cn = {
         'init_hub': "初始化",
         'use_nat_server': "穿透服务",
         'config_nat_server': "穿透服务",
-        'login_binding_hub_account_tip':"此矿机已绑定MW地址 ",
+        'login_binding_hub_account_tip':"此节点已绑定MW地址 ",
     },
     hubsetting: {
         'register_nat_server': "申请穿透服务",
@@ -99,7 +99,7 @@ const cn = {
         'send_message': "消息",
         'storage_file':'数据',
         'on_chain':'上链存证',
-        'hub_setting': "矿机设置",
+        'hub_setting': "节点设置",
         'income_and_expenditure_details': "收支明细",
         'payout': "支出",
         'income': "收入",
@@ -921,8 +921,8 @@ const cn = {
     notification: {
         'update_success': "更新成功",
         'restart_success': "请稍后再次打开页面",
-        'hubsetting_no_sharder_account': "请输入官网账号获取H矿机配置",
-        'hubsetting_sharder_account_no_permission': "请联系管理员获取矿机设置",
+        'hubsetting_no_sharder_account': "请输入官网账号获取节点配置",
+        'hubsetting_sharder_account_no_permission': "请联系管理员获取节点设置",
         'hubsetting_account_address_error_format': "关联MW地址格式错误！",
         'hubsetting_no_mnemonic_word': "开启矿池必须填写助记词！",
         'hubsetting_not_matched_mnemonic_word': "助记词和的登录用的助记词不一致",
