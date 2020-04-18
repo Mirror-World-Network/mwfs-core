@@ -24,11 +24,11 @@
                         <!--{{$t('header.mining')}}-->
                     <!--</el-menu-item>-->
                 </el-menu>
-                <div class="navbar_console">
-                    <el-button type="text" @click="goConsole">
-                        <span class="console"></span>
-                    </el-button>
-                </div>
+<!--                <div class="navbar_console">-->
+<!--                    <el-button type="text" @click="goConsole">-->
+<!--                        <span class="console"></span>-->
+<!--                    </el-button>-->
+<!--                </div>-->
                 <div class="navbar_search">
                     <div>
                         <input class="navbar_search_input" :class="activeSearch ? 'navbar_search_input_active' : ''"
