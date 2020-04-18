@@ -203,7 +203,7 @@ const cn = {
         'account_balance': "账户余额",
         'account_balance_explain':"已接收到的转账和挖矿所得，需要一定数量的区块确认后，才可变成可用余额。",
         'account_available_balance': "可用余额",
-        'account_name_not_set_explain':'3个区块高度确认后的所有已接收到的转账和挖矿所得。',
+        'account_name_not_set_explain':'1个区块确认后的所有已接收到的转账和挖矿所得。',
         'frozen_balance_nqt': "冻结金额",
         'account_mining_balance': "已挖矿",
         'public_key': "公钥",

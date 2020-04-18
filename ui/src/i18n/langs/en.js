@@ -202,7 +202,7 @@ const en = {
         'account_balance': "Account Balance",
         'account_balance_explain':"is the current MW amount including any MW earned from unconfirmed blocks.",
         'account_available_balance': "Available Balance",
-        'account_name_not_set_explain':'is the MW amount currently available for use and it will only include the MW earnings from confirmed blocks (after 3 block confirmations).',
+        'account_name_not_set_explain':'is the MW amount currently available for use and it will only include the MW earnings from confirmed blocks (after 1 block confirmations).',
         'frozen_balance_nqt': "Freeze Amount",
         'account_mining_balance': "Mined Amount",
         'public_key': "Public Key",
