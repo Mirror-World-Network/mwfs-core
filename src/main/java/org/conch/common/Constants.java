@@ -218,7 +218,9 @@ public final class Constants {
     public static final int FXT_BLOCK = isTestnetOrDevnet() ? 10000 : 10000; 
     
     public static final int LAST_KNOWN_BLOCK = isDevnet() ?  1 : (isTestnet() ? 1 : 1);
-    
+    public static final int BOOTNODE_MINING_DIRECT_HEIGHT = isTestnet() ? 1600 : 1;
+    public static final long MINGING_MW_HOLDING_LIMIT = isTestnet() ? 133 : 133;
+
     public static final int TESTNET_PHASE_ONE = 500000;
     public static final int TESTNET_PHASE_TWO = 990000;
     public static final String TESTNET_PHASE_ONE_TIME = "2019-12-01 00:00:00";
@@ -247,7 +249,7 @@ public final class Constants {
     public static final long SHUFFLING_DEPOSIT_NQT = (isTestnetOrDevnet() ? 7 : 1000) * ONE_SS;
 
     public static final boolean correctInvalidFees = Conch.getBooleanProperty("sharder.correctInvalidFees");
-    public static final String ACCOUNT_PREFIX = "CDW-"; //account prefix，SSA: Sharder Storage Account
+    public static final String ACCOUNT_PREFIX = "CDW-"; //account prefix
 
     //chain begin time
     public static final long EPOCH_BEGINNING = launchedTime(0).getTimeInMillis();
