@@ -99,9 +99,15 @@ public class ArchiveDbTool {
             String[] dbArchiveArray = archiveDb(null);
             if(dbArchiveArray == null || dbArchiveArray.length == 0) {
                 Logger.logInfoMessage("zip db archive and memo file failed. EXIT the db archive operation.");
+            } else {
+                // upload to OSS
+                Logger.logInfoMessage("Delete the old db archive memo file " + OSS_DB_ARCHIVE_MEMO_PATH);
+                AliyunOssUtil.delFile(Lists.newArrayList(OSS_DB_ARCHIVE_MEMO_PATH));
+                Logger.logInfoMessage("Upload the db archive[" + dbArchiveArray[0] + "] to OSS " + OSS_DB_ARCHIVE_PATH);
+                AliyunOssUtil.uploadFile(OSS_DB_ARCHIVE_PATH, dbArchiveArray[0], true);
+                Logger.logInfoMessage("Upload the db archive memo file[" + dbArchiveArray[1] + "] to OSS " + OSS_DB_ARCHIVE_MEMO_PATH);
+                AliyunOssUtil.uploadFile(OSS_DB_ARCHIVE_MEMO_PATH, dbArchiveArray[1], true);
             }
-            AliyunOssUtil.uploadFile(OSS_DB_ARCHIVE_PATH, dbArchiveArray[0], true);
-            AliyunOssUtil.uploadFile(OSS_DB_ARCHIVE_MEMO_PATH, dbArchiveArray[1], true);
         });
         dbArchiveThread.start();
     }
@@ -139,11 +145,6 @@ public class ArchiveDbTool {
             // return values
             archiveArray[0] = dbArchivePath;
             archiveArray[1] = generateArchiveMemoFile(pathStr);
-
-            // upload to OSS
-            AliyunOssUtil.delFile(Lists.newArrayList(OSS_DB_ARCHIVE_MEMO_PATH));
-            AliyunOssUtil.uploadFile(archiveArray[0], dbArchivePath, true);
-            AliyunOssUtil.uploadFile(archiveArray[1], dbArchivePath, true);
 
             return archiveArray;
         } finally {
