@@ -843,7 +843,12 @@
                         <td>{{$global.getSSNumberFormat(accountInfo.frozenBalanceNQT)}}</td>
                     </tr>
                     <tr>
-                        <th>{{$t('account_info.account_mining_balance')}}</th>
+                        <th>
+                            {{$t('account_info.account_mining_balance')}}
+                            <el-tooltip class="item" effect="dark" :content="$t('account_info.account_mining_balance_explain')" placement="top-start">
+                                <p class="el-icon-info"></p>
+                            </el-tooltip>
+                        </th>
                         <td>{{$global.getSSNumberFormat(accountInfo.forgedBalanceNQT)}}</td>
                     </tr>
                     <tr>
