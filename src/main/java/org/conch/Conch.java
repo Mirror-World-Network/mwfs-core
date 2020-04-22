@@ -387,7 +387,14 @@ public final class Conch {
 
     private static String readAndParseMyAddress(){
         String myAddr = Convert.emptyToNull(Conch.getStringProperty("sharder.myAddress", IpUtil.getNetworkIp()).trim());
-        return "undefined".equalsIgnoreCase(myAddress) ? IpUtil.getNetworkIp().trim() : myAddr;
+
+        // correct the undefined issue of myAddress
+        if("undefined".equalsIgnoreCase(myAddress)){
+            myAddr = IpUtil.getNetworkIp().trim();
+            Conch.storePropertieToFile("sharder.myAddress", myAddr);
+        }
+
+        return  myAddr;
     }
     /**
      * [NAT] useNATService and client configuration
