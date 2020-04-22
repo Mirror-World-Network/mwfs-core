@@ -789,7 +789,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
 
                 isRestoringDb = true;
                 new Thread(() -> {
-                    ClientUpgradeTool.restoreDbToKnownHeight();
+                    ClientUpgradeTool.restoreDbToLastArchive();
                     Conch.restartApplication(null);
                 }).start();
 

@@ -208,7 +208,7 @@ public final class Conch {
         String filePath = ".hubSetting/.tempCache/.sysCache";
         String userHome = Paths.get(System.getProperty("user.home"), filePath).toString();
         File tempFile = new File(userHome);
-        // hub node check if serial number exist
+        // node check if serial number exist
         if (tempFile.exists()) {
             String num = null;
             try {
@@ -217,7 +217,9 @@ public final class Conch {
                 e.printStackTrace();
             }
             Conch.serialNum = StringUtils.isEmpty(num) ? "" : num.replaceAll("(\\r\\n|\\n)", "");
-            Logger.logDebugMessage("serialNum => " + Conch.serialNum);
+            if(Logger.printNow(Constants.CONCH_P_readAndSetSerialNum)) {
+                Logger.logDebugMessage("serialNum => " + Conch.serialNum);
+            }
         }
     }
     
@@ -375,14 +377,25 @@ public final class Conch {
         loadProperties(properties, CONCH_PROPERTIES, false);
         
         // use the external ip as its myAddress default value
-        myAddress = Convert.emptyToNull(Conch.getStringProperty("sharder.myAddress", IpUtil.getNetworkIp()).trim());
-        
+        myAddress = readAndParseMyAddress();
+
         // check port of myAddress whether equal to port of TESTNET
         if (myAddress != null && myAddress.endsWith(":" + PresetParam.getPeerPort(Constants.Network.TESTNET)) && !Constants.isTestnet()) {
             throw new RuntimeException("Port " + PresetParam.getPeerPort(Constants.Network.TESTNET) + " should only be used for testnet!!!");
         }
     }
 
+    private static String readAndParseMyAddress(){
+        String myAddr = Convert.emptyToNull(Conch.getStringProperty("sharder.myAddress", IpUtil.getNetworkIp()).trim());
+
+        // correct the undefined issue of myAddress
+        if("undefined".equalsIgnoreCase(myAddress)){
+            myAddr = IpUtil.getNetworkIp().trim();
+            Conch.storePropertieToFile("sharder.myAddress", myAddr);
+        }
+
+        return  myAddr;
+    }
     /**
      * [NAT] useNATService and client configuration
      */
@@ -399,7 +412,7 @@ public final class Conch {
         
         try {
             if (isUseNAT()) {
-                Logger.logInfoMessage("[NAT] Node joins the network via sharder foundation or 3rd part NAT|DDNS service");
+                Logger.logInfoMessage("[NAT] Node joins the network via foundation NAT or 3rd part NAT|DDNS service");
                 
                 File natCmdFile = new File(SystemUtils.IS_OS_WINDOWS ? "nat_client.exe" : "nat_client");
 
