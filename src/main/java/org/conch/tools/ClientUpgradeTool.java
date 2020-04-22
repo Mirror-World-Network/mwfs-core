@@ -362,6 +362,10 @@ public class ClientUpgradeTool {
         restoreDb(lastDbArchive);
     }
 
+    /**
+     * auto db archive function is open; use the restoreDbToLastArchive to replace the restoreDbToKnownHeight
+     */
+    @Deprecated
     public static void restoreDbToKnownHeight() {
         if(lastDbArchive == null || lastDbArchiveHeight == null) fetchLastDbArchive();
         

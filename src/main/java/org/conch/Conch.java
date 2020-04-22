@@ -412,7 +412,7 @@ public final class Conch {
         
         try {
             if (isUseNAT()) {
-                Logger.logInfoMessage("[NAT] Node joins the network via sharder foundation or 3rd part NAT|DDNS service");
+                Logger.logInfoMessage("[NAT] Node joins the network via foundation NAT or 3rd part NAT|DDNS service");
                 
                 File natCmdFile = new File(SystemUtils.IS_OS_WINDOWS ? "nat_client.exe" : "nat_client");
 
