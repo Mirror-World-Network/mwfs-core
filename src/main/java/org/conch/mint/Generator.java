@@ -785,8 +785,8 @@ public class Generator implements Comparable<Generator> {
     /** Generator list has been initialized */
     private static boolean generatorsInitialized = false;
     
-    /** 3days */
-    private static final int MAX_ACTIVE_GENERATOR_LIFECYCLE = 615;
+    /** 10days */
+    private static final int MAX_ACTIVE_GENERATOR_LIFECYCLE = 1440;
     
     /**
      * Return a list of generators for the next block.  The caller must hold the blockchain
