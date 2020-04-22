@@ -389,7 +389,7 @@ public final class Conch {
         String myAddr = Convert.emptyToNull(Conch.getStringProperty("sharder.myAddress", IpUtil.getNetworkIp()).trim());
 
         // correct the undefined issue of myAddress
-        if("undefined".equalsIgnoreCase(myAddress)){
+        if("undefined".equalsIgnoreCase(myAddr)){
             myAddr = IpUtil.getNetworkIp().trim();
             Conch.storePropertieToFile("sharder.myAddress", myAddr);
         }
