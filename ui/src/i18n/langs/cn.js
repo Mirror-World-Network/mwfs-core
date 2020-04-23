@@ -232,7 +232,7 @@ const cn = {
         'console': "控制台",
     },
     network: {
-        'mining_time': "挖矿时间",
+        'mining_time': "预计出块时间",
         'poc_score': "算力 (PoC)",
         'poc_score_ss': "MW抵押得分",
         'poc_score_node_type': "节点类型得分",
@@ -343,7 +343,7 @@ const cn = {
             'join_time': "加入时间",
             'investing_diamonds': "投入MW",
             'gain_profit': "获得收益",
-            'remaining_mining_time': "剩余挖矿时间",
+            'remaining_mining_time': "剩余挖矿数",
             'exit_pool': "退出矿池",
             'destroy_pool': "删除矿池",
             'creator': "创建者",

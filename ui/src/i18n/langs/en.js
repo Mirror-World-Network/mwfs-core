@@ -231,7 +231,7 @@ const en = {
         'console': "console",
     },
     network: {
-        'mining_time': "Mining Time",
+        'mining_time': "Estimated Block Generation Time",
         // 'poc_score': "Hashrate",
         'poc_score': "Power (PoC)",
         'poc_score_ss': "MW Held Score",
