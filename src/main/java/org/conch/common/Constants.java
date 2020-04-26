@@ -431,8 +431,9 @@ public final class Constants {
     public static final String Generator_startMining = Generator.class.getName() + "#startMining";
     public static final String CONCH_P_reachLastKnownBlock = Conch.class.getName() + "#reachLastKnownBlock";
     public static final String CONCH_P_readAndSetSerialNum = Conch.class.getName() + "#readAndSetSerialNum";
-    public static final String BlockchainProcessor_P_downloadPeer = BlockchainProcessorImpl.class.getName() + "#downloadPeer";
-    public static final String BlockchainProcessor_P_getMoreBlocks = BlockchainProcessorImpl.class.getName() + "#getMoreBlocks";
+    public static final String BlockchainProcessor_downloadPeer_sizeCheck = BlockchainProcessorImpl.class.getName() + "#downloadPeer#sizeCheck";
+    public static final String BlockchainProcessor_downloadPeer_getWeightedPeer = BlockchainProcessorImpl.class.getName() + "#downloadPeer#getWeightedPeer";
+    public static final String BlockchainProcessor_getMoreBlocks = BlockchainProcessorImpl.class.getName() + "#getMoreBlocks";
     public static final String GetNodeHardware_P_report = GetNodeHardware.class.getName() + "#report";
     
     public static final boolean hubLinked = Conch.getBooleanProperty("sharder.HubBind");

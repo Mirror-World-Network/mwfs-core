@@ -98,7 +98,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class Conch {
 
     public static final String VERSION = "0.0.3";
-    public static final String STAGE = Conch.getStringProperty("sharder.phase","Pioneer");;
+    // Phase: Pioneer -> Union -> World
+    public static final String STAGE = "Pioneer";
     public static final String APPLICATION = "COS";
 
     private static volatile Time time = new Time.EpochTime();
@@ -1206,7 +1207,7 @@ public final class Conch {
      * @return 
      */
     public static String getFullVersion(){
-        return VERSION + STAGE;
+        return VERSION + "-" + STAGE;
     }
     public static String getVersion(){ return VERSION; }
     public static String getCosUpgradeDate(){ return ClientUpgradeTool.cosLastUpdateDate; }

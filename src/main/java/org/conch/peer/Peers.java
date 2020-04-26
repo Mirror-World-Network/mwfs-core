@@ -1385,7 +1385,7 @@ public final class Peers {
      */
     public static Peer getWeightedPeer(List<Peer> selectedPeers) {
         if (selectedPeers.isEmpty()) return null;
-    
+
         long totalWeight = 0;
         for (Peer peer : selectedPeers) {
             long weight = (peer.getWeight() == 0) ? 1 : peer.getWeight();
