@@ -10,6 +10,7 @@ import org.conch.consensus.genesis.SharderGenesis;
 import org.conch.consensus.poc.tx.PocTxBody;
 import org.conch.mint.pool.SharderPoolProcessor;
 import org.conch.peer.Peer;
+import org.conch.util.LocalDebugTool;
 import org.conch.util.Logger;
 
 import java.io.Serializable;
@@ -139,9 +140,8 @@ public class PocScore implements Serializable {
     }
     
     public PocScore setHeight(int height) {
-        if(Constants.isLocalDebug()
-        && "CDW-87T2-PQFF-UV3X-GXGQ4".equalsIgnoreCase(Account.rsAccount(this.accountId))) {
-            Logger.logDebugMessage("CDW-87T2-PQFF-UV3X-GXGQ4 is declared at height " + height);
+        if(LocalDebugTool.isCheckPocAccount(this.accountId)) {
+            Logger.logDebugMessage(Account.rsAccount(this.accountId) + " is updated at height " + height);
         }
         this.height = height;
         return this;
