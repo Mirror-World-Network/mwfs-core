@@ -194,10 +194,17 @@ public final class Conch {
 
         return Peer.Type.getSimpleName(nodeTypeCode);
     }
-    
+
+    private static int readSerialNoCount = 0;
     public static String getSerialNum(){
-        if(StringUtils.isEmpty(Conch.serialNum) || Conch.serialNum.length() < 6) readAndSetSerialNum();
-        
+        if((StringUtils.isEmpty(Conch.serialNum) || Conch.serialNum.length() < 6)
+        && readSerialNoCount == 0) {
+            readAndSetSerialNum();
+        }
+        // every specified times to read the serial no from
+        if(readSerialNoCount++ == 100){
+            readSerialNoCount = 0;
+        }
         return Conch.serialNum;
     }
     
@@ -825,9 +832,9 @@ public final class Conch {
                 testSecureRandom();
                 long currentTime = System.currentTimeMillis();
                 Logger.logMessage("Initialization took " + (currentTime - startTime) / 1000 + " seconds");
-                Logger.logMessage("COS server " + getFullVersion() + " " + getCosUpgradeDate() + " started successfully.");
-                Logger.logMessage("Copyright © 2017 mwfs.io.");
-                Logger.logMessage("Distributed under MIT.");
+                Logger.logMessage("COS server " + getFullVersion() + " " + getCosUpgradeDate() + " started successfully");
+                Logger.logMessage("Copyright © 2019 mw.run");
+                Logger.logMessage("Distributed under MIT");
                 if (API.getWelcomePageUri() != null) Logger.logMessage("Client UI URL is " + API.getWelcomePageUri());
 
                 setServerStatus(ServerStatus.STARTED, API.getWelcomePageUri());
@@ -1143,7 +1150,7 @@ public final class Conch {
         
         Integer verInt = Integer.valueOf(version.replaceAll("\\.", ""));
         Integer currentVerInt = Integer.valueOf(VERSION.replaceAll("\\.", ""));
-        
+
         return currentVerInt.compareTo(verInt);
     }
 
