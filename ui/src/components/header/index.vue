@@ -188,7 +188,7 @@
             </div>
             <div class="modal-body">
                 <div class="version-info">
-                    <span>{{$t('upgrade.current_version')}}{{blockchainStatus.version}}</span>
+                    <span>{{$t('upgrade.current_version')}}v{{blockchainStatus.version}}</span>
                     <span style="color: #555;font-style: italic;font-size: smaller;"> {{blockchainStatus.cosLastUpgradeDate}}</span>
                     <br/>
                     <span v-if="isUpdate">

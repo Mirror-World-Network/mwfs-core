@@ -69,7 +69,7 @@ const cn = {
     },
     upgrade: {
         'title': "COS版本升级",
-        'current_version': "当前版本",
+        'current_version': "当前版本 ",
         'discover_new_version': "发现新版本",
         'no_new_version': "当前已是最新版本",
         'update': "升级",

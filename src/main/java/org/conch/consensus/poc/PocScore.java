@@ -3,6 +3,7 @@ package org.conch.consensus.poc;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.conch.Conch;
 import org.conch.account.Account;
 import org.conch.common.Constants;
 import org.conch.consensus.genesis.SharderGenesis;
@@ -32,9 +33,25 @@ public class PocScore implements Serializable {
 
     BigInteger effectiveBalance;
     
-    private static BigInteger SCORE_MULTIPLIER = new BigInteger("1000");
-    
-    //TODO 
+    private static BigInteger SCORE_MULTIPLIER = parseAndGetScoreMagnification();
+
+    /**
+     * mag. of poc score is use to increase the poc score of the miner to make sure the mining gap is match the preset interval
+     * @return
+     */
+    private static BigInteger parseAndGetScoreMagnification(){
+        BigInteger mag = BigInteger.TEN;
+        try{
+            if(Conch.getHeight() <= Constants.POC_SCORE_MAGNIFICATION_HEIGHT) {
+                mag = new BigInteger("1000");
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return mag;
+    }
+
+    //TODO for every pool add the luck, used to battle the block generation chance
     int luck = 0;
 
 
