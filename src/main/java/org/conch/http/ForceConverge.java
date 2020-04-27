@@ -372,7 +372,13 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
         // correct the blockchain of Testnet
         // Conch.getBlockchainProcessor().addListener(block -> resetPoolAndAccounts(block), BlockchainProcessor.Event.AFTER_BLOCK_ACCEPT);
     }
-    
+
+    /**
+     * recipientId
+     */
+    public static void updateRecipientIdIntoOldPocTxs() {
+        //TODO
+    }
     
     /**
      * Reset the blockchain to correct the account balance of Testnet

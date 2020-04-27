@@ -199,7 +199,8 @@ public abstract class PocTxApi {
                 pocNodeType = new PocTxBody.PocNodeTypeV3(pocNodeType, nodeTypeJson.getLong("diskCapacity"));
 
                 Logger.logInfoMessage("creating node type tx %s", pocNodeType.toString());
-                createTransaction(request, account, 0, 0, pocNodeType);
+                long recipientId = (accountId == -1) ? 0 : accountId;
+                createTransaction(request, account, recipientId, 0, pocNodeType);
                 Logger.logInfoMessage("success to create node type tx");
             } catch(ConchException.AccountControlException e){
                 Logger.logErrorMessage(e.getMessage());
