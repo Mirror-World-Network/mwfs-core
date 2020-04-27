@@ -20,6 +20,7 @@
                     <div class="block_blue radius_blue">
                         <p>{{$t('network.block_peers_volume')}}</p>
                         <p><span>{{peerNum}}</span></p>
+                        <p class="declared_peers"><span>{{$t('network.declared_peers_size')}}</span><span class="declared_size">{{declaredPeerSize}}</span></p>
                     </div>
                 </div>
             </div>
@@ -510,6 +511,7 @@
                 newestTime: 0,
                 averageAmount: 0,
                 peerNum: 0,
+                declaredPeerSize: 0,
                 fetchCoordinates: false,
                 //旷工信息
                 activeCount: 0,
@@ -606,6 +608,7 @@
                 const _this = this;
                 _this.$global.fetch("GET", {startThis:"startThis"}, "getPeers").then(res => {
                     _this.peerNum = res.peers.length + _this.limitPeerSize;
+                    _this.declaredPeerSize = res.declaredPeerSize;
                     try {
                         _this.$global.coordinatesMap = JSON.parse(res.coordinates);
                     }catch (e) {
@@ -775,6 +778,16 @@
 
         .generator {
             margin-right: 10px;
+        }
+    }
+
+    .declared_peers {
+        text-align: left!important;
+        font-size: 13px!important;
+
+        .declared_size {
+            margin-left: 5px;
+            font-weight: bold;
         }
     }
 

@@ -21,6 +21,7 @@
 
 package org.conch.http;
 
+import org.conch.Conch;
 import org.conch.peer.Peer;
 import org.conch.peer.Peers;
 import org.conch.util.Convert;
@@ -114,7 +115,7 @@ public final class GetPeers extends APIServlet.APIRequestHandler {
         String startThis =  req.getParameter("startThis");
         JSONObject response = new JSONObject();
         tempCoordinatesMap.putAll(CoordinatesMap);
-        if (startThis != null){
+        if (startThis != null) {
             if (CoordinatesMap.size() == 0  || (CoordinatesMap.get("peersLength") != null && (int)CoordinatesMap.get("peersLength") != peersJSON.size())){
                 new Thread("ExchangeIpAddr"){
                     public void run(){
@@ -132,6 +133,7 @@ public final class GetPeers extends APIServlet.APIRequestHandler {
             response.put("coordinates",tempCoordinatesMap.get("CoordinatesList"));
         }
         response.put("peers", peersJSON);
+        response.put("declaredPeerSize", Conch.getPocProcessor().getCertifiedPeers().size());
         return response;
     }
 
@@ -172,7 +174,6 @@ public final class GetPeers extends APIServlet.APIRequestHandler {
                 result += line;
             }
         } catch (Exception e) {
-            System.out.println("发送 POST 请求出现异常！"+e);
             e.printStackTrace();
         }
         //使用finally块来关闭输出流、输入流
@@ -195,7 +196,6 @@ public final class GetPeers extends APIServlet.APIRequestHandler {
 
     public static void main(String[] args){
         JSONArray peersJSON = new JSONArray();
-        peersJSON.add("cn.testnat.sharder.io:8926");
         peersJSON.add("116.8.37.150");
         System.out.println(peersJSON.size());
         System.out.println(CoordinatesMap.toString());
