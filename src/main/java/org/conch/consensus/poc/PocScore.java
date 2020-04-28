@@ -44,7 +44,7 @@ public class PocScore implements Serializable {
     private static BigInteger parseAndGetScoreMagnification(){
         BigInteger mag = BigInteger.TEN;
         try{
-            if(Conch.getHeight() <= Constants.POC_SCORE_MAGNIFICATION_HEIGHT) {
+            if(Conch.getHeight() <= (Constants.POC_TX_ALLOW_RECIPIENT + 70)) {
                 mag = new BigInteger("1000");
             }
         }catch(Exception e){
@@ -55,7 +55,6 @@ public class PocScore implements Serializable {
 
     //TODO for every pool add the luck, used to battle the block generation chance
     int luck = 0;
-
 
     public PocScore(){}
     
