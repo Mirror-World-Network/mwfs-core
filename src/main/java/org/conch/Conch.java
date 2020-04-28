@@ -97,7 +97,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class Conch {
 
-    public static final String VERSION = "0.0.2";
+    public static final String VERSION = "0.0.3";
     // Phase: Pioneer -> Union -> World
     public static final String STAGE = "Pioneer";
     public static final String APPLICATION = "COS";
