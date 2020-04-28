@@ -218,18 +218,13 @@ public final class Constants {
     public static final int FXT_BLOCK = isTestnetOrDevnet() ? 10000 : 10000; 
     
     public static final int LAST_KNOWN_BLOCK = isDevnet() ?  1 : (isTestnet() ? 1 : 1);
-    public static final int BOOTNODE_MINING_DIRECT_HEIGHT = isTestnet() ? 1600 : 1;
 
-    public static final int TESTNET_PHASE_ONE = 500000;
-    public static final int TESTNET_PHASE_TWO = 990000;
-    public static final String TESTNET_PHASE_ONE_TIME = "2019-12-01 00:00:00";
-    public static final String TESTNET_PHASE_TWO_TIME = "2020-09-30 00:00:00";
     public static final int POC_LEDGER_RESET_HEIGHT = isTestnet() ? 0 : 0;
     public static final int POC_NEW_ALGO_HEIGHT = isTestnet() ? 0 : 0;
-    public static final int POC_SS_HELD_SCORE_PHASE1_HEIGHT = isTestnet() ? 0 : 0;
     public static final int POC_SS_HELD_SCORE_PHASE2_HEIGHT = isTestnet() ? 0 : 0;
     public static final int POC_POOL_NEVER_END_HEIGHT = isTestnet() ? 0 : 0;
     public static final int POC_BALANCE_CORRECTION_HEIGHT = isTestnet() ? 0 : 0;
+    public static final int POC_TX_ALLOW_RECIPIENT = isTestnet() ? 1450 : 0;
 
     //not opened yet
     public static final int PHASING_BLOCK_HEIGHT = Integer.MAX_VALUE;
@@ -436,8 +431,9 @@ public final class Constants {
     public static final String Generator_startMining = Generator.class.getName() + "#startMining";
     public static final String CONCH_P_reachLastKnownBlock = Conch.class.getName() + "#reachLastKnownBlock";
     public static final String CONCH_P_readAndSetSerialNum = Conch.class.getName() + "#readAndSetSerialNum";
-    public static final String BlockchainProcessor_P_downloadPeer = BlockchainProcessorImpl.class.getName() + "#downloadPeer";
-    public static final String BlockchainProcessor_P_getMoreBlocks = BlockchainProcessorImpl.class.getName() + "#getMoreBlocks";
+    public static final String BlockchainProcessor_downloadPeer_sizeCheck = BlockchainProcessorImpl.class.getName() + "#downloadPeer#sizeCheck";
+    public static final String BlockchainProcessor_downloadPeer_getWeightedPeer = BlockchainProcessorImpl.class.getName() + "#downloadPeer#getWeightedPeer";
+    public static final String BlockchainProcessor_getMoreBlocks = BlockchainProcessorImpl.class.getName() + "#getMoreBlocks";
     public static final String GetNodeHardware_P_report = GetNodeHardware.class.getName() + "#report";
     
     public static final boolean hubLinked = Conch.getBooleanProperty("sharder.HubBind");

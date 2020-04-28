@@ -136,7 +136,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 while (true) {
 
                     if (!getMoreBlocks) {
-                        if (Logger.printNow(Constants.BlockchainProcessor_P_getMoreBlocks)) {
+                        if (Logger.printNow(Constants.BlockchainProcessor_getMoreBlocks)) {
                             Logger.logDebugMessage("Don't synchronize blocks when the getMoreBlocks is set to false");
                         }
 
@@ -148,8 +148,8 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     }
 
                     if (Conch.hasSerialNum() && !Constants.hubLinked) {
-                        if (Logger.printNow(Constants.BlockchainProcessor_P_getMoreBlocks)) {
-                            Logger.logDebugMessage("Don't synchronize blocks before the Hub initialization is completed");
+                        if (Logger.printNow(Constants.BlockchainProcessor_getMoreBlocks)) {
+                            Logger.logDebugMessage("Don't synchronize blocks before the Client initialization is completed");
                         }
                         return;
                     }
@@ -216,7 +216,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             int connectedSize = connectedPublicPeers.size();
             if (!Generator.isBootNode
                     && connectedSize < limitConnectedSize) {
-                if (Logger.printNow(Constants.BlockchainProcessor_P_downloadPeer)) {
+                if (Logger.printNow(Constants.BlockchainProcessor_downloadPeer_sizeCheck)) {
                     Logger.logInfoMessage("No enough connected peers[limit size=" + (limitConnectedSize) + ",current connected size=" + connectedSize + "], break syn blocks...");
 //                    Logger.logDebugMessage("Current peers => " + Arrays.toString(connectedPublicPeers.toArray()));
                 }
@@ -231,7 +231,11 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             peerHasMore = true;
             final Peer peer = forceSwitchToBootNodesFork ?
                     Peers.checkOrConnectBootNode() : Peers.getWeightedPeer(connectedPublicPeers);
-            if (peer == null) return;
+            if (peer == null
+                && Logger.printNow(Constants.BlockchainProcessor_downloadPeer_getWeightedPeer)) {
+                Logger.logDebugMessage("Can't find a weighted peer to sync the blocks, the reasons are follow: \n\r a) current peer's version %s is larger than other peers.\n b) can't connect to boot nodes or other peers which have the public IP.\n Wait for next turn.", Conch.getFullVersion());
+                return;
+            }
 
             JSONObject response = getPeersDifficulty(peer);
 
@@ -253,7 +257,10 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             if (betterCumulativeDifficulty.equals(curCumulativeDifficulty)) return;
 
             // the cos version of the feeder peer is smaller than current peer
-            if (Conch.versionCompare(peer.getVersion()) > 0) return;
+            if (Conch.versionCompare(peer.getVersion()) > 0){
+                Logger.logDebugMessage("Current peer's version %s is larger than remote peer %s[%s]'s version, ABORT the block sync... ", Conch.getFullVersion(), peer.getAnnouncedAddress(), peer.getHost());
+                return;
+            }
 
             // milestone block and block number check
             long commonMilestoneBlockId = SharderGenesis.GENESIS_BLOCK_ID;
@@ -766,7 +773,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             if (switchToBootNodeFailedCount++ < COUNT_RESTORE_DB) {
                 // rollback the local blockchain then fetch the blocks once
                 if (bootNodeHeight < Conch.getHeight()
-                        && bootNodeHeight > Constants.LAST_KNOWN_BLOCK) {
+                    && bootNodeHeight > Constants.LAST_KNOWN_BLOCK) {
                     startHeight = bootNodeHeight;
                 } else if (bootNodeHeight > Conch.getHeight()) {
                     startHeight = Conch.getHeight() - 12;
@@ -1695,15 +1702,14 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         if (!Arrays.equals(Crypto.sha256().digest(previousLastBlock.bytes()), block.getPreviousBlockHash())) {
             throw new BlockNotAcceptedException("Previous block hash doesn't match", block);
         }
-
         if (block.getId() == 0L || BlockDb.hasBlock(block.getId(), previousLastBlock.getHeight())) {
             throw new BlockNotAcceptedException("Duplicate block or invalid id", block);
         }
         if (!block.verifyGenerationSignature() && !Generator.allowsFakeMining(block.getGeneratorPublicKey())) {
             Account generatorAccount = Account.getAccount(block.getGeneratorId());
             PocScore pocScoreObj = Conch.getPocProcessor().calPocScore(generatorAccount, previousLastBlock.getHeight());
-            String errorMsg = String.format("Block generation signature verification failed, generator %s poc score is %d at height %d.",
-                    generatorAccount.getRsAddress(), pocScoreObj.total(), (previousLastBlock.getHeight() + 1));
+            String errorMsg = String.format("Block generation signature verification failed, generator %s(id=%d, last update height=%d)'s poc score is %d at height %d.",
+                    generatorAccount.getRsAddress(), generatorAccount.getId(), pocScoreObj.getHeight() , pocScoreObj.total(), (previousLastBlock.getHeight() + 1));
             throw new BlockNotAcceptedException(errorMsg, block);
         }
         if (!block.verifyBlockSignature()) {
@@ -2027,6 +2033,8 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 }
 //                SharderPoolProcessor.rollback(commonBlock.getHeight());
 //                PocDb.rollback(commonBlock.getHeight());
+
+                Conch.getPocProcessor().rollbackTo(commonBlock.getHeight());
 
                 Db.db.clearCache();
                 Db.db.commitTransaction();

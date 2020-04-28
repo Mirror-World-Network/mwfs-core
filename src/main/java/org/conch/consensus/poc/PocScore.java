@@ -3,12 +3,15 @@ package org.conch.consensus.poc;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.conch.Conch;
 import org.conch.account.Account;
 import org.conch.common.Constants;
 import org.conch.consensus.genesis.SharderGenesis;
 import org.conch.consensus.poc.tx.PocTxBody;
 import org.conch.mint.pool.SharderPoolProcessor;
 import org.conch.peer.Peer;
+import org.conch.util.LocalDebugTool;
+import org.conch.util.Logger;
 
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -32,11 +35,26 @@ public class PocScore implements Serializable {
 
     BigInteger effectiveBalance;
     
-    private static BigInteger SCORE_MULTIPLIER = new BigInteger("1000");
-    
-    //TODO 
-    int luck = 0;
+    private static BigInteger SCORE_MULTIPLIER = parseAndGetScoreMagnification();
 
+    /**
+     * mag. of poc score is use to increase the poc score of the miner to make sure the mining gap is match the preset interval
+     * @return
+     */
+    private static BigInteger parseAndGetScoreMagnification(){
+        BigInteger mag = BigInteger.TEN;
+        try{
+            if(Conch.getHeight() <= (Constants.POC_TX_ALLOW_RECIPIENT + 70)) {
+                mag = new BigInteger("1000");
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return mag;
+    }
+
+    //TODO for every pool add the luck, used to battle the block generation chance
+    int luck = 0;
 
     public PocScore(){}
     
@@ -121,6 +139,9 @@ public class PocScore implements Serializable {
     }
     
     public PocScore setHeight(int height) {
+        if(LocalDebugTool.isCheckPocAccount(this.accountId)) {
+            Logger.logDebugMessage("[LocalDebugMode] " + Account.rsAccount(this.accountId) + " is updated at height " + height);
+        }
         this.height = height;
         return this;
     }
@@ -219,6 +240,9 @@ public class PocScore implements Serializable {
 
     private static final String SCORE_KEY = "poc_score";
     public JSONObject toJsonObject() {
+        if(LocalDebugTool.isCheckPocAccount(accountId)){
+            Logger.logDebugMessage("[LocalDebugMode] convert the %s's poc score to json object", Account.rsAccount(accountId));
+        }
         JSONObject jsonObject = JSON.parseObject(toJsonString());
         jsonObject.put(SCORE_KEY, total());
         return jsonObject;

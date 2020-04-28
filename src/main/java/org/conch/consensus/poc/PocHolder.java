@@ -34,31 +34,29 @@ import java.util.*;
 class PocHolder implements Serializable {
     
     // you can use the key word 'transient' exclude the attribute to persist
-    
+
     static PocHolder inst = new PocHolder();
 
     int lastHeight = -1;
     
     /** poc score **/
     // accountId : pocScore
-    private transient Map<Long, PocScore> scoreMap = PocDb.listAll();
-   
+    protected transient Map<Long, PocScore> scoreMap = PocDb.listAll();
     // height : { accountId : pocScore }
-    private transient Map<Integer, Map<Long, PocScore>> historyScore = Maps.newConcurrentMap();
+    protected transient Map<Integer, Map<Long, PocScore>> historyScore = Maps.newConcurrentMap();
     /** poc score **/
 
     /** certified peers **/
     // certified peer: foundation node,sharder hub/box, community node
     // account id : certified peer
-    private Map<Long, CertifiedPeer> certifiedPeers = Maps.newConcurrentMap();
+    protected Map<Long, CertifiedPeer> certifiedPeers = Maps.newConcurrentMap();
     // height : { accountId : certifiedPeer }
-    private Map<Integer, Map<Long,CertifiedPeer>> historyCertifiedPeers = Maps.newConcurrentMap();
+    protected Map<Integer, Map<Long,CertifiedPeer>> historyCertifiedPeers = Maps.newConcurrentMap();
     /** certified peers **/
     
     
     private volatile Map<Integer, List<Long>> delayPocTxsByHeight = Maps.newConcurrentMap();
     private static volatile int pocTxHeight = -1;
-    
     
     public static void updateHeight(int height){
         if(height == -1) return;
@@ -283,11 +281,12 @@ class PocHolder implements Serializable {
         PocDb.saveOrUpdate(pocScore);
         
         PocScore pocScoreDetail = inst.scoreMap.get(pocScore.accountId);
-        
-        if(pocScore.height >= pocScoreDetail.height) {
+
+        if(pocScoreDetail == null
+        || pocScore.height >= pocScoreDetail.height) {
             inst.scoreMap.put(pocScore.accountId, pocScore);
         }
-        
+
         return pocScore;
     }
     
@@ -416,7 +415,7 @@ class PocHolder implements Serializable {
         static final int printCount = 1;
         
         protected static boolean debug = Constants.isTestnetOrDevnet()  ? false : false;
-        protected static boolean debugHistory = Constants.isDevnet() ? false : false;
+        protected static boolean debugHistory = Constants.isDevnet() ? true : false;
         
         protected static String summary = reset();
         private static final String splitter = "\n\r";

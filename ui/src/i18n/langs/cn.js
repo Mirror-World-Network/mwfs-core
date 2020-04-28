@@ -69,7 +69,7 @@ const cn = {
     },
     upgrade: {
         'title': "COS版本升级",
-        'current_version': "当前版本",
+        'current_version': "当前版本 ",
         'discover_new_version': "发现新版本",
         'no_new_version': "当前已是最新版本",
         'update': "升级",
@@ -232,7 +232,7 @@ const cn = {
         'console': "控制台",
     },
     network: {
-        'mining_time': "挖矿时间",
+        'mining_time': "预计出块时间",
         'poc_score': "算力 (PoC)",
         'poc_score_ss': "MW抵押得分",
         'poc_score_node_type': "节点类型得分",
@@ -253,6 +253,7 @@ const cn = {
         'block_newest_time': "生成时间 ",
         'block_avg_transaction_volume': "区块平均交易数",
         'block_peers_volume': "节点数量",
+        'declared_peers_size': "历史声明节点数",
         'miner_info': "交易概况",
         'miner_volume': "矿工数量",
         'total_trading_volume': "交易总额",
@@ -343,7 +344,7 @@ const cn = {
             'join_time': "加入时间",
             'investing_diamonds': "投入MW",
             'gain_profit': "获得收益",
-            'remaining_mining_time': "剩余挖矿时间",
+            'remaining_mining_time': "剩余挖矿数",
             'exit_pool': "退出矿池",
             'destroy_pool': "删除矿池",
             'creator': "创建者",
@@ -1020,7 +1021,7 @@ const cn = {
         "status_refuse":"拒绝发放",
     },
     poc: {
-        'block_reward_tips_phase1': "说明: 矿工接入期(1600高度之前)，没有出块奖励",
+        'block_reward_tips_phase1': "说明: 矿工接入期(2600高度之前)，没有出块奖励",
         'creator': "创建者",
         'type': "类型",
         'nodeType': "节点类型",

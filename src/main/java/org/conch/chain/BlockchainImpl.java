@@ -24,7 +24,10 @@ package org.conch.chain;
 import org.conch.Conch;
 import org.conch.common.ConchException;
 import org.conch.common.Constants;
-import org.conch.db.*;
+import org.conch.consensus.genesis.GenesisRecipient;
+import org.conch.db.Db;
+import org.conch.db.DbIterator;
+import org.conch.db.DbUtils;
 import org.conch.tx.Transaction;
 import org.conch.tx.TransactionDb;
 import org.conch.tx.TransactionImpl;
@@ -411,6 +414,8 @@ public final class BlockchainImpl implements Blockchain {
     @Override
     public int getTransactionCountByAccount(long accountId, byte type,byte subtype){
 
+        accountId = checkAndConvertAccountId(accountId, type);
+
         StringBuilder buf = new StringBuilder();
         buf.append("SELECT COUNT(*) FROM transaction WHERE (recipient_id = ? or sender_id = ?) ");
         if(type >= 0){
@@ -461,18 +466,19 @@ public final class BlockchainImpl implements Blockchain {
     /**
      * 查询账户的收款付款交易记录
      * @param accountId
+     * @param type
      * @param isFrom accountId是否是发送方
      * @param from
      * @param to
      * @return
      */
     @Override
-    public DbIterator<TransactionImpl> getTransactions(long accountId, boolean isFrom,int from, int to) {
+    public DbIterator<TransactionImpl> getTransactions(long accountId, byte type, boolean isFrom, int from, int to) {
         Connection con = null;
         PreparedStatement pstmt;
         try {
             StringBuilder buf = new StringBuilder();
-            buf.append("SELECT transaction.* FROM transaction where type=0 ");
+            buf.append("SELECT transaction.* FROM transaction where type=" + type + " ");
             if (isFrom) {
                 buf.append("And sender_id = ? ");
             } else {
@@ -497,10 +503,26 @@ public final class BlockchainImpl implements Blockchain {
         return getTransactions(accountId, 0, type, subtype, blockTimestamp, false, false, false, 0, -1, includeExpiredPrunable, false);
     }
 
+    /**
+     * Poc txs: query by poc creator id
+     * Other txs: query by input account id
+     *
+     * @param accountId input account id
+     * @param type tx type
+     * @return
+     */
+    private static long checkAndConvertAccountId(long accountId, byte type){
+        // Poc txs
+        return TransactionType.TYPE_POC == type ? GenesisRecipient.POC_TX_CREATOR_ID : accountId;
+    }
+
     @Override
     public DbIterator<TransactionImpl> getTransactions(long accountId, int numberOfConfirmations, byte type, byte subtype,
                                                        int blockTimestamp, boolean withMessage, boolean phasedOnly, boolean nonPhasedOnly,
                                                        int from, int to, boolean includeExpiredPrunable, boolean executedOnly) {
+
+        accountId = checkAndConvertAccountId(accountId, type);
+
         if (phasedOnly && nonPhasedOnly) {
             throw new IllegalArgumentException("At least one of phasedOnly or nonPhasedOnly must be false");
         }

@@ -34,6 +34,7 @@ import org.conch.tx.TransactionDb;
 import org.conch.tx.TransactionImpl;
 import org.conch.tx.TransactionType;
 import org.conch.util.Convert;
+import org.conch.util.LocalDebugTool;
 import org.conch.util.Logger;
 import org.conch.util.SizeUtil;
 import org.json.simple.JSONArray;
@@ -294,6 +295,11 @@ public final class BlockImpl implements Block {
         return this.blockTransactions;
     }
 
+    /**
+     * no needs to add external to mark the block contains the poc txs - 2020.04.28 ben
+     * @param transaction
+     */
+    @Deprecated
     public void autoExtensionAppend(TransactionImpl transaction) {
         // auto extension process for isPoc and isPool
         if (TransactionType.TYPE_POC == transaction.getType().getType()) {
@@ -508,6 +514,13 @@ public final class BlockImpl implements Block {
             boolean isIgnoreBlock = CheckSumValidator.isKnownIgnoreBlock(this.id);
             if(isIgnoreBlock) {
                 Logger.logWarningMessage("Known ignore block[id=%d, height=%d] in %s, skip validation", this.getId(), (previousBlock.getHeight()+1), Constants.getNetwork().getName());
+            }
+
+//            if(isIgnoreBlock && LocalDebugTool.isCheckPocAccount(creator.getId())){
+            if(LocalDebugTool.isCheckPocAccount(creator.getId())
+            && (previousBlock.getHeight()+1) > 1101) {
+                Logger.logDebugMessage("[LocalDebugMode] block creator %s is in the poc accounts check list, ", creator.getRsAddress());
+                return (previousBlock.getHeight()+1) <= 1377 ? true : false;
             }
             return validHit || isIgnoreBlock;
 

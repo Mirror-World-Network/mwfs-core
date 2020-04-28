@@ -26,7 +26,6 @@ import org.json.simple.JSONObject;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -103,10 +102,12 @@ public class SharderPoolProcessor implements Serializable {
     static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     /**
+     *  pool is no dead line now - 2020.04.26
      * check the end block to verify the pool life cycle can't exceed the end date
      * @param endBlockNo
      * @return
-     */
+
+    @Deprecated
     private static int checkAndReturnEndBlockNo(int endBlockNo){
         try {
             Date phaseOneEndDate = dateFormat.parse(Constants.TESTNET_PHASE_ONE_TIME);
@@ -128,7 +129,7 @@ public class SharderPoolProcessor implements Serializable {
         }
        return endBlockNo;
     }
-    
+    */
     
     public static boolean addProcessingQuitTx(long relatedJoinTxId, long txId){
         if(processingQuitTxMap.containsKey(relatedJoinTxId) 
@@ -202,7 +203,7 @@ public class SharderPoolProcessor implements Serializable {
             return null;
         }
         
-        endBlockNo = checkAndReturnEndBlockNo(endBlockNo);
+//        endBlockNo = checkAndReturnEndBlockNo(endBlockNo);
         SharderPoolProcessor pool = new SharderPoolProcessor(creatorId, poolId, startBlockNo, endBlockNo);
         creator.addFrozenSubBalanceSubUnconfirmed(AccountLedger.LedgerEvent.FORGE_POOL_CREATE, pool.getPoolId(), PLEDGE_AMOUNT_NQT);
         pool.power += PLEDGE_AMOUNT_NQT;

@@ -231,7 +231,7 @@ const en = {
         'console': "console",
     },
     network: {
-        'mining_time': "Mining Time",
+        'mining_time': "Estimated Block Generation Time",
         // 'poc_score': "Hashrate",
         'poc_score': "Power (PoC)",
         'poc_score_ss': "MW Held Score",
@@ -253,6 +253,7 @@ const en = {
         'block_newest_time': "Block Generation Time ",
         'block_avg_transaction_volume': "Average Txn Volume",
         'block_peers_volume': "Node Volume",
+        'declared_peers_size': "All Declared Node Size",
         'miner_info': "Trading Summary",
         'miner_volume': "Miners",
         'total_trading_volume': "Gross Amount",
@@ -1019,7 +1020,7 @@ const en = {
         "status_refuse":"Refuse",
     },
     poc: {
-        'block_reward_tips_phase1': "NOTE: Miner joining phase(before the height 1600)，block reward is 0",
+        'block_reward_tips_phase1': "NOTE: Miner joining phase(before the height 2600)，block reward is 0",
         'creator': "Creator",
         'type': "Type",
         'nodeType': "Node Type",

@@ -98,7 +98,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class Conch {
 
     public static final String VERSION = "0.0.2";
-    public static final String STAGE = "-Alpha";
+    // Phase: Pioneer -> Union -> World
+    public static final String STAGE = "Pioneer";
     public static final String APPLICATION = "COS";
 
     private static volatile Time time = new Time.EpochTime();
@@ -193,10 +194,17 @@ public final class Conch {
 
         return Peer.Type.getSimpleName(nodeTypeCode);
     }
-    
+
+    private static int readSerialNoCount = 0;
     public static String getSerialNum(){
-        if(StringUtils.isEmpty(Conch.serialNum) || Conch.serialNum.length() < 6) readAndSetSerialNum();
-        
+        if((StringUtils.isEmpty(Conch.serialNum) || Conch.serialNum.length() < 6)
+        && readSerialNoCount == 0) {
+            readAndSetSerialNum();
+        }
+        // every specified times to read the serial no from
+        if(readSerialNoCount++ == 100){
+            readSerialNoCount = 0;
+        }
         return Conch.serialNum;
     }
     
@@ -386,12 +394,24 @@ public final class Conch {
     }
 
     private static String readAndParseMyAddress(){
-        String myAddr = Convert.emptyToNull(Conch.getStringProperty("sharder.myAddress", IpUtil.getNetworkIp()).trim());
-
+        String myAddr = Convert.emptyToNull(Conch.getStringProperty("sharder.myAddress", "").trim());
+        boolean closeAutoSwitchIp = Conch.getBooleanProperty("sharder.closeAutoSwitchIp");
         // correct the undefined issue of myAddress
         if("undefined".equalsIgnoreCase(myAddr)){
             myAddr = IpUtil.getNetworkIp().trim();
             Conch.storePropertieToFile("sharder.myAddress", myAddr);
+        }
+
+        if(closeAutoSwitchIp) {
+            Logger.logInfoMessage("Auto check and switch the internal ip to public ip is CLOSED");
+        }else{
+            // correct the internal IP to public IP if the client have the public IP at the every client start
+            if(StringUtils.isEmpty(myAddr)
+            || (!IpUtil.isDomain(myAddr) && IpUtil.isInternalIp(myAddr)) // myAddress is not the domain and it is internal ip
+            ) {
+                myAddr = IpUtil.getNetworkIp().trim();
+                Conch.storePropertieToFile("sharder.myAddress", myAddr);
+            }
         }
 
         return  myAddr;
@@ -824,9 +844,9 @@ public final class Conch {
                 testSecureRandom();
                 long currentTime = System.currentTimeMillis();
                 Logger.logMessage("Initialization took " + (currentTime - startTime) / 1000 + " seconds");
-                Logger.logMessage("COS server " + getFullVersion() + " " + getCosUpgradeDate() + " started successfully.");
-                Logger.logMessage("Copyright © 2017 mwfs.io.");
-                Logger.logMessage("Distributed under MIT.");
+                Logger.logMessage("COS server " + getFullVersion() + " " + getCosUpgradeDate() + " started successfully");
+                Logger.logMessage("Copyright © 2019 mw.run");
+                Logger.logMessage("Distributed under MIT");
                 if (API.getWelcomePageUri() != null) Logger.logMessage("Client UI URL is " + API.getWelcomePageUri());
 
                 setServerStatus(ServerStatus.STARTED, API.getWelcomePageUri());
@@ -1142,7 +1162,7 @@ public final class Conch {
         
         Integer verInt = Integer.valueOf(version.replaceAll("\\.", ""));
         Integer currentVerInt = Integer.valueOf(VERSION.replaceAll("\\.", ""));
-        
+
         return currentVerInt.compareTo(verInt);
     }
 
@@ -1206,7 +1226,7 @@ public final class Conch {
      * @return 
      */
     public static String getFullVersion(){
-        return VERSION + STAGE;
+        return VERSION + "-" + STAGE;
     }
     public static String getVersion(){ return VERSION; }
     public static String getCosUpgradeDate(){ return ClientUpgradeTool.cosLastUpdateDate; }

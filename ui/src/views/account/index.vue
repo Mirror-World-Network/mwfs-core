@@ -909,6 +909,7 @@
                 userConfig: {
                     nodeType: this.$store.state.userConfig['sharder.NodeType'],
                     xxx: this.$store.state.userConfig['sharder.xxx'],
+                    phase: this.$store.state.userConfig['sharder.phase'],
                     diskCapacity: this.$store.state.userConfig['sharder.diskCapacity'],
                     useNATService: this.$store.state.userConfig['sharder.useNATService'] === 'true',
                     natClientSecretKey: this.$store.state.userConfig['sharder.NATClientKey'],
