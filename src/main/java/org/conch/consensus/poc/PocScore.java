@@ -141,7 +141,7 @@ public class PocScore implements Serializable {
     
     public PocScore setHeight(int height) {
         if(LocalDebugTool.isCheckPocAccount(this.accountId)) {
-            Logger.logDebugMessage(Account.rsAccount(this.accountId) + " is updated at height " + height);
+            Logger.logDebugMessage("[LocalDebugMode] " + Account.rsAccount(this.accountId) + " is updated at height " + height);
         }
         this.height = height;
         return this;
@@ -241,6 +241,9 @@ public class PocScore implements Serializable {
 
     private static final String SCORE_KEY = "poc_score";
     public JSONObject toJsonObject() {
+        if(LocalDebugTool.isCheckPocAccount(accountId)){
+            Logger.logDebugMessage("[LocalDebugMode] convert the %s's poc score to json object", Account.rsAccount(accountId));
+        }
         JSONObject jsonObject = JSON.parseObject(toJsonString());
         jsonObject.put(SCORE_KEY, total());
         return jsonObject;

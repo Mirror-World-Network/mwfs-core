@@ -354,8 +354,9 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
             ThreadPool.scheduleThread("cosAutoUpgradeThread", autoUpgradeThread, intervalInMinutes, TimeUnit.MINUTES);
         }
 
-        checkOrForceDeleteBakFolder();
-//        
+//       checkOrForceDeleteBakFolder();
+
+//
 //        // manual reset
 //        String resetStr = Conch.getStringProperty(PROPERTY_MANUAL_RESET, null);
 //        boolean manualReset = StringUtils.isEmpty(resetStr) ? true : Boolean.valueOf(resetStr);
@@ -373,13 +374,7 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
         // Conch.getBlockchainProcessor().addListener(block -> resetPoolAndAccounts(block), BlockchainProcessor.Event.AFTER_BLOCK_ACCEPT);
     }
 
-    /**
-     * recipientId
-     */
-    public static void updateRecipientIdIntoOldPocTxs() {
-        //TODO
-    }
-    
+
     /**
      * Reset the blockchain to correct the account balance of Testnet
      */

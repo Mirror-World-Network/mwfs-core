@@ -172,9 +172,6 @@ public class CheckSumValidator {
     }
 
     public static boolean isKnownIgnoreBlock(long blockId){
-        if(LocalDebugTool.isCheckBlockId(blockId)) {
-            return false;
-        }
         return  knownIgnoreBlocks.contains(blockId);
     }
 

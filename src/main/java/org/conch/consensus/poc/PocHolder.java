@@ -52,7 +52,7 @@ class PocHolder implements Serializable {
     // account id : certified peer
     protected Map<Long, CertifiedPeer> certifiedPeers = Maps.newConcurrentMap();
     // height : { accountId : certifiedPeer }
-    private Map<Integer, Map<Long,CertifiedPeer>> historyCertifiedPeers = Maps.newConcurrentMap();
+    protected Map<Integer, Map<Long,CertifiedPeer>> historyCertifiedPeers = Maps.newConcurrentMap();
     /** certified peers **/
     
     
