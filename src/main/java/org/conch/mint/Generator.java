@@ -374,6 +374,16 @@ public class Generator implements Comparable<Generator> {
         // mining condition: holding limit check
         long accountId = Account.getId(secretPhrase);
         Account bindMiner = Account.getAccount(accountId, Conch.getHeight());
+
+        //check the peer statement
+        boolean isCertifiedPeer = Conch.getPocProcessor().isCertifiedPeerBind(accountId,Conch.getHeight());
+        if(!isCertifiedPeer) {
+            if(Logger.printNow(Constants.Generator_startMining)) {
+                Logger.logWarningMessage("Can't start the mining of the current account %s(it didn't linked to a certified peer at the height %d), the reason maybe it didn't create a PocNodeTypeTx. please INIT or RESET the client firstly! ", bindMiner.getRsAddress(), Conch.getHeight());
+            }
+            return null;
+        }
+
         long accountBalanceNQT = (bindMiner != null) ? bindMiner.getEffectiveBalanceNQT(Conch.getHeight()) : 0L;
         if(accountBalanceNQT < Constants.MINING_HOLDING_LIMIT) {
             if(Logger.printNow(Constants.Generator_startMining)) {

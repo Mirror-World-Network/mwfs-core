@@ -1702,7 +1702,6 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         if (!Arrays.equals(Crypto.sha256().digest(previousLastBlock.bytes()), block.getPreviousBlockHash())) {
             throw new BlockNotAcceptedException("Previous block hash doesn't match", block);
         }
-
         if (block.getId() == 0L || BlockDb.hasBlock(block.getId(), previousLastBlock.getHeight())) {
             throw new BlockNotAcceptedException("Duplicate block or invalid id", block);
         }
@@ -2035,7 +2034,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
 //                SharderPoolProcessor.rollback(commonBlock.getHeight());
 //                PocDb.rollback(commonBlock.getHeight());
 
-                Conch.getPocProcessor().rollbackTo(commonBlock.getHeight());
+//                Conch.getPocProcessor().rollbackTo(commonBlock.getHeight());
 
                 Db.db.clearCache();
                 Db.db.commitTransaction();
