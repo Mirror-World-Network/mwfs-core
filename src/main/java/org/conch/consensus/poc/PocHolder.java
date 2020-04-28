@@ -41,10 +41,9 @@ class PocHolder implements Serializable {
     
     /** poc score **/
     // accountId : pocScore
-    private transient Map<Long, PocScore> scoreMap = PocDb.listAll();
-   
+    protected transient Map<Long, PocScore> scoreMap = PocDb.listAll();
     // height : { accountId : pocScore }
-    private transient Map<Integer, Map<Long, PocScore>> historyScore = Maps.newConcurrentMap();
+    protected transient Map<Integer, Map<Long, PocScore>> historyScore = Maps.newConcurrentMap();
     /** poc score **/
 
     /** certified peers **/
@@ -58,7 +57,6 @@ class PocHolder implements Serializable {
     
     private volatile Map<Integer, List<Long>> delayPocTxsByHeight = Maps.newConcurrentMap();
     private static volatile int pocTxHeight = -1;
-    
     
     public static void updateHeight(int height){
         if(height == -1) return;
@@ -416,7 +414,7 @@ class PocHolder implements Serializable {
         static final int printCount = 1;
         
         protected static boolean debug = Constants.isTestnetOrDevnet()  ? false : false;
-        protected static boolean debugHistory = Constants.isDevnet() ? false : false;
+        protected static boolean debugHistory = Constants.isDevnet() ? true : false;
         
         protected static String summary = reset();
         private static final String splitter = "\n\r";
