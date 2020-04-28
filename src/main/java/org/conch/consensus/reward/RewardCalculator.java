@@ -28,7 +28,7 @@ public class RewardCalculator {
     }
     
 //    private static final int HALVE_COUNT = 210240;
-    private static final int MINER_JOINING_PHASE = 2600; // around '2020-05-06 21:00'
+    public static final int MINER_JOINING_PHASE = 2600; // around '2020-05-06 21:00'
     /**
      * mint reward calculate
      * @return
