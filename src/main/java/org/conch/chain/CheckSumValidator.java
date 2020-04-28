@@ -139,7 +139,6 @@ public class CheckSumValidator {
     // known ignore blocks
     private static final Set<Long> knownIgnoreBlocks = Sets.newHashSet(
             //Testnet
-
     );
     
     private static final Set<Long> knownIgnoreTxs = Sets.newHashSet();

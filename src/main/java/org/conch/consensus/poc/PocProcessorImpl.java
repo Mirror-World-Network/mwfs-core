@@ -306,6 +306,7 @@ public class PocProcessorImpl implements PocProcessor {
             }
 
             // reset the certified peers
+            // TODO
 
 
             // set the latest certified peer
