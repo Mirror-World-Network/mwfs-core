@@ -800,9 +800,15 @@ public class Generator implements Comparable<Generator> {
     /** Generator list has been initialized */
     private static boolean generatorsInitialized = false;
     
-    /** 10days */
-    private static final int MAX_ACTIVE_GENERATOR_LIFECYCLE = 1440;
-    
+    /** 1months */
+    private static final int MAX_ACTIVE_GENERATOR_LIFECYCLE = calActiveGeneratorCount().intValue();
+
+
+    private static Long calActiveGeneratorCount(){
+        // 1 month
+        return 30L * (60L*60L*24L / (long)Constants.getBlockGapSeconds());
+    }
+
     /**
      * Return a list of generators for the next block.  The caller must hold the blockchain
      * read lock to ensure the integrity of the returned list.
