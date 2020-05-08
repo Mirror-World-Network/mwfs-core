@@ -803,7 +803,6 @@ public class Generator implements Comparable<Generator> {
     /** 1months */
     private static final int MAX_ACTIVE_GENERATOR_LIFECYCLE = calActiveGeneratorCount().intValue();
 
-
     private static Long calActiveGeneratorCount(){
         // 1 month
         return 30L * (60L*60L*24L / (long)Constants.getBlockGapSeconds());

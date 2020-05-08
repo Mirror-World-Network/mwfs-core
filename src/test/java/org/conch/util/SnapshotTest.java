@@ -3,12 +3,14 @@ package org.conch.util;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.conch.Conch;
 import org.conch.account.Account;
 import org.conch.chain.BlockchainImpl;
 import org.conch.common.Constants;
 import org.conch.db.Db;
 import org.conch.db.DbIterator;
 import org.conch.db.DbUtils;
+import org.conch.peer.CertifiedPeer;
 import org.conch.tx.Transaction;
 import org.conch.tx.TransactionImpl;
 import org.conch.tx.TransactionType;
@@ -17,10 +19,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author <a href="mailto:xy@mwfs.io">Ben</a>
@@ -198,6 +197,59 @@ public class SnapshotTest {
             throw new RuntimeException(e.toString(), e);
         } finally {
             DbUtils.close(con);
+        }
+    }
+
+
+    private static void exportDeclaredPeerList(Map<Long, CertifiedPeer> certifiedPeers, int height){
+        // certified peer: foundation node, hub/box, community node
+        // account id : certified peer
+        Collection<CertifiedPeer> peers = certifiedPeers.values();
+        String rsAddrList = "";
+        String mwAmountList = "";
+        String heightList = "";
+        String hostList = "";
+        String typeList = "";
+        String updateTimeList = "";
+        String originalData = "";
+        for(CertifiedPeer certifiedPeer : peers){
+            JSONObject peerObj = new JSONObject();
+            long mwAmount = 0;
+            try{
+                mwAmount = Account.getAccount(certifiedPeer.getBoundAccountId()).getEffectiveBalanceSS(height);
+            }catch(Exception e){
+
+            }
+
+            rsAddrList += certifiedPeer.getBoundRS() + "\n";
+            mwAmountList += mwAmount + "\n";
+            heightList += certifiedPeer.getHeight() + "\n";
+            hostList += certifiedPeer.getHost() + "\n";
+            typeList += certifiedPeer.getType().getSimpleName() + "\n";
+            updateTimeList += certifiedPeer.getUpdateTime().toString() + "\n";
+
+            peerObj.put("BindAddr",certifiedPeer.getBoundRS());
+            peerObj.put("MwAmount",mwAmount);
+            peerObj.put("DeclaredHeight",certifiedPeer.getHeight());
+            peerObj.put("PeerHost",certifiedPeer.getHost());
+            peerObj.put("PeerType",certifiedPeer.getType().getSimpleName());
+            peerObj.put("UpdateTime",certifiedPeer.getUpdateTime().toString());
+            originalData += peerObj.toJSONString() + "\n";
+        }
+
+        Logger.logDebugMessage("\n## BindAddr ##\n\r" + rsAddrList);
+        Logger.logDebugMessage("\n## DeclaredHeight ##\n\r" + heightList);
+        Logger.logDebugMessage("\n## mwAmountList ##\n\r" + mwAmountList);
+        Logger.logDebugMessage("\n## PeerHost ##\n\r" + hostList);
+        Logger.logDebugMessage("\n## PeerType ##\n\r" + typeList);
+        Logger.logDebugMessage("\n## UpdateTime ##\n\r" + updateTimeList);
+        Logger.logDebugMessage("\n## Original Data ##\n\r" + originalData);
+    }
+
+    public static void printDeclaredPeersSnapshot(int height){
+        if(Conch.getHeight() == height) {
+            // 2601
+           exportDeclaredPeerList(Conch.getPocProcessor().getCertifiedPeers(), 2600);
         }
     }
 }
