@@ -2,11 +2,11 @@
     <div class="container_login">
         <div class="content">
             <div class="content_message">
-                <div>
-                    <a>{{$t('login.login_tip1')}}</a><br/>
-                    <a>{{$t('login.login_tip2')}}</a>
-<!--                    <a>The testnet peer port is 8218</a>-->
-                </div>
+                <div><a>{{$t('login.login_tip0')}}</a><br/></div>
+                <div><a>{{$t('login.login_tip1')}}</a><br/></div>
+                <div><a>{{$t('login.login_tip2')}}</a><br/></div>
+                <div><a>{{$t('login.login_tip3')}}</a><br/></div>
+                <div><a>{{$t('login.login_tip4')}}</a></div>
             </div>
 
             <el-col :span="24">
@@ -50,7 +50,6 @@
         }
     };
 </script>
-
 
 <style lang="scss">
     @import './style.scss';

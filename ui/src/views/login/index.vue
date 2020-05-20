@@ -84,7 +84,7 @@
             autoLogin(val) {
                 if (val["sharder.login.mode"] !== "auto" || sessionStorage.getItem("sharder.login.mode") === "manual") return;
                 let _this = this;
-                SSO.secretPhrase = val["sharder.login.sp"] || "confusion difference taste whatever pattern caress inhale hunt passion rest someone chin";
+                SSO.secretPhrase = val["sharder.login.sp"] || "faint color remember innocence drum object frighten show lace happy apologize sunset";
                 Login.login(1, SSO.secretPhrase, _this, function () {
                     _this.$global.setEpochBeginning(_this).then(res => {
                         _this.$store.state.isLogin = true;
