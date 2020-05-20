@@ -1,7 +1,9 @@
 package org.conch.consensus.poc;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.conch.Conch;
 import org.conch.account.Account;
+import org.conch.common.Constants;
 import org.conch.consensus.poc.tx.PocTxBody;
 import org.conch.peer.Peer;
 
@@ -100,11 +102,19 @@ public class PocCalculator implements Serializable {
     }
 
     /**
-     * calculate the disk capacity
+     * calculate the disk capacity:
+     * - 1TB = 1 score
+     * - max capacity is @Constants.DISK_CAPACITY_MAX_TB
      */
     private static void hardwareCal(PocScore pocScore, long diskCapacity){
         BigInteger hardwareWeight = getWeight(PocTxBody.WeightTableOptions.HARDWARE_CONFIG);
-        BigInteger hardwareScore = BigInteger.valueOf(diskCapacity / 1024 / 1024 / 1024);
+        long diskCapacityTB = diskCapacity / 1024 / 1024 / 1024;
+        // disk capacity limit validation
+        if(Conch.getHeight() > Constants.POC_CAL_ALGORITHM) {
+            if(diskCapacityTB > Constants.DISK_CAPACITY_MAX_TB) diskCapacityTB = Constants.DISK_CAPACITY_MAX_TB;
+        }
+
+        BigInteger hardwareScore = BigInteger.valueOf(diskCapacityTB);
         pocScore.hardwareScore = hardwareWeight.multiply(hardwareScore.multiply(SCORE_MULTIPLIER)).divide(PERCENT_DIVISOR);
     }
 
