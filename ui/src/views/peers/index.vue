@@ -285,11 +285,13 @@
                 _this.getPeersInfo(peersList);
                 _this.activeHubCount = 0;
                 _this.minerList.forEach(function (item) {
-                    if (item.bindPeerType === "Sharder Hub") {
+                    if (item.bindPeerType === "Soul Node"
+                    || item.bindPeerType === "Center Node"
+                    || item.bindPeerType === "Community Node"
+                    ) {
                         _this.activeHubCount++;
                     }
                 });
-
             },
             getSPPeers:function(){
                 const _this = this;
