@@ -24,7 +24,6 @@ package org.conch.chain;
 import org.conch.Conch;
 import org.conch.common.ConchException;
 import org.conch.common.Constants;
-import org.conch.consensus.genesis.GenesisRecipient;
 import org.conch.db.Db;
 import org.conch.db.DbIterator;
 import org.conch.db.DbUtils;
@@ -414,8 +413,6 @@ public final class BlockchainImpl implements Blockchain {
     @Override
     public int getTransactionCountByAccount(long accountId, byte type,byte subtype){
 
-        accountId = checkAndConvertAccountId(accountId, type);
-
         StringBuilder buf = new StringBuilder();
         buf.append("SELECT COUNT(*) FROM transaction WHERE (recipient_id = ? or sender_id = ?) ");
         if(type >= 0){
@@ -497,31 +494,47 @@ public final class BlockchainImpl implements Blockchain {
         }
     }
 
+    /**
+     * 查询指定交易集合
+     * @return
+     */
+    @Override
+    public DbIterator<TransactionImpl> getTransactions(long accountId, byte type, boolean isFrom, int from, int to, int endHeight) {
+        Connection con = null;
+        PreparedStatement pstmt;
+        try {
+            StringBuilder buf = new StringBuilder();
+            buf.append("SELECT transaction.* FROM transaction where type=" + type + " ");
+            if (isFrom) {
+                buf.append("And sender_id = ? ");
+            } else {
+                buf.append("And recipient_id = ? ");
+            }
+            buf.append("And height <= ? ");
+            buf.append("ORDER BY block_timestamp DESC, transaction_index DESC");
+            buf.append(DbUtils.limitsClause(from, to));
+            con = Db.db.getConnection();
+            int i = 0;
+            pstmt = con.prepareStatement(buf.toString());
+            pstmt.setLong(++i,accountId);
+            pstmt.setInt(++i,endHeight);
+            DbUtils.setLimits(++i, pstmt, from, to);
+            return getTransactions(con, pstmt);
+        }catch (SQLException e) {
+            throw new RuntimeException(e.toString(), e);
+        }
+    }
+
     @Override
     public DbIterator<TransactionImpl> getTransactions(long accountId, byte type, byte subtype, int blockTimestamp,
                                                        boolean includeExpiredPrunable) {
         return getTransactions(accountId, 0, type, subtype, blockTimestamp, false, false, false, 0, -1, includeExpiredPrunable, false);
     }
 
-    /**
-     * Poc txs: query by poc creator id
-     * Other txs: query by input account id
-     *
-     * @param accountId input account id
-     * @param type tx type
-     * @return
-     */
-    private static long checkAndConvertAccountId(long accountId, byte type){
-        // Poc txs
-        return TransactionType.TYPE_POC == type ? GenesisRecipient.POC_TX_CREATOR_ID : accountId;
-    }
-
     @Override
     public DbIterator<TransactionImpl> getTransactions(long accountId, int numberOfConfirmations, byte type, byte subtype,
                                                        int blockTimestamp, boolean withMessage, boolean phasedOnly, boolean nonPhasedOnly,
                                                        int from, int to, boolean includeExpiredPrunable, boolean executedOnly) {
-
-        accountId = checkAndConvertAccountId(accountId, type);
 
         if (phasedOnly && nonPhasedOnly) {
             throw new IllegalArgumentException("At least one of phasedOnly or nonPhasedOnly must be false");

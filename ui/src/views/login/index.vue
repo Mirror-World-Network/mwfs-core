@@ -9,7 +9,7 @@
             </el-radio-group>
             <el-col :span="24" class="login_operation">
                 <div style="font-size: x-small;color: #5daf34;text-align: left;height: 12px;">
-                    <span v-if="tabTitle === 'key'&& hubBind">{{$t('login.login_binding_hub_account_tip')}}{{hubBindAddress}}</span>
+                    <span v-if="tabTitle === 'key' && hubBind && displayBindAddr">{{$t('login.login_binding_hub_account_tip')}}{{hubBindAddress}}</span>
                 </div>
                 <input v-if="tabTitle === 'key'" class="account_input" type="password" v-model="secretPhrase"
                        :placeholder="$t('login.login_placeholder')"/>
@@ -61,7 +61,6 @@
             console.info("Net work type is:", SSO.netWorkType);
 
             this.$global.getUserConfig(this).then(res => {
-                // console.log(res, "getUserConfiggetUserConfiggetUserConfiggetUserConfiggetUserConfiggetUserConfig");
                 _this.$store.state.isHubInit = res["sharder.HubBindAddress"] ? false : true;
                 _this.$store.state.userConfig = res;
                 _this.hubBind = res["sharder.HubBind"];
@@ -72,10 +71,20 @@
             SSO.init();
         },
         methods: {
+            displayBindAddr(){
+                const _this = this;
+
+                if(_this.$store.state.userConfig["sharder.myAddress"]
+                && (_this.$store.state.userConfig["sharder.myAddress"].contains("mw.run")
+                    || _this.$store.state.userConfig["sharder.myAddress"].contains("mwfs.io"))){
+                    return false
+                }
+                return true
+            },
             autoLogin(val) {
                 if (val["sharder.login.mode"] !== "auto" || sessionStorage.getItem("sharder.login.mode") === "manual") return;
                 let _this = this;
-                SSO.secretPhrase = val["sharder.login.sp"] || "confusion difference taste whatever pattern caress inhale hunt passion rest someone chin";
+                SSO.secretPhrase = val["sharder.login.sp"] || "faint color remember innocence drum object frighten show lace happy apologize sunset";
                 Login.login(1, SSO.secretPhrase, _this, function () {
                     _this.$global.setEpochBeginning(_this).then(res => {
                         _this.$store.state.isLogin = true;

@@ -119,6 +119,8 @@ public final class Constants {
     public static final int GUARANTEED_BALANCE_CONFIRMATIONS = isDevnet() ? 1 :(isTestnet()? 1 : 3);
     public static final int LEASING_DELAY = isTestnetOrDevnet() ? Conch.getIntProperty("sharder.testnetLeasingDelay", 10) : 205;
     public static final long MINING_HOLDING_LIMIT = isTestnet() ? (133 * ONE_SS) : (133 * ONE_SS);
+    public static final long DISK_CAPACITY_MIN_TB = isTestnet() ? 1 : 1;
+    public static final long DISK_CAPACITY_MAX_TB = isTestnet() ? 96 : 96;
 
     public static final int MAX_TIMEDRIFT = 15; // allow up to 15 s clock difference
     public static final int MINING_DELAY = Conch.getIntProperty("sharder.miningDelay");
@@ -225,6 +227,9 @@ public final class Constants {
     public static final int POC_POOL_NEVER_END_HEIGHT = isTestnet() ? 0 : 0;
     public static final int POC_BALANCE_CORRECTION_HEIGHT = isTestnet() ? 0 : 0;
     public static final int POC_TX_ALLOW_RECIPIENT = isTestnet() ? 1450 : 0;
+    // the poc calculate algorithm changed height.
+    // NOTE: set the height to 0 when reset the chain or start a new chain
+    public static final int POC_CAL_ALGORITHM = isTestnet() ? 4600 : 0;
 
     //not opened yet
     public static final int PHASING_BLOCK_HEIGHT = Integer.MAX_VALUE;
