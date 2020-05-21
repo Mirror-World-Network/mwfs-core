@@ -166,7 +166,7 @@ public final class GetBlockchainTransactions extends APIServlet.APIRequestHandle
                     tx.setIndex(0);
                     // Poc statement(PoC Node Type Tx)
                     if(TransactionType.TYPE_POC == tx.getType().getType()) {
-                        txsInJsonObj.add(JSONData.transaction(tx, includePhasingResult));
+                        oldPocTxs.add(tx);
                     }
                 });
 
