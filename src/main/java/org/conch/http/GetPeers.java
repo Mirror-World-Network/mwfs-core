@@ -25,23 +25,15 @@ import org.conch.Conch;
 import org.conch.peer.Peer;
 import org.conch.peer.Peers;
 import org.conch.util.Convert;
+import org.conch.util.IpUtil;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONStreamAware;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Collection;
-import java.util.HashMap;
 
 public final class GetPeers extends APIServlet.APIRequestHandler {
-    static final HashMap CoordinatesMap = new HashMap();
-    static final HashMap tempCoordinatesMap = new HashMap();
     static final GetPeers instance = new GetPeers();
 
     private GetPeers() {
@@ -112,26 +104,31 @@ public final class GetPeers extends APIServlet.APIRequestHandler {
         if(peersJSON.size() <= 0) {
             peersJSON.add(Peers.getMyAddress());
         }
-        String startThis =  req.getParameter("startThis");
+
         JSONObject response = new JSONObject();
-        tempCoordinatesMap.putAll(CoordinatesMap);
+
+        String startThis =  req.getParameter("startThis");
         if (startThis != null) {
-            if (CoordinatesMap.size() == 0  || (CoordinatesMap.get("peersLength") != null && (int)CoordinatesMap.get("peersLength") != peersJSON.size())){
-                new Thread("ExchangeIpAddr"){
-                    public void run(){
-                        final String result = byIPtoCoordinates("https://mw.run/api/front/coordinates/ip",JSONArray.toJSONString(peersJSON));
-                        if (result.contains("ErrorInfo")){
-                            return;
-                        }else{
-                            CoordinatesMap.put("CoordinatesList",result);
-                            CoordinatesMap.put("peersLength",peersJSON.size());
-                            tempCoordinatesMap.putAll(CoordinatesMap);
-                        }
-                    }
-                }.start();
-            }
-            response.put("coordinates",tempCoordinatesMap.get("CoordinatesList"));
+            response.put("coordinates", IpUtil.parseAndConvertToCoordinates(peersJSON).toJSONString());
         }
+//        tempCoordinatesMap.putAll(CoordinatesMap);
+//        if (startThis != null) {
+//            if (CoordinatesMap.size() == 0  || (CoordinatesMap.get("peersLength") != null && (int)CoordinatesMap.get("peersLength") != peersJSON.size())){
+//                new Thread("ExchangeIpAddr"){
+//                    public void run(){
+//                        final String result = byIPtoCoordinates("https://mw.run/api/front/coordinates/ip",JSONArray.toJSONString(peersJSON));
+//                        if (result.contains("ErrorInfo")){
+//                            return;
+//                        }else{
+//                            CoordinatesMap.put("CoordinatesList",result);
+//                            CoordinatesMap.put("peersLength",peersJSON.size());
+//                            tempCoordinatesMap.putAll(CoordinatesMap);
+//                        }
+//                    }
+//                }.start();
+//            }
+//
+//        }
         response.put("peers", peersJSON);
         response.put("declaredPeerSize", Conch.getPocProcessor().getCertifiedPeers().size());
         return response;
@@ -142,72 +139,7 @@ public final class GetPeers extends APIServlet.APIRequestHandler {
         return false;
     }
 
-    public static String byIPtoCoordinates(String url, String param) {
-        PrintWriter out = null;
-        BufferedReader in = null;
-        String result = "";
-        try {
-            URL realUrl = new URL(url);
-            // 打开和URL之间的连接
-            URLConnection conn = realUrl.openConnection();
-            // 设置通用的请求属性
-            conn.setRequestProperty("accept", "*/*");
-            conn.setRequestProperty("connection", "Keep-Alive");
-            conn.setRequestProperty("content-type","application/json;charset=UTF-8");
-
-            // 发送POST请求必须设置如下两行
-            conn.setDoOutput(true);
-            conn.setDoInput(true);
-            // 获取URLConnection对象对应的输出流
-            out = new PrintWriter(conn.getOutputStream());
-            // 发送请求参数
-            out.print(param);
-            // flush输出流的缓冲
-            out.flush();
-            // 定义BufferedReader输入流来读取URL的响应
-            in = new BufferedReader(
-                    new InputStreamReader(conn.getInputStream()));
-            System.out.println(in);
-
-            String line;
-            while ((line = in.readLine()) != null) {
-                result += line;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        //使用finally块来关闭输出流、输入流
-        finally{
-            try{
-                if(out!=null){
-                    out.close();
-                }
-                if(in!=null){
-                    in.close();
-                }
-            }
-            catch(IOException ex){
-                ex.printStackTrace();
-            }
-        }
-
-        return result;
-    }
-
     public static void main(String[] args){
-        JSONArray peersJSON = new JSONArray();
-        peersJSON.add("116.8.37.150");
-        System.out.println(peersJSON.size());
-        System.out.println(CoordinatesMap.toString());
-        System.out.println(CoordinatesMap.get("peersLength"));
-        String result= byIPtoCoordinates("http://localhost:8080/api/front/coordinates/ip",JSONArray.toJSONString(peersJSON));
-        System.out.println("jiegou:"+result);
-        result = result.substring(0,result.length()-1)+",\"116.8.37.150\":{\"X\":\"22.81667\",\"Y\":\"108.31667\"}}";
-        System.out.println(result);
 
-      /*  String result= byIPtoCoordinates("https://mwfs.io/api/front/coordinates/ip",JSONArray.toJSONString(peersJSON));
-        System.out.println("lengh:"+CoordinatesMap.get("peersLengh"));
-        System.out.println("jiegou:"+result);
-        System.out.println(peersJSON.size());*/
     }
 }
