@@ -204,6 +204,8 @@ public class CheckSumValidator {
                 +"{\"checksum\":\"1dbf7440a2bbf0ee9df66d62cb3e858909695334be51d2958a2c364e3ab49304d5819f0f604af28429809c4c56d1189877a4b2dcf74fae0df0cbe3b465132022\",\"height\":1390,\"id\":-3318284808878241769,\"network\":\"testnet\"},"
                 +"{\"checksum\":\"b5da577c146a0be1138bfed1976be181d8d0cd0d4d2b98270e213010756e40026c627c2df2d3aed9931c5456a5b02059e518f7c3fa0224487b6b16c9d4568bbf\",\"height\":1396,\"id\":-1864144628520431314,\"network\":\"testnet\"},"
                 +"{\"checksum\":\"c74a81193b553651e90ffa26ff34fff05876a98bc3bc71d10c3a29d3f70bc70b9974cf77a7ddf50154b63e752731bccba360253c1991208a53c8849d82787db4\",\"height\":1405,\"id\":6272874939080731257,\"network\":\"testnet\"},"
+                +"{\"checksum\":\"19957dafa66e4b05505ccda03065005f79b094147acb6503abaf3acf3e53950f033efd257430a627dd120c8829ccc361219aeca0a6cf769994633a3a5ccf43df\",\"height\":5130,\"id\":3627531186248768236,\"network\":\"testnet\"},"
+                +"{\"checksum\":\"7d7eeb8549239f717802ba0af1a5af35b61b622ea612702dc67602ef04d9a50ebbe71db149f90fbe01668b30777f9d25afa4fb3db139b42aba66276be788475b\",\"height\":5316,\"id\":6735474350291239541,\"network\":\"testnet\"},"
                 + "]"
         );
 
