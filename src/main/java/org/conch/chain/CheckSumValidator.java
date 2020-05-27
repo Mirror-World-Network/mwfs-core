@@ -206,6 +206,7 @@ public class CheckSumValidator {
                 +"{\"checksum\":\"c74a81193b553651e90ffa26ff34fff05876a98bc3bc71d10c3a29d3f70bc70b9974cf77a7ddf50154b63e752731bccba360253c1991208a53c8849d82787db4\",\"height\":1405,\"id\":6272874939080731257,\"network\":\"testnet\"},"
                 +"{\"checksum\":\"19957dafa66e4b05505ccda03065005f79b094147acb6503abaf3acf3e53950f033efd257430a627dd120c8829ccc361219aeca0a6cf769994633a3a5ccf43df\",\"height\":5130,\"id\":3627531186248768236,\"network\":\"testnet\"},"
                 +"{\"checksum\":\"7d7eeb8549239f717802ba0af1a5af35b61b622ea612702dc67602ef04d9a50ebbe71db149f90fbe01668b30777f9d25afa4fb3db139b42aba66276be788475b\",\"height\":5316,\"id\":6735474350291239541,\"network\":\"testnet\"},"
+                +"{\"checksum\":\"3a0dbfcef1d5c5b50e979e54038e1291fae84ed95f9504635cccef9c1c6f7e0633b6884ad145ba31c7ed0ebf3f1ed74997f806f2abc3318243d7da1a58984204\",\"height\":5487,\"id\":986005735749606277,\"network\":\"testnet\"},"
                 + "]"
         );
 
