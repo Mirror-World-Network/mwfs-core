@@ -27,6 +27,7 @@ import org.conch.account.Account;
 import org.conch.account.AccountLedger;
 import org.conch.common.ConchException;
 import org.conch.common.Constants;
+import org.conch.consensus.burn.BurnCalculator;
 import org.conch.consensus.genesis.SharderGenesis;
 import org.conch.consensus.poc.PocScore;
 import org.conch.consensus.poc.tx.PocTxBody;
@@ -2372,14 +2373,9 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
 
 
         try {
-            // burn transaction
-            boolean startBurn = false;
-            if(Constants.BURN_NEW_START_HEIGHT != -1L
-            && Constants.BURN_NEW_START_HEIGHT < previousBlock.getHeight()){
-                startBurn = true;
-            }
-            if (totalFeeNQT > 0 && startBurn) {
-                long burnNQT = Math.round(totalFeeNQT * Constants.BURN_NEW_RATE);
+            // burn tx
+            long burnNQT = BurnCalculator.burnAmount(totalFeeNQT);
+            if (burnNQT > 0) {
                 TransactionImpl transaction =
                         new TransactionImpl.BuilderImpl(
                                 publicKey,
@@ -2394,7 +2390,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 digest.update(transaction.bytes());
                 totalAmountNQT += transaction.getAmountNQT();
                 payloadLength += transaction.getFullSize();
-                Logger.logInfoMessage("create burn transaction: burn " + burnNQT + " SS");
+                Logger.logDebugMessage("create burn transaction: burn " + burnNQT + " SS");
             }
         } catch (ConchException.ValidationException e) {
             e.printStackTrace();
