@@ -853,7 +853,7 @@ public final class Conch {
 
                 if (isDesktopMode()) runtimeMode.launchDesktopApplication();
 
-                if (Constants.isTestnetOrDevnet()) Logger.logMessage("RUNNING ON " +  Constants.getNetwork()  + " - DO NOT USE REAL ACCOUNTS!");
+                if (Constants.isTestnetOrDevnet()) Logger.logMessage("RUNNING ON " +  Constants.getNetwork()  + " - DO NOT USE MAINNET ACCOUNTS!");
 
                 Peers.sysInitialed = true;
             } catch (Exception e) {

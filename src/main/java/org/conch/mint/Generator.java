@@ -380,7 +380,7 @@ public class Generator implements Comparable<Generator> {
         boolean isCertifiedPeer = Conch.getPocProcessor().isCertifiedPeerBind(accountId,Conch.getHeight());
         if(!isCertifiedPeer) {
             if(Logger.printNow(Constants.Generator_startMining)) {
-                Logger.logWarningMessage("Can't start the mining of the current account %s(it didn't linked to a certified peer at the height %d), the reason maybe it didn't create a PocNodeTypeTx. please INIT or RESET the client firstly! ",
+                Logger.logWarningMessage("Can't start the mining of the current account %s(it didn't linked to a certified peer before the height %d), the reason maybe it didn't create a PocNodeTypeTx. please INIT or RESET the client firstly! ",
                         rsAddr,
                         Conch.getHeight());
             }
@@ -999,9 +999,21 @@ public class Generator implements Comparable<Generator> {
     public static void checkOrStartAutoMining(){
         if(autoMintRunning) {
             if(Logger.printNow(Constants.Generator_checkOrStartAutoMining, 600)) {
-                Logger.logInfoMessage("Account %s is mining [next mining time is %s] ...", linkedGenerator.rsAddress, Convert.dateFromEpochTime(linkedGenerator.hitTime));
+                if(linkedGenerator == null) {
+                    Logger.logInfoMessage("Can't start auto mining because no linked account, please finish the client initial firstly ...");
+                }else {
+                    Logger.logInfoMessage("Account %s is mining [next mining time is %s] ...",
+                            linkedGenerator.rsAddress,
+                            Convert.dateFromEpochTime(linkedGenerator.hitTime));
+                }
             }else{
-                Logger.logDebugMessage("Account %s is mining [next mining time is %s] ...", linkedGenerator.rsAddress, Convert.dateFromEpochTime(linkedGenerator.hitTime));  
+                if(linkedGenerator == null) {
+                    Logger.logDebugMessage("Can't start auto mining because no linked account, please finish the client initial firstly ...");
+                }else {
+                    Logger.logDebugMessage("Account %s is mining [next mining time is %s] ...",
+                            linkedGenerator.rsAddress,
+                            Convert.dateFromEpochTime(linkedGenerator.hitTime));
+                }
             }
             return;
         }
