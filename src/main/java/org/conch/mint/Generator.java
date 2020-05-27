@@ -716,7 +716,7 @@ public class Generator implements Comparable<Generator> {
             }
         }
         **/
-    
+
         PocScore pocScoreObj = Conch.getPocProcessor().calPocScore(account,lastHeight);
         effectiveBalance = pocScoreObj.getEffectiveBalance();
         detailedPocScore = pocScoreObj.toJsonObject();

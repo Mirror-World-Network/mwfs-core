@@ -1005,7 +1005,7 @@
                     publicKey: SSO.publicKey,
                     requestProcessingTime: '',
                     unconfirmedBalanceNQT: '',
-                    pocScore:'',
+                    pocScore:'--',
                 },
                 selectType: '',
                 transactionType: [{
@@ -1220,6 +1220,7 @@
                 _this.accountInfo.frozenBalanceNQT = res.frozenBalanceNQT;
                 _this.accountInfo.guaranteedBalanceNQT = res.guaranteedBalanceNQT;
                 _this.accountInfo.unconfirmedBalanceNQT = res.unconfirmedBalanceNQT;
+                _this.accountInfo.pocScore = res.pocScore;
                 _this.accountInfo.name = res.name;
             });
             _this.getAccountTransactionList();
@@ -1239,7 +1240,6 @@
             });
             // _this.getLatestHubVersion();
             _this.getPicVCode();
-            _this.getPocScore();
         },
         methods: {
 
@@ -1375,30 +1375,6 @@
             activeSelectType(type) {
                 return this.selectType === type ? 'active' : ''
             },
-            getPocScore(){
-                const _this = this;
-
-                _this.$global.fetch("GET", {
-                    limit: 99999
-                }, "getNextBlockGenerators").then(res => {
-                    _this.activeCount = res.activeCount;
-                    for(let t of res.generators){
-                        if(t.accountRS === SSO.accountRS){
-                            if(t.pocScore){
-                                _this.accountInfo.pocScore = t.pocScore;
-
-                            }else {
-                                _this.accountInfo.pocScore = '--';
-                            }
-                            break;
-                        }else{
-                            _this.accountInfo.pocScore = '--';
-                        }
-                    }
-                }).catch(err => {
-                    console.info("error", err);
-                });
-            },
             getLatestHubVersion() {
                 const _this = this;
                 _this.$http.get('/sharder?requestType=getLatestCosVersion').then(res => {
@@ -1415,8 +1391,7 @@
                     _this.$message.error(err.message);
                 });
             },
-            drawBarchart: function (barchat) {
-
+            drawBarChart: function (barchat) {
                 var dom = document.getElementById("transaction_amount_bar");
                 if (!dom) {
                     console.log("dom transaction_amount_bar got faild，echarts can not load")
@@ -2827,7 +2802,7 @@
                         barchat.series.push(0);
                     }
 
-                    _this.drawBarchart(barchat);
+                    _this.drawBarChart(barchat);
                 });
             },
             getYieldData() {
@@ -3113,7 +3088,6 @@
             let periodicTransactions = setInterval(() => {
                 if (_this.$route.path === '/account') {
                     _this.getAccountTransactionList();
-                    _this.getPocScore();
                 } else {
                     clearInterval(periodicTransactions);
                 }
