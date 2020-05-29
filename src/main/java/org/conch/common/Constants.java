@@ -231,7 +231,7 @@ public final class Constants {
     public static final int POC_TX_ALLOW_RECIPIENT = isTestnet() ? 1450 : 0;
     // the poc calculate algorithm changed height.
     // NOTE: set the height to 0 when reset the chain or start a new chain
-    public static final int POC_CAL_ALGORITHM = isTestnet() ? 4600 : 0;
+    public static final int POC_CAL_ALGORITHM = isTestnet() ? 7220 : 0;
 
     //not opened yet
     public static final int PHASING_BLOCK_HEIGHT = Integer.MAX_VALUE;

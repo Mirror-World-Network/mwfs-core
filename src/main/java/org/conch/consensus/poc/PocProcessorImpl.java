@@ -396,10 +396,13 @@ public class PocProcessorImpl implements PocProcessor {
 
     private static boolean pocDbBeReset = false;
     /**
-     * reset the poc table to avoid the poc score wrong
+     * - reset the poc table to avoid the poc score wrong
+     * - close this processing after
      */
-    public static void resetPocDb() {
-        if(Conch.getHeight() > RewardCalculator.MINER_JOINING_PHASE) {
+    public static void checkAndResetPocDb() {
+        BlockImpl lastBlock = BlockDb.findLastBlock();
+        if(lastBlock != null
+        && lastBlock.getHeight() > RewardCalculator.MINER_JOINING_PHASE) {
             return;
         }
 
@@ -422,7 +425,7 @@ public class PocProcessorImpl implements PocProcessor {
     }
 
     public static void init() {
-        resetPocDb();
+        checkAndResetPocDb();
         ThreadPool.scheduleThread("OldPocTxsProcessThread", oldPocTxsProcessThread, 1, TimeUnit.MINUTES);
         ThreadPool.scheduleThread("DelayedPocTxsProcessThread", delayedPocTxsProcessThread, pocTxSynThreadInterval, TimeUnit.SECONDS);
         //updateRecipientIdIntoOldPocTxs();
