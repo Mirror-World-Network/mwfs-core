@@ -655,7 +655,7 @@ export default {
     drawPeers() {
         var dom = document.getElementById("peers-map")
         if (!dom) {
-            console.log('dom peers-map got failed，echarts can not load')
+            console.log('dom peers-map got failed，echarts can not draw the peer map')
             return
         }
         let _this = this.$vue;
@@ -757,7 +757,7 @@ export default {
                     itemStyle: {
                         normal: {
                             borderColor: "#fff",
-                            color: "#577ceb"
+                            color: "#53c7b1"
                         }
                     }
                 }
