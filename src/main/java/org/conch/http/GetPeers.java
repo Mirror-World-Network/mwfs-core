@@ -107,28 +107,11 @@ public final class GetPeers extends APIServlet.APIRequestHandler {
 
         JSONObject response = new JSONObject();
 
+        // convert the ip to coordinate
         String startThis =  req.getParameter("startThis");
         if (startThis != null) {
             response.put("coordinates", IpUtil.parseAndConvertToCoordinates(peersJSON).toJSONString());
         }
-//        tempCoordinatesMap.putAll(CoordinatesMap);
-//        if (startThis != null) {
-//            if (CoordinatesMap.size() == 0  || (CoordinatesMap.get("peersLength") != null && (int)CoordinatesMap.get("peersLength") != peersJSON.size())){
-//                new Thread("ExchangeIpAddr"){
-//                    public void run(){
-//                        final String result = byIPtoCoordinates("https://mw.run/api/front/coordinates/ip",JSONArray.toJSONString(peersJSON));
-//                        if (result.contains("ErrorInfo")){
-//                            return;
-//                        }else{
-//                            CoordinatesMap.put("CoordinatesList",result);
-//                            CoordinatesMap.put("peersLength",peersJSON.size());
-//                            tempCoordinatesMap.putAll(CoordinatesMap);
-//                        }
-//                    }
-//                }.start();
-//            }
-//
-//        }
         response.put("peers", peersJSON);
         response.put("declaredPeerSize", Conch.getPocProcessor().getCertifiedPeers().size());
         return response;
