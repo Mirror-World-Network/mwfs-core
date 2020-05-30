@@ -258,6 +258,9 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
             FileUtil.deleteDbFolder();
             FileUtil.clearAllLogs();
             Logger.logInfoMessage("[ManualReset] manual reset finished");
+
+            Logger.logDebugMessage("[ManualReset] set the manualReset setting to false");
+            Conch.storePropertieToFile(PROPERTY_MANUAL_RESET, "false");
         }catch (RuntimeException | FileNotFoundException e) {
             Logger.logErrorMessage("reset failed", e);
         }finally {
@@ -356,13 +359,12 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
 
 //       checkOrForceDeleteBakFolder();
 
-//
-//        // manual reset
-//        String resetStr = Conch.getStringProperty(PROPERTY_MANUAL_RESET, null);
-//        boolean manualReset = StringUtils.isEmpty(resetStr) ? true : Boolean.valueOf(resetStr);
-//        if(manualReset && !Generator.isBootNode) {
-//            manualReset();
-//        }
+        // manual reset
+        String resetStr = Conch.getStringProperty(PROPERTY_MANUAL_RESET, null);
+        boolean manualReset = StringUtils.isEmpty(resetStr) ? true : Boolean.valueOf(resetStr);
+        if(manualReset && !Generator.isBootNode) {
+            manualReset();
+        }
         
 //        // switch fork
 //        if(StringUtils.isEmpty(currentFork) || !"Giant".equals(currentFork)){

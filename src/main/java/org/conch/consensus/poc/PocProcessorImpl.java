@@ -397,7 +397,7 @@ public class PocProcessorImpl implements PocProcessor {
     private static boolean pocDbBeReset = false;
     /**
      * - reset the poc table to avoid the poc score wrong
-     * - close this processing after
+     * - close this reset processing after RewardCalculator.MINER_JOINING_PHASE
      */
     public static void checkAndResetPocDb() {
         BlockImpl lastBlock = BlockDb.findLastBlock();
