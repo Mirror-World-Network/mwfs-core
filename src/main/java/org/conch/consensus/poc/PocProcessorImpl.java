@@ -425,7 +425,7 @@ public class PocProcessorImpl implements PocProcessor {
     }
 
     public static void init() {
-        // checkAndResetPocDb();
+        checkAndResetPocDb();
         ThreadPool.scheduleThread("OldPocTxsProcessThread", oldPocTxsProcessThread, 1, TimeUnit.MINUTES);
         ThreadPool.scheduleThread("DelayedPocTxsProcessThread", delayedPocTxsProcessThread, pocTxSynThreadInterval, TimeUnit.SECONDS);
         //updateRecipientIdIntoOldPocTxs();

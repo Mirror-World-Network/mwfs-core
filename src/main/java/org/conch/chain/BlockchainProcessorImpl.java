@@ -137,7 +137,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 while (true) {
 
                     if (!getMoreBlocks) {
-                        if (Logger.printNow(Constants.BlockchainProcessor_getMoreBlocks)) {
+                        if (Logger.printNow(Logger.BlockchainProcessor_getMoreBlocks)) {
                             Logger.logDebugMessage("Don't synchronize blocks when the getMoreBlocks is set to false");
                         }
 
@@ -149,7 +149,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     }
 
                     if (Conch.hasSerialNum() && !Constants.hubLinked) {
-                        if (Logger.printNow(Constants.BlockchainProcessor_getMoreBlocks)) {
+                        if (Logger.printNow(Logger.BlockchainProcessor_getMoreBlocks)) {
                             Logger.logDebugMessage("Don't synchronize blocks before the Client initialization is completed");
                         }
                         return;
@@ -217,7 +217,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             int connectedSize = connectedPublicPeers.size();
             if (!Generator.isBootNode
                     && connectedSize < limitConnectedSize) {
-                if (Logger.printNow(Constants.BlockchainProcessor_downloadPeer_sizeCheck)) {
+                if (Logger.printNow(Logger.BlockchainProcessor_downloadPeer_sizeCheck)) {
                     Logger.logInfoMessage("No enough connected peers[limit size=" + (limitConnectedSize) + ",current connected size=" + connectedSize + "], break syn blocks...");
 //                    Logger.logDebugMessage("Current peers => " + Arrays.toString(connectedPublicPeers.toArray()));
                 }
@@ -233,7 +233,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             final Peer peer = forceSwitchToBootNodesFork ?
                     Peers.checkOrConnectBootNode() : Peers.getWeightedPeer(connectedPublicPeers);
             if (peer == null
-                && Logger.printNow(Constants.BlockchainProcessor_downloadPeer_getWeightedPeer)) {
+                && Logger.printNow(Logger.BlockchainProcessor_downloadPeer_getWeightedPeer)) {
                 Logger.logDebugMessage("Can't find a weighted peer to sync the blocks, the reasons are follow:  a) current peer's version %s is larger than other peers. b) can't connect to boot nodes or other peers which have the public IP.  Wait for next turn.", Conch.getFullVersion());
                 return;
             }
@@ -1678,7 +1678,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
 
     private void validate(BlockImpl block, BlockImpl previousLastBlock, int curTime) throws BlockNotAcceptedException, GeneratorNotAcceptedException {
 
-        if (!Generator.isValid(block.getGeneratorId(), block.getHeight())) {
+        if (!Generator.isValidMiner(block.getGeneratorId(), block.getHeight())) {
             throw new GeneratorNotAcceptedException("Invalid generator", block.getGeneratorId());
         }
 

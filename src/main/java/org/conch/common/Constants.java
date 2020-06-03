@@ -24,10 +24,7 @@ package org.conch.common;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.conch.Conch;
-import org.conch.chain.BlockchainProcessorImpl;
-import org.conch.consensus.poc.hardware.GetNodeHardware;
 import org.conch.env.RuntimeEnvironment;
-import org.conch.mint.Generator;
 import org.conch.peer.Peer;
 
 import java.util.*;
@@ -430,20 +427,7 @@ public final class Constants {
 
     public static final String HOST_FILTER_INFO = "Not valid host! ONLY {} can do this operation!";
     
-    /** log count check key **/
-    public static final String Generator_getNextGenerators = Generator.class.getName() + "#getNextGenerators";
-    public static final String Generator_isMintHeightReached = Generator.class.getName() + "#isMintHeightReached";
-    public static final String Generator_checkOrStartAutoMining = Generator.class.getName() + "#checkOrStartAutoMining";
-    public static final String Generator_isBlockStuckOnBootNode = Generator.class.getName() + "#isBlockStuckOnBootNode";
-    public static final String Generator_isPocTxsProcessed = Generator.class.getName() + "#isPocTxsProcessed";
-    public static final String Generator_startMining = Generator.class.getName() + "#startMining";
-    public static final String CONCH_P_reachLastKnownBlock = Conch.class.getName() + "#reachLastKnownBlock";
-    public static final String CONCH_P_readAndSetSerialNum = Conch.class.getName() + "#readAndSetSerialNum";
-    public static final String BlockchainProcessor_downloadPeer_sizeCheck = BlockchainProcessorImpl.class.getName() + "#downloadPeer#sizeCheck";
-    public static final String BlockchainProcessor_downloadPeer_getWeightedPeer = BlockchainProcessorImpl.class.getName() + "#downloadPeer#getWeightedPeer";
-    public static final String BlockchainProcessor_getMoreBlocks = BlockchainProcessorImpl.class.getName() + "#getMoreBlocks";
-    public static final String GetNodeHardware_P_report = GetNodeHardware.class.getName() + "#report";
-    
+
     public static final boolean hubLinked = Conch.getBooleanProperty("sharder.HubBind");
     public static final boolean initFromArchivedDbFile = Conch.getBooleanProperty("sharder.initFromArchivedDbFile");
 

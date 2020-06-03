@@ -111,11 +111,12 @@ public class PocCalculator implements Serializable {
      */
     private static void hardwareCal(PocScore pocScore, long diskCapacity){
         BigInteger hardwareWeight = getWeight(PocTxBody.WeightTableOptions.HARDWARE_CONFIG);
+        BigInteger hardwareScore = BigInteger.valueOf(diskCapacity / 1024 / 1024 / 1024);
 
-        Double diskCapacityTBD = new Double(diskCapacity) / new Double(ONE_T_IN_KB_UNIT);
-        long diskCapacityTB = 0;
         // disk capacity limit validation
         if(Conch.getHeight() > Constants.POC_CAL_ALGORITHM) {
+            Double diskCapacityTBD = new Double(diskCapacity) / new Double(ONE_T_IN_KB_UNIT);
+            long diskCapacityTB = 0;
             // valid min disk value is 1T, allow 5% precision lose
             // step is 1T if disk value larger than 1T
             // max disk value is Constants.DISK_CAPACITY_MAX_TB=96T
@@ -126,9 +127,9 @@ public class PocCalculator implements Serializable {
             } else if(diskCapacityTBD > Constants.DISK_CAPACITY_MAX_TB) {
                 diskCapacityTB = Constants.DISK_CAPACITY_MAX_TB;
             }
+            hardwareScore = BigInteger.valueOf(diskCapacityTB);
         }
 
-        BigInteger hardwareScore = BigInteger.valueOf(diskCapacityTB);
         pocScore.hardwareScore = hardwareWeight.multiply(hardwareScore.multiply(SCORE_MULTIPLIER)).divide(PERCENT_DIVISOR);
     }
 
@@ -248,44 +249,6 @@ public class PocCalculator implements Serializable {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
-    }
-
-
-    private static void _diskCal(long diskCapacity){
-        Double diskCapacityTBD = new Double(diskCapacity) / new Double(ONE_T_IN_KB_UNIT);
-        long diskCapacityTB = 0;
-        // disk capacity limit validation
-        // allow 5% precision lose
-        if(diskCapacityTBD > 0.95 && diskCapacityTBD <= 1.0){
-            diskCapacityTB = 1;
-        } else if(diskCapacityTBD > 1.0 && diskCapacityTBD <= Constants.DISK_CAPACITY_MAX_TB){
-            diskCapacityTB = diskCapacityTBD.longValue();
-        } else if(diskCapacityTBD > Constants.DISK_CAPACITY_MAX_TB) {
-            diskCapacityTB = Constants.DISK_CAPACITY_MAX_TB;
-        }
-
-        BigInteger hardwareScore = BigInteger.valueOf(diskCapacityTB);
-        System.out.println(String.format("diskCapacityTBD=%s, hardwareScore=%d, diskCapacityTB=%d", diskCapacityTBD , hardwareScore.longValue(), diskCapacityTB));
-    }
-    public static void main(String[] args) {
-        System.out.println("------------500G----------");
-        _diskCal(500 * 1024 * 1024L);
-        System.out.println("------------972G----------");
-        _diskCal(972 * 1024 * 1024L);
-        System.out.println("------------975G----------");
-        _diskCal(975 * 1024 * 1024L);
-        System.out.println("------------1T----------");
-        _diskCal(1024 * 1024 * 1024L);
-        System.out.println("------------1.5T----------");
-        _diskCal(1536 * 1024 * 1024L);
-        System.out.println("------------2T----------");
-        _diskCal(2048 * 1024 * 1024L);
-        System.out.println("------------3T----------");
-        _diskCal(3041 * 1024 * 1024L);
-        System.out.println("------------96T----------");
-        _diskCal(98304 * 1024 * 1024L);
-        System.out.println("------------100T----------");
-        _diskCal(100 * 1024 * 1024 * 1024L);
     }
 
 }
