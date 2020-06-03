@@ -81,7 +81,7 @@ const cn = {
     register: {
         'register_title': "您的账户密钥如下",
         'register_tip1': "请写下来或记住这12个单词，该密钥用于访问您的MW账户。",
-        'register_tip2': "注意：永远不要透露您的密钥，如果丢失您将无法访问您的账户！",
+        'register_tip2': "注意：请妥善保管不要透露您的密钥，如果丢失您将无法访问您的账户！",
         'cancel': "取消",
         'next_step': "下一步",
     },
