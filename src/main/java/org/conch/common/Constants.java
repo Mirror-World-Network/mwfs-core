@@ -24,10 +24,7 @@ package org.conch.common;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.conch.Conch;
-import org.conch.chain.BlockchainProcessorImpl;
-import org.conch.consensus.poc.hardware.GetNodeHardware;
 import org.conch.env.RuntimeEnvironment;
-import org.conch.mint.Generator;
 import org.conch.peer.Peer;
 
 import java.util.*;
@@ -87,14 +84,16 @@ public final class Constants {
 
     private static final String networkInProperties = Conch.getStringProperty("sharder.network");
     public static final String NetworkDef = loadNetworkDefinition();
+
     public static final boolean isOffline = Conch.getBooleanProperty("sharder.isOffline");
     public static final boolean isLightClient = Conch.getBooleanProperty("sharder.isLightClient");
     public static final boolean isStorageClient = Conch.getBooleanProperty("sharder.storage.enable");
-    public static final Double BURN_NEW_RATE = 0.3;
-    public static final Long BURN_NEW_START_HEIGHT = isTestnetOrDevnet() ? (-1L) : 10L;
-    public static final Long BURN_ADDRESS_ID = -1L;
+
     public static final List<String> bootNodesHost = parseBootNodesHost();
     public static final String bootNodeHost = parseBootNodeHost();
+
+    public static final Long BURN_OPENING_HEIGHT = isTestnetOrDevnet() ? (-1L) : 10L;
+    public static final Long BURN_ADDRESS_ID = -1L;
 
 //    public static final int MAX_NUMBER_OF_TRANSACTIONS = 255;
     public static final int MAX_NUMBER_OF_TRANSACTIONS = 5000;
@@ -229,7 +228,7 @@ public final class Constants {
     public static final int POC_TX_ALLOW_RECIPIENT = isTestnet() ? 1450 : 0;
     // the poc calculate algorithm changed height.
     // NOTE: set the height to 0 when reset the chain or start a new chain
-    public static final int POC_CAL_ALGORITHM = isTestnet() ? 4600 : 0;
+    public static final int POC_CAL_ALGORITHM = isTestnet() ? 6688 : 0;
 
     //not opened yet
     public static final int PHASING_BLOCK_HEIGHT = Integer.MAX_VALUE;
@@ -254,6 +253,7 @@ public final class Constants {
     public static final long EPOCH_BEGINNING = launchedTime(0).getTimeInMillis();
 
     //Mining pool
+    public static final int POOL_OPENING_HEIGHT = isTestnetOrDevnet() ? -1 : -1;
     public static final int SHARDER_POOL_DELAY = isDevnet() ? 1 : 1; //transaction become effective
     public static final int SHARDER_POOL_MAX_BLOCK_DESTROY = 5; //pool can be destroyed by manual
     public static final int SHARDER_POOL_DEADLINE = isDevnet() ? 60 * 24 : 60 * 24 * 7; 
@@ -427,20 +427,7 @@ public final class Constants {
 
     public static final String HOST_FILTER_INFO = "Not valid host! ONLY {} can do this operation!";
     
-    /** log count check key **/
-    public static final String Generator_getNextGenerators = Generator.class.getName() + "#getNextGenerators";
-    public static final String Generator_isMintHeightReached = Generator.class.getName() + "#isMintHeightReached";
-    public static final String Generator_checkOrStartAutoMining = Generator.class.getName() + "#checkOrStartAutoMining";
-    public static final String Generator_isBlockStuckOnBootNode = Generator.class.getName() + "#isBlockStuckOnBootNode";
-    public static final String Generator_isPocTxsProcessed = Generator.class.getName() + "#isPocTxsProcessed";
-    public static final String Generator_startMining = Generator.class.getName() + "#startMining";
-    public static final String CONCH_P_reachLastKnownBlock = Conch.class.getName() + "#reachLastKnownBlock";
-    public static final String CONCH_P_readAndSetSerialNum = Conch.class.getName() + "#readAndSetSerialNum";
-    public static final String BlockchainProcessor_downloadPeer_sizeCheck = BlockchainProcessorImpl.class.getName() + "#downloadPeer#sizeCheck";
-    public static final String BlockchainProcessor_downloadPeer_getWeightedPeer = BlockchainProcessorImpl.class.getName() + "#downloadPeer#getWeightedPeer";
-    public static final String BlockchainProcessor_getMoreBlocks = BlockchainProcessorImpl.class.getName() + "#getMoreBlocks";
-    public static final String GetNodeHardware_P_report = GetNodeHardware.class.getName() + "#report";
-    
+
     public static final boolean hubLinked = Conch.getBooleanProperty("sharder.HubBind");
     public static final boolean initFromArchivedDbFile = Conch.getBooleanProperty("sharder.initFromArchivedDbFile");
 

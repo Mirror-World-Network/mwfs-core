@@ -30,6 +30,9 @@ public class PocCalculator implements Serializable {
     // the final poc score should divide the PERCENT_DIVISOR
     private static final BigInteger PERCENT_DIVISOR = BigInteger.valueOf(100L);
 
+    // 1T convert to KB unit
+    private static final long ONE_T_IN_KB_UNIT = 1024*1024*1024L;
+
     // default weight table
     private volatile PocTxBody.PocWeightTable pocWeightTable = PocTxBody.PocWeightTable.defaultPocWeightTable();
 
@@ -108,13 +111,25 @@ public class PocCalculator implements Serializable {
      */
     private static void hardwareCal(PocScore pocScore, long diskCapacity){
         BigInteger hardwareWeight = getWeight(PocTxBody.WeightTableOptions.HARDWARE_CONFIG);
-        long diskCapacityTB = diskCapacity / 1024 / 1024 / 1024;
+        BigInteger hardwareScore = BigInteger.valueOf(diskCapacity / 1024 / 1024 / 1024);
+
         // disk capacity limit validation
         if(Conch.getHeight() > Constants.POC_CAL_ALGORITHM) {
-            if(diskCapacityTB > Constants.DISK_CAPACITY_MAX_TB) diskCapacityTB = Constants.DISK_CAPACITY_MAX_TB;
+            Double diskCapacityTBD = new Double(diskCapacity) / new Double(ONE_T_IN_KB_UNIT);
+            long diskCapacityTB = 0;
+            // valid min disk value is 1T, allow 5% precision lose
+            // step is 1T if disk value larger than 1T
+            // max disk value is Constants.DISK_CAPACITY_MAX_TB=96T
+            if(diskCapacityTBD > 0.95 && diskCapacityTBD <= 1.0){
+                diskCapacityTB = 1;
+            } else if(diskCapacityTBD > 1.0 && diskCapacityTBD <= Constants.DISK_CAPACITY_MAX_TB){
+                diskCapacityTB = diskCapacityTBD.longValue();
+            } else if(diskCapacityTBD > Constants.DISK_CAPACITY_MAX_TB) {
+                diskCapacityTB = Constants.DISK_CAPACITY_MAX_TB;
+            }
+            hardwareScore = BigInteger.valueOf(diskCapacityTB);
         }
 
-        BigInteger hardwareScore = BigInteger.valueOf(diskCapacityTB);
         pocScore.hardwareScore = hardwareWeight.multiply(hardwareScore.multiply(SCORE_MULTIPLIER)).divide(PERCENT_DIVISOR);
     }
 

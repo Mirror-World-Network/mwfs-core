@@ -545,13 +545,19 @@
                 if (_this.$route.path === '/network') {
                     _this.networkUrlBlocks();
                     _this.httpGetNextBlockGenerators();
-                    _this.drawPeerMap();
+                    _this.fetchPeers();
                 }else{
                     clearInterval(networkDataLoader);
                 }
             }, SSO.downloadingBlockchain ? this.$global.cfg.soonInterval : this.$global.cfg.defaultInterval);
 
-            // this.menuAdapter();
+            let peerDataLoader = setInterval(() => {
+                if (_this.$route.path === '/network') {
+                    _this.drawPeerMap();
+                }else{
+                    clearInterval(peerDataLoader);
+                }
+            }, 15*60*1000);
         },
         filters: {
             generatorRSFilter(val) {
@@ -604,6 +610,15 @@
                     console.info("error", err);
                 });
             },
+            fetchPeers(){
+                const _this = this;
+                _this.$global.fetch("GET", {startThis:"startThis"}, "getPeers").then(res => {
+                    _this.peerNum = res.peers.length + _this.limitPeerSize;
+                    _this.declaredPeerSize = res.declaredPeerSize;
+                }).catch(err => {
+                    console.info("error", err);
+                });
+            },
             drawPeerMap(){
                 const _this = this;
                 _this.$global.fetch("GET", {startThis:"startThis"}, "getPeers").then(res => {
@@ -616,11 +631,9 @@
                     }finally {
                         _this.$global.drawPeers();
                     }
-
                 }).catch(err => {
                     console.info("error", err);
                 });
-
             },
             networkUrlBlocks() {
                 const _this = this;
@@ -792,8 +805,3 @@
     }
 
 </style>
-<!--<style scoped>-->
-<!--.modal.w700{-->
-<!--width: 960px!important;-->
-<!--}-->
-<!--</style>-->

@@ -275,7 +275,6 @@
             let _this = this;
             _this.getSPPeers();
             _this.init(_this.$global.peers.peers);
-
         },
         methods: {
             init: function (peersList) {
@@ -288,6 +287,7 @@
                     if (item.bindPeerType === "Soul Node"
                     || item.bindPeerType === "Center Node"
                     || item.bindPeerType === "Community Node"
+                    || item.bindPeerType === "Normal Node"
                     ) {
                         _this.activeHubCount++;
                     }
@@ -297,7 +297,7 @@
                 const _this = this;
                 _this.$http.post(window.api.simulatedPositioningUrl).then(res => {
                     if (res.data){
-                        _this.peersList = res.data.concat(_this.peersList);
+                        _this.peersList = _this.peersList.concat(res.data);
                         _this.totalSize = _this.peersList.length;
                     }
                 });

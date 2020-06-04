@@ -206,6 +206,12 @@ public class PocScore implements Serializable {
         BigInteger effectiveSS = BigInteger.ZERO;
         if (account == null) return effectiveSS;
 
+        // pool not opening and reach the poc algo changed height
+        if((Constants.POOL_OPENING_HEIGHT == -1 || Conch.getHeight() <= Constants.POOL_OPENING_HEIGHT)
+            && Conch.getHeight() > Constants.POC_CAL_ALGORITHM) {
+            return effectiveSS;
+        }
+
         SharderPoolProcessor poolProcessor = SharderPoolProcessor.getPoolByCreator(account.getId());
         
         if(Constants.isDevnet() && SharderGenesis.isGenesisRecipients(account.getId())){

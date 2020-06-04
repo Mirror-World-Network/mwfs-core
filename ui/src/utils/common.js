@@ -19,7 +19,7 @@ export default {
     $vue: {},
     placeholder: "--",
     unit: " MW",
-    poolPledgeAmount: 2000000000000, // pledge amount of pool crerator
+    poolPledgeAmount: 10000000000000, // pledge amount of pool creator
     optHeight: {join: 0,quit: 0, destroy: 0, create: 0},
     sendVerifyCode(url,username, fun) {
 
@@ -154,10 +154,6 @@ export default {
             }).then(res => {
                 _this.peers = res.data;
                 resolve(res);
-                // console.log(res.data);
-                // if (_this.isOpenConsole) {
-                //     console.log(res.data);
-                // }
             });
         });
     },
@@ -659,7 +655,7 @@ export default {
     drawPeers() {
         var dom = document.getElementById("peers-map")
         if (!dom) {
-            console.log('dom peers-map got faild，echarts can not load')
+            console.log('dom peers-map got failed，echarts can not draw the peer map')
             return
         }
         let _this = this.$vue;
@@ -761,7 +757,7 @@ export default {
                     itemStyle: {
                         normal: {
                             borderColor: "#fff",
-                            color: "#577ceb"
+                            color: "#53c7b1"
                         }
                     }
                 }
@@ -885,7 +881,9 @@ export default {
      * @param t
      */
     getSenderOrRecipient(t) {
-        if (t.type === 9 && this.$vue.$store.state.account === t.recipientRS) {
+        if(t.type === 12){
+            return "System"
+        } else if (t.type === 9 && this.$vue.$store.state.account === t.recipientRS) {
             return t.senderRS
         } else if (t.type === 9 && this.$vue.$store.state.account !== t.recipientRS) {
             return this.$vue.$t('dialog.account_transaction_own')

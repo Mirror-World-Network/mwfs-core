@@ -224,23 +224,25 @@
                                 <td class="pc-table">{{$global.getTransactionAmountNQT(transaction,accountInfo.accountRS)}}</td>
                                 <td class="pc-table">{{$global.getTransactionFeeNQT(transaction)}}</td>
                                 <td class=" image_text w300 pc-table">
+                                    <!-- tx sender -->
                                     <span class="linker" v-if="transaction.type === 9 || transaction.type === 18">Coinbase</span>
+                                    <span class="linker" v-else-if="transaction.type === 12" @click="openBlockInfoDialog(transaction.height)">System</span>
                                     <span class="linker" @click="openAccountInfoDialog(transaction.senderRS)"
                                           v-else-if="transaction.senderRS === accountInfo.accountRS && transaction.type !== 9">
                                          <span class="linker" @click="openAccountInfoDialog(transaction.recipientRS)" v-if="transaction.type === 8 && transaction.subtype === 3 &&transaction.recipientRS !== accountInfo.accountRS">
                                             {{transaction.recipientRS}}
-                                        </span>
-                                        <span v-else>{{$t('transaction.self')}}</span>
+                                         </span>
+                                         <span v-else>{{$t('transaction.self')}}</span>
                                     </span>
                                     <span class="linker" v-else-if=" transaction.senderRS !== accountInfo.accountRS && transaction.type !== 9">
                                          <span v-if="transaction.type === 8 && transaction.subtype === 3">
                                             {{$t('transaction.self')}}
-                                        </span>
-                                        <span v-else>{{transaction.senderRS}}</span>
+                                         </span>
+                                         <span v-else>{{transaction.senderRS}}</span>
                                     </span>
 
                                     <img src="../../assets/img/right_arrow.svg"/>
-
+                                    <!-- tx recipient -->
                                     <span class="linker" @click="openAccountInfoDialog(transaction.senderRS)" v-if="transaction.type === 9">
                                         {{$t('transaction.self')}}
                                     </span>
@@ -1003,7 +1005,7 @@
                     publicKey: SSO.publicKey,
                     requestProcessingTime: '',
                     unconfirmedBalanceNQT: '',
-                    pocScore:'',
+                    pocScore:'--',
                 },
                 selectType: '',
                 transactionType: [{
@@ -1218,6 +1220,7 @@
                 _this.accountInfo.frozenBalanceNQT = res.frozenBalanceNQT;
                 _this.accountInfo.guaranteedBalanceNQT = res.guaranteedBalanceNQT;
                 _this.accountInfo.unconfirmedBalanceNQT = res.unconfirmedBalanceNQT;
+                _this.accountInfo.pocScore = res.pocScore;
                 _this.accountInfo.name = res.name;
             });
             _this.getAccountTransactionList();
@@ -1237,7 +1240,6 @@
             });
             // _this.getLatestHubVersion();
             _this.getPicVCode();
-            _this.getPocScore();
         },
         methods: {
 
@@ -1373,30 +1375,6 @@
             activeSelectType(type) {
                 return this.selectType === type ? 'active' : ''
             },
-            getPocScore(){
-                const _this = this;
-
-                _this.$global.fetch("GET", {
-                    limit: 99999
-                }, "getNextBlockGenerators").then(res => {
-                    _this.activeCount = res.activeCount;
-                    for(let t of res.generators){
-                        if(t.accountRS === SSO.accountRS){
-                            if(t.pocScore){
-                                _this.accountInfo.pocScore = t.pocScore;
-
-                            }else {
-                                _this.accountInfo.pocScore = '--';
-                            }
-                            break;
-                        }else{
-                            _this.accountInfo.pocScore = '--';
-                        }
-                    }
-                }).catch(err => {
-                    console.info("error", err);
-                });
-            },
             getLatestHubVersion() {
                 const _this = this;
                 _this.$http.get('/sharder?requestType=getLatestCosVersion').then(res => {
@@ -1413,8 +1391,7 @@
                     _this.$message.error(err.message);
                 });
             },
-            drawBarchart: function (barchat) {
-
+            drawBarChart: function (barchat) {
                 var dom = document.getElementById("transaction_amount_bar");
                 if (!dom) {
                     console.log("dom transaction_amount_bar got faild，echarts can not load")
@@ -2825,7 +2802,7 @@
                         barchat.series.push(0);
                     }
 
-                    _this.drawBarchart(barchat);
+                    _this.drawBarChart(barchat);
                 });
             },
             getYieldData() {
@@ -3111,7 +3088,6 @@
             let periodicTransactions = setInterval(() => {
                 if (_this.$route.path === '/account') {
                     _this.getAccountTransactionList();
-                    _this.getPocScore();
                 } else {
                     clearInterval(periodicTransactions);
                 }
