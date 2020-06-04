@@ -351,18 +351,8 @@ public class Generator implements Comparable<Generator> {
         return listeners.removeListener(listener, eventType);
     }
 
-    public static boolean isBlackedMiner(long minerId, int height){
-        Account minerAccount = Account.getAccount(minerId, height);
-        // check the black list
-        if(blackedGenerators.contains(minerId)) {
-            if(Logger.printNow(Logger.Generator_startMining)) {
-                Logger.logWarningMessage("Invalid miner account %s. Because this account is in the black list! ",
-                        minerAccount.getRsAddress(),
-                        Conch.getHeight());
-            }
-            return true;
-        }
-        return false;
+    public static boolean isBlackedMiner(long minerId){
+        return blackedGenerators.contains(minerId);
     }
 
     /**
@@ -375,18 +365,25 @@ public class Generator implements Comparable<Generator> {
         Account minerAccount = Account.getAccount(minerId, height);
         if(minerAccount == null) {
             if(Logger.printNow(Logger.Generator_startMining)) {
-                Logger.logWarningMessage("Current miner account[id=%d] is a new account at this height %d, please create some txs or receive some MW from other accounts", minerId, height);
+                Logger.logWarningMessage("Current miner account[id=%d] can't start auto mining or mint block. Because it is a new account at this height %d, please create some txs or receive some MW from other accounts", minerId, height);
             }
             return false;
         }
 
-        if(isBlackedMiner(minerId, height)) return false;
+        if(isBlackedMiner(minerId)) {
+            if(Logger.printNow(Logger.Generator_startMining)) {
+                Logger.logWarningMessage("Invalid miner account %s can't start auto mining or mint block. Because this account is in the black list! ",
+                        minerAccount.getRsAddress(),
+                        Conch.getHeight());
+            }
+            return false;
+        }
 
         //check the peer statement
         boolean isCertifiedPeer = Conch.getPocProcessor().isCertifiedPeerBind(minerId, height);
         if(!isCertifiedPeer) {
             if(Logger.printNow(Logger.Generator_startMining)) {
-                Logger.logWarningMessage("Invalid miner account %s(it didn't linked to a certified peer before the height %d). " +
+                Logger.logWarningMessage("Invalid miner account %s(it didn't linked to a certified peer before the height %d) can't start auto mining or mint block. " +
                                 "Maybe it didn't create a PocNodeTypeTx sto statement. please INIT or RESET the client firstly! ",
                         minerAccount.getRsAddress(),
                         Conch.getHeight());
@@ -397,7 +394,7 @@ public class Generator implements Comparable<Generator> {
         long accountBalanceNQT = (minerAccount != null) ? minerAccount.getEffectiveBalanceNQT(Conch.getHeight()) : 0L;
         if(accountBalanceNQT < Constants.MINING_HOLDING_LIMIT) {
             if(Logger.printNow(Logger.Generator_startMining)) {
-                Logger.logWarningMessage("Invalid miner account %s. Because the MW holding limit of the mining is %d and current balance is %d",
+                Logger.logWarningMessage("Invalid miner account %s can't start auto mining or mint block. Because the MW holding limit of the mining is %d and current balance is %d",
                         minerAccount.getRsAddress(),
                         (Constants.MINING_HOLDING_LIMIT / Constants.ONE_SS),
                         (accountBalanceNQT / Constants.ONE_SS));
@@ -417,7 +414,15 @@ public class Generator implements Comparable<Generator> {
         }
 
         // mining condition: holding limit check
-        if(!isValidMiner(Account.getId(secretPhrase), Conch.getHeight())) return null;
+        long minerAccountId = Account.getId(secretPhrase);
+        if(!isValidMiner(minerAccountId, Conch.getHeight())) {
+            if(Logger.printNow(Logger.Generator_startMining)) {
+                Logger.logWarningMessage("Current miner account[id=%d] isn't a valid miner, so can't start auto mining at this height %d",
+                        minerAccountId,
+                        Conch.getHeight());
+            }
+            return null;
+        }
 
         /**
         // whether own the pool

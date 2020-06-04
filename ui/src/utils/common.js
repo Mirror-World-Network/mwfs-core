@@ -19,7 +19,7 @@ export default {
     $vue: {},
     placeholder: "--",
     unit: " MW",
-    poolPledgeAmount: 2000000000000, // pledge amount of pool crerator
+    poolPledgeAmount: 10000000000000, // pledge amount of pool creator
     optHeight: {join: 0,quit: 0, destroy: 0, create: 0},
     sendVerifyCode(url,username, fun) {
 
