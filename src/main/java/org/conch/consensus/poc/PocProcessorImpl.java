@@ -13,7 +13,6 @@ import org.conch.consensus.genesis.SharderGenesis;
 import org.conch.consensus.poc.db.PocDb;
 import org.conch.consensus.poc.tx.PocTxBody;
 import org.conch.consensus.poc.tx.PocTxWrapper;
-import org.conch.consensus.reward.RewardCalculator;
 import org.conch.db.Db;
 import org.conch.db.DbIterator;
 import org.conch.db.DbUtils;
@@ -397,12 +396,12 @@ public class PocProcessorImpl implements PocProcessor {
     private static boolean reprocessAllPocTxs = true;
     /**
      * - reset the poc table to avoid the poc score wrong
-     * - close this reset processing after RewardCalculator.MINER_JOINING_PHASE
+     * - close this reset processing after Constants.POC_CAL_ALGORITHM
      */
     public static void checkAndResetPocDb() {
         BlockImpl lastBlock = BlockDb.findLastBlock();
         if(lastBlock != null
-        && lastBlock.getHeight() > RewardCalculator.MINER_JOINING_PHASE) {
+        && lastBlock.getHeight() > Constants.POC_CAL_ALGORITHM) {
             return;
         }
 

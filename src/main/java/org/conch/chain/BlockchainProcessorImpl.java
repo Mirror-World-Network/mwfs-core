@@ -1628,7 +1628,8 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             } catch (Exception e) {
                 Db.db.rollbackTransaction();
                 blockchain.setLastBlock(previousLastBlock);
-                Logger.logErrorMessage("push block failed caused by: %s", e.getMessage());
+//                Logger.logErrorMessage("push block failed caused by: %s", e.getMessage());
+                Logger.logErrorMessage("push block failed", e);
                 throw e;
             } finally {
                 Db.db.endTransaction();
@@ -1677,8 +1678,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
 
 
     private void validate(BlockImpl block, BlockImpl previousLastBlock, int curTime) throws BlockNotAcceptedException, GeneratorNotAcceptedException {
-
-        if (!Generator.isValidMiner(block.getGeneratorId(), block.getHeight())) {
+        if (Generator.isBlackedMiner(block.getGeneratorId(), block.getHeight())) {
             throw new GeneratorNotAcceptedException("Invalid generator", block.getGeneratorId());
         }
 
