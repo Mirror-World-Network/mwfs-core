@@ -29,7 +29,9 @@ import org.conch.Conch;
 import org.conch.account.Account;
 import org.conch.chain.*;
 import org.conch.common.Constants;
+import org.conch.consensus.poc.PocHolder;
 import org.conch.consensus.poc.PocScore;
+import org.conch.consensus.poc.tx.PocTxBody;
 import org.conch.crypto.Crypto;
 import org.conch.env.RuntimeEnvironment;
 import org.conch.mint.pool.SharderPoolProcessor;
@@ -896,7 +898,38 @@ public class Generator implements Comparable<Generator> {
                 Logger.logDebugMessage(generatorList.size() + " generators found");
             }
 
+            // print the poc score detail of the miner in the local debug mode
+            if(LocalDebugTool.isLocalDebug()){
+                String generatorDetailStr = "";
+                String badHardwareScoreStr = "";
+                for(ActiveGenerator generator : generatorList){
+                    // hardware score check
+                    if("CDW-UY6L-7CLD-XC6X-7MEZU".equals(generator.rsAddress)
+                            || "CDW-MNB8-KMQH-TJHP-3R34Y".equals(generator.rsAddress)){
+                        //String ip, Peer.Type type, long accountId, long diskCapacity
+                        // 2236098293400195366,
+                        PocTxBody.PocNodeTypeV3 pocNodeTypeV3 = new PocTxBody.PocNodeTypeV3("192.168.0.134", Peer.Type.SOUL, 2236098293400195366L, 201650405100L);
+                        PocScore pocScoreToUpdate = PocHolder.getPocScore(Conch.getHeight(), generator.accountId);
+                        pocScoreToUpdate.nodeTypeCal(pocNodeTypeV3);
+                        System.out.println("Found the hardware score check account :" + generator.rsAddress);
+                    }
 
+                    // mw holding score check
+                    if("CDW-85JU-VWJ8-GYB2-6PW5H".equals(generator.rsAddress)){
+                        PocScore pocScoreToUpdate = PocHolder.getPocScore(Conch.getHeight(), generator.accountId);
+                        pocScoreToUpdate.ssCal();
+                        System.out.println("Found the mw holding score check account :" + generator.rsAddress);
+                    }
+
+                    if(generator.detailedPocScore.getBigInteger("hardwareScore").doubleValue() > 54000){
+                        badHardwareScoreStr += generator.toJson(false) + "\n";
+                    }
+
+                    generatorDetailStr += generator.toJson(false) + "\n";;
+                }
+                Logger.logDebugMessage("\n\rTotal Generator detail is \n\r" + generatorDetailStr);
+                Logger.logDebugMessage("\n\rTotal Bad Hardware Score detail is \n\r" + badHardwareScoreStr);
+            }
         }
         return generatorList;
     }

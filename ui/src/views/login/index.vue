@@ -58,7 +58,7 @@
         created() {
             const _this = this;
 
-            console.info("Net work type is:", SSO.netWorkType);
+            console.debug("Net work type is:", SSO.netWorkType);
 
             this.$global.getUserConfig(this).then(res => {
                 _this.$store.state.isHubInit = res["sharder.HubBindAddress"] ? false : true;
@@ -66,6 +66,8 @@
                 _this.hubBind = res["sharder.HubBind"];
                 _this.hubBindAddress = res["sharder.HubBindAddress"];
                 _this.autoLogin(res);
+                console.debug("sharder.myAddress:", _this.$store.state.userConfig["sharder.myAddress"]);
+                console.debug("userConfig:", _this.$store.state.userConfig);
             });
 
             SSO.init();
@@ -73,7 +75,8 @@
         methods: {
             displayBindAddr(){
                 const _this = this;
-                console.info("sharder.myAddress: " + _this.$store.state.userConfig["sharder.myAddress"])
+                console.debug("in displayBindAddr method")
+                console.debug("sharder.myAddress: " + _this.$store.state.userConfig["sharder.myAddress"])
                 if(_this.$store.state.userConfig["sharder.myAddress"]) {
                     if(_this.$store.state.userConfig["sharder.myAddress"].indexOf("mw.run") != -1
                     || _this.$store.state.userConfig["sharder.myAddress"].indexOf("mwfs.io") != -1) {

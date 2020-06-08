@@ -153,12 +153,24 @@ public final class BlockchainImpl implements Blockchain {
         }
     }
 
-    @Override
-    public DbIterator<BlockImpl> getBlocks(int from, int to) {
+    /**
+     *
+     * @param from
+     * @param to
+     * @param orderPair String[2]: orderPair[0] - sort field, orderPair[0] - sort direction
+     * @return
+     */
+    private DbIterator<BlockImpl> _getBlocks(int from, int to, String[] orderPair) {
+        String sortField = "height";
+        String sortDirection = "DESC";
+        if(orderPair != null && orderPair.length == 2) {
+            sortField = orderPair[0];
+            sortDirection = orderPair[1];
+        }
         Connection con = null;
         try {
             con = Db.db.getConnection();
-            PreparedStatement pstmt = con.prepareStatement("SELECT * FROM block WHERE height <= ? AND height >= ? ORDER BY height DESC");
+            PreparedStatement pstmt = con.prepareStatement("SELECT * FROM block WHERE height <= ? AND height >= ? ORDER BY " + sortField + " " + sortDirection);
             int blockchainHeight = getHeight();
             pstmt.setInt(1, blockchainHeight - from);
             pstmt.setInt(2, blockchainHeight - to);
@@ -166,6 +178,16 @@ public final class BlockchainImpl implements Blockchain {
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
         }
+    }
+
+    @Override
+    public DbIterator<BlockImpl> getBlocks(int from, int to, String[] orderPair) {
+        return _getBlocks(from, to, orderPair);
+    }
+
+    @Override
+    public DbIterator<BlockImpl> getBlocks(int from, int to) {
+       return _getBlocks(from, to, null);
     }
 
 
