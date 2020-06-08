@@ -1,7 +1,6 @@
 package org.conch.consensus.poc;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.conch.Conch;
 import org.conch.account.Account;
 import org.conch.common.Constants;
 import org.conch.consensus.poc.tx.PocTxBody;
@@ -59,7 +58,6 @@ public class PocCalculator implements Serializable {
         pocScore.ssScore = ssHoldWeight.multiply(pocScore.ssScore).divide(PERCENT_DIVISOR);
     }
     
-    
     private static BigInteger predefineNodeTypeLevel(Peer.Type peerType){
        return BigInteger.valueOf(inst.pocWeightTable.getNodeTypeTemplate().get(peerType.getCode()).longValue());
     }
@@ -114,7 +112,8 @@ public class PocCalculator implements Serializable {
         BigInteger hardwareScore = BigInteger.valueOf(diskCapacity / 1024 / 1024 / 1024);
 
         // disk capacity limit validation
-        if(Conch.getHeight() > Constants.POC_CAL_ALGORITHM) {
+        if(pocScore.getHeight() > Constants.POC_CAL_ALGORITHM
+        || PocProcessorImpl.FORCE_RE_CALCULATE) {
             Double diskCapacityTBD = new Double(diskCapacity) / new Double(ONE_T_IN_KB_UNIT);
             long diskCapacityTB = 0;
             // valid min disk value is 1T, allow 5% precision lose

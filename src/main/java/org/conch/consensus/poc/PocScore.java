@@ -206,15 +206,34 @@ public class PocScore implements Serializable {
         BigInteger effectiveSS = BigInteger.ZERO;
         if (account == null) return effectiveSS;
 
+        if(height >= Constants.POC_MW_POC_SCORE_CHANGE_HEIGHT
+            || PocProcessorImpl.FORCE_RE_CALCULATE) {
+            // the effective ss of genesis peer's miner force to limit to 100,000
+            if(SharderGenesis.isGenesisPeerAccount(account.getId())){
+                if(accountBalanceNQT >  100000L * Constants.ONE_SS) {
+                    effectiveSS = BigInteger.valueOf(100000L);
+                }else {
+                    effectiveSS = BigInteger.valueOf(accountBalanceNQT / Constants.ONE_SS);
+                }
+            }else{
+                effectiveSS = BigInteger.valueOf(accountBalanceNQT / Constants.ONE_SS);
+            }
+
+            if(PocProcessorImpl.FORCE_RE_CALCULATE) {
+                return  effectiveSS;
+            }
+        }
+
         // pool not opening and reach the poc algo changed height
         if((Constants.POOL_OPENING_HEIGHT == -1 || Conch.getHeight() <= Constants.POOL_OPENING_HEIGHT)
-            && Conch.getHeight() > Constants.POC_CAL_ALGORITHM) {
+            && height > Constants.POC_CAL_ALGORITHM) {
             return effectiveSS;
         }
 
         SharderPoolProcessor poolProcessor = SharderPoolProcessor.getPoolByCreator(account.getId());
         
         if(Constants.isDevnet() && SharderGenesis.isGenesisRecipients(account.getId())){
+            // expand the balance to 10x at the dev env
             effectiveSS = BigInteger.valueOf(accountBalanceNQT * 10 / Constants.ONE_SS);
         }else if(Constants.isTestnet() && height < Constants.POC_NEW_ALGO_HEIGHT){
             if (poolProcessor != null && SharderPoolProcessor.State.WORKING.equals(poolProcessor.getState())) {

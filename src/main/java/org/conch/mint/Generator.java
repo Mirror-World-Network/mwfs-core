@@ -681,7 +681,7 @@ public class Generator implements Comparable<Generator> {
         int elapsedTime = Conch.getEpochTime() - Conch.getBlockchain().getLastBlock().getTimestamp();
         JSONObject json = new JSONObject();
         json.put("account", Long.toUnsignedString(accountId));
-        json.put("accountRS", Account.rsAccount(accountId));
+        json.put("accountRS", StringUtils.isNotEmpty(rsAddress) ? rsAddress : Account.rsAccount(accountId));
         json.put("effectiveBalanceSS",  effectiveBalance);
         json.put("pocScore", pocScore);
         json.put("detailedPocScore", detailedPocScore);
@@ -894,6 +894,20 @@ public class Generator implements Comparable<Generator> {
             Collections.sort(generatorList);
             if(Logger.printNow(Logger.Generator_getNextGenerators)){
                 Logger.logDebugMessage(generatorList.size() + " generators found");
+            }
+
+            // print the poc score detail of the miner in the local debug mode
+            if(LocalDebugTool.isLocalDebug()){
+                String generatorDetailStr = "";
+                String badHardwareScoreStr = "";
+                for(ActiveGenerator generator : generatorList){
+                    if(generator.detailedPocScore.getBigInteger("hardwareScore").doubleValue() > 54000){
+                        badHardwareScoreStr += generator.toJson(false) + "\n";
+                    }
+                    generatorDetailStr += generator.toJson(false) + "\n";;
+                }
+                Logger.logDebugMessage("\n\rTotal Generator detail is \n\r" + generatorDetailStr);
+                Logger.logDebugMessage("\n\rTotal Bad Hardware Score detail is \n\r" + badHardwareScoreStr);
             }
         }
         return generatorList;

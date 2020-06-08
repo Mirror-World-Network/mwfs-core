@@ -38,6 +38,7 @@
                 userConfig: [],
                 hubBindAddress:"",
                 hubBind:false,
+                displayBindAddr: true,
                 hubSettingDialog: false,
                 hubsetting: {
                     openPunchthrough: true,
@@ -65,19 +66,20 @@
                 _this.$store.state.userConfig = res;
                 _this.hubBind = res["sharder.HubBind"];
                 _this.hubBindAddress = res["sharder.HubBindAddress"];
+                _this.displayBindAddr = this.checkAndSetdisplayBindAddr();
                 _this.autoLogin(res);
             });
 
             SSO.init();
         },
         methods: {
-            displayBindAddr(){
+            checkAndSetdisplayBindAddr(){
                 const _this = this;
-
-                if(_this.$store.state.userConfig["sharder.myAddress"]
-                && (_this.$store.state.userConfig["sharder.myAddress"].contains("mw.run")
-                    || _this.$store.state.userConfig["sharder.myAddress"].contains("mwfs.io"))){
-                    return false
+                if(_this.$store.state.userConfig["sharder.myAddress"]) {
+                    if(_this.$store.state.userConfig["sharder.myAddress"].indexOf("mw.run") != -1
+                    || _this.$store.state.userConfig["sharder.myAddress"].indexOf("mwfs.io") != -1) {
+                        return false;
+                    }
                 }
                 return true
             },
