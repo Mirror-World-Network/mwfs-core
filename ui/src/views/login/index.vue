@@ -73,11 +73,12 @@
         methods: {
             displayBindAddr(){
                 const _this = this;
-
-                if(_this.$store.state.userConfig["sharder.myAddress"]
-                && (_this.$store.state.userConfig["sharder.myAddress"].contains("mw.run")
-                    || _this.$store.state.userConfig["sharder.myAddress"].contains("mwfs.io"))){
-                    return false
+                console.info("sharder.myAddress: " + _this.$store.state.userConfig["sharder.myAddress"])
+                if(_this.$store.state.userConfig["sharder.myAddress"]) {
+                    if(_this.$store.state.userConfig["sharder.myAddress"].indexOf("mw.run") != -1
+                    || _this.$store.state.userConfig["sharder.myAddress"].indexOf("mwfs.io") != -1) {
+                        return false;
+                    }
                 }
                 return true
             },

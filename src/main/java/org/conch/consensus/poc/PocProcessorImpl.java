@@ -452,12 +452,11 @@ public class PocProcessorImpl implements PocProcessor {
                 try {
                     if(reprocessAllPocTxs){
                         fromHeight = 0;
-                        Logger.logInfoMessage("[HistoryPocTxs] process history poc txs from %d to %d ...", fromHeight, toHeight);
                         blocks = BlockchainImpl.getInstance().getAllBlocks();
                     }else{
-                        Logger.logInfoMessage("[HistoryPocTxs] process history poc txs from %d to %d ...", fromHeight, toHeight);
                         blocks = BlockchainImpl.getInstance().getBlocks(fromHeight, toHeight);
                     }
+                    Logger.logInfoMessage("[HistoryPocTxs] process history poc txs from %d to %d, it may take a few minutes ...", fromHeight, toHeight);
                     int count = 0;
                     for (BlockImpl block : blocks) {
                         count += instance.pocSeriesTxProcess(block);
