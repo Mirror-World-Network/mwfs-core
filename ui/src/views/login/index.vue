@@ -38,6 +38,7 @@
                 userConfig: [],
                 hubBindAddress:"",
                 hubBind:false,
+                displayBindAddr: true,
                 hubSettingDialog: false,
                 hubsetting: {
                     openPunchthrough: true,
@@ -58,25 +59,22 @@
         created() {
             const _this = this;
 
-            console.debug("Net work type is:", SSO.netWorkType);
+            console.info("Net work type is:", SSO.netWorkType);
 
             this.$global.getUserConfig(this).then(res => {
                 _this.$store.state.isHubInit = res["sharder.HubBindAddress"] ? false : true;
                 _this.$store.state.userConfig = res;
                 _this.hubBind = res["sharder.HubBind"];
                 _this.hubBindAddress = res["sharder.HubBindAddress"];
+                _this.displayBindAddr = this.checkAndSetdisplayBindAddr();
                 _this.autoLogin(res);
-                console.debug("sharder.myAddress:", _this.$store.state.userConfig["sharder.myAddress"]);
-                console.debug("userConfig:", _this.$store.state.userConfig);
             });
 
             SSO.init();
         },
         methods: {
-            displayBindAddr(){
+            checkAndSetdisplayBindAddr(){
                 const _this = this;
-                console.debug("in displayBindAddr method")
-                console.debug("sharder.myAddress: " + _this.$store.state.userConfig["sharder.myAddress"])
                 if(_this.$store.state.userConfig["sharder.myAddress"]) {
                     if(_this.$store.state.userConfig["sharder.myAddress"].indexOf("mw.run") != -1
                     || _this.$store.state.userConfig["sharder.myAddress"].indexOf("mwfs.io") != -1) {
