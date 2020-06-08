@@ -681,7 +681,7 @@ public class Generator implements Comparable<Generator> {
         int elapsedTime = Conch.getEpochTime() - Conch.getBlockchain().getLastBlock().getTimestamp();
         JSONObject json = new JSONObject();
         json.put("account", Long.toUnsignedString(accountId));
-        json.put("accountRS", Account.rsAccount(accountId));
+        json.put("accountRS", StringUtils.isNotEmpty(rsAddress) ? rsAddress : Account.rsAccount(accountId));
         json.put("effectiveBalanceSS",  effectiveBalance);
         json.put("pocScore", pocScore);
         json.put("detailedPocScore", detailedPocScore);
@@ -895,6 +895,8 @@ public class Generator implements Comparable<Generator> {
             if(Logger.printNow(Logger.Generator_getNextGenerators)){
                 Logger.logDebugMessage(generatorList.size() + " generators found");
             }
+
+
         }
         return generatorList;
     }

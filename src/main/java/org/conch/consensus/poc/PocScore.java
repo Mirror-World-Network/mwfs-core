@@ -206,7 +206,10 @@ public class PocScore implements Serializable {
         BigInteger effectiveSS = BigInteger.ZERO;
         if (account == null) return effectiveSS;
 
-        effectiveSS = BigInteger.valueOf(accountBalanceNQT * 10 / Constants.ONE_SS);
+        if(Conch.getHeight() >= Constants.POC_MW_POC_SCORE_CHANGE_HEIGHT){
+            effectiveSS = BigInteger.valueOf(accountBalanceNQT * 10 / Constants.ONE_SS);
+        }
+
         // pool not opening and reach the poc algo changed height
         if((Constants.POOL_OPENING_HEIGHT == -1 || Conch.getHeight() <= Constants.POOL_OPENING_HEIGHT)
             && Conch.getHeight() > Constants.POC_CAL_ALGORITHM) {
