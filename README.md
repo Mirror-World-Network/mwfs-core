@@ -93,10 +93,10 @@ HTTP:  3216，9001
 ```
 
 ## 开始挖矿 
-请阅读[MINER-GUIDE.md](./MINER-GUIDE.md)
+请阅读[MINER-GUIDE.pdf](https://mwfs.oss-cn-shenzhen.aliyuncs.com/cos/miner/MW_Miner_Register.pdf)
 
 ## 关注我们 ##
 ```
-Website: #
+Website: mw.run
 Github: https://github.com/CryptoDWH/cdwh-chain
 ```

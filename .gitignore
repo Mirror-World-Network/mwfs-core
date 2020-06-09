@@ -31,8 +31,12 @@ sharder_db
 mw_db
 sharder_test_db
 mw_test_db
+bak/
+ARCHIVE/
+archive/
+temp/
 
-# storage/ipfs/bin
 # storage/
 .ipfs
 bin.exe
+storage/ipfs/bin
