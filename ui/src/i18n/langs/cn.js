@@ -222,7 +222,7 @@ const cn = {
         'forging_error_new_account': "您的帐户还没有公钥不能挖矿，请完成一次交易或则使用密钥重新登录",
         'forging_error_effective_balance': "您的有效余额不足，不能挖矿！",
         'forging_error_no_admin_password': "无法确定挖矿状态，请先设置节点管理密码",
-        'forging_error_exceeds_account_volume': "只能使用关联地址挖矿,请用绑关联地址的密钥重新登陆",
+        'forging_error_exceeds_account_volume': "只能使用绑定地址挖矿,请用绑定地址密钥重新登陆",
         'no_forging': "未挖矿",
         'started_forging': "挖矿中",
         'exit': "退出",
