@@ -82,9 +82,9 @@ public final class GetBizBlocks extends APIServlet.APIRequestHandler {
                     if (transactionList.size() <= 0) {
                         continue;
                     }
+                    JSONObject blockJson = JSONData.block(block, transactionList,true, false);
+                    blocks.add(blockJson);
                 }
-                JSONObject blockJson = JSONData.block(block, true, false);
-                blocks.add(blockJson);
             }
         }finally {
             DbUtils.close(iterator);

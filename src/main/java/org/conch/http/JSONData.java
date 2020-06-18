@@ -390,7 +390,7 @@ public final class JSONData {
         return json;
     }
 
-    public static JSONObject block(Block block, boolean includeTransactions, boolean includeExecutedPhased) {
+    public static JSONObject block(Block block,List<Transaction> transactionLists, boolean includeTransactions, boolean includeExecutedPhased) {
         JSONObject json = new JSONObject();
         json.put("block", block.getStringId());
         json.put("height", block.getHeight());
@@ -418,9 +418,17 @@ public final class JSONData {
         json.put("blockSignature", Convert.toHexString(block.getBlockSignature()));
         JSONArray transactions = new JSONArray();
         if (includeTransactions) {
-            block.getTransactions().forEach(transaction -> transactions.add(transaction(transaction)));
+            if (transactionLists != null && transactionLists.size() > 0){
+                transactionLists.forEach(transaction -> transactions.add(transaction(transaction)));
+            }else{
+                block.getTransactions().forEach(transaction -> transactions.add(transaction(transaction)));
+            }
         } else {
-            block.getTransactions().forEach(transaction -> transactions.add(transaction.getStringId()));
+            if (transactionLists != null && transactionLists.size() > 0){
+                transactionLists.forEach(transaction -> transactions.add(transaction.getStringId()));
+            }else {
+                block.getTransactions().forEach(transaction -> transactions.add(transaction.getStringId()));
+            }
         }
         json.put("transactions", transactions);
         if (includeExecutedPhased) {
@@ -970,23 +978,23 @@ public final class JSONData {
 
                 attachmentJSON.replace("data","");
             }
-            
+
             // quit pool tx
             if(transaction.getType().isType(TransactionType.TYPE_SHARDER_POOL)
                     && transaction.getType().isSubType(TransactionType.SUBTYPE_SHARDER_POOL_QUIT)
                     && attachmentJSON.containsKey("txId")){
-                
+
                 String txId = String.valueOf(attachmentJSON.get("txId"));
                 Transaction joinTx = Conch.getBlockchain().getTransaction(Long.valueOf(txId));
                 attachmentJSON.put("txSId",joinTx != null ? joinTx.getStringId() : "none");
-              
+
                 if(joinTx != null && joinTx.getAttachment() != null){
                     attachmentJSON.put("amount", joinTx.getAttachment().getJSONObject().get("amount"));
-                }  
+                }
             }
 
             // join pool tx or deletion poo tx: convert the pool id
-            
+
             json.put("attachment", attachmentJSON);
         }
         putAccount(json, "sender", transaction.getSenderId());
@@ -996,8 +1004,8 @@ public final class JSONData {
             json.put("ecBlockId", Long.toUnsignedString(transaction.getECBlockId()));
             json.put("ecBlockHeight", transaction.getECBlockHeight());
         }
-        
-      
+
+
 
         return json;
     }
