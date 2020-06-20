@@ -52,10 +52,8 @@ public class GetTransactions extends APIServlet.APIRequestHandler {
         if (pageSize <= 0) {
             pageSize = 10;
         }
-        int firstIndex = Conch.getHeight() - height;
-        int lastIndex = Conch.getHeight() - height;
-        int transactionIndexBegin = (pageNo - 1) * pageSize;
-        int transactionIndexEnd = transactionIndexBegin + pageSize;
+        Integer firstIndex = Conch.getHeight() - height;
+        Integer lastIndex = Conch.getHeight() - height;
         final int timestamp = ParameterParser.getTimestamp(request);
         JSONArray blocks = new JSONArray();
         DbIterator<? extends Block> iterator = null;
@@ -74,11 +72,17 @@ public class GetTransactions extends APIServlet.APIRequestHandler {
                     if (transactionList.size() <= 0) {
                         continue;
                     }
+                    Integer indexTypeFirst = transactionList.get(0) != null ? Integer.valueOf(transactionList.get(0).getIndex()) : 0;
+                    Integer transactionIndexBegin = (pageNo - 1) * pageSize + indexTypeFirst;
+                    Integer transactionIndexEnd = transactionIndexBegin + pageSize + indexTypeFirst;
                     transactionList = transactionList.stream().filter(
                             transaction -> transaction.getIndex() >= transactionIndexBegin && transaction.getIndex() < transactionIndexEnd
                     ).collect(Collectors.toList());
                     JSONObject blockJson = JSONData.block(block, transactionList, true, false);
-                    blocks.add(blockJson);
+                    JSONArray transactionsJson = (JSONArray) blockJson.get("transactions");
+                    if (transactionsJson.size() == transactionList.size()) {
+                        blocks.add(blockJson);
+                    }
                 }
             }
         } finally {
