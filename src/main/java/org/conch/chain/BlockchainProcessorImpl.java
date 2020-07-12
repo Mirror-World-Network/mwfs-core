@@ -1629,7 +1629,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 Db.db.rollbackTransaction();
                 blockchain.setLastBlock(previousLastBlock);
 //                Logger.logErrorMessage("push block failed caused by: %s", e.getMessage());
-                Logger.logErrorMessage("push block failed", e);
+                Logger.logErrorMessage(String.format("push block at height %d failed", previousLastBlock.getHeight()), e);
                 throw e;
             } finally {
                 Db.db.endTransaction();
@@ -1683,7 +1683,8 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         }
 
         if (previousLastBlock.getId() != block.getPreviousBlockId()) {
-            throw new BlockOutOfOrderException("Previous block id doesn't match", block);
+            throw new BlockOutOfOrderException("Previous block id doesn't match[previous block id of current chain=" + previousLastBlock.getId()
+                    + ", pushing block id=" + block.getId() + "]", block);
         }
         if (block.getVersion() != getBlockVersion(previousLastBlock.getHeight())) {
             throw new BlockNotAcceptedException("Invalid version " + block.getVersion(), block);
