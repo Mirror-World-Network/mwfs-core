@@ -2283,7 +2283,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             // transaction version=1, deadline=10,timestamp=blockTimestamp
             TransactionImpl transaction = new TransactionImpl.BuilderImpl(
                     publicKey,
-                    RewardCalculator.mintReward(),
+                    RewardCalculator.blockReward(),
                     0,
                     (short) 10,
                     new Attachment.CoinBase(
