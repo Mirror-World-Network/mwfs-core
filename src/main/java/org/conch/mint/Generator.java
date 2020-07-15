@@ -958,10 +958,14 @@ public class Generator implements Comparable<Generator> {
         }
 
         public int compareTo(ActiveGenerator obj) {
-            return (hitTime < obj.hitTime ? -1 : (hitTime > obj.hitTime ? 1 : 0));
+            try{
+                return (hitTime < obj.hitTime ? -1 : (hitTime > obj.hitTime ? 1 : 0));
+            }catch(Exception e){
+                Logger.logErrorMessage("ActiveGenerator compare failed",e);
+            }
+            return 0;
         }
     }
-
 
     // Hub auto mining setting
     private static final String HUB_BIND_ADDRESS = Conch.getStringProperty("sharder.HubBindAddress");

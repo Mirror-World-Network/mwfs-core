@@ -206,7 +206,7 @@ public class PocScore implements Serializable {
         BigInteger effectiveSS = BigInteger.ZERO;
         if (account == null) return effectiveSS;
 
-        if(height >= Constants.POC_MW_POC_SCORE_CHANGE_HEIGHT
+        if(height >= Constants.POC_SCORE_CHANGE_HEIGHT
             || PocProcessorImpl.FORCE_RE_CALCULATE) {
             // the effective ss of genesis peer's miner force to limit to 100,000
             if(SharderGenesis.isGenesisPeerAccount(account.getId())){
