@@ -5,7 +5,9 @@ import com.google.common.collect.Maps;
 import org.conch.Conch;
 import org.conch.account.Account;
 import org.conch.account.AccountLedger;
+import org.conch.common.ConchException;
 import org.conch.common.Constants;
+import org.conch.consensus.genesis.SharderGenesis;
 import org.conch.consensus.poc.PocHolder;
 import org.conch.consensus.poc.PocScore;
 import org.conch.mint.pool.PoolRule;
@@ -268,6 +270,35 @@ public class RewardCalculator {
             }
         }
         return tx.getAmountNQT();
+    }
+
+    /**
+     * No needs to validate in the tx creation. rewards calculate and distribute at the block accepted in the Pool processor:
+     * org.conch.consensus.reward.RewardCalculator#blockRewardDistribution(org.conch.tx.Transaction, boolean)
+     * Ben-07.15.2020
+     *
+     * To replace the org.conch.tx.TransactionType.CoinBase#validateByType
+     * @param transaction
+     * @return
+     */
+    public static boolean validateCoinbaseTx(Transaction transaction) throws ConchException.NotValidException {
+//        if(transaction.getAmountNQT() > RewardCalculator.blockReward(transaction.getHeight())){
+//            throw new ConchException.NotValidException("block reward is large than the maxium amount " + );
+//        }
+        Attachment.CoinBase coinBase = (Attachment.CoinBase) transaction.getAttachment();
+        if (Attachment.CoinBase.CoinBaseType.BLOCK_REWARD == coinBase.getCoinBaseType()) {
+            // FIXME sum the consi
+            Map<Long, Long> consignors = coinBase.getConsignors();
+
+            if(consignors.size() <= 0) return true;
+        } else if(CoinBase.CoinBaseType.CROWD_BLOCK_REWARD == coinBase.getCoinBaseType()){
+            // sum the
+        } else if (Attachment.CoinBase.CoinBaseType.GENESIS == coinBase.getCoinBaseType()) {
+            if (!SharderGenesis.isGenesisCreator(coinBase.getCreator())) {
+                throw new ConchException.NotValidException("the Genesis coin base tx is not created by genesis creator");
+            }
+        }
+        return true;
     }
 
 }

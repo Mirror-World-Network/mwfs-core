@@ -574,6 +574,7 @@ public abstract class TransactionType {
             private void validateByType(Transaction transaction) throws ConchException.NotValidException {
                 Attachment.CoinBase coinBase = (Attachment.CoinBase) transaction.getAttachment();
                 if (Attachment.CoinBase.CoinBaseType.BLOCK_REWARD == coinBase.getCoinBaseType()) {
+
                     Map<Long, Long> consignors = coinBase.getConsignors();
                     
                     if(consignors.size() <= 0) return;
