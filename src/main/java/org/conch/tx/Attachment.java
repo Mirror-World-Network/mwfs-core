@@ -193,7 +193,6 @@ public interface Attachment extends Appendix {
         //pool id or account id
         protected final long generatorId;
         // account id : investment amount
-        // FIXME - change the investment amount to distribution amount
         protected final Map<Long, Long> consignors;
         // miner's account id : poc score
         protected Map<Long, Long> crowdMiners;

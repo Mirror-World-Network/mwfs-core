@@ -2270,24 +2270,8 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
 
         // coin base
         try {
-            // Pool owner -> pool rewards map (send rewards to pool joiners)
-            // Single miner -> empty rewards map (send rewards to miner)
-            Map<Long, Long> map = new HashMap<>();
-            long poolId = SharderPoolProcessor.findOwnPoolId(creator.getId());
-            if (poolId == -1 || SharderPoolProcessor.isDead(poolId)) {
-                poolId = creator.getId();
-            } else {
-                map = SharderPoolProcessor.getPool(poolId).getConsignorsAmountMap();
-            }
-
             // transaction version=1, deadline=10,timestamp=blockTimestamp
-            TransactionImpl transaction = new TransactionImpl.BuilderImpl(
-                    publicKey,
-                    RewardCalculator.blockReward(Conch.getHeight()),
-                    0,
-                    (short) 10,
-                    new Attachment.CoinBase(
-                            Attachment.CoinBase.CoinBaseType.BLOCK_REWARD, creator.getId(), poolId, map))
+            TransactionImpl transaction = RewardCalculator.generateCoinBaseTxBuilder(publicKey, Conch.getHeight())
                     .timestamp(blockTimestamp)
                     .recipientId(0)
                     .build(secretPhrase);

@@ -1,5 +1,6 @@
 package org.conch.consensus.reward;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.conch.Conch;
 import org.conch.account.Account;
@@ -8,14 +9,20 @@ import org.conch.common.Constants;
 import org.conch.consensus.poc.PocHolder;
 import org.conch.consensus.poc.PocScore;
 import org.conch.mint.pool.PoolRule;
+import org.conch.mint.pool.SharderPoolProcessor;
 import org.conch.peer.CertifiedPeer;
 import org.conch.tx.Attachment;
+import org.conch.tx.Attachment.CoinBase;
 import org.conch.tx.Transaction;
+import org.conch.tx.TransactionImpl;
+import org.conch.util.LocalDebugTool;
 import org.conch.util.Logger;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 /**
  * @author <a href="mailto:xy@sharder.org">Ben</a>
@@ -78,6 +85,45 @@ public class RewardCalculator {
     }
 
     /**
+     *
+     * @param publicKey public key of miner's account
+     * @param height blockchain's height
+     * @return
+     */
+    public static TransactionImpl.BuilderImpl generateCoinBaseTxBuilder(final byte[] publicKey, int height){
+        Account creator = Account.getAccount(publicKey);
+
+        // Pool owner -> pool rewards map (send rewards to pool joiners)
+        // Single miner -> empty rewards map (send rewards to miner)
+        Map<Long, Long> map = new HashMap<>();
+        long poolId = SharderPoolProcessor.findOwnPoolId(creator.getId());
+        if (poolId == -1 || SharderPoolProcessor.isDead(poolId)) {
+            poolId = creator.getId();
+        } else {
+            map = SharderPoolProcessor.getPool(poolId).getConsignorsAmountMap();
+        }
+
+        Attachment.CoinBase coinBase = null;
+        if(height >= Constants.COINBASE_CROWD_MINER_OPEN_HEIGHT
+        || LocalDebugTool.isLocalDebug()){
+            // crowd miner mode
+            Map<Long, Long> crowdMinerPocScoreMap = generateCrowdMinerPocScoreMap(Lists.newArrayList(creator.getId()), height);
+            coinBase = new CoinBase(creator.getId(), poolId, map, crowdMinerPocScoreMap);
+        }else{
+            // single miner or pool reward mode
+            coinBase = new CoinBase(CoinBase.CoinBaseType.BLOCK_REWARD, creator.getId(), poolId, map);
+        }
+
+        return new TransactionImpl.BuilderImpl(
+                publicKey,
+                blockReward(height),
+                0,
+                (short) 10,
+                coinBase);
+    }
+
+
+    /**
      * read the current qualified miners and calculate the reward distribution according to poc score rate:
      * - qualified condition:
      * a) create a tx to declared the node;
@@ -86,12 +132,12 @@ public class RewardCalculator {
      * @return map: miner's account id : poc score
      */
     private static long QUALIFIED_MINER_HOLDING_MW_MIN = 1064L;
-    public static Map<Long, Long> generateCrowdMinerRewardMap(List<Long> exceptAccounts){
-        Map<Long, Long> crowdMinerRewardMap = Maps.newHashMap();
+    private static Map<Long, Long> generateCrowdMinerPocScoreMap(List<Long> exceptAccounts, int height){
+        Map<Long, Long> crowdMinerPocScoreMap = Maps.newHashMap();
         // read the qualified miner list
         Map<Long, CertifiedPeer>  certifiedPeers = Conch.getPocProcessor().getCertifiedPeers();
         if(certifiedPeers == null || certifiedPeers.size() == 0) {
-            return crowdMinerRewardMap;
+            return crowdMinerPocScoreMap;
         }
 
         // generate the poc score map
@@ -104,20 +150,20 @@ public class RewardCalculator {
             Account declaredAccount = Account.getAccount(certifiedPeer.getBoundAccountId());
             long holdingMwAmount = 0;
             try{
-                holdingMwAmount = declaredAccount.getEffectiveBalanceSS(Conch.getHeight());
+                holdingMwAmount = declaredAccount.getEffectiveBalanceSS(height);
             }catch(Exception e){
                 e.printStackTrace();
             }
             if(holdingMwAmount < QUALIFIED_MINER_HOLDING_MW_MIN) continue;
 
             // poc score judgement
-            PocScore pocScore = PocHolder.getPocScore(Conch.getHeight(), declaredAccount.getId());
+            PocScore pocScore = PocHolder.getPocScore(height, declaredAccount.getId());
             if(pocScore == null || pocScore.total().longValue() <= 0) continue;
 
-            crowdMinerRewardMap.put(declaredAccount.getId(), pocScore.total().longValue());
+            crowdMinerPocScoreMap.put(declaredAccount.getId(), pocScore.total().longValue());
         }
 
-        return crowdMinerRewardMap;
+        return crowdMinerPocScoreMap;
     }
 
     /**
