@@ -291,7 +291,7 @@
                                     </el-form>
                                 </template>
                             </el-table-column>
-                            <el-table-column :label="$t('dialog.account_info_account')" width="220">
+                            <el-table-column :label="$t('dialog.account_info_account')" width="230">
                                 <template slot-scope="scope">
                                     <div v-html="scope.row.accountRS" v-if="scope.row.accountRS === accountRS" style="color:#1bc98e;"></div>
                                     <div v-html="scope.row.accountRS" v-if="scope.row.accountRS !== accountRS" style=""></div>
