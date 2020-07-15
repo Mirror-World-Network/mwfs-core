@@ -392,7 +392,7 @@
                                             </el-row>
                                             <el-row>
                                                 <el-form-item :label="$t('network.mining_time')">
-                                                    <span>{{ dateFormat(props.row.hitTime) }}</span>
+                                                    <span>{{ dateFormat(props.row) }}</span>
                                                 </el-form-item>
                                             </el-row>
 <!--                                            <el-row>-->
