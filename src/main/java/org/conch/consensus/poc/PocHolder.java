@@ -210,7 +210,7 @@ public class PocHolder implements Serializable {
             return;
         }
         
-        Logger.logDebugMessage("#addOrUpdateBoundPeer# update a certified peer: %s", existPeer.toString());
+//        Logger.logDebugMessage("#addOrUpdateBoundPeer# update a certified peer: %s", existPeer.toString());
     }
     
     /**
