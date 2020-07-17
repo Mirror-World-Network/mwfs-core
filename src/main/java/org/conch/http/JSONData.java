@@ -974,7 +974,7 @@ public final class JSONData {
             // quit pool tx
             if(transaction.getType().isType(TransactionType.TYPE_SHARDER_POOL)
                     && transaction.getType().isSubType(TransactionType.SUBTYPE_SHARDER_POOL_QUIT)
-                    && attachmentJSON.containsKey("txId")){
+                    && attachmentJSON.containsKey("txId")) {
                 
                 String txId = String.valueOf(attachmentJSON.get("txId"));
                 Transaction joinTx = Conch.getBlockchain().getTransaction(Long.valueOf(txId));
@@ -986,6 +986,18 @@ public final class JSONData {
             }
 
             // join pool tx or deletion poo tx: convert the pool id
+
+            // coinbase
+            if(transaction.getType().isType(TransactionType.TYPE_COIN_BASE)) {
+
+                String txId = String.valueOf(attachmentJSON.get("txId"));
+                Transaction joinTx = Conch.getBlockchain().getTransaction(Long.valueOf(txId));
+                attachmentJSON.put("txSId",joinTx != null ? joinTx.getStringId() : "none");
+
+                if(joinTx != null && joinTx.getAttachment() != null){
+                    attachmentJSON.put("amount", joinTx.getAttachment().getJSONObject().get("amount"));
+                }
+            }
             
             json.put("attachment", attachmentJSON);
         }

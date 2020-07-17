@@ -107,7 +107,7 @@ public class RewardCalculator {
 
         Attachment.CoinBase coinBase = null;
         if(height >= Constants.COINBASE_CROWD_MINER_OPEN_HEIGHT
-        || LocalDebugTool.isLocalDebug()){
+        || LocalDebugTool.isLocalDebugAndBootNodeMode){
             // crowd miner mode
             Map<Long, Long> crowdMinerPocScoreMap = generateCrowdMinerPocScoreMap(Lists.newArrayList(creator.getId()), height);
             coinBase = new CoinBase(creator.getId(), poolId, map, crowdMinerPocScoreMap);
@@ -144,6 +144,7 @@ public class RewardCalculator {
 
         // generate the poc score map
         for(CertifiedPeer certifiedPeer : certifiedPeers.values()){
+            // only reward once for same miner
             if(exceptAccounts != null
             && exceptAccounts.contains(certifiedPeer.getBoundAccountId())){
                 continue;
@@ -154,7 +155,7 @@ public class RewardCalculator {
             try{
                 holdingMwAmount = declaredAccount.getEffectiveBalanceSS(height);
             }catch(Exception e){
-                e.printStackTrace();
+                Logger.logErrorMessage("[QualifiedMiner]can't get balance of account %s at height %d",  declaredAccount.getRsAddress(), height);
             }
             if(holdingMwAmount < QUALIFIED_MINER_HOLDING_MW_MIN) continue;
 
