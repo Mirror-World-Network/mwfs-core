@@ -166,6 +166,7 @@
                 <el-radio-group v-model="tabTitle" class="title">
                     <el-radio-button label="account" class="btn">{{$t('dialog.block_info_all_transaction')}}</el-radio-button>
                     <el-radio-button label="blockInfo" class="btn">{{$t('dialog.block_info_all_block_detail')}}</el-radio-button>
+                    <el-radio-button label="blockRewardInfo" class="btn">{{$t('dialog.block_reward_distribution_detail')}}</el-radio-button>
                     <el-radio-button v-if="pocInfoList.length > 0" label="pocInfo" class="btn">PoC</el-radio-button>
                     <el-radio-button v-if="poolInfoList.length > 0" label="poolInfo" class="btn">Pool</el-radio-button>
                     <el-radio-button v-if="messageInfoList.length > 0" label="messageInfo" class="btn">{{$t('sendMessage.infomation')}}</el-radio-button>
@@ -173,7 +174,7 @@
                 </el-radio-group>
 
                 <div v-if="tabTitle === 'account'" class="account_list">
-                    <table class="table">
+                    <table  class="table">
                         <tbody>
                         <tr>
                             <th class="pc-table">{{$t('dialog.account_transaction_time')}}</th>
@@ -214,6 +215,7 @@
                         </tbody>
                     </table>
                 </div>
+
                 <div v-if="tabTitle === 'blockInfo'" class="blockInfo">
                     <table class="table">
                         <tbody>
@@ -287,6 +289,11 @@
                         </tbody>
                     </table>
                 </div>
+
+                <div v-if="tabTitle === 'blockRewardInfo'" class="reward_list">
+
+                </div>
+
                 <div v-if="tabTitle === 'pocInfo'" class="blockInfo">
                     <!-- pc -->
                     <el-table :data="pocInfoList" class="poc pc" style="width: 100%">
@@ -959,9 +966,7 @@
                 if (subtype === 5) return _this.$root.$t("transaction.transaction_type_account");
             },
             downloadFile(row,column){
-
                 window.open("/sharder?requestType=downloadStoredData&ssid="+row.fileInfo.ssid+"&filename="+row.fileInfo.name,"_blank");
-
             },
 
         },
