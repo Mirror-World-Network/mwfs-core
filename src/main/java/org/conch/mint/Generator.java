@@ -908,8 +908,8 @@ public class Generator implements Comparable<Generator> {
                     }
                     generatorDetailStr += generator.toJson(false) + "\n";;
                 }
-                Logger.logDebugMessage("\n\rTotal Generator detail is \n\r" + generatorDetailStr);
-                Logger.logDebugMessage("\n\rTotal Bad Hardware Score detail is \n\r" + badHardwareScoreStr);
+                //Logger.logDebugMessage("\n\rTotal Generator detail is \n\r" + generatorDetailStr);
+                //Logger.logDebugMessage("\n\rTotal Bad Hardware Score detail is \n\r" + badHardwareScoreStr);
             }
         }
         return generatorList;
