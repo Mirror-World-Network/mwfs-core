@@ -136,7 +136,7 @@ public class RewardCalculator {
      * c) current height's balance  > 4256 MW（32T staking amount）;
      * @return map: miner's account id : poc score
      */
-    private static long QUALIFIED_CROWD_MINER_HOLDING_MW_MIN = 32*133L; // 1T-133MW
+    private static long QUALIFIED_CROWD_MINER_HOLDING_AMOUNT_MIN = 32*133L; // 1T-133MW
     private static Map<Long, Long> generateCrowdMinerPocScoreMap(List<Long> exceptAccounts, int height){
         Map<Long, Long> crowdMinerPocScoreMap = Maps.newHashMap();
         // read the qualified miner list
@@ -163,7 +163,7 @@ public class RewardCalculator {
                 Logger.logWarningMessage("[QualifiedMiner] not valid miner because can't get balance of account %s at height %d, caused by %s",  declaredAccount.getRsAddress(), height, e.getMessage());
                 holdingMwAmount = 0;
             }
-            if(holdingMwAmount < QUALIFIED_CROWD_MINER_HOLDING_MW_MIN) continue;
+            if(holdingMwAmount < QUALIFIED_CROWD_MINER_HOLDING_AMOUNT_MIN) continue;
 
             // poc score judgement
             PocScore pocScore = PocHolder.getPocScore(height, declaredAccount.getId());
