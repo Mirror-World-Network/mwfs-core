@@ -11,7 +11,7 @@
             <div class="modal-body">
                 <div class="account_preInfo">
                     <span v-if="accountInfo.name">{{$t('dialog.account_info_name') + ': ' + accountInfo.name}} | </span>
-                    <span>{{$t('dialog.account_info_available_asset') + ': ' + $global.getSSNumberFormat(accountInfo.unconfirmedBalanceNQT)}}</span>
+                    <span>{{$t('dialog.account_info_available_asset') + ': ' + $global.getAmountFormat(accountInfo.unconfirmedBalanceNQT)}}</span>
                 </div>
                 <div class="account_allInfo">
                     <el-radio-group v-model="tabTitle" class="title">
@@ -75,7 +75,7 @@
             <div class="modal-body">
                 <div class="account_preInfo">
                     <span v-if="accountInfo.name">{{$t('dialog.account_info_name') + accountInfo.name}} |</span>
-                    <span>{{$t('dialog.account_info_available_asset') + ": " + $global.getSSNumberFormat(accountInfo.unconfirmedBalanceNQT)}}</span>
+                    <span>{{$t('dialog.account_info_available_asset') + ": " + $global.getAmountFormat(accountInfo.unconfirmedBalanceNQT)}}</span>
                 </div>
                 <div class="account_transactionInfo">
                     <p class="fl">{{$t('dialog.account_transaction_detail')}}</p>
@@ -298,10 +298,10 @@
                     </el-radio-group>
 
                     <div v-if="(rewardTabs === 'crowdMinerRewards') && containCrowdRewardTxs()">
-                        <p class="testnet-tips">{{$t('dialog.block_reward_distribution_crowd')}}: {{$global.convertNQTtoUnit(coinBaseTx.attachment.crowdMinerRewardAmount)}}</p>
+                        <p class="testnet-tips">{{$t('dialog.block_reward_distribution_crowd')}}: {{$global.getAmountFormat(coinBaseTx.attachment.crowdMinerRewardAmount)}}</p>
                     </div>
                     <div v-else-if="(rewardTabs === 'miningRewards') && containMiningRewardTxs()">
-                        <p class="testnet-tips">{{$t('dialog.block_reward_distribution_mining')}}: {{$global.convertNQTtoUnit(coinBaseTx.attachment.blockMiningRewardAmount)}}</p>
+                        <p class="testnet-tips">{{$t('dialog.block_reward_distribution_mining')}}: {{$global.getAmountFormat(coinBaseTx.attachment.blockMiningRewardAmount)}}</p>
                     </div>
 
                     <table v-if="(rewardTabs === 'crowdMinerRewards') && containCrowdRewardTxs()" class="table">
@@ -319,7 +319,7 @@
                                 <td class="linker mobile-td" >{{crowdMiner.accountRS}}</td>
                                 <td class="pc-table" v-if="crowdMiner.pocScore === -1">--</td>
                                 <td class="pc-table" v-else>{{crowdMiner.pocScore}}</td>
-                                <td class="pc-table">{{$global.convertNQTtoUnit(crowdMiner.rewardAmount)}}</td>
+                                <td class="pc-table">{{$global.getAmountFormatBySpecifiedPrecision(crowdMiner.rewardAmount,8)}}</td>
                                 <td class="pc-table">CoinBase</td>
                                 <td class="mobile icon-box" style="width: 20px"><i class="el-icon-arrow-right"></i></td>
                             </tr>
@@ -340,8 +340,8 @@
                                 <template v-for="(poolJoiner,index) in coinBaseTx.attachment.consignors">
                                     <td class="linker mobile-td" >{{poolJoiner.accountId}}</td>
                                     <td class="linker mobile-td" >{{poolJoiner.accountRS}}</td>
-                                    <td class="pc-table">{{$global.convertNQTtoUnit(poolJoiner.investAmount)}}</td>
-                                    <td class="pc-table">{{$global.convertNQTtoUnit(poolJoiner.rewardAmount)}}</td>
+                                    <td class="pc-table">{{$global.getAmountFormat(poolJoiner.investAmount)}}</td>
+                                    <td class="pc-table">{{$global.getAmountFormat(poolJoiner.rewardAmount)}}</td>
                                     <td class="pc-table">CoinBase</td>
                                     <td class="mobile icon-box" style="width: 20px"><i class="el-icon-arrow-right"></i></td>
                                 </template>
@@ -350,7 +350,7 @@
                                 <td class="linker mobile-td" >{{blockInfo.generator}}</td>
                                 <td class="linker mobile-td" >{{blockInfo.generatorRS}}</td>
                                 <td class="pc-table">--</td>
-                                <td class="pc-table">{{$global.convertNQTtoUnit(coinBaseTx.attachment.blockMiningRewardAmount)}}</td>
+                                <td class="pc-table">{{$global.getAmountFormat(coinBaseTx.attachment.blockMiningRewardAmount)}}</td>
                                 <td class="pc-table">CoinBase</td>
                                 <td class="mobile icon-box" style="width: 20px"><i class="el-icon-arrow-right"></i></td>
                             </tr>

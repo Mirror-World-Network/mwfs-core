@@ -829,7 +829,7 @@
                                 <p class="el-icon-info"></p>
                             </el-tooltip>
                         </th>
-                        <td>{{$global.getSSNumberFormat(accountInfo.balanceNQT)}}</td>
+                        <td>{{$global.getAmountFormat(accountInfo.balanceNQT)}}</td>
                     </tr>
                     <tr>
                         <th>
@@ -838,11 +838,11 @@
                                 <p class="el-icon-info"></p>
                             </el-tooltip>
                         </th>
-                        <td>{{$global.getSSNumberFormat(accountInfo.effectiveBalanceNQT)}}</td>
+                        <td>{{$global.getAmountFormat(accountInfo.effectiveBalanceNQT)}}</td>
                     </tr>
                     <tr>
                         <th>{{$t('account_info.frozen_balance_nqt')}}</th>
-                        <td>{{$global.getSSNumberFormat(accountInfo.frozenBalanceNQT)}}</td>
+                        <td>{{$global.getAmountFormatBySpecifiedPrecision(accountInfo.frozenBalanceNQT,8)}}</td>
                     </tr>
                     <tr>
                         <th>
@@ -851,7 +851,7 @@
                                 <p class="el-icon-info"></p>
                             </el-tooltip>
                         </th>
-                        <td>{{$global.getSSNumberFormat(accountInfo.forgedBalanceNQT)}}</td>
+                        <td>{{$global.getAmountFormat(accountInfo.forgedBalanceNQT)}}</td>
                     </tr>
                     <tr>
                         <th>{{$t('network.poc_score')}}</th>
@@ -1256,7 +1256,6 @@
             //         }
             //     }
             // },
-
             //定时器
             finish() {
                 //禁用以下表单

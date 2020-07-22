@@ -868,17 +868,6 @@ export default {
         return new BigNumber(t.feeNQT).dividedBy("100000000").toFixed() + this.unit;
     },
     /**
-     * convert the nqt amount to unit
-     * @param amountNQT
-     * @returns {string}
-     */
-    convertNQTtoUnit(amountNQT) {
-        if (amountNQT <= 0) {
-            return this.placeholder;
-        }
-        return new BigNumber(amountNQT).dividedBy("100000000").toFixed() + this.unit;
-    },
-    /**
      * 返回对象 或 占位符
      * @param o1
      * @param o2
@@ -964,13 +953,20 @@ export default {
      * @param f
      * @returns {string}
      */
-    getSSNumberFormat(num, f) {
-        if (!num || num <= 0) {
+    getAmountFormat(amount, f) {
+        if (!amount || amount <= 0) {
             return this.placeholder
         } else if (f) {
-            return num + this.unit
+            return amount + this.unit
         } else {
-            return new BigNumber(num).dividedBy("100000000").toFixed(2) + this.unit
+            return new BigNumber(amount).dividedBy("100000000").toFixed(2) + this.unit
+        }
+    },
+    getAmountFormatBySpecifiedPrecision(amount, precision) {
+        if (!amount || amount <= 0) {
+            return this.placeholder
+        } else {
+            return new BigNumber(amount).dividedBy("100000000").toFixed(precision) + this.unit
         }
     },
     /**
