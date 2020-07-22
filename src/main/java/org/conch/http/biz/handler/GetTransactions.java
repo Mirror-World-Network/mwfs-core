@@ -78,7 +78,10 @@ public class GetTransactions extends APIServlet.APIRequestHandler {
                     transactionList = transactionList.stream().filter(
                             transaction -> transaction.getIndex() >= transactionIndexBegin && transaction.getIndex() < transactionIndexEnd
                     ).collect(Collectors.toList());
-                    JSONObject blockJson = JSONData.block(block, transactionList, true, false);
+
+                    JSONObject blockJson = JSONData.block(block, true, false);
+                    blockJson = JSONData.appendSpecifiedTxsBefore(transactionList, blockJson);
+
                     JSONArray transactionsJson = (JSONArray) blockJson.get("transactions");
                     if (transactionsJson.size() == transactionList.size()) {
                         blocks.add(blockJson);
