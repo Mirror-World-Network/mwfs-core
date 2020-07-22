@@ -1,24 +1,3 @@
-/*
- *  Copyright © 2017-2018 Sharder Foundation.
- *
- *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU General Public License
- *  version 2 as published by the Free Software Foundation.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, you can visit it at:
- *  https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
- *
- *  This software uses third party libraries and open-source programs,
- *  distributed under licenses described in 3RD-PARTY-LICENSES.
- *
- */
-
 package org.conch.http.biz.handler;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -45,26 +24,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.conch.http.JSONResponses.BIZ_INCORRECT_INDEX;
+import static org.conch.http.JSONResponses.MISSING_TRANSACTION;
 
-public final class GetBizBlocks extends APIServlet.APIRequestHandler {
+public class GetTransactions extends APIServlet.APIRequestHandler {
 
-    public static final GetBizBlocks instance = new GetBizBlocks();
+    public static final GetTransactions instance = new GetTransactions();
 
-    private GetBizBlocks() {
-        super(new APITag[]{APITag.BIZ}, "firstIndex", "lastIndex", "includeTypes");
+    private GetTransactions() {
+        super(new APITag[]{APITag.BIZ}, "height", "type", "pageNo", "pageSize");
     }
 
     @Override
-    protected JSONStreamAware processRequest(HttpServletRequest req) throws ConchException {
-        int firstIndex = ParameterParser.getFirstIndex(req);
-        int lastIndex = ParameterParser.getLastIndex(req);
-        String includeType = Convert.emptyToNull(req.getParameter("includeTypes"));
-        Logger.logDebugMessage("GetBizBlocks firstIndex=%d, lastIndex=%d, includeType=%s", firstIndex, lastIndex, includeType);
-        if (includeType == null && lastIndex - firstIndex > 500) {
-            throw new ParameterException(BIZ_INCORRECT_INDEX);
+    protected JSONStreamAware processRequest(HttpServletRequest request) throws ConchException {
+        String heightStr = Convert.emptyToNull(request.getParameter("height"));
+        String type = Convert.emptyToNull(request.getParameter("type"));
+        String pageNoStr = Convert.emptyToNull(request.getParameter("pageNo"));
+        String pageSizeStr = Convert.emptyToNull(request.getParameter("pageSize"));
+        if (heightStr == null || type == null) {
+            return MISSING_TRANSACTION;
         }
-        final int timestamp = ParameterParser.getTimestamp(req);
+        Integer height = Integer.valueOf(heightStr);
+        Integer pageNo = pageNoStr != null ? Integer.valueOf(pageNoStr) : 0;
+        Integer pageSize = pageSizeStr != null ? Integer.valueOf(pageSizeStr) : 0;
+        if (pageNo <= 0) {
+            pageNo = 1;
+        }
+        if (pageSize <= 0) {
+            pageSize = 10;
+        }
+        Integer firstIndex = Conch.getHeight() - height;
+        Integer lastIndex = Conch.getHeight() - height;
+        final int timestamp = ParameterParser.getTimestamp(request);
         JSONArray blocks = new JSONArray();
         DbIterator<? extends Block> iterator = null;
         try {
@@ -74,22 +64,28 @@ public final class GetBizBlocks extends APIServlet.APIRequestHandler {
                 if (block.getTimestamp() < timestamp) {
                     break;
                 }
-                if (!StringUtils.isNullOrEmpty(includeType)) {
-                    List<String> typeList = Arrays.asList(StringUtils.arraySplit(includeType, ',', true));
+                if (!StringUtils.isNullOrEmpty(type)) {
+                    List<String> typeList = Arrays.asList(StringUtils.arraySplit(type, ',', true));
                     List<Transaction> transactionList = block.getTransactions().stream().filter(
                             transaction -> typeList.contains(String.valueOf(transaction.getType().getType()))
                     ).collect(Collectors.toList());
                     if (transactionList.size() <= 0) {
                         continue;
                     }
+                    Integer indexTypeFirst = transactionList.get(0) != null ? Integer.valueOf(transactionList.get(0).getIndex()) : 0;
+                    Integer transactionIndexBegin = (pageNo - 1) * pageSize + indexTypeFirst;
+                    Integer transactionIndexEnd = transactionIndexBegin + pageSize + indexTypeFirst;
+                    transactionList = transactionList.stream().filter(
+                            transaction -> transaction.getIndex() >= transactionIndexBegin && transaction.getIndex() < transactionIndexEnd
+                    ).collect(Collectors.toList());
 
                     JSONObject blockJson = JSONData.block(block, true, false);
                     blockJson = JSONData.appendSpecifiedTxsBefore(transactionList, blockJson);
 
-                    blocks.add(blockJson);
-                } else {
-                    JSONObject blockJson = JSONData.block(block, true, false);
-                    blocks.add(blockJson);
+                    JSONArray transactionsJson = (JSONArray) blockJson.get("transactions");
+                    if (transactionsJson.size() == transactionList.size()) {
+                        blocks.add(blockJson);
+                    }
                 }
             }
         } finally {
@@ -105,13 +101,12 @@ public final class GetBizBlocks extends APIServlet.APIRequestHandler {
             response.addAll(list);
         } catch (IOException e) {
             if (Logger.isLevel(Logger.Level.DEBUG)) {
-                Logger.logErrorMessage("can't parse blocks data structure in GetBizBlocks api processing", e);
+                Logger.logErrorMessage("can't parse blocks data structure in GetTransactions api processing", e);
             } else {
-                Logger.logErrorMessage("can't parse blocks data structure in GetBizBlocks api processing");
+                Logger.logErrorMessage("can't parse blocks data structure in GetTransactions api processing");
             }
             return JSONResponses.BIZ_JSON_IO_ERROR;
         }
-
         return response;
     }
 

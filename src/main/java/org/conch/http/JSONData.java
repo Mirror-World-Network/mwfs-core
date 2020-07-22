@@ -391,6 +391,30 @@ public final class JSONData {
         return json;
     }
 
+    /**
+     * Compatibility method for the block explorer using:
+     * - convert the specified tx list to json format
+     * - append the json format specified txs before the current block's tx collection
+     * - use the new json format tx collection to replace the old one in the block json object
+     * @param txList
+     * @param blockJson
+     * @return
+     */
+    public static JSONObject appendSpecifiedTxsBefore(List<Transaction> txList, JSONObject blockJson){
+        // prepare the pre tx list
+        JSONArray transactions = new JSONArray();
+        txList.forEach(transaction -> transactions.add(JSONData.transaction(transaction, false)));
+
+        // append the pre tx list and remove the old tx list from block json object
+        if(blockJson.containsKey("transactions")) {
+            transactions.addAll((JSONArray)blockJson.get("transactions"));
+            blockJson.remove("transactions");
+        }
+        blockJson.put("transactions", transactions);
+
+        return blockJson;
+    }
+
     public static JSONObject block(Block block, boolean includeTransactions, boolean includeExecutedPhased) {
         JSONObject json = new JSONObject();
         json.put("block", block.getStringId());
