@@ -132,7 +132,7 @@ public class RewardCalculator {
      * read the current qualified miners and calculate the reward distribution according to poc score rate:
      * - qualified condition:
      * a) create a tx to declared the node;
-     * b) lined the mining address;
+     * b) linked the mining address;
      * c) current height's balance  > 4256 MW（32T staking amount）;
      * @return map: miner's account id : poc score
      */
