@@ -208,7 +208,7 @@ const en = {
         'account_name_not_set_explain':'is the MW amount currently available for use and it will only include the MW earnings from confirmed blocks (after 1 block confirmations).',
         'frozen_balance_nqt': "Freeze Amount",
         'account_mining_balance': "Mined Amount",
-        'account_mining_balance_explain': "Include：mining reward, tx fee",
+        'account_mining_balance_explain': "Include：mining rewards, crowd miner rewards, tx fee",
         'public_key': "Public Key",
     },
     header: {
