@@ -41,7 +41,6 @@ import org.conch.mint.Generator;
 import org.conch.mint.pool.SharderPoolProcessor;
 import org.conch.peer.Peers;
 import org.conch.tools.ClientUpgradeTool;
-import org.conch.tx.Attachment;
 import org.conch.tx.Transaction;
 import org.conch.util.FileUtil;
 import org.conch.util.Logger;
@@ -486,14 +485,10 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
                 while(i > 0){
                     Block pastBlock = Conch.getBlockchain().getBlockAtHeight(block.getHeight() - i);
     
-                    for (Transaction transaction : pastBlock.getTransactions()) {
-                        Attachment attachment = transaction.getAttachment();
-                        if(!(attachment instanceof Attachment.CoinBase)) continue;
-    
-                        Attachment.CoinBase coinbaseBody = (Attachment.CoinBase) attachment;
-                        if(!coinbaseBody.isType(Attachment.CoinBase.CoinBaseType.BLOCK_REWARD)) continue;
+                    for (Transaction tx : pastBlock.getTransactions()) {
+                        if(!RewardCalculator.isBlockRewardTx(tx.getAttachment())) continue;
 
-                        RewardCalculator.blockRewardDistribution(transaction,false);
+                        RewardCalculator.blockRewardDistribution(tx,false);
                     }
                     i--;
                 }

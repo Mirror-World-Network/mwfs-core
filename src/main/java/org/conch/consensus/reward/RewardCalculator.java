@@ -306,7 +306,7 @@ public class RewardCalculator {
             }
             account.addMintedBalance(amount);
             account.pocChanged();
-            Logger.logDebugMessage("[Stage Two] unfreeze mining rewards %d of %s and add it in mined amount of tx %d at height %d",
+            Logger.logDebugMessage("[Stage Two] unfreeze mining/crowdMiners rewards %d of %s and add it in mined amount of tx %d at height %d",
                     amount, account.getRsAddress(), tx.getId() , tx.getHeight());
         }
     }
@@ -346,6 +346,19 @@ public class RewardCalculator {
             }
         }
         return tx.getAmountNQT();
+    }
+
+    /**
+     * CoinBase tx attachment judgement
+     * @param attachment
+     * @return
+     */
+    public static boolean isBlockRewardTx(Attachment attachment) {
+        if(!(attachment instanceof Attachment.CoinBase)) return false;
+
+        Attachment.CoinBase coinbaseBody = (Attachment.CoinBase) attachment;
+        return coinbaseBody.isType(Attachment.CoinBase.CoinBaseType.BLOCK_REWARD)
+                || coinbaseBody.isType(Attachment.CoinBase.CoinBaseType.CROWD_BLOCK_REWARD);
     }
 
     /**
