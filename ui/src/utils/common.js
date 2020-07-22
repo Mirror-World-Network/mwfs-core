@@ -868,11 +868,11 @@ export default {
         return new BigNumber(t.feeNQT).dividedBy("100000000").toFixed() + this.unit;
     },
     /**
-     * convert the reward amount
+     * convert the nqt amount to unit
      * @param amountNQT
      * @returns {string}
      */
-    getBlockRewardNQT(amountNQT) {
+    convertNQTtoUnit(amountNQT) {
         if (amountNQT <= 0) {
             return this.placeholder;
         }
