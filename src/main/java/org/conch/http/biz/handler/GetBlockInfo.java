@@ -63,7 +63,7 @@ public final class GetBlockInfo extends APIServlet.APIRequestHandler {
         } catch (RuntimeException e) {
             return INCORRECT_HEIGHT;
         }
-        String responseStr = JSON.toString(JSONData.block(blockData, true, true));
+        String responseStr = JSON.toString(JSONData.block(blockData, null,true, true));
         ObjectMapper mapper = new ObjectMapper();
         try {
             JSONObject jsonObject = new JSONObject();
