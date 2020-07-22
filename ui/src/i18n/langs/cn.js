@@ -209,7 +209,8 @@ const cn = {
         'account_name_not_set_explain':'1个区块确认后的所有已接收到的转账和挖矿所得。',
         'frozen_balance_nqt': "冻结金额",
         'account_mining_balance': "挖矿收入",
-        'account_mining_balance_explain': "包含：出块奖励，有效矿工奖励，交易手续费",
+        'account_reward_balance': "系统奖励",
+        'account_reward_balance_explain': "包含：出块奖励，有效矿工奖励，交易手续费",
         'public_key': "公钥",
     },
     header: {
