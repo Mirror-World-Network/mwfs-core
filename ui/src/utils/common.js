@@ -959,13 +959,7 @@ export default {
         } else if (f) {
             return amount + this.unit
         } else {
-            return new BigNumber(amount).dividedBy("100000000").toFixed(2) + this.unit
-        }
-    },
-    getAmountFormatBySpecifiedPrecision(amount, precision) {
-        if (!amount || amount <= 0) {
-            return this.placeholder
-        } else {
+            var precision = amount < 100000000 ? 8 : 2;
             return new BigNumber(amount).dividedBy("100000000").toFixed(precision) + this.unit
         }
     },
