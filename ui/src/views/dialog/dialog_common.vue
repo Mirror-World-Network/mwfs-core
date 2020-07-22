@@ -289,8 +289,9 @@
                         </tbody>
                     </table>
                 </div>
-
+                <!-- block reward distribution section -->
                 <div v-if="tabTitle === 'blockRewardInfo'" class="account_list">
+                    <!-- tabs -->
                     <el-radio-group v-model="rewardTabs" class="title">
                         <el-radio-button v-if="containCrowdRewardTxs()" label="crowdMinerRewards" class="reward-tab">{{$t('dialog.block_reward_distribution_crowd')}}</el-radio-button>
 <!--                        <el-radio-button v-if="containMiningRewardTxs()" label="miningRewards" class="reward-tab">{{$t('dialog.block_reward_distribution_mining')}}</el-radio-button>-->
@@ -304,6 +305,7 @@
                         <p class="testnet-tips">{{$t('dialog.block_reward_distribution_mining')}}: {{$global.getAmountFormat(coinBaseTx.attachment.blockMiningRewardAmount)}}</p>
                     </div>
 
+                    <!-- crowd miners rewards distribution table -->
                     <table v-if="(rewardTabs === 'crowdMinerRewards') && containCrowdRewardTxs()" class="table">
                         <tbody>
                             <tr>
@@ -326,6 +328,7 @@
                         </tbody>
                     </table>
 
+                    <!-- mining rewards(include pool mode) distribution table -->
                     <table v-if="(rewardTabs === 'miningRewards')" class="table">
                         <tbody>
                             <tr>
@@ -356,8 +359,6 @@
                             </tr>
                         </tbody>
                     </table>
-
-
                 </div>
 
                 <div v-if="tabTitle === 'pocInfo'" class="blockInfo">
