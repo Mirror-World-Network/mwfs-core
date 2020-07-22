@@ -57,7 +57,7 @@ public final class GetBlocks extends APIServlet.APIRequestHandler {
                 if (block.getTimestamp() < timestamp) {
                     break;
                 }
-                blocks.add(JSONData.block(block,null, includeTransactions, includeExecutedPhased));
+                blocks.add(JSONData.block(block, includeTransactions, includeExecutedPhased));
             }
         }finally {
             DbUtils.close(iterator);

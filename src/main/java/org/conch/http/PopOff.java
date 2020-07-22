@@ -64,7 +64,7 @@ public final class PopOff extends APIServlet.APIRequestHandler {
             Conch.getBlockchainProcessor().setGetMoreBlocks(true);
         }
         JSONArray blocksJSON = new JSONArray();
-        blocks.forEach(block -> blocksJSON.add(JSONData.block(block, null,true, false)));
+        blocks.forEach(block -> blocksJSON.add(JSONData.block(block, true, false)));
         JSONObject response = new JSONObject();
         response.put("blocks", blocksJSON);
         if (keepTransactions) {

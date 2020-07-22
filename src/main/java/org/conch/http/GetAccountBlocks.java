@@ -55,7 +55,7 @@ public final class GetAccountBlocks extends APIServlet.APIRequestHandler {
             iterator = Conch.getBlockchain().getBlocks(accountId, timestamp, firstIndex, lastIndex);
             while (iterator.hasNext()) {
                 Block block = iterator.next();
-                blocks.add(JSONData.block(block,null, includeTransactions, false));
+                blocks.add(JSONData.block(block, includeTransactions, false));
             }
         }finally {
             DbUtils.close(iterator);
