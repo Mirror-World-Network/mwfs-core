@@ -169,8 +169,8 @@
             checkExchangeNum(){
                 const _this = this;
                 _this.loadingExchangeSS = true;
-                let forgedBalanceNQT = _this.$global.getSSNumberFormat(_this.forgedBalanceNQT);
-                /*let effectiveBalanceNQT = _this.$global.getSSNumberFormat(SSO.accountInfo.effectiveBalanceNQT);*/
+                let forgedBalanceNQT = _this.$global.getAmountFormat(_this.forgedBalanceNQT);
+                /*let effectiveBalanceNQT = _this.$global.getAmountFormat(SSO.accountInfo.effectiveBalanceNQT);*/
                 let exchangeSS = _this.exchangeSS;
                 let data = new FormData();
                /* effectiveBalanceNQT = Number(effectiveBalanceNQT.substring(0,effectiveBalanceNQT.length-2));*/

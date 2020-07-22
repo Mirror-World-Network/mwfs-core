@@ -254,6 +254,9 @@ public class Generator implements Comparable<Generator> {
                             List<Generator> forgers = new ArrayList<>();
                             for (Generator generator : generators.values()) {
                                 generator.setLastBlock(lastBlock);
+
+                                if(generator.pocScore == null) continue;
+
                                 if (generator.pocScore.signum() > 0) {
                                     forgers.add(generator);
                                 }
@@ -362,6 +365,8 @@ public class Generator implements Comparable<Generator> {
      * @return true-valid miner
      */
     public static boolean isValidMiner(long minerId, int height){
+        if(LocalDebugTool.isLocalDebugAndBootNodeMode) return true;
+
         Account minerAccount = Account.getAccount(minerId, height);
         if(minerAccount == null) {
             if(Logger.printNow(Logger.Generator_startMining)) {
@@ -906,8 +911,8 @@ public class Generator implements Comparable<Generator> {
                     }
                     generatorDetailStr += generator.toJson(false) + "\n";;
                 }
-                Logger.logDebugMessage("\n\rTotal Generator detail is \n\r" + generatorDetailStr);
-                Logger.logDebugMessage("\n\rTotal Bad Hardware Score detail is \n\r" + badHardwareScoreStr);
+                //Logger.logDebugMessage("\n\rTotal Generator detail is \n\r" + generatorDetailStr);
+                //Logger.logDebugMessage("\n\rTotal Bad Hardware Score detail is \n\r" + badHardwareScoreStr);
             }
         }
         return generatorList;
@@ -958,10 +963,14 @@ public class Generator implements Comparable<Generator> {
         }
 
         public int compareTo(ActiveGenerator obj) {
-            return (hitTime < obj.hitTime ? -1 : (hitTime > obj.hitTime ? 1 : 0));
+            try{
+                return (hitTime < obj.hitTime ? -1 : (hitTime > obj.hitTime ? 1 : 0));
+            }catch(Exception e){
+                Logger.logErrorMessage("ActiveGenerator compare failed",e);
+            }
+            return 0;
         }
     }
-
 
     // Hub auto mining setting
     private static final String HUB_BIND_ADDRESS = Conch.getStringProperty("sharder.HubBindAddress");

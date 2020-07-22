@@ -291,7 +291,7 @@
                                     </el-form>
                                 </template>
                             </el-table-column>
-                            <el-table-column :label="$t('dialog.account_info_account')" width="220">
+                            <el-table-column :label="$t('dialog.account_info_account')" width="230">
                                 <template slot-scope="scope">
                                     <div v-html="scope.row.accountRS" v-if="scope.row.accountRS === accountRS" style="color:#1bc98e;"></div>
                                     <div v-html="scope.row.accountRS" v-if="scope.row.accountRS !== accountRS" style=""></div>
@@ -392,7 +392,7 @@
                                             </el-row>
                                             <el-row>
                                                 <el-form-item :label="$t('network.mining_time')">
-                                                    <span>{{ dateFormat(props.row.hitTime) }}</span>
+                                                    <span>{{ dateFormat(props.row) }}</span>
                                                 </el-form-item>
                                             </el-row>
 <!--                                            <el-row>-->
@@ -507,20 +507,20 @@
                 //list列表
                 blocklist: [],
                 //网络总览
-                newestHeight: 0,
-                newestTime: 0,
-                averageAmount: 0,
-                peerNum: 0,
-                declaredPeerSize: 0,
+                newestHeight: '--',
+                newestTime: '--',
+                averageAmount: '--',
+                peerNum: '--',
+                declaredPeerSize: '--',
                 fetchCoordinates: false,
-                //旷工信息
-                activeCount: 0,
-                totalCount: 0,
-                storageCount: 0,
-                transferCount: 0,
-                systemReward: 0,
-                poolCount: 0,
-                aliasCount: 0,
+                //矿工信息
+                activeCount: '--',
+                totalCount: '--',
+                storageCount: '--',
+                transferCount: '--',
+                systemReward: '--',
+                poolCount: '--',
+                aliasCount: '--',
                 //分页信息
                 isMobile: false,
                 currentPage: 1,
@@ -645,7 +645,7 @@
                     _this.newestTime = _this.$global.myFormatTime(res.blocks[0].timestamp, 'YMDHMS', true);
                     if (_this.currentPage === 1) {
                       //   _this.blocklist.splice(0,_this.blocklist.length)
-                        console.log(res.blocks);
+                        //console.log(res.blocks);
                         _this.blocklist = res.blocks
                     }
                 }).catch(error => {

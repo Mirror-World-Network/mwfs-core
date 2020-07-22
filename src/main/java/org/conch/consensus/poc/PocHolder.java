@@ -153,7 +153,7 @@ public class PocHolder implements Serializable {
             return;
         }
 
-        Logger.logDebugMessage("#addOrUpdateBoundPeer# add a new certified peer: %s", newPeer.toString());
+//        Logger.logDebugMessage("#addOrUpdateBoundPeer# add a new certified peer: %s", newPeer.toString());
         if (!inst.certifiedPeers.containsKey(accountId)) {
             inst.certifiedPeers.put(accountId, newPeer);
             return;
@@ -210,7 +210,7 @@ public class PocHolder implements Serializable {
             return;
         }
         
-        Logger.logDebugMessage("#addOrUpdateBoundPeer# update a certified peer: %s", existPeer.toString());
+//        Logger.logDebugMessage("#addOrUpdateBoundPeer# update a certified peer: %s", existPeer.toString());
     }
     
     /**

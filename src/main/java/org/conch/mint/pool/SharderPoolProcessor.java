@@ -11,6 +11,7 @@ import org.conch.chain.Block;
 import org.conch.chain.BlockchainProcessor;
 import org.conch.common.Constants;
 import org.conch.consensus.poc.db.PoolDb;
+import org.conch.consensus.reward.RewardCalculator;
 import org.conch.db.Db;
 import org.conch.db.DbIterator;
 import org.conch.db.DbUtils;
@@ -104,7 +105,6 @@ public class SharderPoolProcessor implements Serializable {
     /**
      *  pool is no dead line now - 2020.04.26
      * check the end block to verify the pool life cycle can't exceed the end date
-     * @param endBlockNo
      * @return
 
     @Deprecated
@@ -521,14 +521,10 @@ public class SharderPoolProcessor implements Serializable {
         if (height > Constants.SHARDER_REWARD_DELAY) {
             Block pastBlock = Conch.getBlockchain().getBlockAtHeight(height - Constants.SHARDER_REWARD_DELAY);
 
-            for (Transaction transaction : pastBlock.getTransactions()) {
-                Attachment attachment = transaction.getAttachment();
-                if(!(attachment instanceof Attachment.CoinBase)) continue;
+            for (Transaction tx : pastBlock.getTransactions()) {
+                if(!RewardCalculator.isBlockRewardTx(tx.getAttachment())) continue;
                 
-                Attachment.CoinBase coinbaseBody = (Attachment.CoinBase) attachment;
-                if(!coinbaseBody.isType(Attachment.CoinBase.CoinBaseType.BLOCK_REWARD)) continue;
-                
-                long mintReward = TransactionType.CoinBase.mintReward(transaction,true);
+                long mintReward = RewardCalculator.blockRewardDistribution(tx, true);
                 updateHistoricalRewards(id,mintReward);
             }
         }

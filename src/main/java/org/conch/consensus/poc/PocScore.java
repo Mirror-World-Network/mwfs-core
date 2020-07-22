@@ -44,6 +44,10 @@ public class PocScore implements Serializable {
     private static BigInteger parseAndGetScoreMagnification(){
         BigInteger mag = BigInteger.TEN;
         try{
+            if(LocalDebugTool.isLocalDebugAndBootNodeMode){
+                return new BigInteger("100000");
+            }
+
             if(Conch.getHeight() <= (Constants.POC_TX_ALLOW_RECIPIENT + 70)) {
                 mag = new BigInteger("1000");
             }
@@ -206,7 +210,7 @@ public class PocScore implements Serializable {
         BigInteger effectiveSS = BigInteger.ZERO;
         if (account == null) return effectiveSS;
 
-        if(height >= Constants.POC_MW_POC_SCORE_CHANGE_HEIGHT
+        if(height >= Constants.POC_SCORE_CHANGE_HEIGHT
             || PocProcessorImpl.FORCE_RE_CALCULATE) {
             // the effective ss of genesis peer's miner force to limit to 100,000
             if(SharderGenesis.isGenesisPeerAccount(account.getId())){
