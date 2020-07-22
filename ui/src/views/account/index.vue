@@ -842,7 +842,7 @@
                     </tr>
                     <tr>
                         <th>{{$t('account_info.frozen_balance_nqt')}}</th>
-                        <td>{{$global.getAmountFormatBySpecifiedPrecision(accountInfo.frozenBalanceNQT,8)}}</td>
+                        <td>{{$global.getAmountFormat(accountInfo.frozenBalanceNQT)}}</td>
                     </tr>
                     <tr>
                         <th>
