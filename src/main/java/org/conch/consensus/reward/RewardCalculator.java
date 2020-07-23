@@ -361,6 +361,13 @@ public class RewardCalculator {
                 || coinbaseBody.isType(Attachment.CoinBase.CoinBaseType.CROWD_BLOCK_REWARD);
     }
 
+    public static boolean isBlockCrowdRewardTx(Attachment attachment) {
+        if(!(attachment instanceof Attachment.CoinBase)) return false;
+
+        Attachment.CoinBase coinbaseBody = (Attachment.CoinBase) attachment;
+        return coinbaseBody.isType(Attachment.CoinBase.CoinBaseType.CROWD_BLOCK_REWARD);
+    }
+
     /**
      * No needs to validate in the tx creation. rewards calculate and distribute at the block accepted in the Pool processor:
      * org.conch.consensus.reward.RewardCalculator#blockRewardDistribution(org.conch.tx.Transaction, boolean)

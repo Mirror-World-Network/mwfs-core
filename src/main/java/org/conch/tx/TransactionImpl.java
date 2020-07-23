@@ -889,7 +889,7 @@ final public class TransactionImpl implements Transaction {
 
     public static TransactionImpl parseTransaction(JSONObject transactionData) throws ConchException.NotValidException {
         TransactionImpl transaction = newTransactionBuilder(transactionData).build();
-        if(RewardCalculator.isBlockRewardTx(transaction.getAttachment())){
+        if(RewardCalculator.isBlockCrowdRewardTx(transaction.getAttachment())){
           //FIXME ignore the signature validation (temporary code to handle block stuck) -2020.07.24
         } else if (transaction.getSignature() != null && !transaction.checkSignature()) {
             throw new ConchException.NotValidException("Invalid transaction signature for transaction " + transaction.getJSONObject().toJSONString());
