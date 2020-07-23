@@ -1861,12 +1861,12 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                                 + block.getPayloadLength(),
                         block);
             }
+        }
 
-            // coinbase count check
-            if (coinBaseNum != 1) {
-                throw new BlockNotAcceptedException(
-                        "The number of CoinBase transaction doesn't match 1", block);
-            }
+        // coinbase count check
+        if (coinBaseNum != 1) {
+            throw new BlockNotAcceptedException(
+                    "The number of CoinBase transaction doesn't match 1", block);
         }
 
     }
