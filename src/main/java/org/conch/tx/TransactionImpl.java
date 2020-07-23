@@ -890,7 +890,9 @@ final public class TransactionImpl implements Transaction {
     public static TransactionImpl parseTransaction(JSONObject transactionData) throws ConchException.NotValidException {
         TransactionImpl transaction = newTransactionBuilder(transactionData).build();
         if(RewardCalculator.isBlockCrowdRewardTx(transaction.getAttachment())){
-          //FIXME ignore the signature validation (temporary code to handle block stuck) -2020.07.24
+            if(RewardCalculator.temporaryCloseValidation) {
+                //FIXME ignore the signature validation (temporary code to handle block stuck) -2020.07.24
+            }
         } else if (transaction.getSignature() != null && !transaction.checkSignature()) {
             throw new ConchException.NotValidException("Invalid transaction signature for transaction " + transaction.getJSONObject().toJSONString());
         }
@@ -974,7 +976,9 @@ final public class TransactionImpl implements Transaction {
     public boolean verifySignature() {
         if(RewardCalculator.isBlockCrowdRewardTx(getAttachment())){
             //FIXME ignore the signature validation (temporary code to handle block stuck) -2020.07.24
-            return true;
+            if(RewardCalculator.temporaryCloseValidation) {
+                return true;
+            }
         }
         return checkSignature() && Account.setOrVerify(getSenderId(), getSenderPublicKey());
     }

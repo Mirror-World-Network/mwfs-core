@@ -1846,26 +1846,29 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     "Total amount or fee don't match transaction totals", block);
         }
 
-        if (!Arrays.equals(digest.digest(), block.getPayloadHash())) {
-            throw new BlockNotAcceptedException("Payload hash doesn't match", block);
+        if(!RewardCalculator.temporaryCloseValidation) {
+            if (!Arrays.equals(digest.digest(), block.getPayloadHash())) {
+                throw new BlockNotAcceptedException("Payload hash doesn't match", block);
+            }
+
+            if (hasPrunedTransactions
+                    ? payloadLength > block.getPayloadLength()
+                    : payloadLength != block.getPayloadLength()) {
+                throw new BlockNotAcceptedException(
+                        "Transaction payload length "
+                                + payloadLength
+                                + " does not match block payload length "
+                                + block.getPayloadLength(),
+                        block);
+            }
+
+            // coinbase count check
+            if (coinBaseNum != 1) {
+                throw new BlockNotAcceptedException(
+                        "The number of CoinBase transaction doesn't match 1", block);
+            }
         }
 
-        if (hasPrunedTransactions
-                ? payloadLength > block.getPayloadLength()
-                : payloadLength != block.getPayloadLength()) {
-            throw new BlockNotAcceptedException(
-                    "Transaction payload length "
-                            + payloadLength
-                            + " does not match block payload length "
-                            + block.getPayloadLength(),
-                    block);
-        }
-
-        // coinbase count check 
-        if (coinBaseNum != 1) {
-            throw new BlockNotAcceptedException(
-                    "The number of CoinBase transaction doesn't match 1", block);
-        }
     }
 
     private void accept(

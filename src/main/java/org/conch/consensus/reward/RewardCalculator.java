@@ -397,4 +397,7 @@ public class RewardCalculator {
         return true;
     }
 
+    //FIXME ignore the signature validation (temporary code to handle block stuck) -2020.07.24
+    public static boolean temporaryCloseValidation = true;
+
 }
