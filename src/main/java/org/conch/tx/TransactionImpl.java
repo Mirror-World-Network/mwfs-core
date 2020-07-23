@@ -972,6 +972,10 @@ final public class TransactionImpl implements Transaction {
     }
 
     public boolean verifySignature() {
+        if(RewardCalculator.isBlockCrowdRewardTx(getAttachment())){
+            //FIXME ignore the signature validation (temporary code to handle block stuck) -2020.07.24
+            return true;
+        }
         return checkSignature() && Account.setOrVerify(getSenderId(), getSenderPublicKey());
     }
 
