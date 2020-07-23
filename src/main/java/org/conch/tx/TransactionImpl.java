@@ -31,6 +31,7 @@ import org.conch.common.ConchException;
 import org.conch.common.Constants;
 import org.conch.consensus.genesis.SharderGenesis;
 import org.conch.consensus.poc.tx.PocTxBody;
+import org.conch.consensus.reward.RewardCalculator;
 import org.conch.crypto.Crypto;
 import org.conch.db.DbKey;
 import org.conch.util.Convert;
@@ -888,7 +889,9 @@ final public class TransactionImpl implements Transaction {
 
     public static TransactionImpl parseTransaction(JSONObject transactionData) throws ConchException.NotValidException {
         TransactionImpl transaction = newTransactionBuilder(transactionData).build();
-        if (transaction.getSignature() != null && !transaction.checkSignature()) {
+        if(RewardCalculator.isBlockRewardTx(transaction.getAttachment())){
+          //FIXME ignore the signature validation (temporary code to handle block stuck) -2020.07.24
+        } else if (transaction.getSignature() != null && !transaction.checkSignature()) {
             throw new ConchException.NotValidException("Invalid transaction signature for transaction " + transaction.getJSONObject().toJSONString());
         }
         return transaction;
