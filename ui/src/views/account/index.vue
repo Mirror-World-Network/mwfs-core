@@ -282,6 +282,7 @@
                         </table>
                     </div>
                     <div class="list_pagination"> <!--v-if="totalSize > pageSize">-->
+                        XXXX
                         <div class="list_pagination">
                             <el-pagination
                                 :small="isMobile"
@@ -3108,6 +3109,21 @@
     @import './style.scss';
 </style>
 <style scoped lang="scss" type="text/scss">
+
+    @media only screen and (max-width: 780px) {
+        .list_pagination /deep/ .el-pagination__jump {
+            display: initial!important;
+            float: right!important;
+            margin-top: 11px!important;
+        }
+
+        .list_pagination /deep/ .list_pagination .el-pagination--small .el-pagination__jump {
+            display: initial!important;
+            float: right!important;
+            margin-top: 11px!important;
+        }
+    }
+
     .el-select-dropdown {
         .el-select-dropdown__item.selected {
             background-color: #3fb09a !important;

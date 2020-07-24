@@ -1195,15 +1195,8 @@
         margin-top: 5px !important;
         border-radius: 0 !important;;
         border: 0;
-        box-shadow: 0 0 0 0 #409EFF;
+        box-shadow: 0 0 0 0 #3fb09a;
     }
-
-    /*.testnet-tips {*/
-    /*    padding: 10px 0 20px 0;*/
-    /*    font-size: 13px;*/
-    /*    font-weight: normal;*/
-    /*    text-align: center;*/
-    /*}*/
 
     #block_info {
         .modal-body {
