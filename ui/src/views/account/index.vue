@@ -282,7 +282,6 @@
                         </table>
                     </div>
                     <div class="list_pagination"> <!--v-if="totalSize > pageSize">-->
-                        XXXX
                         <div class="list_pagination">
                             <el-pagination
                                 :small="isMobile"
