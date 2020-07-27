@@ -847,7 +847,7 @@
                     <tr>
                         <th>
                             {{$t('account_info.account_mining_balance')}}
-                            <el-tooltip class="item" effect="dark" :content="$t('account_info.account_mining_balance_explain')" placement="top-start">
+                            <el-tooltip class="item" effect="dark" :content="$t('account_info.account_reward_balance_explain')" placement="top-start">
                                 <p class="el-icon-info"></p>
                             </el-tooltip>
                         </th>
