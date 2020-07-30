@@ -891,7 +891,7 @@ const en = {
         'account_info_staking_amount': "Staking Amount",
         'account_info_view_detail': "View Details",
         'account_transaction_detail': "Transaction Details",
-        'acount_transaction_return': "Return to Account Info",
+        'account_transaction_return': "Return to Account Info",
         'account_transaction_signature': "Signature",
         'account_transaction_transaction_serial_number': "Transaction Index",
         'account_transaction_time': "Time",
