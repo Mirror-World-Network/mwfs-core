@@ -41,7 +41,7 @@ public class PocHolder implements Serializable {
     
     /** poc score **/
     // accountId : pocScore
-    protected transient Map<Long, PocScore> scoreMap = PocDb.listAll();
+    protected transient Map<Long, PocScore> scoreMap = PocDb.listAllScore();
     // height : { accountId : pocScore }
     protected transient Map<Integer, Map<Long, PocScore>> historyScore = Maps.newConcurrentMap();
     /** poc score **/
@@ -49,11 +49,10 @@ public class PocHolder implements Serializable {
     /** certified peers **/
     // certified peer: foundation node, hub/box, community node
     // account id : certified peer
-    protected Map<Long, CertifiedPeer> certifiedPeers = Maps.newConcurrentMap();
+    protected Map<Long, CertifiedPeer> certifiedPeers = PocDb.listAllPeers();
     // height : { accountId : certifiedPeer }
     protected Map<Integer, Map<Long,CertifiedPeer>> historyCertifiedPeers = Maps.newConcurrentMap();
     /** certified peers **/
-    
     
     private volatile Map<Integer, List<Long>> delayPocTxsByHeight = Maps.newConcurrentMap();
     private static volatile int pocTxHeight = -1;
@@ -144,7 +143,7 @@ public class PocHolder implements Serializable {
      * @param host peer host
      * @param accountId bound account id
      */
-    private synchronized static void addOrUpdateBoundPeer(int height, Peer.Type type, String host, long accountId) {
+    public synchronized static void addOrUpdateCertifiedPeer(int height, Peer.Type type, String host, long accountId) {
         CertifiedPeer newPeer = new CertifiedPeer(height, type, host, accountId);
         try{
             newPeer.check();
@@ -153,6 +152,8 @@ public class PocHolder implements Serializable {
             return;
         }
 
+        PocDb.saveOrUpdatePeer(newPeer);
+
 //        Logger.logDebugMessage("#addOrUpdateBoundPeer# add a new certified peer: %s", newPeer.toString());
         if (!inst.certifiedPeers.containsKey(accountId)) {
             inst.certifiedPeers.put(accountId, newPeer);
@@ -160,7 +161,6 @@ public class PocHolder implements Serializable {
         }
 
         CertifiedPeer existPeer = inst.certifiedPeers.get(accountId);
-        
         
         if(Peer.Type.FOUNDATION == type) {
             if(IpUtil.isFoundationDomain(newPeer.getHost())) {
@@ -202,29 +202,9 @@ public class PocHolder implements Serializable {
         
         // add the new certified peer into certifiedPeers map
         inst.certifiedPeers.put(accountId, newPeer);
-                
         existPeer.update(newPeer.getBoundAccountId());
-        
-        if(type == null) {
-            Logger.logDebugMessage("#addOrUpdateBoundPeer# update a certified peer: %s", existPeer.toString());
-            return;
-        }
-        
-//        Logger.logDebugMessage("#addOrUpdateBoundPeer# update a certified peer: %s", existPeer.toString());
     }
     
-    /**
-     *  add certifiedPeer 
-     *  
-     * @param height
-     * @param type
-     * @param host
-     * @param accountId
-     */
-    public static void addCertifiedPeer(int height, Peer.Type type, String host, long accountId) {
-        addOrUpdateBoundPeer(height, type, host, accountId);
-    }
-
     public static int countDelayPocTxs(int queryHeight) {
         int count = 0;
         //order by height number 
@@ -278,7 +258,7 @@ public class PocHolder implements Serializable {
 
 
     static PocScore saveOrUpdate(PocScore pocScore) {
-        PocDb.saveOrUpdate(pocScore);
+        PocDb.saveOrUpdateScore(pocScore);
         
         PocScore pocScoreDetail = inst.scoreMap.get(pocScore.accountId);
 
@@ -338,7 +318,7 @@ public class PocHolder implements Serializable {
             }
         }
         
-        PocDb.saveOrUpdate(_pocScore);
+        PocDb.saveOrUpdateScore(_pocScore);
       
         inst.scoreMap.put(pocScore.accountId,_pocScore);
 //        inst.lastHeight = pocScore.height > inst.lastHeight ? pocScore.height : inst.lastHeight;
@@ -388,7 +368,7 @@ public class PocHolder implements Serializable {
      */               
     static void recordHistoryScore(PocScore pocScore){
         PocScore historyPocScore = new PocScore(pocScore.height, pocScore);
-        PocDb.saveOrUpdate(historyPocScore);
+        PocDb.saveOrUpdateScore(historyPocScore);
         
         if(!inst.historyScore.containsKey(pocScore.height)) {
             inst.historyScore.put(pocScore.height, Maps.newHashMap());

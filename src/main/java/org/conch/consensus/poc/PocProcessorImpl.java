@@ -230,7 +230,7 @@ public class PocProcessorImpl implements PocProcessor {
                       CertifiedPeer certifiedPeer = PocHolder.getBoundPeer(accountId, height);
                       if(certifiedPeer != null) {
                           certifiedPeer.setType(Peer.Type.NORMAL);
-                          PocHolder.addCertifiedPeer(height, Peer.Type.NORMAL, certifiedPeer.getHost(), accountId);
+                          PocHolder.addOrUpdateCertifiedPeer(height, Peer.Type.NORMAL, certifiedPeer.getHost(), accountId);
                       }
                   }
 
@@ -464,13 +464,13 @@ public class PocProcessorImpl implements PocProcessor {
                     }
                 }
                 //rollback the db
-                PocDb.rollback(height);
+                PocDb.rollbackScore(height);
             }
 
             // reset the score map
             synchronized (PocHolder.inst.scoreMap) {
                 PocHolder.inst.scoreMap.clear();
-                PocHolder.inst.scoreMap = PocDb.listAll();
+                PocHolder.inst.scoreMap = PocDb.listAllScore();
             }
 
             // rollback the history certified peers
@@ -481,11 +481,14 @@ public class PocProcessorImpl implements PocProcessor {
                         PocHolder.inst.historyCertifiedPeers.remove(i);
                     }
                 }
+                PocDb.rollbackPeer(height);
             }
 
             // reset the certified peers
-            // TODO
-
+            synchronized (PocHolder.inst.certifiedPeers) {
+                PocHolder.inst.certifiedPeers.clear();
+                PocHolder.inst.certifiedPeers = PocDb.listAllPeers();
+            }
 
             // set the latest certified peer
             PocHolder.inst.updateHeight(height);
@@ -575,7 +578,7 @@ public class PocProcessorImpl implements PocProcessor {
             if (!Db.db.isInTransaction()) {
                 Db.db.beginTransaction();
             }
-            int count = PocDb.rollback(0);
+            int count = PocDb.rollbackScore(0);
 
             Db.db.clearCache();
             Db.db.commitTransaction();
@@ -876,7 +879,7 @@ public class PocProcessorImpl implements PocProcessor {
         if(StringUtils.isEmpty(ip) || type == null) {
             Logger.logWarningMessage("NodeType tx[id=%d,height=%d,summary=%s] is a bad tx, don't add the certified peer", tx.getId(), tx.getHeight(), summary);
         }else{
-            PocHolder.addCertifiedPeer(height, type, ip, accountId);
+            PocHolder.addOrUpdateCertifiedPeer(height, type, ip, accountId);
         }
         return true;
     }
