@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.conch.account.Account;
 import org.conch.common.ConchException;
+import org.conch.util.Convert;
 import org.conch.util.IpUtil;
 
 import java.io.Serializable;
@@ -138,6 +139,10 @@ public class CertifiedPeer implements Serializable {
         return type;
     }
 
+    public int getTypeCode() {
+        return this.type.getCode();
+    }
+
     public void setType(Peer.Type type) {
         this.type = type;
     }
@@ -172,6 +177,10 @@ public class CertifiedPeer implements Serializable {
 
     public Timestamp getUpdateTime() {
         return updateTime;
+    }
+
+    public int getUpdateTimeInEpochFormat() {
+        return Convert.toEpochTime(this.updateTime.getTime());
     }
 
     public int getEndHeight() {
