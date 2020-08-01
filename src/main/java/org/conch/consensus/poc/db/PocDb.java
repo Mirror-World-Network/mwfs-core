@@ -1,6 +1,5 @@
 package org.conch.consensus.poc.db;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.conch.Conch;
@@ -52,8 +51,7 @@ public class PocDb  {
                     ResultSet rs = pstmt.executeQuery();
                     while(rs.next()){
                         try{
-                            String detail = rs.getString("detail");
-                            PocScore pocScore = JSON.parseObject(detail, PocScore.class);
+                            PocScore pocScore = new PocScore(rs.getString("detail"));
 
                             // compare the height
                             if(scoreMap.containsKey(pocScore.getAccountId())){
@@ -144,12 +142,12 @@ public class PocDb  {
             pstmtInsert.setLong(1, pocScore.getAccountId());
             pstmtInsert.setLong(2, pocScore.total().longValue());
             pstmtInsert.setInt(3, pocScore.getHeight());
-            pstmtInsert.setString(4, pocScore.toJsonString());
+            pstmtInsert.setString(4, pocScore.toSimpleJson());
             return pstmtInsert.executeUpdate();
         }
 
         public int update(Connection con, PocScore pocScore) throws SQLException {
-            String detail = pocScore.toJsonString();
+            String detail = pocScore.toSimpleJson();
             if(con == null || StringUtils.isEmpty(detail) || pocScore.getAccountId() == -1 || pocScore.getHeight() < 0 ){
                 return 0;
             }
@@ -251,7 +249,7 @@ public class PocDb  {
         String detail = pocScoreTable.get(accountId, height, loadHistory);
         if(StringUtils.isEmpty(detail)) return null;
         
-        return JSON.parseObject(detail, PocScore.class);
+        return new PocScore(detail);
     }
 
     public static Map<Long,PocScore>  listAll() {
