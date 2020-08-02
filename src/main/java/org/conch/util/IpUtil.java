@@ -454,7 +454,7 @@ public class IpUtil {
         }
     }*/
 
-
+    private static boolean geoQueryExceptionSwitch = false;
     private static void requestIpLocationTools(JSONObject json, String ip) {
         try {
             Document document = Jsoup.connect("https://www.iplocationtools.com/" + ip).get();
@@ -462,7 +462,8 @@ public class IpUtil {
             json.put("X", ne.substring(ne.indexOf("(") + 1, ne.indexOf(",")));
             json.put("Y", ne.substring(ne.indexOf(",") + 2, ne.indexOf(")")));
         } catch (IOException e) {
-            if (Logger.printNow(Logger.IpUtil_geoTransformFailed)) {
+            if (geoQueryExceptionSwitch
+            && Logger.printNow(Logger.IpUtil_geoTransformFailed)) {
                 Logger.logDebugMessage("requestGeoIpTool failed: " + e.getMessage());
             }
         }
@@ -483,7 +484,8 @@ public class IpUtil {
             }
 
         } catch (IOException e) {
-            if (Logger.printNow(Logger.IpUtil_geoTransformFailed)) {
+            if (geoQueryExceptionSwitch
+                && Logger.printNow(Logger.IpUtil_geoTransformFailed)) {
                 Logger.logDebugMessage("requestGeoIpTool failed: " + e.getMessage());
             }
         }
@@ -502,7 +504,8 @@ public class IpUtil {
             }
 
         } catch (IOException e) {
-            if (Logger.printNow(Logger.IpUtil_geoTransformFailed)) {
+            if (geoQueryExceptionSwitch
+                && Logger.printNow(Logger.IpUtil_geoTransformFailed)) {
                  Logger.logDebugMessage("requestGeoIpTool failed: " + e.getMessage());
             }
         }
