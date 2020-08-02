@@ -95,15 +95,35 @@ public class PocScore implements Serializable {
         int height = simpleObj.containsKey("height") ? simpleObj.getIntValue("height") : 0;
         this.height = height;
 
+        // compatibility codes
+        if(simpleObj.containsKey("bcScore")) this.bcScore = simpleObj.getBigInteger("bcScore");
         if(simpleObj.containsKey("bs")) this.bcScore = simpleObj.getBigInteger("bs");
+
+        if(simpleObj.containsKey("blockMissScore")) this.blockMissScore = simpleObj.getBigInteger("blockMissScore");
         if(simpleObj.containsKey("bms")) this.blockMissScore = simpleObj.getBigInteger("bms");
+
+        if(simpleObj.containsKey("effectiveBalance")) this.effectiveBalance = simpleObj.getBigInteger("effectiveBalance");
         if(simpleObj.containsKey("eb")) this.effectiveBalance = simpleObj.getBigInteger("eb");
+
+        if(simpleObj.containsKey("hardwareScore")) this.hardwareScore = simpleObj.getBigInteger("hardwareScore");
         if(simpleObj.containsKey("hs")) this.hardwareScore = simpleObj.getBigInteger("hs");
+
+        if(simpleObj.containsKey("networkScore")) this.networkScore = simpleObj.getBigInteger("networkScore");
         if(simpleObj.containsKey("ns")) this.networkScore = simpleObj.getBigInteger("ns");
+
+        if(simpleObj.containsKey("nodeTypeScore")) this.nodeTypeScore = simpleObj.getBigInteger("nodeTypeScore");
         if(simpleObj.containsKey("nts")) this.nodeTypeScore = simpleObj.getBigInteger("nts");
+
+        if(simpleObj.containsKey("onlineRateScore")) this.onlineRateScore = simpleObj.getBigInteger("onlineRateScore");
         if(simpleObj.containsKey("ors")) this.onlineRateScore = simpleObj.getBigInteger("ors");
+
+        if(simpleObj.containsKey("performanceScore")) this.performanceScore = simpleObj.getBigInteger("performanceScore");
         if(simpleObj.containsKey("ps")) this.performanceScore = simpleObj.getBigInteger("ps");
+
+        if(simpleObj.containsKey("serverScore")) this.serverScore = simpleObj.getBigInteger("serverScore");
         if(simpleObj.containsKey("ss")) this.serverScore = simpleObj.getBigInteger("ss");
+
+        if(simpleObj.containsKey("ssScore")) this.ssScore = simpleObj.getBigInteger("ssScore");
         if(simpleObj.containsKey("sss")) this.ssScore = simpleObj.getBigInteger("sss");
     }
 
