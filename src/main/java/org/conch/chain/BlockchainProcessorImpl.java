@@ -2040,8 +2040,6 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     table.rollback(commonBlock.getHeight());
                 }
 //                SharderPoolProcessor.rollback(commonBlock.getHeight());
-//                PocDb.rollback(commonBlock.getHeight());
-
                 Conch.getPocProcessor().rollbackTo(commonBlock.getHeight());
 
                 Db.db.clearCache();
