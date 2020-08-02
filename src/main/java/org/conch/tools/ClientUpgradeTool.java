@@ -117,8 +117,8 @@ public class ClientUpgradeTool {
     public static volatile boolean forceDownloadFromOSS = false;
     private static volatile boolean restoring = false;
     private static final long FETCH_DB_ARCHIVE_INTERVAL_MS = 30*60*1000L;
-    // default value is 5 days
-    private static final long DOWNLOAD_DB_ARCHIVE_INTERVAL_MS = 5*24*60*60*1000L;
+    // default value is 30 days
+    private static final long DOWNLOAD_DB_ARCHIVE_INTERVAL_MS = 30*(24*60*60*1000L);
     private static volatile JSONObject lastDbArchiveObj = null;
     private static long lastDbArchiveFetchTime = -1;
     private static long lastDownloadDbArchiveTime = -1;
@@ -302,10 +302,10 @@ public class ClientUpgradeTool {
             boolean downloadFromOSS = true;
             if(archivedDbFile.exists()){
                 if(forceDownloadFromOSS || downloadNewDbArchiveNow(archivedDbFile)){
+                    String lastDownloadTime = new Date(archivedDbFile.lastModified()).toString();
                     archivedDbFile.delete();
                 }else{
                     long intervalHours = DOWNLOAD_DB_ARCHIVE_INTERVAL_MS / (60*60*1000L);
-//                    String lastDownloadTime = new Date(archivedDbFile.lastModified()).toString();
                     String nextDownloadTime = new Date(lastDownloadDbArchiveTime + DOWNLOAD_DB_ARCHIVE_INTERVAL_MS).toString();
                     String currentTime = new Date(System.currentTimeMillis()).toString();
                     Logger.logInfoMessage("[ UPGRADE DB ] Don't fetch the new db archive from OSS caused by: not reached the db archive download time[%s], " +
