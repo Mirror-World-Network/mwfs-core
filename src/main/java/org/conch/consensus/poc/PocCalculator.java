@@ -3,6 +3,7 @@ package org.conch.consensus.poc;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.conch.account.Account;
 import org.conch.common.Constants;
+import org.conch.consensus.poc.db.PocDb;
 import org.conch.consensus.poc.tx.PocTxBody;
 import org.conch.peer.Peer;
 
@@ -33,9 +34,16 @@ public class PocCalculator implements Serializable {
     private static final long ONE_T_IN_KB_UNIT = 1024*1024*1024L;
 
     // default weight table
-    private volatile PocTxBody.PocWeightTable pocWeightTable = PocTxBody.PocWeightTable.defaultPocWeightTable();
+    private volatile PocTxBody.PocWeightTable pocWeightTable = instWeightTable();
 
     volatile int lastHeight = -1;
+
+
+    private static PocTxBody.PocWeightTable instWeightTable(){
+        PocTxBody.PocWeightTable lastPocWeightTable = PocDb.findLastWeightTable();
+        return lastPocWeightTable != null ? lastPocWeightTable : PocTxBody.PocWeightTable.defaultPocWeightTable();
+    }
+
 
     public static void setCurWeightTable(PocTxBody.PocWeightTable weightTable, int height) {
         inst.pocWeightTable = weightTable;

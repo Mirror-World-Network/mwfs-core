@@ -232,6 +232,8 @@ public final class Constants {
     public static final int POC_CAL_ALGORITHM = isTestnet() ? 6788 : 0;
     // mw-holding score algo. changed; re-calculate the hardware and mw-holding score
     public static final int POC_SCORE_CHANGE_HEIGHT = isTestnet() ? 7328 : 0;
+    public static final int POC_REPROCESS_CROWD_MINER_OPEN_HEIGHT = isDevnet() ? 1 : (isTestnet() ? 15455 : 1);
+    public static final int POC_MULTIPLIER_CHANGE_HEIGHT = isDevnet() ? 0 : (isTestnet() ? 15414 : 1);
 
     //not opened yet
     public static final int PHASING_BLOCK_HEIGHT = Integer.MAX_VALUE;
@@ -266,7 +268,6 @@ public final class Constants {
     //Coinbase
     public static final int MAX_COINBASE_TYPE_LENGTH = 16;
     public static final int COINBASE_CROWD_MINER_OPEN_HEIGHT = isDevnet() ? 1 : (isTestnet() ? 13686 : 1);
-    public static final int POC_REPROCESS_CROWD_MINER_OPEN_HEIGHT = isDevnet() ? 1 : (isTestnet() ? 15455 : 1);
 
     //OSS
     public static final String OSS_PREFIX = "https://mwfs.oss-cn-shenzhen.aliyuncs.com/";
