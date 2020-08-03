@@ -294,7 +294,7 @@ public class RewardCalculator {
         if(!stageTwo) {
             account.addBalanceAddUnconfirmed(AccountLedger.LedgerEvent.BLOCK_GENERATED, tx.getId(), amount);
             account.addFrozen(AccountLedger.LedgerEvent.BLOCK_GENERATED, tx.getId(), amount);
-            Logger.logDebugMessage("[Stage One-%d] add mining/crowdMiners rewards %d to %s unconfirmed balance and freeze it of tx %d",
+            Logger.logDebugMessage("[%d-Stage One] add mining/crowdMiners rewards %d to %s unconfirmed balance and freeze it of tx %d",
                     tx.getHeight(), amount, account.getRsAddress(), tx.getId());
         }else{
             if(Constants.isTestnet() && account.getFrozenBalanceNQT() <= 0) {
@@ -306,7 +306,7 @@ public class RewardCalculator {
             }
             account.addMintedBalance(amount);
             account.pocChanged();
-            Logger.logDebugMessage("[Stage Two-%d] unfreeze mining/crowdMiners rewards %d of %s and add it in mined amount of tx %d",
+            Logger.logDebugMessage("[%d-Stage Two] unfreeze mining/crowdMiners rewards %d of %s and add it in mined amount of tx %d",
                     tx.getHeight(), amount, account.getRsAddress(), tx.getId());
         }
     }
