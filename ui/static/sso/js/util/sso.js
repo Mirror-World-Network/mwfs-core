@@ -1781,7 +1781,7 @@ var Sso = (function (NRS, $, undefined) {
     };
 
     NRS.updateBlockchainDownloadProgress = function () {
-        debug("Check block chain download progess....");
+        debug("Check block chain download progress....");
         var lastNumBlocks = 5000;
 
         // var downloadingBlockchain = $("#downloading_blockchain");

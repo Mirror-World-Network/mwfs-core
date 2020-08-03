@@ -128,7 +128,7 @@ public class AccountLedger {
                 return;
             try (Connection con = db.getConnection();
                  PreparedStatement pstmt = con.prepareStatement("DELETE FROM account_ledger WHERE height <= ?")) {
-                int trimHeight = Math.max(blockchain.getHeight() - trimKeep, 0);
+                int trimHeight = Math.max(height - trimKeep, 0);
                 pstmt.setInt(1, trimHeight);
                 pstmt.executeUpdate();
             } catch (SQLException e) {

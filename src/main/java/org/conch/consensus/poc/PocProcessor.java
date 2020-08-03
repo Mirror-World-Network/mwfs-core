@@ -112,7 +112,6 @@ public interface PocProcessor {
      */
     Map<Long, CertifiedPeer> getCertifiedPeers();
 
-    Map<Integer, Map<Long,CertifiedPeer>>  getHistoryCertifiedPeers();
 
     boolean rollbackTo(int height);
 }

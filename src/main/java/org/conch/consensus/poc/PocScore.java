@@ -32,9 +32,11 @@ public class PocScore implements Serializable {
     BigInteger onlineRateScore = BigInteger.ZERO;
     BigInteger blockMissScore = BigInteger.ZERO;
     BigInteger bcScore = BigInteger.ZERO;
-
     BigInteger effectiveBalance;
-    
+
+    BigInteger total = null;
+
+    // don't use the static parameter (calculate should base on the height)
     private static BigInteger SCORE_MULTIPLIER = parseAndGetScoreMagnification();
 
     /**
@@ -88,11 +90,103 @@ public class PocScore implements Serializable {
         this.height = height;
     }
 
+    public PocScore(Long accountId, int height,  String pocDetailJson){
+        JSONObject simpleObj = JSONObject.parseObject(pocDetailJson);
+
+        this.accountId = accountId;
+        if(simpleObj.containsKey("accountId")) this.accountId = simpleObj.getLong("accountId");
+        if(simpleObj.containsKey("aid")) this.accountId = simpleObj.getLong("aid");
+
+//        int height = simpleObj.containsKey("height") ? simpleObj.getIntValue("height") : 0;
+//        if(simpleObj.containsKey("h")) height = simpleObj.getIntValue("h");
+        this.height = height;
+
+        // compatibility codes
+        if(simpleObj.containsKey("bcScore")) this.bcScore = simpleObj.getBigInteger("bcScore");
+        if(simpleObj.containsKey("bs")) this.bcScore = simpleObj.getBigInteger("bs");
+
+        if(simpleObj.containsKey("blockMissScore")) this.blockMissScore = simpleObj.getBigInteger("blockMissScore");
+        if(simpleObj.containsKey("bms")) this.blockMissScore = simpleObj.getBigInteger("bms");
+
+        if(simpleObj.containsKey("effectiveBalance")) this.effectiveBalance = simpleObj.getBigInteger("effectiveBalance");
+        if(simpleObj.containsKey("eb")) this.effectiveBalance = simpleObj.getBigInteger("eb");
+
+        if(simpleObj.containsKey("hardwareScore")) this.hardwareScore = simpleObj.getBigInteger("hardwareScore");
+        if(simpleObj.containsKey("hs")) this.hardwareScore = simpleObj.getBigInteger("hs");
+
+        if(simpleObj.containsKey("networkScore")) this.networkScore = simpleObj.getBigInteger("networkScore");
+        if(simpleObj.containsKey("ns")) this.networkScore = simpleObj.getBigInteger("ns");
+
+        if(simpleObj.containsKey("nodeTypeScore")) this.nodeTypeScore = simpleObj.getBigInteger("nodeTypeScore");
+        if(simpleObj.containsKey("nts")) this.nodeTypeScore = simpleObj.getBigInteger("nts");
+
+        if(simpleObj.containsKey("onlineRateScore")) this.onlineRateScore = simpleObj.getBigInteger("onlineRateScore");
+        if(simpleObj.containsKey("ors")) this.onlineRateScore = simpleObj.getBigInteger("ors");
+
+        if(simpleObj.containsKey("performanceScore")) this.performanceScore = simpleObj.getBigInteger("performanceScore");
+        if(simpleObj.containsKey("ps")) this.performanceScore = simpleObj.getBigInteger("ps");
+
+        if(simpleObj.containsKey("serverScore")) this.serverScore = simpleObj.getBigInteger("serverScore");
+        if(simpleObj.containsKey("ss")) this.serverScore = simpleObj.getBigInteger("ss");
+
+        if(simpleObj.containsKey("ssScore")) this.ssScore = simpleObj.getBigInteger("ssScore");
+        if(simpleObj.containsKey("sss")) this.ssScore = simpleObj.getBigInteger("sss");
+    }
+
+    public String toSimpleJson(){
+        JSONObject simpleObj = new JSONObject();
+//        simpleObj.put("aid",this.accountId);
+//        if(this.height > 0)  simpleObj.put("h",this.height);
+
+        if(this.bcScore.intValue() > 0)  simpleObj.put("bs",this.bcScore);
+        if(this.blockMissScore.intValue() > 0)  simpleObj.put("bms",this.blockMissScore);
+        if(this.effectiveBalance != null && this.effectiveBalance.intValue() > 0)  simpleObj.put("eb",this.effectiveBalance);
+        if(this.hardwareScore.intValue() > 0)  simpleObj.put("hs",this.hardwareScore);
+        if(this.networkScore.intValue() > 0)  simpleObj.put("ns",this.networkScore);
+        if(this.nodeTypeScore.intValue() > 0)  simpleObj.put("nts",this.nodeTypeScore);
+        if(this.onlineRateScore.intValue() > 0)  simpleObj.put("ors",this.onlineRateScore);
+        if(this.performanceScore.intValue() > 0)  simpleObj.put("ps",this.performanceScore);
+        if(this.serverScore.intValue() > 0)  simpleObj.put("ss",this.serverScore);
+        if(this.ssScore.intValue() > 0)  simpleObj.put("sss",this.ssScore);
+        return simpleObj.toJSONString();
+    }
+
+    public PocScore clearTotal(){
+        this.total = null;
+        return this;
+    }
+
+    public PocScore setTotal(Long totalScore){
+        this.total = BigInteger.valueOf(totalScore != null ? totalScore : 0);
+        return this;
+    }
+
+    /**
+     * temporary to compatible the
+     * @return
+     */
+    public BigInteger reCalTotalForCompatibility(){
+        if(Conch.getHeight() <= Constants.POC_MULTIPLIER_CHANGE_HEIGHT) {
+            total = ssScore.add(nodeTypeScore).add(serverScore).add(hardwareScore).add(networkScore).add(performanceScore).add(onlineRateScore)
+                    .add(blockMissScore).add(bcScore).multiply(BigInteger.valueOf(1000));
+        }
+        return total;
+    }
+
     public BigInteger total() {
 //        // 90% of block rewards for hub miner, 10% for other miners in Testnet phase1 (before end of 2019.Q2)
 //        BigInteger rate = Conch.getPocProcessor().isCertifiedPeerBind(accountId, height) ? BigInteger.valueOf(90) : BigInteger.valueOf(10);
 //        return score.multiply(SCORE_MULTIPLIER).multiply(rate).divide(BigInteger.valueOf(100));
-        BigInteger score = ssScore.add(nodeTypeScore).add(serverScore).add(hardwareScore).add(networkScore).add(performanceScore).add(onlineRateScore).add(blockMissScore).add(bcScore);
+
+        if(total != null) return total;
+
+        BigInteger score = ssScore.add(nodeTypeScore).add(serverScore).add(hardwareScore).add(networkScore).add(performanceScore).add(onlineRateScore)
+                .add(blockMissScore).add(bcScore);
+
+        if(Conch.getHeight() > Constants.POC_MULTIPLIER_CHANGE_HEIGHT) {
+            return score.multiply(parseAndGetScoreMagnification());
+        }
+
         return score.multiply(SCORE_MULTIPLIER);
     }
 
@@ -280,7 +374,7 @@ public class PocScore implements Serializable {
     public String toJsonString() {
         return JSON.toJSONString(this);
     }
-    
+
     public Long getAccountId() {
         return accountId;
     }

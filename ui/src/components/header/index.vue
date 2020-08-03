@@ -598,6 +598,13 @@
     @import './style.scss';
 </style>
 <style scoped lang="scss" type="text/scss">
+     @media only screen and (max-width: 780px) {
+        .navbar_left /deep/ .el-menu--horizontal .el-menu-item:not(.is-disabled):focus, .el-menu--horizontal .el-menu-item:not(.is-disabled):hover {
+            border-bottom: 2px solid #3fb09a!important;
+            color: #3fb09a!important;
+        }
+    }
+
     .el-select-dropdown {
         .el-select-dropdown__item.selected {
             background-color: #3fb09a !important;

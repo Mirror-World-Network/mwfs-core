@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.conch.account.Account;
 import org.conch.common.ConchException;
+import org.conch.util.Convert;
 import org.conch.util.IpUtil;
 
 import java.io.Serializable;
@@ -39,7 +40,8 @@ public class CertifiedPeer implements Serializable {
     String boundRS;
     Timestamp updateTime;
 
-    public CertifiedPeer(Peer.Type type, String host, long accountId) {
+
+    public CertifiedPeer(Peer.Type type, String host, long accountId, long lastUpdateMS) {
         this.type = type != null ? type : Peer.Type.NORMAL;
         this.useNat = Peers.isUseNATService(host);
         this.host = host;
@@ -50,7 +52,11 @@ public class CertifiedPeer implements Serializable {
         } catch (Exception ignore) {
             //ignore
         }
-        updateTimeSet();
+        updateTimeSet(lastUpdateMS);
+    }
+
+    public CertifiedPeer(Peer.Type type, String host, long accountId) {
+        this(type, host, accountId, System.currentTimeMillis());
     }
 
     public CertifiedPeer(int height, Peer.Type type, String host, long accountId) {
@@ -58,9 +64,9 @@ public class CertifiedPeer implements Serializable {
         this.height = height;
     }
 
-    private void updateTimeSet() {
+    private void updateTimeSet(long timeMS) {
         try {
-            this.updateTime = new Timestamp(System.currentTimeMillis());
+            this.updateTime = new Timestamp(timeMS);
         } catch (Exception ignore) {
             //ignore
         }
@@ -73,19 +79,19 @@ public class CertifiedPeer implements Serializable {
 
     public CertifiedPeer update(int height) {
         if (this.height < height) this.height = height;
-        updateTimeSet();
+        updateTimeSet(System.currentTimeMillis());
         return this;
     }
 
     public CertifiedPeer update(long accountId) {
         boundAccountSet(accountId);
-        updateTimeSet();
+        updateTimeSet(System.currentTimeMillis());
         return this;
     }
 
     public CertifiedPeer update(Peer.Type type) {
         this.type = type;
-        updateTimeSet();
+        updateTimeSet(System.currentTimeMillis());
         return this;
     }
 
@@ -133,6 +139,10 @@ public class CertifiedPeer implements Serializable {
         return type;
     }
 
+    public int getTypeCode() {
+        return this.type.getCode();
+    }
+
     public void setType(Peer.Type type) {
         this.type = type;
     }
@@ -167,6 +177,10 @@ public class CertifiedPeer implements Serializable {
 
     public Timestamp getUpdateTime() {
         return updateTime;
+    }
+
+    public int getUpdateTimeInEpochFormat() {
+        return Convert.toEpochTime(this.updateTime.getTime());
     }
 
     public int getEndHeight() {

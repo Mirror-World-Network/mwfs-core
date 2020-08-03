@@ -141,6 +141,6 @@ public class UrlManager {
     }
     
     public static String getDbArchiveUrl(String archivedDbFile) {
-        return COS_RELEASE_URL + archivedDbFile;
+        return archivedDbFile.startsWith("http") ? archivedDbFile : (COS_RELEASE_URL + archivedDbFile);
     }
 }

@@ -389,7 +389,7 @@ public class Generator implements Comparable<Generator> {
         if(!isCertifiedPeer) {
             if(Logger.printNow(Logger.Generator_startMining)) {
                 Logger.logWarningMessage("Invalid miner account %s(it didn't linked to a certified peer before the height %d) can't start auto mining or mint block. " +
-                                "Maybe it didn't create a PocNodeTypeTx sto statement. please INIT or RESET the client firstly! ",
+                                "Maybe it didn't create a PocNodeTypeTx statement. please INIT or RESET the client firstly! ",
                         minerAccount.getRsAddress(),
                         Conch.getHeight());
             }
@@ -573,7 +573,7 @@ public class Generator implements Comparable<Generator> {
         BigInteger target = prevTarget.add(effectiveBaseTarget);
         // check the elapsed time(in second) after previous block generated
         boolean elapsed = elapsedTime > Constants.getBlockGapSeconds();
-        
+
         // 3 right situations: a) last hit < current hit < current target, b) this block is elapsed, c) in offline mode
         boolean validHit = hit.compareTo(target) < 0 && (hit.compareTo(prevTarget) >= 0 || elapsed || Constants.isOffline);
         if(!validHit) {

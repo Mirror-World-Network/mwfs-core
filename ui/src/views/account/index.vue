@@ -847,7 +847,7 @@
                     <tr>
                         <th>
                             {{$t('account_info.account_mining_balance')}}
-                            <el-tooltip class="item" effect="dark" :content="$t('account_info.account_mining_balance_explain')" placement="top-start">
+                            <el-tooltip class="item" effect="dark" :content="$t('account_info.account_reward_balance_explain')" placement="top-start">
                                 <p class="el-icon-info"></p>
                             </el-tooltip>
                         </th>
@@ -3108,6 +3108,21 @@
     @import './style.scss';
 </style>
 <style scoped lang="scss" type="text/scss">
+
+    @media only screen and (max-width: 780px) {
+        .list_pagination /deep/ .el-pagination__jump {
+            display: initial!important;
+            float: right!important;
+            margin-top: 11px!important;
+        }
+
+        .list_pagination /deep/ .list_pagination .el-pagination--small .el-pagination__jump {
+            display: initial!important;
+            float: right!important;
+            margin-top: 11px!important;
+        }
+    }
+
     .el-select-dropdown {
         .el-select-dropdown__item.selected {
             background-color: #3fb09a !important;
