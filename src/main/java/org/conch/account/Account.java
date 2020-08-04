@@ -488,6 +488,10 @@ public final class Account {
             account.save(con);
         }
 
+        @Override
+        public void trim(int height) {
+            _trim("account",height);
+        }
     };
 
     private static final DbKey.LongKeyFactory<AccountInfo> accountInfoDbKeyFactory = new DbKey.LongKeyFactory<AccountInfo>("account_id") {
@@ -521,6 +525,11 @@ public final class Account {
             accountLease.save(con);
         }
 
+        @Override
+        public void trim(int height) {
+            _trim("account_lease", height);
+        }
+
     };
 
     private static final VersionedEntityDbTable<AccountInfo> accountInfoTable = new VersionedEntityDbTable<AccountInfo>("account_info",
@@ -534,6 +543,11 @@ public final class Account {
         @Override
         protected void save(Connection con, AccountInfo accountInfo) throws SQLException {
             accountInfo.save(con);
+        }
+
+        @Override
+        public void trim(int height) {
+            _trim("account_info",height);
         }
 
     };
@@ -589,7 +603,7 @@ public final class Account {
 
         @Override
         public void trim(int height) {
-            super.trim(Math.max(0, height - Constants.MAX_DIVIDEND_PAYMENT_ROLLBACK));
+            _trim("account_asset", height - Constants.MAX_DIVIDEND_PAYMENT_ROLLBACK);
         }
 
         @Override
@@ -631,6 +645,11 @@ public final class Account {
         }
 
         @Override
+        public void trim(int height) {
+            _trim("account_currency", height);
+        }
+
+        @Override
         protected String defaultSort() {
             return " ORDER BY units DESC, account_id, currency_id ";
         }
@@ -641,18 +660,7 @@ public final class Account {
 
         @Override
         public void trim(int height) {
-            Connection con = null;
-            try {
-                con = Db.db.getConnection();
-                PreparedStatement pstmtDelete = con.prepareStatement("DELETE FROM account_guaranteed_balance "
-                        + "WHERE height < ? AND height >= 0");
-                pstmtDelete.setInt(1, height - Constants.GUARANTEED_BALANCE_CONFIRMATIONS);
-                pstmtDelete.executeUpdate();
-            } catch (SQLException e) {
-                throw new RuntimeException(e.toString(), e);
-            }finally {
-                DbUtils.close(con);
-            }
+            _trim("account_guaranteed_balance", height, false);
         }
 
     };
@@ -676,6 +684,11 @@ public final class Account {
         @Override
         protected void save(Connection con, AccountProperty accountProperty) throws SQLException {
             accountProperty.save(con);
+        }
+
+        @Override
+        public void trim(int height) {
+            _trim("account_property", height);
         }
 
     };
