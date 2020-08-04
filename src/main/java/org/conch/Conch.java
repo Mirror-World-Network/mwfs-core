@@ -772,7 +772,7 @@ public final class Conch {
         BlockchainProcessorImpl.getInstance().shutdown();
         Peers.shutdown();
         Db.shutdown();
-        Logger.logShutdownMessage("COS server " + VERSION + " stopped.");
+        Logger.logShutdownMessage("COS server " + getFullVersion() + " "  + getCosUpgradeDate() + " stopped.");
         Logger.shutdown();
         runtimeMode.shutdown();
     }
