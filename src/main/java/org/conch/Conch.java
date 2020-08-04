@@ -1109,7 +1109,7 @@ public final class Conch {
                 runBeforeRestart.run();
             }
             // exit
-            Logger.logInfoMessage("Sharder Server Shutting down...");
+            Logger.logInfoMessage("COS Server Shutting down...");
             System.exit(0);
         } catch (Exception e) {
             // something went wrong
