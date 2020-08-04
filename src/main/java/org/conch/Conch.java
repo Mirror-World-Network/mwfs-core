@@ -772,7 +772,7 @@ public final class Conch {
         BlockchainProcessorImpl.getInstance().shutdown();
         Peers.shutdown();
         Db.shutdown();
-        Logger.logShutdownMessage("COS server " + VERSION + " stopped.");
+        Logger.logShutdownMessage("COS server " + getFullVersion() + " "  + getCosUpgradeDate() + " stopped.");
         Logger.shutdown();
         runtimeMode.shutdown();
     }
@@ -852,7 +852,7 @@ public final class Conch {
                 Users.init();
                 DebugTrace.init();
                 DbBackup.init();
-             
+
                 int timeMultiplier = (Constants.isTestnetOrDevnet() && Constants.isOffline) ? Math.max(Conch.getIntProperty("sharder.timeMultiplier"), 1) : 1;
                 ThreadPool.start(timeMultiplier);
                 if (timeMultiplier > 1) {
@@ -1109,7 +1109,7 @@ public final class Conch {
                 runBeforeRestart.run();
             }
             // exit
-            Logger.logInfoMessage("Sharder Server Shutting down...");
+            Logger.logInfoMessage("COS Server Shutting down...");
             System.exit(0);
         } catch (Exception e) {
             // something went wrong

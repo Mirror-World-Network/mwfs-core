@@ -360,6 +360,7 @@ public class ClientUpgradeTool {
     public static void restoreDbToLastArchive() {
         if(lastDbArchive == null || lastDbArchiveHeight == null) fetchLastDbArchive();
         restoreDb(lastDbArchive);
+        Conch.restartApplication(null);
     }
 
     /**

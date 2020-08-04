@@ -19,6 +19,7 @@ import org.conch.db.DbUtils;
 import org.conch.mint.pool.PoolRule;
 import org.conch.peer.CertifiedPeer;
 import org.conch.peer.Peer;
+import org.conch.tools.ClientUpgradeTool;
 import org.conch.tx.Attachment;
 import org.conch.tx.Transaction;
 import org.conch.tx.TransactionImpl;
@@ -563,10 +564,13 @@ public class PocProcessorImpl implements PocProcessor {
     public static void init() {
 //        checkAndResetPocDb();
         PocDb.init();
+        checkAndFetchDbToReGenerateScores();
         ThreadPool.scheduleThread("OldPocTxsProcessThread", oldPocTxsProcessThread, 1, TimeUnit.MINUTES);
         ThreadPool.scheduleThread("DelayedPocTxsProcessThread", delayedPocTxsProcessThread, pocTxSynThreadInterval, TimeUnit.SECONDS);
         //updateRecipientIdIntoOldPocTxs();
     }
+
+
 
     private static long pocTxsProcessStartMS = -1;
     private static long pocTxsProcessingMS = -1;
@@ -597,12 +601,11 @@ public class PocProcessorImpl implements PocProcessor {
                 count += instance.pocSeriesTxProcess(block);
                 if(blockProcessCount++ % 100 == 0) {
                     pocTxsProcessingMS = System.currentTimeMillis() - pocTxsProcessStartMS;
-                    Logger.logDebugMessage("[HistoryPocTxs] %d block's poc txs be processed [used time= %d S (%d MS)]", blockProcessCount, pocTxsProcessingMS / 1000, pocTxsProcessStartMS);
                 }
             }
 
             pocTxsProcessingMS = System.currentTimeMillis() - pocTxsProcessStartMS;
-            Logger.logInfoMessage("[HistoryPocTxs] finish history poc txs processing[from %d to %d] [processed size=%d] [used time= %d S (%d MS)]"
+            Logger.logInfoMessage("[HistoryPocTxs] finish history poc txs processing[from %d to %d] [processed size=%d] [used time= %d S(≈%d MS)]"
                     , fromHeight, toHeight, count
                     , pocTxsProcessingMS / 1000, pocTxsProcessStartMS);
         } finally {
@@ -610,6 +613,46 @@ public class PocProcessorImpl implements PocProcessor {
             BlockchainImpl.getInstance().writeUnlock();
         }
         return count;
+    }
+
+    private static boolean reGeneratePocScores = Conch.getBooleanProperty("sharder.reGeneratePocScores", false);
+    public static void checkAndReGeneratePocScores(){
+        long startMS = System.currentTimeMillis();
+        if(reGeneratePocScores) {
+            Logger.logInfoMessage("Start to re-generate all poc scores...");
+//            PocDb.reGenerateAllScores();
+//            long scoreReGenerateMS = System.currentTimeMillis();
+//            Logger.logInfoMessage("Finish the poc scores re-generating, used time %d S(≈%d MS)"
+//                    , (scoreReGenerateMS-startMS) /1000, (scoreReGenerateMS-startMS));
+
+            Logger.logInfoMessage("Start to re-process all poc txs...");
+            reProcessPocTxs(0, Conch.getHeight());
+            long reprocessPocTxsMS = System.currentTimeMillis();
+            Logger.logInfoMessage("Finish the poc txs reprocessing, used time %d S(≈%d MS)"
+                    , (reprocessPocTxsMS-startMS) /1000, (reprocessPocTxsMS-startMS));
+
+
+            Logger.logInfoMessage("Start to trim derived tables");
+            Conch.getBlockchainProcessor().trimDerivedTables();
+            long trimTablesMS = System.currentTimeMillis();
+            Logger.logInfoMessage("Finish the table trimming, used time %d S(≈%d MS)"
+                    , (trimTablesMS-reprocessPocTxsMS) /1000, (trimTablesMS-reprocessPocTxsMS));
+
+//            reGeneratePocScores = false;
+//            Conch.storePropertieToFile("sharder.reGeneratePocScores", "false");
+            Logger.logInfoMessage("Re-generate all finished, used time %d S(≈%d MS)"
+                    , (trimTablesMS-startMS) /1000, (trimTablesMS-startMS));
+
+        }
+    }
+
+    public static void checkAndFetchDbToReGenerateScores(){
+        if(reGeneratePocScores) {
+            Logger.logDebugMessage("Fetch and upgrade the latest archived db file to local and restart the cos service");
+            ClientUpgradeTool.fetchLastDbArchive();
+            Conch.storePropertieToFile("sharder.reGeneratePocScores", "false");
+            Conch.restartApplication(null);
+        }
     }
 
     private static final Runnable oldPocTxsProcessThread = () -> {
@@ -620,12 +663,13 @@ public class PocProcessorImpl implements PocProcessor {
                 return;
             }
 
-            boolean reprocessBefore = Conch.containProperty(PROPERTY_REPROCESS_POC_TXS);
             // old poc txs process: a) miss the poc tx, b) restart the cos client
             if (reprocessAllPocTxs) {
                 // total poc txs from last height
+                boolean reprocessBefore = Conch.containProperty(PROPERTY_REPROCESS_POC_TXS);
                 int fromHeight = reprocessBefore ? PocDb.getLastScoreHeight() : 0;
                 reProcessPocTxs(fromHeight, Conch.getHeight());
+
                 reprocessAllPocTxs = false;
                 Conch.storePropertieToFile(PROPERTY_REPROCESS_POC_TXS, "false");
             }
@@ -857,9 +901,9 @@ public class PocProcessorImpl implements PocProcessor {
         }
 
 //        ACCOUNT_ID = -2448817859391213308 and HEIGHT = 13793
-        if(accountId == -2448817859391213308L){
-            Logger.logDebugMessage("at account id is -2448817859391213308L");
-        }
+//        if(accountId == -2448817859391213308L){
+//            Logger.logDebugMessage("at account id is -2448817859391213308L");
+//        }
         PocScore pocScoreToUpdate = PocHolder.getPocScore(height, accountId);
         PocHolder.saveOrUpdate(pocScoreToUpdate.setHeight(height).nodeTypeCal(nodeTypeV3 != null ? nodeTypeV3 : nodeTypeV2));
         
