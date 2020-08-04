@@ -462,21 +462,6 @@ public final class Account {
 
     }
 
-    private static void _trim(String tableName, int height) {
-        Connection con = null;
-        try {
-            con = Db.db.getConnection();
-            PreparedStatement deleteStatement = con.prepareStatement("DELETE FROM " + tableName
-                    + " WHERE height < ? AND height >= 0 AND latest <> TRUE");
-            deleteStatement.setInt(1, height);
-            deleteStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e.toString(), e);
-        }finally {
-            DbUtils.close(con);
-        }
-    }
-
     private static final DbKey.LongKeyFactory<Account> accountDbKeyFactory = new DbKey.LongKeyFactory<Account>("id") {
 
         @Override
@@ -542,7 +527,7 @@ public final class Account {
 
         @Override
         public void trim(int height) {
-            _trim("account_lease",height);
+            _trim("account_lease", height);
         }
 
     };
@@ -675,18 +660,7 @@ public final class Account {
 
         @Override
         public void trim(int height) {
-            Connection con = null;
-            try {
-                con = Db.db.getConnection();
-                PreparedStatement pstmtDelete = con.prepareStatement("DELETE FROM account_guaranteed_balance "
-                        + "WHERE height < ? AND height >= 0");
-                pstmtDelete.setInt(1, height - Constants.GUARANTEED_BALANCE_CONFIRMATIONS);
-                pstmtDelete.executeUpdate();
-            } catch (SQLException e) {
-                throw new RuntimeException(e.toString(), e);
-            }finally {
-                DbUtils.close(con);
-            }
+            _trim("account_guaranteed_balance", height, false);
         }
 
     };
