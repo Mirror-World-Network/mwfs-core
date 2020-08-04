@@ -853,6 +853,9 @@ public final class Conch {
                 DebugTrace.init();
                 DbBackup.init();
 
+                Logger.logMessage("trim all tables");
+                getBlockchainProcessor().trimDerivedTables();
+
                 int timeMultiplier = (Constants.isTestnetOrDevnet() && Constants.isOffline) ? Math.max(Conch.getIntProperty("sharder.timeMultiplier"), 1) : 1;
                 ThreadPool.start(timeMultiplier);
                 if (timeMultiplier > 1) {
