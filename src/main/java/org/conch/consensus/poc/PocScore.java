@@ -56,7 +56,7 @@ public class PocScore implements Serializable {
             }
 
             if(height > Constants.POC_MULTIPLIER_CHANGE_HEIGHT){
-                mag = new BigInteger("500");
+                mag = new BigInteger("1000");
             }
         }catch(Exception e){
             e.printStackTrace();
@@ -176,9 +176,9 @@ public class PocScore implements Serializable {
         if(this.height <= Constants.POC_MULTIPLIER_CHANGE_HEIGHT) {
             total = score.multiply(BigInteger.valueOf(1000));
         }
-        else{
-            total = score.multiply(parseAndGetScoreMagnification(this.height));
-        }
+//        else{
+//            total = score.multiply(parseAndGetScoreMagnification(this.height));
+//        }
         // update with current height
         PocScore updateScore = new PocScore();
         updateScore.synFrom(this);
