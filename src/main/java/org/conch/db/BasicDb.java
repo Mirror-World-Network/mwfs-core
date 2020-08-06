@@ -146,7 +146,7 @@ public class BasicDb {
         cp.setMaxConnections(maxConnections);
         cp.setLoginTimeout(loginTimeout);
         try (Connection con = cp.getConnection();
-             Statement stmt = con.createStatement()) {
+            Statement stmt = con.createStatement()) {
             stmt.executeUpdate("SET DEFAULT_LOCK_TIMEOUT " + defaultLockTimeout);
             stmt.executeUpdate("SET MAX_MEMORY_ROWS " + maxMemoryRows);
         } catch (SQLException e) {

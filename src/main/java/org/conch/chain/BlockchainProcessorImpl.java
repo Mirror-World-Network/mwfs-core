@@ -798,10 +798,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 if (isRestoringDb) return false;
 
                 isRestoringDb = true;
-                new Thread(() -> {
-                    ClientUpgradeTool.restoreDbToLastArchive();
-                    Conch.restartApplication(null);
-                }).start();
+                ClientUpgradeTool.restoreDbToLastArchive(true, true);
 
                 return false;
             }

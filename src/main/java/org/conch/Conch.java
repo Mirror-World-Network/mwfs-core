@@ -796,7 +796,7 @@ public final class Conch {
                 }catch(Exception e){
                     Logger.logInfoMessage("[DB EXCEPTION HANDLE] Fetch and restore to last db archive because the db instance init failed[ %s ]", e.getMessage());
                     ClientUpgradeTool.forceDownloadFromOSS = true;
-                    ClientUpgradeTool.restoreDbToLastArchive();
+                    ClientUpgradeTool.restoreDbToLastArchive(true, true);
                     ClientUpgradeTool.forceDownloadFromOSS = false;
                 }
                 setServerStatus(ServerStatus.AFTER_DATABASE, null);
