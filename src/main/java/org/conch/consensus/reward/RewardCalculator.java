@@ -278,7 +278,7 @@ public class RewardCalculator {
         }
 
         String isCalOnly = updateBalance ? "" : "-CalOnly";
-        String tail = "[DEBUG] ----------------------------\n[DEBUG] Total size: " + crowdMiners.size() + 1;
+        String tail = "[DEBUG] ----------------------------\n[DEBUG] Total count: " + crowdMiners.size() + 1;
         if(!stageTwo){
             Logger.logDebugMessage("[%d-StageOne%s] Add crowdMiners rewards to account's unconfirmed balance and freeze it. \n[DEBUG] CrowdMiner Reward Detail Format:[txid] address: distribution amount\n%s%s\n", tx.getHeight(), isCalOnly,  details, tail);
         }else {
@@ -359,7 +359,7 @@ public class RewardCalculator {
                 stage, consignors.size(), tx.getHeight(), minerAccount.getRsAddress());
 
         String details = "";
-        String tail = "[DEBUG] ----------------------------\n[DEBUG] Total size:  ";
+        String tail = "[DEBUG] ----------------------------\n[DEBUG] Total count:  ";
         if (consignors.size() == 0) {
             details += updateBalanceAndFrozeIt(senderAccount, tx, miningRewards, stageTwo);
             tail += "1";
