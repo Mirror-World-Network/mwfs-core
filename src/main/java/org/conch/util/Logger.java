@@ -342,10 +342,6 @@ public final class Logger {
         doLog(Level.WARN, message, exc);
     }
 
-    public static boolean isInfoEnabled() {
-        return log.isInfoEnabled();
-    }
-
     /**
      * Log an INFO message
      *
@@ -373,10 +369,6 @@ public final class Logger {
      */
     public static void logInfoMessage(String message, Throwable exc) {
         doLog(Level.INFO, message, exc);
-    }
-
-    public static boolean isDebugEnabled() {
-        return log.isDebugEnabled();
     }
 
     /**
