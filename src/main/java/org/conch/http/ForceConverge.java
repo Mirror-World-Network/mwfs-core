@@ -376,7 +376,7 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
         }
 
         // restore the DB
-        checkAndFetchDbToReGenerateScores();
+        // checkAndFetchDbToReGenerateScores();
         
 //        // switch fork
 //        if(StringUtils.isEmpty(currentFork) || !"Giant".equals(currentFork)){
