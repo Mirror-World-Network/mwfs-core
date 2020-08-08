@@ -343,8 +343,13 @@ public class ClientUpgradeTool {
                 lastDownloadDbArchiveTime = System.currentTimeMillis();
             }
 
-            Conch.pause();
+            // compare archive height with the current height
+            if(lastDbArchiveHeight <= Conch.getHeight()){
+                Logger.logInfoMessage("[ UPGRADE DB ] Give up current db restore, because db archive height %d <= current height %d", lastDbArchiveHeight, Conch.getHeight());
+                return;
+            }
 
+            Conch.pause();
             // backup the old db folder
             Logger.logInfoMessage("[ UPGRADE DB ] Delete the bak folder");
             FileUtil.deleteDirectory(Paths.get(".","bak"));
