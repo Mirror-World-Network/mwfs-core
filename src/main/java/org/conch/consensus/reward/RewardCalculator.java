@@ -316,7 +316,7 @@ public class RewardCalculator {
             account.addMintedBalance(amount);
             account.pocChanged();
         }
-        return  String.format("[DEBUG] txid-%d | %s: %d\n", tx.getId(), account.getRsAddress(), amount);
+        return  String.format("[DEBUG] txid/%d | %s: %d\n", tx.getId(), account.getRsAddress(), amount);
     }
 
 
