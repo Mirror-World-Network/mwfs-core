@@ -6,8 +6,8 @@ import org.conch.common.Constants;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -55,7 +55,7 @@ public class FileUtilTest {
         return version;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws MalformedURLException {
 //        try {
 //            //fetchUpgradePackageViaVersion();
 //            getNewestHubVersion();
@@ -64,8 +64,11 @@ public class FileUtilTest {
 //            e.printStackTrace();
 //        }
         
-        File file = new File("/Users/ben/Downloads/fileTime/cos-db-archive");
-        System.out.println(file.lastModified());
-        System.out.println(new Date(file.lastModified()).toString());
+//        File file = new File("/Users/ben/Downloads/fileTime/cos-db-archive");
+//        System.out.println(file.lastModified());
+//        System.out.println(new Date(file.lastModified()).toString());
+        System.out.println(RestfulHttpClient.findResource("http://47.115.58.34:88/download/mw_test_db_1125553.zip"));
+//      System.out.println(FileUtils.toFile(new URL("http://47.115.58.34:88/download/mw_test_db_15777.zip")).exists());
+
     }
 }

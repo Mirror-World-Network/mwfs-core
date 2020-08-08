@@ -510,8 +510,13 @@ public final class BlockImpl implements Block {
 
             BigInteger hit = new BigInteger(1, new byte[]{generationSignatureHash[7], generationSignatureHash[6], generationSignatureHash[5], generationSignatureHash[4], generationSignatureHash[3], generationSignatureHash[2], generationSignatureHash[1], generationSignatureHash[0]});
             boolean validHit = Generator.verifyHit(hit, pocScore, previousBlock, timestamp);
+            // first try
             if(!validHit) {
-                validHit = Generator.verifyHit(hit, pocScoreObj.reCalTotalForCompatibility(), previousBlock, timestamp);
+                validHit = Generator.verifyHit(hit, pocScoreObj.reCalTotalForCompatibility(false), previousBlock, timestamp);
+            }
+            // last try
+            if(!validHit) {
+                validHit = Generator.verifyHit(hit, pocScoreObj.reCalTotalForCompatibility(true), previousBlock, timestamp);
             }
 
             boolean isIgnoreBlock = CheckSumValidator.isKnownIgnoreBlock(this.id, this.getBlockSignature());
@@ -527,7 +532,7 @@ public final class BlockImpl implements Block {
             return validHit || isIgnoreBlock;
 
         } catch (RuntimeException e) {
-            Logger.logMessage("Error verifying block generation signature " + toString(), e);
+            Logger.logMessage("Error verifying block generation signature " + toSummary(), e);
             return false;
         }
     }
@@ -633,6 +638,16 @@ public final class BlockImpl implements Block {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
+    }
+
+    public String toSummary(){
+        return String.format(" [block id=%d, block generator=%s, block timestamp=%d, block string id=%s, block signature=%s]"
+                , getId()
+                , Account.rsAccount(getGeneratorId())
+                , getTimestamp()
+                , getStringId()
+                , Convert.toHexString(getBlockSignature())
+        );
     }
 
 }

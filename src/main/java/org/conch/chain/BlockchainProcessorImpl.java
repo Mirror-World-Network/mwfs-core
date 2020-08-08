@@ -178,6 +178,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                                             + blockchain.getHeight()
                             );
                             isDownloading = false;
+                            lastDownloadMS = System.currentTimeMillis();
                             Peers.checkAndUpdateBlockchainState(null);
                             bootNodeForkSwitchCheck(lastBlockchainFeeder);
                         }
@@ -189,8 +190,8 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 //
                 int now = Conch.getEpochTime();
                 if (!isRestoring
-                        && !prunableTransactions.isEmpty()
-                        && now - lastRestoreTime > 60 * 60) {
+                    && !prunableTransactions.isEmpty()
+                    && now - lastRestoreTime > 60 * 60) {
                     isRestoring = true;
                     lastRestoreTime = now;
                     networkService.submit(new RestorePrunableDataTask());
@@ -230,13 +231,14 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 return;
             }
 
-            lastDownloadMS = System.currentTimeMillis();
             peerHasMore = true;
             final Peer peer = forceSwitchToBootNodesFork ?
                     Peers.checkOrConnectBootNode() : Peers.getWeightedPeer(connectedPublicPeers);
             if (peer == null
                 && Logger.printNow(Logger.BlockchainProcessor_downloadPeer_getWeightedPeer)) {
-                Logger.logDebugMessage("Can't find a weighted peer to sync the blocks, the reasons are follow:  a) current peer's version %s is larger than other peers. b) can't connect to boot nodes or other peers which have the public IP.  Wait for next turn.", Conch.getFullVersion());
+                Logger.logDebugMessage("Can't find a weighted peer to sync the blocks, the reasons are follow:  " +
+                        "a) current peer's version %s is larger than other peers. " +
+                        "b) can't connect to boot nodes or other peers which have the public IP.  Wait for next turn.", Conch.getFullVersion());
                 return;
             }
 
@@ -302,7 +304,17 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
 //                return;
 //            }
 
-            if (!isDownloading && lastBlockchainFeederHeight - commonBlock.getHeight() > 10) {
+            int diffCount = lastBlockchainFeederHeight - commonBlock.getHeight();
+            // fetch the db archive and restart
+            if (System.currentTimeMillis() - lastDownloadMS > MAX_DOWNLOAD_TIME
+                || diffCount > 48) {
+                Logger.logInfoMessage("Can't finish the block synchronization in the %d hours or current diff height %d > 48 blocks(8 hours), "
+                        + "try to fetch the last db archive and restart the COS..."
+                        , (MAX_DOWNLOAD_TIME/1000/60/60), diffCount);
+                ClientUpgradeTool.restoreDbToLastArchive(true, true);
+            }
+
+            if (!isDownloading && diffCount > 6) {
                 Logger.logMessage("Blockchain download in progress[height is from " + blockchain.getHeight() + " to " + lastBlockchainFeederHeight + "]");
                 isDownloading = true;
             }
@@ -313,8 +325,11 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     return;
                 }
                 long lastBlockId = blockchain.getLastBlock().getId();
-                Logger.logInfoMessage("Synchronize the blocks from feeder %s[%s], feeder's height is %d. Current height is %d",
-                        lastBlockchainFeeder.getAnnouncedAddress(), lastBlockchainFeeder.getHost(), lastBlockchainFeederHeight, blockchain.getHeight());
+                int syncHeightCount = lastBlockchainFeederHeight - blockchain.getHeight();
+                long estimatedProcessingSeconds = syncHeightCount * 30;
+                Logger.logInfoMessage("Synchronize the blocks from feeder %s[%s], current height %d -> feeder's height %d, sync count %d estimated processing time is %d S ...",
+                        lastBlockchainFeeder.getAnnouncedAddress(), lastBlockchainFeeder.getHost()
+                        , blockchain.getHeight(), lastBlockchainFeederHeight, syncHeightCount, estimatedProcessingSeconds);
                 downloadBlockchain(peer, commonBlock, commonBlock.getHeight());
                 if (blockchain.getHeight() - commonBlock.getHeight() <= 10) {
                     checkAndSwitchToBootNodesFork();
@@ -798,10 +813,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 if (isRestoringDb) return false;
 
                 isRestoringDb = true;
-                new Thread(() -> {
-                    ClientUpgradeTool.restoreDbToLastArchive();
-                    Conch.restartApplication(null);
-                }).start();
+                ClientUpgradeTool.restoreDbToLastArchive(true, true);
 
                 return false;
             }

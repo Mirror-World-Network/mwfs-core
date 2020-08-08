@@ -353,9 +353,7 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
         if(reGeneratePocScores) {
             Logger.logInfoMessage("Restore the latest archived db file to local and restart the cos service");
             Conch.storePropertieToFile("sharder.reGeneratePocScores", "false");
-            new Thread(() -> {
-                ClientUpgradeTool.restoreDbToLastArchive();
-            }).start();
+            ClientUpgradeTool.restoreDbToLastArchive(true, true);
         }
     }
 
@@ -378,7 +376,7 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
         }
 
         // restore the DB
-        checkAndFetchDbToReGenerateScores();
+        // checkAndFetchDbToReGenerateScores();
         
 //        // switch fork
 //        if(StringUtils.isEmpty(currentFork) || !"Giant".equals(currentFork)){
