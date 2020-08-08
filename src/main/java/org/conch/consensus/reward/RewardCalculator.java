@@ -385,12 +385,12 @@ public class RewardCalculator {
 
         Peer feeder = Conch.getBlockchainProcessor().getLastBlockchainFeeder();
         if(Logger.isLevel(Logger.Level.INFO)) {
-            Logger.logInfoMessage("[Rewards-%d-Stage%s] Distribution detail[crowd miner size=%d, mining joiner size=%d, processing used time≈ %d S(%d MS)] at current height %d -> height %d of feeder %s[%s]",
+            Logger.logInfoMessage("[Rewards-%d-Stage%s] Distribution detail[crowd miner size=%d, mining joiner size=%d, processing used time≈ %d S(%d MS)] at current height %d -> height %d of feeder %s[%s]\n",
                     tx.getHeight(), stage, crowdMiners.size(), miningJoinerCount
                     , totalUsedMs / 1000, totalUsedMs
                     , Conch.getHeight(), Conch.getBlockchainProcessor().getLastBlockchainFeederHeight(), feeder.getAnnouncedAddress(), feeder.getHost());
         }else {
-            Logger.logDebugMessage("[Rewards-%d-Stage%s] Distribution used time[crowd miners≈ %d S(%d MS), mining joiners≈ %d S(%d MS)], reward distribution detail[crowd miner size=%d, mining joiner size=%d] at height %d -> height %d of feeder %s[%s]",
+            Logger.logDebugMessage("[Rewards-%d-Stage%s] Distribution used time[crowd miners≈ %d S(%d MS), mining joiners≈ %d S(%d MS)], reward distribution detail[crowd miner size=%d, mining joiner size=%d] at height %d -> height %d of feeder %s[%s]\n",
                     tx.getHeight(), stage
                     , crowdRewardProcessingMS / 1000, crowdRewardProcessingMS
                     , miningRewardProcessingMS / 1000, miningRewardProcessingMS
