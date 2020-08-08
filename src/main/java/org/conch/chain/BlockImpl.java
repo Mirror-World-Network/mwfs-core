@@ -510,8 +510,13 @@ public final class BlockImpl implements Block {
 
             BigInteger hit = new BigInteger(1, new byte[]{generationSignatureHash[7], generationSignatureHash[6], generationSignatureHash[5], generationSignatureHash[4], generationSignatureHash[3], generationSignatureHash[2], generationSignatureHash[1], generationSignatureHash[0]});
             boolean validHit = Generator.verifyHit(hit, pocScore, previousBlock, timestamp);
+            // first try
             if(!validHit) {
-                validHit = Generator.verifyHit(hit, pocScoreObj.reCalTotalForCompatibility(), previousBlock, timestamp);
+                validHit = Generator.verifyHit(hit, pocScoreObj.reCalTotalForCompatibility(false), previousBlock, timestamp);
+            }
+            // last try
+            if(!validHit) {
+                validHit = Generator.verifyHit(hit, pocScoreObj.reCalTotalForCompatibility(true), previousBlock, timestamp);
             }
 
             boolean isIgnoreBlock = CheckSumValidator.isKnownIgnoreBlock(this.id, this.getBlockSignature());

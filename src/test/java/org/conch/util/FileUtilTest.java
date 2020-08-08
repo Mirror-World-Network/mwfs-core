@@ -67,10 +67,8 @@ public class FileUtilTest {
 //        File file = new File("/Users/ben/Downloads/fileTime/cos-db-archive");
 //        System.out.println(file.lastModified());
 //        System.out.println(new Date(file.lastModified()).toString());
-        //File file = FileUtils.toFile(new URL("http://47.115.58.34:88/download/mw_test_db_15553.zip"));
-        System.out.println(RestfulHttpClient.containResource("http://47.115.58.34:88/download/mw_test_db_1125553.zip"));
-   //     System.out.println(file.exists());
-        System.out.println(FileUtils.toFile(new URL("http://47.115.58.34:88/download/mw_test_db_15777.zip")).exists());
+        System.out.println(RestfulHttpClient.findResource("http://47.115.58.34:88/download/mw_test_db_1125553.zip"));
+//      System.out.println(FileUtils.toFile(new URL("http://47.115.58.34:88/download/mw_test_db_15777.zip")).exists());
 
     }
 }
