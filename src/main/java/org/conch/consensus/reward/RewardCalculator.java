@@ -360,6 +360,7 @@ public class RewardCalculator {
 
         String details = "";
         String tail = "[DEBUG] ----------------------------\n[DEBUG] Total count:  ";
+        int miningJoinerCount = 1;
         if (consignors.size() == 0) {
             details += updateBalanceAndFrozeIt(senderAccount, tx, miningRewards, stageTwo);
             tail += "1";
@@ -370,6 +371,7 @@ public class RewardCalculator {
                 details += updateBalanceAndFrozeIt(account, tx, rewardList.get(id), stageTwo);
             }
             tail += rewardList.size();
+            miningJoinerCount = rewardList.size();
         }
 
         if(!stageTwo){
@@ -384,7 +386,7 @@ public class RewardCalculator {
         Peer feeder = Conch.getBlockchainProcessor().getLastBlockchainFeeder();
         if(Logger.isLevel(Logger.Level.INFO)) {
             Logger.logInfoMessage("[Rewards-%d-Stage%s] Distribution detail[crowd miner size=%d, mining joiner size=%d, processing used time≈ %d S(%d MS)] at current height %d -> height %d of feeder %s[%s]",
-                    tx.getHeight(), stage, crowdMiners.size(), consignors.size()
+                    tx.getHeight(), stage, crowdMiners.size(), miningJoinerCount
                     , totalUsedMs / 1000, totalUsedMs
                     , Conch.getHeight(), Conch.getBlockchainProcessor().getLastBlockchainFeederHeight(), feeder.getAnnouncedAddress(), feeder.getHost());
         }else {
@@ -392,7 +394,7 @@ public class RewardCalculator {
                     tx.getHeight(), stage
                     , crowdRewardProcessingMS / 1000, crowdRewardProcessingMS
                     , miningRewardProcessingMS / 1000, miningRewardProcessingMS
-                    , crowdMiners.size(), consignors.size()
+                    , crowdMiners.size(), miningJoinerCount
                     , Conch.getHeight(), Conch.getBlockchainProcessor().getLastBlockchainFeederHeight(), feeder.getAnnouncedAddress(), feeder.getHost());
         }
         return tx.getAmountNQT();
