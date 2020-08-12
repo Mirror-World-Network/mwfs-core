@@ -1258,6 +1258,9 @@ public final class Conch {
     public static String getFullVersion(){
         return VERSION + "-" + STAGE;
     }
+    public static String getVersionWithBuild(){
+        return VERSION + "-" + STAGE + " " + ClientUpgradeTool.cosLastUpdateDate;
+    }
     public static String getVersion(){ return VERSION; }
     public static String getCosUpgradeDate(){ return ClientUpgradeTool.cosLastUpdateDate; }
 
