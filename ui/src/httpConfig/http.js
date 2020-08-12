@@ -4,6 +4,7 @@
 import axios from "axios";
 import apiURL from "./api.js";
 import Qs from 'qs';
+import { Message } from 'element-ui';
 
 import cookie from "../../static/sso/js/cookie.js";
 
@@ -67,6 +68,7 @@ axios.interceptors.response.use(
     error => {
         // 返回接口返回的错误信息
         console.log(`axios error: ${JSON.stringify(error)}`)
+        // Message.error(error.message)
         return Promise.reject(error);
     });
 export default axios;

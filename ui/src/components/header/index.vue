@@ -294,7 +294,6 @@
                     _this.forging = res.data;
                     // console.log("forging",_this.forging);
                 }).catch(err => {
-                    _this.$message.error(err);
                     console.error(err);
                 });
             }
@@ -303,7 +302,6 @@
                 _this.forging = res.data;
                 // console.log("forging",_this.forging);
             }).catch(err => {
-                _this.$message.error(err);
                 console.error(err);
             });
         },
@@ -328,7 +326,6 @@
                 }).then(res => {
                     _this.accountInfo = res.data;
                 }).catch(err => {
-                    _this.$message.error(err);
                     console.error(err);
                 });
             },
@@ -393,7 +390,6 @@
                                 _this.forging = res.data;
                                 // console.log("forging",_this.forging);
                             }).catch(err => {
-                                _this.$message.error(err);
                                 console.error(err);
                             });
 
@@ -402,7 +398,6 @@
                             console.error(res.data.errorDescription);
                         }
                     }).catch(err => {
-                        _this.$message.error(err);
                         console.error(err);
                     });
                 } else if (b === false && pwd === '') {
@@ -416,7 +411,6 @@
                                 _this.forging = res.data;
                                 // console.log("forging",_this.forging);
                             }).catch(err => {
-                                _this.$message.error(err);
                                 console.error(err);
                             });
                         } else {
@@ -424,7 +418,6 @@
                             console.error(res.data.errorDescription);
                         }
                     }).catch(err => {
-                        _this.$message.error(err);
                         console.error(err);
                     });
                     closeDialog();
@@ -523,7 +516,7 @@
                         _this.$message.error(res.data.error ? res.data.error : res.data.errorDescription);
                     }
                 }).catch(err => {
-                    _this.$message.error(err.message);
+                    // _this.$message.error(err.message);
                 });
             },
             updateHubVersion(adminPwd) {
@@ -545,7 +538,7 @@
                         _this.$message.error(res.data.error ? res.data.error : res.data.errorDescription);
                     }
                 }).catch(err => {
-                    _this.$message.error(err.message);
+                    // _this.$message.error(err.message);
                 });
             },
             versionCompare(current, latest) {

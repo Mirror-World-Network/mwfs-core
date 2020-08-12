@@ -1387,7 +1387,7 @@
                         _this.$message.error(res.data.error ? res.data.error : res.data.errorDescription);
                     }
                 }).catch(err => {
-                    _this.$message.error(err.message);
+                    // _this.$message.error(err.message);
                 });
             },
             drawBarChart: function (barchat) {
@@ -1531,7 +1531,7 @@
                         _this.$message.error(res.data.error ? res.data.error : res.data.errorDescription);
                     }
                 }).catch(err => {
-                    _this.$message.error(err.message);
+                    // _this.$message.error(err.message);
                 });
             },
             restartHub(adminPwd) {
@@ -1549,7 +1549,7 @@
                         _this.closeDialog();
                     }
                 }).catch(err => {
-                    _this.$message.error(err.message);
+                    // _this.$message.error(err.message);
                 });
             },
             resetHub(adminPwd,type) {
@@ -1568,7 +1568,7 @@
                         _this.$message.error(res.data.errorDescription ? res.data.errorDescription : res.data.failedReason);
                         _this.closeDialog();
                     }
-                }).catch(err => _this.$message.error(err.message));
+                })
             },
             updateHubSetting(params) {
                 const _this = this;
@@ -1585,7 +1585,7 @@
                         _this.closeDialog();
                     }
                 }).catch(err => {
-                    _this.$message.error(err.message);
+                    // _this.$message.error(err.message);
                 });
             },
             verifyAndGenerateHubSettingFormData() {
@@ -1733,7 +1733,6 @@
                     })
                     .catch(err => {
                         _this.registerNatLoading = false;
-                        _this.$message.error(err.message);
                     });
             },
             bindNatService(){
@@ -1762,7 +1761,6 @@
                     })
                     .catch(err => {
                         _this.registerNatLoading = false;
-                        _this.$message.error(err.message);
                     });
 
             },
@@ -1796,7 +1794,7 @@
                         console.log('failed to reconfigure settings...')
                     }
                 }).catch(err => {
-                    _this.$message.error(err.message);
+                    // _this.$message.error(err.message);
                 });
             },
             checkPicVerificationCode(){},
@@ -1836,7 +1834,6 @@
                         })
                         .catch(err => {
                             _this.hubsetting.loadingData = false;
-                            _this.$message.error(err.message);
                         });
                 }
             },
@@ -2049,7 +2046,6 @@
                     }
                 }).catch(err => {
                     console.log(err);
-                    _this.$message.error(err.message);
                 });
 
             },
@@ -2086,7 +2082,6 @@
                     }
                 }).catch(err => {
                     console.log(err);
-                    _this.$message.error(err.message);
                 });
             },
 
@@ -2200,7 +2195,6 @@
                     }).catch(err => {
                         reject(err);
                         console.log(err);
-                        _this.$message.error(err.message);
                     });
                 });
 
@@ -2308,7 +2302,6 @@
                     }).catch(err => {
                         reject(err);
                         console.log(err);
-                        _this.$message.error(err.message);
                     });
                 });
             },
@@ -2351,7 +2344,7 @@
                             _this.$message.error(res2.data.errorCode);
                         }
                     }).catch(err => {
-                        _this.$message.error(err.message);
+                        // _this.$message.error(err.message);
                     });
                     _this.loading = false;
                     _this.getTotalList();
@@ -2359,7 +2352,6 @@
                     _this.updateMinerState();
                 }).catch(function (err) {
                     _this.loading = false;
-                    _this.$message.error(err.message);
                 });
             },
             updateMinerState() {
