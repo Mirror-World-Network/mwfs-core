@@ -665,7 +665,6 @@
                     _this.loading = false;
                 }).catch(err => {
                     console.info('error', err);
-                    _this.$message.error(err);
                     _this.loading = false;
                 });
             },
