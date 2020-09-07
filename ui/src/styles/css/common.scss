@@ -126,12 +126,16 @@
                         background-repeat: no-repeat;
                     }
 
-                    .peer-icon.icon0, .peer-icon.icon2 {
+                    .peer-icon.icon0 {
                         background-image: url("../../assets/img/error.svg");
                     }
 
                     .peer-icon.icon1 {
                         background-image: url("../../assets/img/success.svg");
+                    }
+
+                    .peer-icon.icon2 {
+                        background-image: url("../../assets/img/warning.svg");
                     }
 
                     img {

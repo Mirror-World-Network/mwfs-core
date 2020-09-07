@@ -296,14 +296,17 @@
                 peersLocationList: this.$route.params.peersLocationList,
                 peersTimeList: this.$route.params.peersTimeList,
                 minerList: this.$route.params.minerList,
-                limitPeerSize: 12
+                limitPeerSize: 12,
+                startTimestamp: null,
+                timer: 0,
+                standardPrecent: 0.7,
             };
         },
         created: function () {
             let _this = this;
+            _this.startTimestamp = Date.parse(new Date());
             _this.getSPPeers();
-            _this.init(_this.$global.peers.peers);
-            console.log("_this.$global", _this.$global)
+            _this.init(_this.peersListFilter(_this.$global.peers.peers));
         },
         methods: {
             init: function (peersList) {
@@ -321,6 +324,26 @@
                         _this.activeHubCount++;
                     }
                 });
+            },
+            // peers filter
+            peersListFilter(peersList){
+                let newPeersList = [];
+                let validPrecent = 0; 
+                console.log("[peersList]", peersList);
+                peersList.forEach(ele => {
+                    if(ele.state){
+                        newPeersList.push(ele)
+                    }
+                })
+                validPrecent = newPeersList.length/peersList.length;
+
+                if (validPrecent < this.standardPrecent) {
+                    // 1. !NON_CONNECTED peer less than standardPrecent of all peer, filter corresponding peer
+                    return newPeersList;
+                } 
+                // 2. Otherwise, do no filtering
+                return peersList;
+                    
             },
             getSPPeers:function(){
                 const _this = this;
@@ -512,8 +535,6 @@
             window.onbeforeunload = function (e) {
                 e = e || window.event;
 
-                debugger;
-
                 // 兼容IE8和Firefox 4之前的版本
                 if (e) {
                     e.returnValue = "您是否确认离开此页面-您输入的数据可能不会被保存";
@@ -522,6 +543,16 @@
                 // Chrome, Safari, Firefox 4+, Opera 12+ , IE 9+
                 return "您是否确认离开此页面-您输入的数据可能不会被保存";
             };
+            if(Date.parse(new Date()) - this.startTimestamp > 600000 ){      
+                clearInterval(this.timer)    
+            }else{      
+                this.timer = setInterval(()=>{       
+                    this.init(this.$global.peers.peers)     
+                },SSO.downloadingBlockchain ? this.$global.cfg.soonInterval : this.$global.cfg.defaultInterval)       
+            };  
+        },
+        destroyed(){    
+            clearInterval(this.timer)  
         },
     };
 </script>
