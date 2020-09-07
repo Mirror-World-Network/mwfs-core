@@ -1,239 +1,267 @@
 <template>
+  <div>
     <div>
-        <div>
-            <div class="block_network mb20">
-                <p class="block_title csp">
-                    <a @click="$router.back()">
-                        <span>{{$t('peers.return_network')}}</span>
-                    </a>
-                </p>
-                <div class="w dfl">
-                    <div class="block_blue radius_blue">
-                        <p>{{$t('peers.total_peers')}}</p>
-                        <p><span>{{peersCount}}</span></p>
-                    </div>
-                    <div class="block_blue radius_blue">
-                        <p>{{$t('peers.active_hub')}}</p>
-                        <p><span v-loading="minerList?  false:true">{{activeHubCount}}</span></p>
-                    </div>
-                    <div class="block_blue radius_blue">
-                        <p>{{$t('peers.active_peers')}}</p>
-                        <p><span>{{activePeersCount}}</span></p>
-                    </div>
-                </div>
-            </div>
-            <div class="block_map" id="peers-map">
-
-            </div>
-            <div class="block_list">
-                <p>
-                    <span class="block_title fl">
-                        <img src="../../assets/img/peerlist.svg"/>
-                        <span>{{$t('peers.peer_list')}}</span>
-                        <span>{{$t('peers.peer_list_link')}}</span>
-                    </span>
-                    <span class="hrefbtn fr block_title csp">
-                        <a @click="openAddPeer">
-                            <span>{{$t("network.peers_add")}}</span>
-                        </a>
-                    </span>
-                </p>
-                <span class="cb"></span>
-                <div class="list_table w br4">
-                    <div class="list_content table_responsive data-loading">
-                        <table class="table table-striped" id="peers_table">
-                            <thead>
-                            <tr>
-                                <th>{{$t('peers.peer_address')}}</th>
-                                <th>{{$t('peers.download')}}</th>
-                                <th>{{$t('peers.upload')}}</th>
-                                <th>{{$t('peers.application')}}</th>
-                                <th>{{$t('peers.platform')}}</th>
-                                <th>{{$t('peers.server')}}</th>
-                                <th>{{$t('peers.operating')}}</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr v-for="(peer,index) in peersList"
-                                v-if="index >= ((currentPage - 1) * pageSize) && index <= (currentPage * pageSize -1)">
-                                <td class="image_text linker" @click="openInfo(peer.address)">
-                                    <el-tooltip class="item" placement="top" effect="light"
-                                                :content="peerState(peer.state)">
-                                            <span class="peer-icon" :class="'icon'+peer.state">
-                                                <span>{{peer.address}}</span>
-                                            </span>
-                                    </el-tooltip>
-                                </td>
-                                <td>{{formatByte(peer.downloadedVolume)}}</td>
-                                <td>{{formatByte(peer.uploadedVolume)}}</td>
-                                <td><span class="patch">{{peer.application}}&nbsp;{{peer.version}}</span></td>
-                                <td>{{peer.platform}}</td>
-                                <td class="linker service">
-                                    <el-tooltip v-for="service in peer.services" class="item" placement="top"
-                                                effect="light" :content="getPeerServicesString(service)">
-                                        <span>{{service}}</span>
-                                    </el-tooltip>
-                                </td>
-                                <td>
-                                    <button class="list_button w40" @click="openConnectPeer(peer.address)">
-                                        {{$t('peers.link')}}
-                                    </button>
-                                    <button class="list_button w70" @click="openBlackDialog(peer.address)">
-                                        {{$t('peers.blacklist')}}
-                                    </button>
-                                </td>
-                            </tr>
-                            </tbody>
-
-                        </table>
-                    </div>
-                    <div class="list_pagination" v-if="totalSize > pageSize">
-                        <el-pagination
-                            @size-change="handleSizeChange"
-                            @current-change="handleCurrentChange"
-                            :current-page.sync="currentPage"
-                            :page-size="pageSize"
-                            layout="total, prev, pager, next, jumper"
-                            :total="totalSize">
-                        </el-pagination>
-                    </div>
-                </div>
-            </div>
+      <div class="block_network mb20">
+        <p class="block_title csp">
+          <a @click="$router.back()">
+            <span>{{$t('peers.return_network')}}</span>
+          </a>
+        </p>
+        <div class="w dfl">
+          <div class="block_blue radius_blue">
+            <p>{{$t('peers.total_peers')}}</p>
+            <p>
+              <span>{{peersCount}}</span>
+            </p>
+          </div>
+          <div class="block_blue radius_blue">
+            <p>{{$t('peers.active_hub')}}</p>
+            <p>
+              <span v-loading="minerList?  false:true">{{activeHubCount}}</span>
+            </p>
+          </div>
+          <div class="block_blue radius_blue">
+            <p>{{$t('peers.active_peers')}}</p>
+            <p>
+              <span>{{activePeersCount}}</span>
+            </p>
+          </div>
         </div>
-
-        <!--add black list-->
-        <div class="modal" id="blacklist_peer_modal" v-show="blacklistDialog">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button class="close" @click="closeDialog"></button>
-                        <h4 class="modal-title">{{$t('peers.join_blacklist')}}</h4>
-                    </div>
-                    <div class="modal-body modal-peer">
-                        <p>{{$t('peers.join_blacklist_tip1')}}{{blacklistPeer}}{{$t('peers.join_blacklist_tip2')}}</p>
-                        <p>{{$t('peers.admin_password')}}</p>
-                        <input v-model="adminPassword" type="password"/>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" v-loading="loading" class="btn" @click="addBlacklist(blacklistPeer)">
-                            {{$t('peers.join')}}
-                        </button>
-                    </div>
-                </div>
-            </div>
+      </div>
+      <div class="block_map" id="peers-map"></div>
+      <div class="block_list">
+        <p>
+          <span class="block_title fl">
+            <img src="../../assets/img/peerlist.svg" />
+            <span>{{$t('peers.peer_list')}}</span>
+            <span>{{$t('peers.peer_list_link')}}</span>
+          </span>
+          <span class="hrefbtn fr block_title csp">
+            <a @click="openAddPeer">
+              <span>{{$t("network.peers_add")}}</span>
+            </a>
+          </span>
+        </p>
+        <span class="cb"></span>
+        <div class="list_table w br4">
+          <div class="list_content table_responsive data-loading">
+            <table class="table table-striped" id="peers_table">
+              <thead>
+                <tr>
+                  <th>{{$t('peers.peer_address')}}</th>
+                  <th>{{$t('peers.download')}}</th>
+                  <th>{{$t('peers.upload')}}</th>
+                  <th>{{$t('peers.application')}}</th>
+                  <th>{{$t('peers.platform')}}</th>
+                  <th>{{$t('peers.server')}}</th>
+                  <th>{{$t('peers.operating')}}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="(peer,index) in peersList"
+                  v-if="index >= ((currentPage - 1) * pageSize) && index <= (currentPage * pageSize -1)"
+                >
+                  <td class="image_text linker" @click="openInfo(peer.address)">
+                    <el-tooltip
+                      class="item"
+                      placement="top"
+                      effect="light"
+                      :content="peerState(peer.state)"
+                    >
+                      <span class="peer-icon" :class="'icon'+peer.state">
+                        <span>{{peer.address}}</span>
+                      </span>
+                    </el-tooltip>
+                  </td>
+                  <td>{{formatByte(peer.downloadedVolume)}}</td>
+                  <td>{{formatByte(peer.uploadedVolume)}}</td>
+                  <td>
+                    <span class="patch">{{peer.application}}&nbsp;{{peer.version}}</span>
+                  </td>
+                  <td>{{peer.platform}}</td>
+                  <td class="linker service">
+                    <el-tooltip
+                      v-for="service in peer.services"
+                      class="item"
+                      placement="top"
+                      effect="light"
+                      :content="getPeerServicesString(service)"
+                    >
+                      <span>{{service}}</span>
+                    </el-tooltip>
+                  </td>
+                  <td>
+                    <button
+                      class="list_button w40"
+                      @click="openConnectPeer(peer.address)"
+                    >{{$t('peers.link')}}</button>
+                    <button
+                      class="list_button w70"
+                      @click="openBlackDialog(peer.address)"
+                    >{{$t('peers.blacklist')}}</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="list_pagination" v-if="totalSize > pageSize">
+            <el-pagination
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentChange"
+              :current-page.sync="currentPage"
+              :page-size="pageSize"
+              layout="total, prev, pager, next, jumper"
+              :total="totalSize"
+            ></el-pagination>
+          </div>
         </div>
-        <!--connect peer-->
-        <div class="modal" id="connect_peer_modal" v-show="connectPeerDialog">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button class="close" @click="closeDialog"></button>
-                        <h4 class="modal-title">{{$t('peers.link_peer')}}</h4>
-                    </div>
-                    <div class="modal-body modal-peer">
-                        <p>{{$t('peers.peer_name')}}</p>
-                        <p>{{connectPeer}}</p>
-                        <p>{{$t('peers.admin_password')}}</p>
-                        <input v-model="adminPassword" type="password"/>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" v-loading="loading" class="btn" @click="addConnectPeer(connectPeer)">
-                            {{$t('peers.link')}}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--add peer-->
-        <div class="modal" id="add_peer_modal" v-show="addPeerDialog">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button class="close" @click="closeDialog"></button>
-                        <h4 class="modal-title">{{$t("peers.peers_add")}}</h4>
-                    </div>
-                    <div class="modal-body modal-peer">
-                        <p>{{$t("peers.peer_address")}}</p>
-                        <input v-model="addPeerAddress" type="text">
-                        <p class="mt10">{{$t("peers.admin_password")}}</p>
-                        <input v-model="adminPassword" type="password"/>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" v-loading="loading" class="btn"
-                                @click="addPeer(addPeerAddress,adminPassword)">
-                            {{$t("peers.join")}}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--view peer info-->
-        <div class="modal_info" id="peer_info" v-show="peerInfoDialog">
-            <div class="modal-header">
-                <img class="close" src="../../assets/img/error.svg" @click="closeDialog"/>
-                <h4 class="modal-title">
-                    <span>{{$t('peers.peer')}} {{peerInfo.address}}</span>
-                </h4>
-            </div>
-            <div class="modal-body">
-                <table class="table">
-                    <tbody>
-                    <tr>
-                        <th>Blockchain State</th>
-                        <td>{{peerInfo.blockchainState}}</td>
-                        <th>{{$t('peers.communication_port')}}</th>
-                        <td>{{peerInfo.port}}</td>
-                    </tr>
-                    <tr>
-                        <th>{{$t('peers.server')}}</th>
-                        <td><span v-for="service in peerInfo.services">{{service}}&nbsp;</span></td>
-                        <th>Outbound Web Socket</th>
-                        <td>{{peerInfo.outboundWebSocket}}</td>
-                    </tr>
-                    <tr>
-                        <th>{{$t('peers.version')}}</th>
-                        <td>{{peerInfo.application}} {{peerInfo.version}}</td>
-                        <th>Peer Load</th>
-                        <td v-if="peerInfo.peerLoad">{{peerInfo.peerLoad.load}}</td>
-                        <td v-else></td>
-                    </tr>
-                    <tr>
-                        <th>{{$t('peers.platform')}}</th>
-                        <td>{{peerInfo.platform}}</td>
-                        <th>Last Connection Attempt</th>
-                        <td>{{$global.myFormatTime(peerInfo.lastConnectAttempt,'YMDHMS',true)}}</td>
-                    </tr>
-                    <tr>
-                        <th>{{$t('peers.latest_update')}}</th>
-                        <td>{{$global.myFormatTime(peerInfo.lastUpdated,'YMDHMS',true)}}</td>
-                        <th>{{$t('peers.status')}}</th>
-                        <td v-if="peerInfo.state === 0">NON_CONNECTED</td>
-                        <td v-else-if="peerInfo.state === 1">CONNECTED</td>
-                        <td v-else-if="peerInfo.state === 2">DISCONNECTED</td>
-                    </tr>
-                    <tr>
-                        <th>{{$t('peers.blacklist')}}</th>
-                        <td>{{peerInfo.blacklisted}}</td>
-                        <th>{{$t('peers.shared_address')}}</th>
-                        <td>{{peerInfo.shareAddress}}</td>
-                    </tr>
-                    <tr>
-                        <th>{{$t('peers.shared_address')}}</th>
-                        <td>{{peerInfo.announcedAddress}}</td>
-                        <th>{{$t('peers.download')}}</th>
-                        <td>{{formatByte(peerInfo.downloadedVolume)}}</td>
-                    </tr>
-                    <tr>
-                        <th>Api Port</th>
-                        <td>{{peerInfo.apiPort}}</td>
-                        <th>{{$t('peers.upload')}}</th>
-                        <td>{{formatByte(peerInfo.uploadedVolume)}}</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+      </div>
     </div>
+
+    <!--add black list-->
+    <div class="modal" id="blacklist_peer_modal" v-show="blacklistDialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button class="close" @click="closeDialog"></button>
+            <h4 class="modal-title">{{$t('peers.join_blacklist')}}</h4>
+          </div>
+          <div class="modal-body modal-peer">
+            <p>{{$t('peers.join_blacklist_tip1')}}{{blacklistPeer}}{{$t('peers.join_blacklist_tip2')}}</p>
+            <p>{{$t('peers.admin_password')}}</p>
+            <input v-model="adminPassword" type="password" />
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              v-loading="loading"
+              class="btn"
+              @click="addBlacklist(blacklistPeer)"
+            >{{$t('peers.join')}}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--connect peer-->
+    <div class="modal" id="connect_peer_modal" v-show="connectPeerDialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button class="close" @click="closeDialog"></button>
+            <h4 class="modal-title">{{$t('peers.link_peer')}}</h4>
+          </div>
+          <div class="modal-body modal-peer">
+            <p>{{$t('peers.peer_name')}}</p>
+            <p>{{connectPeer}}</p>
+            <p>{{$t('peers.admin_password')}}</p>
+            <input v-model="adminPassword" type="password" />
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              v-loading="loading"
+              class="btn"
+              @click="addConnectPeer(connectPeer)"
+            >{{$t('peers.link')}}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--add peer-->
+    <div class="modal" id="add_peer_modal" v-show="addPeerDialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button class="close" @click="closeDialog"></button>
+            <h4 class="modal-title">{{$t("peers.peers_add")}}</h4>
+          </div>
+          <div class="modal-body modal-peer">
+            <p>{{$t("peers.peer_address")}}</p>
+            <input v-model="addPeerAddress" type="text" />
+            <p class="mt10">{{$t("peers.admin_password")}}</p>
+            <input v-model="adminPassword" type="password" />
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              v-loading="loading"
+              class="btn"
+              @click="addPeer(addPeerAddress,adminPassword)"
+            >{{$t("peers.join")}}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--view peer info-->
+    <div class="modal_info" id="peer_info" v-show="peerInfoDialog">
+      <div class="modal-header">
+        <img class="close" src="../../assets/img/error.svg" @click="closeDialog" />
+        <h4 class="modal-title">
+          <span>{{$t('peers.peer')}} {{peerInfo.address}}</span>
+        </h4>
+      </div>
+      <div class="modal-body">
+        <table class="table">
+          <tbody>
+            <tr>
+              <th>Blockchain State</th>
+              <td>{{peerInfo.blockchainState}}</td>
+              <th>{{$t('peers.communication_port')}}</th>
+              <td>{{peerInfo.port}}</td>
+            </tr>
+            <tr>
+              <th>{{$t('peers.server')}}</th>
+              <td>
+                <span v-for="service in peerInfo.services">{{service}}&nbsp;</span>
+              </td>
+              <th>Outbound Web Socket</th>
+              <td>{{peerInfo.outboundWebSocket}}</td>
+            </tr>
+            <tr>
+              <th>{{$t('peers.version')}}</th>
+              <td>{{peerInfo.application}} {{peerInfo.version}}</td>
+              <th>Peer Load</th>
+              <td v-if="peerInfo.peerLoad">{{peerInfo.peerLoad.load}}</td>
+              <td v-else></td>
+            </tr>
+            <tr>
+              <th>{{$t('peers.platform')}}</th>
+              <td>{{peerInfo.platform}}</td>
+              <th>Last Connection Attempt</th>
+              <td>{{$global.myFormatTime(peerInfo.lastConnectAttempt,'YMDHMS',true)}}</td>
+            </tr>
+            <tr>
+              <th>{{$t('peers.latest_update')}}</th>
+              <td>{{$global.myFormatTime(peerInfo.lastUpdated,'YMDHMS',true)}}</td>
+              <th>{{$t('peers.status')}}</th>
+              <td v-if="peerInfo.state === 0">NON_CONNECTED</td>
+              <td v-else-if="peerInfo.state === 1">CONNECTED</td>
+              <td v-else-if="peerInfo.state === 2">DISCONNECTED</td>
+            </tr>
+            <tr>
+              <th>{{$t('peers.blacklist')}}</th>
+              <td>{{peerInfo.blacklisted}}</td>
+              <th>{{$t('peers.shared_address')}}</th>
+              <td>{{peerInfo.shareAddress}}</td>
+            </tr>
+            <tr>
+              <th>{{$t('peers.shared_address')}}</th>
+              <td>{{peerInfo.announcedAddress}}</td>
+              <th>{{$t('peers.download')}}</th>
+              <td>{{formatByte(peerInfo.downloadedVolume)}}</td>
+            </tr>
+            <tr>
+              <th>Api Port</th>
+              <td>{{peerInfo.apiPort}}</td>
+              <th>{{$t('peers.upload')}}</th>
+              <td>{{formatByte(peerInfo.uploadedVolume)}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </template>
 <script>
     export default {
@@ -275,6 +303,7 @@
             let _this = this;
             _this.getSPPeers();
             _this.init(_this.$global.peers.peers);
+            console.log("_this.$global", _this.$global)
         },
         methods: {
             init: function (peersList) {
@@ -300,6 +329,8 @@
                         _this.peersList = _this.peersList.concat(res.data);
                         _this.totalSize = _this.peersList.length;
                     }
+                }).catch(err => {
+                    console.log("getSPPeers: ", err)
                 });
             },
             openBlackDialog: function (address) {
@@ -478,13 +509,25 @@
         },
         mounted() {
             this.$global.drawPeers(this.peersLocationList, this.peersTimeList);
-        }
+            window.onbeforeunload = function (e) {
+                e = e || window.event;
+
+                debugger;
+
+                // 兼容IE8和Firefox 4之前的版本
+                if (e) {
+                    e.returnValue = "您是否确认离开此页面-您输入的数据可能不会被保存";
+                }
+
+                // Chrome, Safari, Firefox 4+, Opera 12+ , IE 9+
+                return "您是否确认离开此页面-您输入的数据可能不会被保存";
+            };
+        },
     };
 </script>
 <style lang="scss" type="text/scss">
-    /*@import '~scss_vars';*/
-    @import './style.scss';
+/*@import '~scss_vars';*/
+@import "./style.scss";
 </style>
 <style scoped lang="scss" type="text/css">
-
 </style>
