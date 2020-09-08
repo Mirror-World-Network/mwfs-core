@@ -490,6 +490,10 @@ public class PocScore implements Serializable {
         this.luck = luck;
     }
 
+    public BigInteger getTotal() {
+        return total;
+    }
+
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);

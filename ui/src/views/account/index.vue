@@ -865,6 +865,70 @@
                     </tbody>
                 </table>
             </div>
+            <div class="pocScore-detail">
+                <el-table
+                    :data="pocScoreDetail"
+                    style="width: 100%"
+                    :show-header="false">
+                    <el-table-column type="expand">
+                        <template slot-scope="props">
+                            <el-form label-position="left" inline class="pocScore-table-expand">
+                                <div>
+                                    <el-row :gutter="15">
+                                        <el-col :span="8">
+                                            <el-form-item :label="$t('network.poc_score_ss')">
+                                                <span>{{ props.row.ssScore }}</span>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="8">
+                                            <el-form-item :label="$t('network.poc_score_node_type')">
+                                                <span>{{ props.row.nodeTypeScore }}</span>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row :gutter="15">
+                                        <el-col :span="8">
+                                            <el-form-item :label="$t('network.poc_score_hardware')">
+                                                <span>{{ props.row.hardwareScore }}</span>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="8">
+                                            <el-form-item :label="$t('network.poc_score_network')">
+                                                <span>{{ props.row.networkScore }}</span>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="8">
+                                            <el-form-item :label="$t('network.poc_score_performance')">
+                                                <span>{{ props.row.performanceScore }}</span>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                </div>
+                            </el-form>
+                        </template>
+                    </el-table-column>
+                    <el-table-column>
+                        <template slot-scope="props">
+                            <span style="color: #00ff99">{{ props.row.address }}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column>
+                        <template slot-scope="props">
+                            <span>{{ props.row.nodeType }}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column>
+                        <template slot-scope="props">
+                            <span>{{ props.row.pocScoreTotal }}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column>
+                        <template slot-scope="props">
+                            <span>{{ props.row.nodeTime }}</span>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </div>
         </div>
         <dialogCommon :tradingInfoOpen="tradingInfoDialog" :trading="trading"
                       :accountInfoOpen="accountInfoDialog" :generatorRS="generatorRS"
@@ -1007,6 +1071,23 @@
                     unconfirmedBalanceNQT: '',
                     pocScore:'--',
                 },
+                pocScoreDetail: [{
+                            bcScore: 0,
+                            blockMissScore: 0,
+                            effectiveBalance: 1,
+                            hardwareScore: 0,
+                            height: 0,
+                            networkScore: 0,
+                            nodeTypeScore: 0,
+                            onlineRateScore: 0,
+                            performanceScore: 0,
+                            serverScore: 0,
+                            ssScore: 0,
+                            address: SSO.accountRS,
+                            nodeType: 0,
+                            pocScoreTotal: 0,
+                            nodeTime:"--",
+                            }],
                 selectType: '',
                 transactionType: [{
                     value: '',
@@ -1220,8 +1301,23 @@
                 _this.accountInfo.frozenBalanceNQT = res.frozenBalanceNQT;
                 _this.accountInfo.guaranteedBalanceNQT = res.guaranteedBalanceNQT;
                 _this.accountInfo.unconfirmedBalanceNQT = res.unconfirmedBalanceNQT;
-                _this.accountInfo.pocScore = res.pocScore;
+                _this.accountInfo.pocScore = res.pocScore.total;
                 _this.accountInfo.name = res.name;
+
+                _this.pocScoreDetail[0].bcScore = res.pocScore.bcScore;
+                _this.pocScoreDetail[0].blockMissScore = res.pocScore.blockMissScore;
+                _this.pocScoreDetail[0].effectiveBalance = res.pocScore.effectiveBalance;
+                _this.pocScoreDetail[0].hardwareScore = res.pocScore.hardwareScore;
+                _this.pocScoreDetail[0].height = res.pocScore.height;
+                _this.pocScoreDetail[0].networkScore = res.pocScore.networkScore;
+                _this.pocScoreDetail[0].nodeTypeScore = res.pocScore.nodeTypeScore;
+                _this.pocScoreDetail[0].onlineRateScore = res.pocScore.onlineRateScore;
+                _this.pocScoreDetail[0].performanceScore = res.pocScore.performanceScore;
+                _this.pocScoreDetail[0].serverScore = res.pocScore.serverScore;
+                _this.pocScoreDetail[0].ssScore = res.pocScore.ssScore;
+                _this.pocScoreDetail[0].nodeType = res.nodeType;
+                _this.pocScoreDetail[0].pocScoreTotal = res.pocScore.total;
+                _this.pocScoreDetail[0].nodeTime = res.declaredTime;
             });
             _this.getAccountTransactionList();
             _this.getDrawData();
