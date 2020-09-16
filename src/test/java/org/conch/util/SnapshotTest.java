@@ -53,11 +53,12 @@ public class SnapshotTest {
 
                     org.json.simple.JSONObject txObj = transaction.getAttachment().getJSONObject();
                     txObj.put("height", transaction.getHeight());
-                    Long accountId = (long)txObj.get("accountId");
-                    if(accountId != 0){
-                        txObj.put("rsAccount", Account.rsAccount(accountId));
+                    if (null != txObj.get("accountId")) {
+                        Long accountId = (long)txObj.get("accountId");
+                        if(accountId != 0){
+                            txObj.put("rsAccount", Account.rsAccount(accountId));
+                        }
                     }
-                    
                     txMap.put((String) txObj.get("ip"), txObj);
                 }
 
