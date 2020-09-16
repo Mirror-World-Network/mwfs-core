@@ -28,6 +28,7 @@ import org.conch.consensus.poc.PocScore;
 import org.conch.db.Db;
 import org.conch.db.DbIterator;
 import org.conch.db.DbUtils;
+import org.conch.peer.CertifiedPeer;
 import org.conch.util.Convert;
 import org.conch.util.Logger;
 import org.json.simple.JSONArray;
@@ -39,6 +40,7 @@ import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Map;
 
 public final class GetAccount extends APIServlet.APIRequestHandler {
 
@@ -157,11 +159,20 @@ public final class GetAccount extends APIServlet.APIRequestHandler {
         }
 
         // poc score
-        BigInteger pocScore = BigInteger.ZERO;
+        // BigInteger pocScore = BigInteger.ZERO;
         try{
+            //PocScore scoreObj = Conch.getPocProcessor().calPocScore(account, Conch.getHeight());
+            //pocScore = scoreObj.total();
+            //response.put("pocScore",  pocScore);
             PocScore scoreObj = Conch.getPocProcessor().calPocScore(account, Conch.getHeight());
-            pocScore = scoreObj.total();
-            response.put("pocScore",  pocScore);
+            Map<Long, CertifiedPeer> certifiedPeers = Conch.getPocProcessor().getCertifiedPeers();
+            CertifiedPeer certifiedPeer = certifiedPeers.get(account.getId());
+            if (scoreObj.getTotal() == null) scoreObj.setTotal(0l);
+            //pocScore = scoreObj.total();
+            //pocScore.add(scoreObj);
+            response.put("pocScore", com.alibaba.fastjson.JSONObject.toJSON(scoreObj));
+            response.put("nodeType", certifiedPeer.getType());
+            response.put("declaredTime", certifiedPeer == null ? "" : certifiedPeer.getUpdateTime());
         }catch(Exception e){
             Logger.logErrorMessage("can't get the poc score", e);
         }

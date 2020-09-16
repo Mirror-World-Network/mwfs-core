@@ -27,6 +27,10 @@ import org.conch.db.Db;
 import org.conch.db.DbUtils;
 import org.conch.http.APIServlet;
 import org.conch.http.APITag;
+import org.conch.tx.Attachment;
+import org.conch.tx.TransactionDb;
+import org.conch.tx.TransactionImpl;
+import org.conch.tx.TransactionType;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONStreamAware;
 
@@ -57,6 +61,7 @@ public final class GetTxStatistics extends APIServlet.APIRequestHandler {
         Long storageDataLength = 0L;
         Long storageCount24H = 0L;
         Long storageDataLength24H = 0L;
+        Long crowdMinerJoinerCount = 0l;
         JSONObject jsonObject = new JSONObject();
 
         Connection con = null;
@@ -100,13 +105,14 @@ public final class GetTxStatistics extends APIServlet.APIRequestHandler {
                     storageDataLength24H = rs.getLong(2);
                 }
             }
+            crowdMinerJoinerCount = getCoinBaseCrowdMinerJoinersCount(con, TransactionType.TYPE_COIN_BASE);
             jsonObject.put("transferCount", transferCount);
             jsonObject.put("transferAmount", transferAmount);
             jsonObject.put("transferCount24H", transferCount24H);
             jsonObject.put("transferAmount24H", transferAmount24H);
             jsonObject.put("storageCount", storageCount);
-            jsonObject.put("poolCount", getTransactionCountByType(con, 8));
-            jsonObject.put("coinBaseCount", getTransactionCountByType(con, 9));
+            jsonObject.put("poolCount", getTransactionCountByType(con, TransactionType.TYPE_SHARDER_POOL));
+            jsonObject.put("coinBaseCount", getTransactionCountByType(con, TransactionType.TYPE_COIN_BASE) + crowdMinerJoinerCount);
             jsonObject.put("storageDataLength", storageDataLength);
             jsonObject.put("storageCount24H", storageCount24H);
             jsonObject.put("storageDataLength24H", storageDataLength24H);
@@ -135,6 +141,29 @@ public final class GetTxStatistics extends APIServlet.APIRequestHandler {
             return rs.getLong(1);
         }
         return 0L;
+    }
+
+    /**
+     * 获取coinbase中的crowdminer和joiner的数量
+     *
+     * @param con
+     * @param type
+     * @return
+     * @throws SQLException
+     * @throws ConchException.NotValidException
+     */
+    private long getCoinBaseCrowdMinerJoinersCount(Connection con, int type) throws SQLException, ConchException.NotValidException {
+        PreparedStatement ps = con.prepareStatement("SELECT * FROM TRANSACTION WHERE TYPE = ?");
+        ps.setInt(1, type);
+        ResultSet rs = ps.executeQuery();
+        long count = 0;
+        if (rs.next()) {
+            TransactionImpl transaction = TransactionDb.loadTransaction(con, rs);
+            Attachment.CoinBase coinBase = (Attachment.CoinBase) transaction.getAttachment();
+            count = count + (coinBase.getConsignors() == null ? 0 : coinBase.getConsignors().size())
+                    + (coinBase.getCrowdMiners() == null ? 0 : coinBase.getCrowdMiners().size());
+        }
+        return count;
     }
 
     @Override
