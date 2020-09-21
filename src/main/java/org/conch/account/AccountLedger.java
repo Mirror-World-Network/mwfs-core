@@ -860,7 +860,10 @@ public class AccountLedger {
             try (PreparedStatement stmt = con.prepareStatement("INSERT INTO account_ledger "
                     + "(account_id, event_type, event_id, holding_type, holding_id, change, balance, "
                     + "block_id, height, timestamp) "
-                    + "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
+                    + "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                 PreparedStatement updateStmt = con.prepareStatement("UPDATE account_ledger "
+                         + "SET latest = false WHERE account_id = ? AND height < ?")
+            ) {
                 int i=0;
                 stmt.setLong(++i, accountId);
                 stmt.setByte(++i, (byte) event.getCode());
@@ -882,6 +885,9 @@ public class AccountLedger {
                         ledgerId = rs.getLong(1);
                     }
                 }
+                updateStmt.setLong(1, accountId);
+                updateStmt.setInt(2, height);
+                updateStmt.executeUpdate();
             }
         }
     }

@@ -207,6 +207,118 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
 
     };
 
+    private final Runnable syncAccountBlockMsg = new Runnable() {
+        @Override
+        public void run() {
+            //check height
+            if (checkHeight("ACCOUNT")) {
+                try {
+                    long t1 = System.currentTimeMillis();
+                    Db.db.beginTransaction();
+                    Account.syncAccountTable("ACCOUNT","ACCOUNT_CACHE",Constants.SYNC_WORK_BLOCK_NUM);
+                    Account.syncAccountTable("ACCOUNT_CACHE","ACCOUNT_HISTORY",Constants.SYNC_CACHE_BLOCK_NUM);
+                    Db.db.commitTransaction();
+                    long t2 = System.currentTimeMillis();
+                    Logger.logDebugMessage("syncTime111================" + (t2 - t1));
+                } catch (Exception e) {
+                    Db.db.rollbackTransaction();
+                }finally {
+                    Db.db.endTransaction();
+                }
+            }
+        }
+    };
+
+    private final Runnable syncAccountGuaranteedBalanceBlockMsg = new Runnable() {
+        @Override
+        public void run() {
+            //check height
+            if (checkHeight("ACCOUNT_GUARANTEED_BALANCE")) {
+                try {
+                    long t1 = System.currentTimeMillis();
+                    Db.db.beginTransaction();
+                    Account.syncAccountGuaranteedBalanceTable("ACCOUNT_GUARANTEED_BALANCE","ACCOUNT_GUARANTEED_BALANCE_CACHE",Constants.SYNC_WORK_BLOCK_NUM);
+                    Account.syncAccountGuaranteedBalanceTable("ACCOUNT_GUARANTEED_BALANCE_CACHE","ACCOUNT_GUARANTEED_BALANCE_HISTORY",Constants.SYNC_CACHE_BLOCK_NUM);
+                    Db.db.commitTransaction();
+                    long t2 = System.currentTimeMillis();
+                    Logger.logDebugMessage("syncTime222================" + (t2 - t1));
+                } catch (Exception e) {
+                    Db.db.rollbackTransaction();
+                }finally {
+                    Db.db.endTransaction();
+                }
+            }
+        }
+    };
+
+    private final Runnable syncAccountLedgerBlockMsg = new Runnable() {
+        @Override
+        public void run() {
+            //check height
+            if (checkHeight("ACCOUNT_LEDGER")) {
+                try {
+                    long t1 = System.currentTimeMillis();
+                    Db.db.beginTransaction();
+                    Account.syncAccountLedgerTable("ACCOUNT_LEDGER","ACCOUNT_LEDGER_CACHE",Constants.SYNC_WORK_BLOCK_NUM);
+                    Account.syncAccountLedgerTable("ACCOUNT_LEDGER_CACHE","ACCOUNT_LEDGER_HISTORY",Constants.SYNC_CACHE_BLOCK_NUM);
+                    Db.db.commitTransaction();
+                    long t2 = System.currentTimeMillis();
+                    Logger.logDebugMessage("syncTime333================" + (t2 - t1));
+                } catch (Exception e) {
+                    Db.db.rollbackTransaction();
+                }finally {
+                    Db.db.endTransaction();
+                }
+            }
+        }
+    };
+
+    private final Runnable syncAccountPocScoreBlockMsg = new Runnable() {
+        @Override
+        public void run() {
+            //check height
+            if (checkHeight("ACCOUNT_POC_SCORE")) {
+                try {
+                    long t1 = System.currentTimeMillis();
+                    Db.db.beginTransaction();
+                    Account.syncAccountPocScoreTable("ACCOUNT_POC_SCORE", "ACCOUNT_POC_SCORE_CACHE", Constants.SYNC_WORK_BLOCK_NUM);
+                    Account.syncAccountPocScoreTable("ACCOUNT_POC_SCORE_CACHE", "ACCOUNT_POC_SCORE_HISTORY", Constants.SYNC_CACHE_BLOCK_NUM);
+                    Db.db.commitTransaction();
+                    long t2 = System.currentTimeMillis();
+                    Logger.logDebugMessage("syncTime444================" + (t2 - t1));
+                } catch (Exception e) {
+                    Db.db.rollbackTransaction();
+                }finally {
+                    Db.db.endTransaction();
+                }
+            }
+        }
+    };
+
+    private boolean checkHeight(String tableName) {
+        Connection con = null;
+        try {
+            con = Db.db.getConnection();
+            PreparedStatement pstmtSelectWork = con.prepareStatement("SELECT max(HEIGHT) height FROM " + tableName);
+            PreparedStatement pstmtSelectHistory = con.prepareStatement("SELECT max(HEIGHT) height FROM " + tableName + "_history");
+
+            ResultSet workRs = pstmtSelectWork.executeQuery();
+            ResultSet historyRs = pstmtSelectHistory.executeQuery();
+            if (workRs.next() && historyRs.next() ) {
+                int workHeight = workRs.getInt("height");
+                int historyHeight = historyRs.getInt("height");
+                return (workHeight - historyHeight > Constants.SYNC_WORK_BLOCK_NUM);
+            }
+        } catch (Exception e) {
+            Logger.logDebugMessage(e.getMessage());
+            return false;
+        }finally {
+            DbUtils.close(con);
+
+        }
+        return false;
+    }
+
     /**
      * Synchronize blocks from the feeder peer
      *
@@ -1286,6 +1398,12 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             Logger.logInfoMessage("Current node mode[light client=%s, offline=%s]", Constants.isLightClient, Constants.isOffline);
             Logger.logInfoMessage("Create a thread 'GetMoreBlocks' to sync the blocks from other peers.....");
             ThreadPool.scheduleThread("GetMoreBlocks", getMoreBlocksThread, 1);
+        }
+        if (true) {
+            ThreadPool.scheduleThread("SyncAccountBlockMsg", syncAccountBlockMsg, Constants.SYNC_TIME, TimeUnit.SECONDS);
+            ThreadPool.scheduleThread("syncAccountGuaranteedBalanceBlockMsg", syncAccountGuaranteedBalanceBlockMsg, Constants.SYNC_TIME, TimeUnit.SECONDS);
+            ThreadPool.scheduleThread("syncAccountLedgerBlockMsg", syncAccountLedgerBlockMsg, Constants.SYNC_TIME, TimeUnit.SECONDS);
+            ThreadPool.scheduleThread("syncAccountPocScoreBlockMsg", syncAccountPocScoreBlockMsg, Constants.SYNC_TIME, TimeUnit.SECONDS);
         }
     }
 

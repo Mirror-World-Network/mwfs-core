@@ -208,11 +208,21 @@ public class PocDb  {
 
             PreparedStatement pstmtInsert = con.prepareStatement("INSERT INTO account_poc_score(account_id, "
                     + " poc_score, height, poc_detail) VALUES(?, ?, ?, ?)");
+            PreparedStatement updateStmt = con.prepareStatement("UPDATE account_poc_score "
+                    + "SET latest = false WHERE account_id = ? AND height < ?");
+
 
             pstmtInsert.setLong(1, pocScore.getAccountId());
             pstmtInsert.setLong(2, pocScore.total().longValue());
             pstmtInsert.setInt(3, pocScore.getHeight());
             pstmtInsert.setString(4, pocScore.toSimpleJson());
+
+            updateStmt.setLong(1, pocScore.getAccountId());
+            updateStmt.setInt(2, pocScore.getHeight());
+            int i = updateStmt.executeUpdate();
+            if (i < 0) {
+                return i;
+            }
             return pstmtInsert.executeUpdate();
         }
 

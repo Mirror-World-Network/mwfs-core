@@ -2099,9 +2099,12 @@ public final class Account {
                     + "WHERE account_id = ? and height = ?");
             PreparedStatement pstmtUpdate = con.prepareStatement("MERGE INTO account_guaranteed_balance (account_id, "
                     + " additions, height) KEY (account_id, height) VALUES(?, ?, ?)");
+            PreparedStatement pstmtUpdateLatest = con.prepareStatement("UPDATE account_guaranteed_balance SET "
+                    + "latest = false WHERE account_id = ? AND height < ?");
             
             pstmtSelect.setLong(1, this.id);
             pstmtSelect.setInt(2, blockchainHeight);
+
             try (ResultSet rs = pstmtSelect.executeQuery()) {
                 long additions = amountNQT;
                 if (rs.next()) {
@@ -2111,6 +2114,10 @@ public final class Account {
                 pstmtUpdate.setLong(2, additions);
                 pstmtUpdate.setInt(3, blockchainHeight);
                 pstmtUpdate.executeUpdate();
+
+                pstmtUpdateLatest.setLong(1, this.id);
+                pstmtUpdateLatest.setInt(2, blockchainHeight);
+                pstmtUpdateLatest.executeUpdate();
             }
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
@@ -2159,5 +2166,283 @@ public final class Account {
     @Override
     public String toString() {
         return "Account " + Long.toUnsignedString(getId());
+    }
+
+
+    public static void syncAccountTable(String sourceTable,String targetTable,int dif) {
+        Connection con = null;
+        try {
+            con = Db.db.getConnection();
+            PreparedStatement pstmtSelectWork = con.prepareStatement("SELECT max(HEIGHT) height FROM " + sourceTable);
+            PreparedStatement pstmtSelectHistory = con.prepareStatement("SELECT max(HEIGHT) height FROM " + targetTable);
+            PreparedStatement pstmtSelect = con.prepareStatement("SELECT DB_ID,ID,BALANCE,UNCONFIRMED_BALANCE,FORGED_BALANCE," +
+                    "ACTIVE_LESSEE_ID,HAS_CONTROL_PHASING,HEIGHT,LATEST,FROZEN_BALANCE FROM " + sourceTable
+                    + " WHERE height > ? and height < ?");
+
+/*
+            PreparedStatement pstmtInsert = con.prepareStatement("INSERT INTO account (ID,BALANCE,UNCONFIRMED_BALANCE,FORGED_BALANCE," +
+                    "ACTIVE_LESSEE_ID,HAS_CONTROL_PHASING,HEIGHT,LATEST,FROZEN_BALANCE) KEY (account_id, height) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+*/
+
+            ResultSet workHeightRs = pstmtSelectWork.executeQuery();
+            ResultSet heightRs = pstmtSelectHistory.executeQuery();
+            if (!workHeightRs.next()) {
+                throw new RuntimeException("table " + sourceTable + " data not exist!");
+            }
+            int workHeight = workHeightRs.getInt("height");
+            int floorHeight = heightRs.next() ? heightRs.getInt("height") : 0;
+            Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
+            if (workHeight - floorHeight < dif) {
+                return;
+            }
+            int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
+
+            pstmtSelect.setInt(1, floorHeight);
+            pstmtSelect.setInt(2, ceilingHeight);
+            ResultSet resultSet = pstmtSelect.executeQuery();
+            while (!resultSet.next()) {
+                floorHeight = ceilingHeight;
+                ceilingHeight = ceilingHeight + Constants.SYNC_BLOCK_NUM;
+                if (floorHeight > workHeight) {
+                    Logger.logDebugMessage("sync data finish!");
+                    return;
+                }
+                pstmtSelect.setInt(1, floorHeight);
+                pstmtSelect.setInt(2, ceilingHeight);
+                resultSet = pstmtSelect.executeQuery();
+            }
+            StringBuilder sb = new StringBuilder("INSERT INTO " + targetTable + " (DB_ID,ID,BALANCE,UNCONFIRMED_BALANCE,FORGED_BALANCE," +
+                    "ACTIVE_LESSEE_ID,HAS_CONTROL_PHASING,HEIGHT,LATEST,FROZEN_BALANCE) VALUES");
+            do {
+                sb.append("(").append(resultSet.getLong("db_id")).append(",");
+                sb.append(resultSet.getLong("id")).append(",");
+                sb.append(resultSet.getLong("balance")).append(",");
+                sb.append(resultSet.getLong("unconfirmed_balance")).append(",");
+                sb.append(resultSet.getLong("forged_balance")).append(",");
+                sb.append(resultSet.getLong("active_lessee_id")).append(",");
+                sb.append(resultSet.getBoolean("has_control_phasing")).append(",");
+                sb.append(resultSet.getInt("height")).append(",");
+                sb.append(resultSet.getBoolean("latest")).append(",");
+                sb.append(resultSet.getLong("frozen_balance")).append(")").append(",");
+            } while (resultSet.next());
+            sb.deleteCharAt(sb.length() - 1);
+            PreparedStatement pstmtInsert = con.prepareStatement(sb.toString());
+            pstmtInsert.execute();
+            PreparedStatement pstmtDelete = con.prepareStatement("DELETE FROM " + sourceTable + " "
+                    + "WHERE height < ? and latest = ?");
+            pstmtDelete.setInt(1, ceilingHeight);
+            pstmtDelete.setBoolean(2, false);
+            pstmtDelete.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.toString(), e);
+        }finally {
+            DbUtils.close(con);
+        }
+    }
+
+
+    public static void syncAccountGuaranteedBalanceTable(String sourceTable,String targetTable,int dif) {
+        Connection con = null;
+        try {
+            con = Db.db.getConnection();
+            PreparedStatement pstmtSelectWork = con.prepareStatement("SELECT max(HEIGHT) height FROM " + sourceTable);
+            PreparedStatement pstmtSelectHistory = con.prepareStatement("SELECT max(HEIGHT) height FROM " + targetTable);
+            PreparedStatement pstmtSelect = con.prepareStatement("SELECT DB_ID,ACCOUNT_ID,ADDITIONS,HEIGHT,LATEST" +
+                    " FROM " + sourceTable + " WHERE height > ? and height < ?");
+
+/*
+            PreparedStatement pstmtInsert = con.prepareStatement("INSERT INTO account (ID,BALANCE,UNCONFIRMED_BALANCE,FORGED_BALANCE," +
+                    "ACTIVE_LESSEE_ID,HAS_CONTROL_PHASING,HEIGHT,LATEST,FROZEN_BALANCE) KEY (account_id, height) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+*/
+
+            ResultSet workHeightRs = pstmtSelectWork.executeQuery();
+            ResultSet heightRs = pstmtSelectHistory.executeQuery();
+            if (!workHeightRs.next()) {
+                throw new RuntimeException("table " + sourceTable + " data not exist!");
+            }
+            int workHeight = workHeightRs.getInt("height");
+            int floorHeight = heightRs.next() ? heightRs.getInt("height") : 0;
+            Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
+            if (workHeight - floorHeight < dif) {
+                return;
+            }
+            int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
+
+            pstmtSelect.setInt(1, floorHeight);
+            pstmtSelect.setInt(2, ceilingHeight);
+            ResultSet resultSet = pstmtSelect.executeQuery();
+            while (!resultSet.next()) {
+                floorHeight = ceilingHeight;
+                ceilingHeight = ceilingHeight + Constants.SYNC_BLOCK_NUM;
+                if (floorHeight > workHeight) {
+                    Logger.logDebugMessage("sync data finish!");
+                    return;
+                }
+                pstmtSelect.setInt(1, floorHeight);
+                pstmtSelect.setInt(2, ceilingHeight);
+                resultSet = pstmtSelect.executeQuery();
+            }
+            StringBuilder sb = new StringBuilder("INSERT INTO " + targetTable + " (DB_ID,ACCOUNT_ID,ADDITIONS,HEIGHT,LATEST) VALUES");
+            do {
+                sb.append("(").append(resultSet.getLong("db_id")).append(",");
+                sb.append(resultSet.getLong("account_id")).append(",");
+                sb.append(resultSet.getLong("additions")).append(",");
+                sb.append(resultSet.getInt("height")).append(",");
+                sb.append(resultSet.getBoolean("latest")).append(")").append(",");
+            } while (resultSet.next());
+            sb.deleteCharAt(sb.length() - 1);
+            PreparedStatement pstmtInsert = con.prepareStatement(sb.toString());
+            pstmtInsert.execute();
+            PreparedStatement pstmtDelete = con.prepareStatement("DELETE FROM " + sourceTable
+                    + " WHERE height < ? and latest = ?");
+            pstmtDelete.setInt(1, ceilingHeight);
+            pstmtDelete.setBoolean(2, false);
+            pstmtDelete.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.toString(), e);
+        }finally {
+            DbUtils.close(con);
+        }
+    }
+
+
+    public static void syncAccountLedgerTable(String sourceTable,String targetTable,int dif) {
+        Connection con = null;
+        try {
+            con = Db.db.getConnection();
+            PreparedStatement pstmtSelectWork = con.prepareStatement("SELECT max(HEIGHT) height FROM " + sourceTable);
+            PreparedStatement pstmtSelectHistory = con.prepareStatement("SELECT max(HEIGHT) height FROM " + targetTable);
+            PreparedStatement pstmtSelect = con.prepareStatement("SELECT DB_ID,ACCOUNT_ID,EVENT_TYPE,EVENT_ID,HOLDING_TYPE," +
+                    "HOLDING_ID,CHANGE,BALANCE,BLOCK_ID,HEIGHT,TIMESTAMP,LATEST FROM " + sourceTable
+                    + " WHERE height > ? and height < ?");
+
+/*
+            PreparedStatement pstmtInsert = con.prepareStatement("INSERT INTO account (ID,BALANCE,UNCONFIRMED_BALANCE,FORGED_BALANCE," +
+                    "ACTIVE_LESSEE_ID,HAS_CONTROL_PHASING,HEIGHT,LATEST,FROZEN_BALANCE) KEY (account_id, height) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+*/
+
+            ResultSet workHeightRs = pstmtSelectWork.executeQuery();
+            ResultSet heightRs = pstmtSelectHistory.executeQuery();
+            if (!workHeightRs.next()) {
+                throw new RuntimeException("table " + sourceTable + " data not exist!");
+            }
+            int workHeight = workHeightRs.getInt("height");
+            int floorHeight = heightRs.next() ? heightRs.getInt("height") : 0;
+            Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
+            if (workHeight - floorHeight < dif) {
+                return;
+            }
+            int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
+
+            pstmtSelect.setInt(1, floorHeight);
+            pstmtSelect.setInt(2, ceilingHeight);
+            ResultSet resultSet = pstmtSelect.executeQuery();
+            while (!resultSet.next()) {
+                floorHeight = ceilingHeight;
+                ceilingHeight = ceilingHeight + Constants.SYNC_BLOCK_NUM;
+                if (floorHeight > workHeight) {
+                    Logger.logDebugMessage("sync data finish!");
+                    return;
+                }
+                pstmtSelect.setInt(1, floorHeight);
+                pstmtSelect.setInt(2, ceilingHeight);
+                resultSet = pstmtSelect.executeQuery();
+            }
+            StringBuilder sb = new StringBuilder("INSERT INTO " + targetTable + " (DB_ID,ACCOUNT_ID,EVENT_TYPE,EVENT_ID,HOLDING_TYPE," +
+                    "HOLDING_ID,CHANGE,BALANCE,BLOCK_ID,HEIGHT,TIMESTAMP,LATEST) VALUES");
+            do {
+                sb.append("(").append(resultSet.getLong("DB_ID")).append(",");
+                sb.append(resultSet.getLong("ACCOUNT_ID")).append(",");
+                sb.append(resultSet.getInt("EVENT_TYPE")).append(",");
+                sb.append(resultSet.getLong("EVENT_ID")).append(",");
+                sb.append(resultSet.getInt("HOLDING_TYPE")).append(",");
+                sb.append(resultSet.getLong("HOLDING_ID")).append(",");
+                sb.append(resultSet.getLong("CHANGE")).append(",");
+                sb.append(resultSet.getLong("BALANCE")).append(",");
+                sb.append(resultSet.getLong("BLOCK_ID")).append(",");
+                sb.append(resultSet.getInt("HEIGHT")).append(",");
+                sb.append(resultSet.getInt("TIMESTAMP")).append(",");
+                sb.append(resultSet.getBoolean("LATEST")).append(")").append(",");
+            } while (resultSet.next());
+            sb.deleteCharAt(sb.length() - 1);
+            PreparedStatement pstmtInsert = con.prepareStatement(sb.toString());
+            pstmtInsert.execute();
+            PreparedStatement pstmtDelete = con.prepareStatement("DELETE FROM "+ sourceTable
+                    + " WHERE height < ? and latest = ?");
+            pstmtDelete.setInt(1, ceilingHeight);
+            pstmtDelete.setBoolean(2, false);
+            pstmtDelete.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.toString(), e);
+        }finally {
+            DbUtils.close(con);
+        }
+    }
+
+
+    public static void syncAccountPocScoreTable(String sourceTable,String targetTable,int dif) {
+        Connection con = null;
+        try {
+            con = Db.db.getConnection();
+            PreparedStatement pstmtSelectWork = con.prepareStatement("SELECT max(HEIGHT) height FROM " + sourceTable);
+            PreparedStatement pstmtSelectHistory = con.prepareStatement("SELECT max(HEIGHT) height FROM " + targetTable);
+            PreparedStatement pstmtSelect = con.prepareStatement("SELECT DB_ID,ACCOUNT_ID,POC_SCORE,HEIGHT,POC_DETAIL,LATEST" +
+                    " FROM " + sourceTable
+                    + " WHERE height > ? and height < ?");
+
+/*
+            PreparedStatement pstmtInsert = con.prepareStatement("INSERT INTO account (ID,BALANCE,UNCONFIRMED_BALANCE,FORGED_BALANCE," +
+                    "ACTIVE_LESSEE_ID,HAS_CONTROL_PHASING,HEIGHT,LATEST,FROZEN_BALANCE) KEY (account_id, height) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+*/
+
+            ResultSet workHeightRs = pstmtSelectWork.executeQuery();
+            ResultSet heightRs = pstmtSelectHistory.executeQuery();
+            if (!workHeightRs.next()) {
+                throw new RuntimeException("table " + sourceTable + " data not exist!");
+            }
+            int workHeight = workHeightRs.getInt("height");
+            int floorHeight = heightRs.next() ? heightRs.getInt("height") : 0;
+            Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
+            if (workHeight - floorHeight < dif) {
+                return;
+            }
+            int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
+
+            pstmtSelect.setInt(1, floorHeight);
+            pstmtSelect.setInt(2, ceilingHeight);
+            ResultSet resultSet = pstmtSelect.executeQuery();
+            while (!resultSet.next()) {
+                floorHeight = ceilingHeight;
+                ceilingHeight = ceilingHeight + Constants.SYNC_BLOCK_NUM;
+                if (floorHeight > workHeight) {
+                    Logger.logDebugMessage("sync data finish!");
+                    return;
+                }
+                pstmtSelect.setInt(1, floorHeight);
+                pstmtSelect.setInt(2, ceilingHeight);
+                resultSet = pstmtSelect.executeQuery();
+            }
+            StringBuilder sb = new StringBuilder("INSERT INTO " + targetTable + " (DB_ID,ACCOUNT_ID,POC_SCORE,HEIGHT,POC_DETAIL,LATEST) VALUES");
+            do {
+                sb.append("(").append(resultSet.getLong("DB_ID")).append(",");
+                sb.append(resultSet.getLong("ACCOUNT_ID")).append(",");
+                sb.append(resultSet.getLong("POC_SCORE")).append(",");
+                sb.append(resultSet.getInt("HEIGHT")).append(",");
+                sb.append(resultSet.getString("POC_DETAIL")).append(",");
+                sb.append(resultSet.getBoolean("LATEST")).append(")").append(",");
+            } while (resultSet.next());
+            sb.deleteCharAt(sb.length() - 1);
+            PreparedStatement pstmtInsert = con.prepareStatement(sb.toString());
+            pstmtInsert.execute();
+            PreparedStatement pstmtDelete = con.prepareStatement("DELETE FROM " + sourceTable
+                    + " WHERE height < ? and latest = ?");
+            pstmtDelete.setInt(1, ceilingHeight);
+            pstmtDelete.setBoolean(2, false);
+            pstmtDelete.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.toString(), e);
+        }finally {
+            DbUtils.close(con);
+        }
     }
 }
