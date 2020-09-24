@@ -652,6 +652,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         blockchain.writeLock();
         try {
             List<BlockImpl> forkBlocks = new ArrayList<>();
+            Logger.logInfoMessage("Will push %d blocks into current chain...", chainBlockIds.size());
             for (int index = 1; index < chainBlockIds.size() && blockchain.getHeight() - startHeight < 720; index++) {
                 if(!getMoreBlocks) break;
 
@@ -662,6 +663,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 BlockImpl block = peerBlock.getBlock();
                 if (blockchain.getLastBlock().getId() == block.getPreviousBlockId()) {
                     try {
+                        Logger.logInfoMessage("Pushing block[%d - %s] into current chain at height %d ...", block.getHeight(), Account.rsAccount(block.getGeneratorId()) , Conch.getHeight());
                         pushBlock(block);
                     } catch (GeneratorNotAcceptedException e) {
                         Generator.blackGenerator(e.getGeneratorId());

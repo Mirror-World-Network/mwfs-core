@@ -121,7 +121,7 @@ export default {
         });
     },
     /**
-     * 获取未出快的交易
+     * 获取未出块的交易
      * @param t
      * @param account
      * @returns {Promise<any>}
