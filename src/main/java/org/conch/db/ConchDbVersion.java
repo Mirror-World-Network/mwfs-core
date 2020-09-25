@@ -1354,25 +1354,45 @@ public class ConchDbVersion extends DbVersion {
                         "create index IF NOT EXISTS ACCOUNT_POC_SCORE_HISTORY_HEIGHT_INDEX on ACCOUNT_POC_SCORE_HISTORY (HEIGHT desc);\n" +
                         "create index IF NOT EXISTS ACCOUNT_POC_SCORE_CACHE_HEIGHT_INDEX on ACCOUNT_POC_SCORE_CACHE (HEIGHT desc);\n" +
 
-                        "ALTER TABLE ACCOUNT_GUARANTEED_BALANCE ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT TRUE;\n" +
-                        "ALTER TABLE ACCOUNT_LEDGER ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT TRUE;");
+                        "ALTER TABLE ACCOUNT_GUARANTEED_BALANCE ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT FALSE;\n" +
+                        "ALTER TABLE ACCOUNT_LEDGER ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT FALSE;");
             case 504:
                 try {
                     Connection con = db.getConnection();
                     String[] arr = { "ACCOUNT_GUARANTEED_BALANCE", "ACCOUNT_LEDGER"};
-                    for (String table : arr) {
-                        Statement statement = con.createStatement();
-                        ResultSet rs = statement.executeQuery("SELECT distinct ACCOUNT_ID FROM " + table);
-                        while (rs.next()) {
-                            long accountId = rs.getLong("ACCOUNT_ID");
-                            PreparedStatement maxHeight = con.prepareStatement("SELECT max(HEIGHT) maxHeight FROM " + table +" where ACCOUNT_ID = ?");
-                            maxHeight.setLong(1,accountId);
-                            ResultSet resultSet = maxHeight.executeQuery();
-                            if (resultSet.next()) {
-                                PreparedStatement update = con.prepareStatement("update " + table + " set LATEST = false where HEIGHT < ? and ACCOUNT_ID = ? and LATEST = true");
-                                update.setInt(1,resultSet.getInt("maxHeight"));
-                                update.setLong(2,accountId);
-                                update.executeUpdate();
+
+                    Statement statement = con.createStatement();
+                    ResultSet rs = statement.executeQuery("SELECT distinct ID FROM ACCOUNT");
+                    while (rs.next()) {
+                        long accountId = rs.getLong("ID");
+                        PreparedStatement idStmt = con.prepareStatement("SELECT HEIGHT FROM ACCOUNT where ID = ? order by HEIGHT DESC limit 1");
+                        idStmt.setLong(1,accountId);
+                        ResultSet resultSet = idStmt.executeQuery();
+                        if (resultSet.next()) {
+                            Integer height = resultSet.getInt("HEIGHT");
+                            for (String table : arr) {
+                                boolean queryExist = false;
+                                PreparedStatement countStmt = con.prepareStatement("SELECT DB_ID FROM " + table  + " where ACCOUNT_ID = ? and HEIGHT = ?");
+                                countStmt.setLong(1,accountId);
+                                countStmt.setInt(2,height);
+                                ResultSet queryRS = countStmt.executeQuery();
+                                if(queryRS != null && queryRS.next()){
+                                    queryExist = true;
+                                }
+
+                                PreparedStatement update = null;
+                                if(Constants.TRIM_AT_INSERT) {
+                                    System.out.println(String.format("DELETE FROM %s WHERE HEIGHT < %d and ACCOUNT_ID = %s", table, height, accountId));
+                                    update = con.prepareStatement("DELETE FROM " + table + " WHERE HEIGHT < ? and ACCOUNT_ID = ?");
+                                }else{
+                                    update = con.prepareStatement("update " + table + " set LATEST = false where WHERE DB_ID <> ? and ACCOUNT_ID = ?");
+                                }
+
+                                if(queryExist) {
+                                    update.setInt(1,height);
+                                    update.setLong(2,accountId);
+                                    update.executeUpdate();
+                                }
                             }
                         }
                     }
