@@ -1362,12 +1362,18 @@ public class ConchDbVersion extends DbVersion {
                     String[] arr = { "ACCOUNT_GUARANTEED_BALANCE", "ACCOUNT_LEDGER"};
                     for (String table : arr) {
                         Statement statement = con.createStatement();
-                        ResultSet rs = statement.executeQuery("SELECT max(height) maxHeight FROM " + table);
-                        if (rs.next()) {
-                            PreparedStatement update = con.prepareStatement("update " + table + " set latest = false where height < ? and latest = true");
-                            update.setInt(1,rs.getInt("maxHeight"));
-                            update.executeUpdate();
-
+                        ResultSet rs = statement.executeQuery("SELECT distinct ACCOUNT_ID FROM " + table);
+                        while (rs.next()) {
+                            long accountId = rs.getLong("ACCOUNT_ID");
+                            PreparedStatement maxHeight = con.prepareStatement("SELECT max(HEIGHT) maxHeight FROM " + table +" where ACCOUNT_ID = ?");
+                            maxHeight.setLong(1,accountId);
+                            ResultSet resultSet = maxHeight.executeQuery();
+                            if (resultSet.next()) {
+                                PreparedStatement update = con.prepareStatement("update " + table + " set LATEST = false where HEIGHT < ? and ACCOUNT_ID = ? and LATEST = true");
+                                update.setInt(1,resultSet.getInt("maxHeight"));
+                                update.setLong(2,accountId);
+                                update.executeUpdate();
+                            }
                         }
                     }
                 } catch (SQLException e) {
