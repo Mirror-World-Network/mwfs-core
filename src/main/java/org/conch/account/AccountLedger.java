@@ -857,38 +857,44 @@ public class AccountLedger {
          * @throws  SQLException            Database error occurred
          */
         private void save(Connection con) throws SQLException {
-            try (PreparedStatement stmt = con.prepareStatement("INSERT INTO account_ledger "
+            PreparedStatement stmt = con.prepareStatement("INSERT INTO account_ledger "
                     + "(account_id, event_type, event_id, holding_type, holding_id, change, balance, "
                     + "block_id, height, timestamp) "
                     + "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-                 PreparedStatement updateStmt = con.prepareStatement("UPDATE account_ledger "
-                         + "SET latest = false WHERE account_id = ? AND height < ?")
-            ) {
-                int i=0;
-                stmt.setLong(++i, accountId);
-                stmt.setByte(++i, (byte) event.getCode());
-                stmt.setLong(++i, eventId);
-                if (holding != null) {
-                    stmt.setByte(++i, (byte)holding.getCode());
-                } else {
-                    stmt.setByte(++i, (byte)-1);
-                }
-                DbUtils.setLong(stmt, ++i, holdingId);
-                stmt.setLong(++i, change);
-                stmt.setLong(++i, balance);
-                stmt.setLong(++i, blockId);
-                stmt.setInt(++i, height);
-                stmt.setInt(++i, timestamp);
-                stmt.executeUpdate();
-                try (ResultSet rs = stmt.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        ledgerId = rs.getLong(1);
-                    }
-                }
-                updateStmt.setLong(1, accountId);
-                updateStmt.setInt(2, height);
-                updateStmt.executeUpdate();
+            PreparedStatement updateStmt = null;
+
+            if(Constants.TRIM_AT_INSERT){
+                updateStmt = con.prepareStatement("DELETE FROM account_ledger "
+                        + "WHERE account_id = ? AND height < ?");
+            }else{
+                updateStmt = con.prepareStatement("UPDATE account_ledger "
+                        + "SET latest = false WHERE account_id = ? AND height < ?");
             }
+
+            int i=0;
+            stmt.setLong(++i, accountId);
+            stmt.setByte(++i, (byte) event.getCode());
+            stmt.setLong(++i, eventId);
+            if (holding != null) {
+                stmt.setByte(++i, (byte)holding.getCode());
+            } else {
+                stmt.setByte(++i, (byte)-1);
+            }
+            DbUtils.setLong(stmt, ++i, holdingId);
+            stmt.setLong(++i, change);
+            stmt.setLong(++i, balance);
+            stmt.setLong(++i, blockId);
+            stmt.setInt(++i, height);
+            stmt.setInt(++i, timestamp);
+            stmt.executeUpdate();
+            try (ResultSet rs = stmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    ledgerId = rs.getLong(1);
+                }
+            }
+            updateStmt.setLong(1, accountId);
+            updateStmt.setInt(2, height);
+            updateStmt.executeUpdate();
         }
     }
 }

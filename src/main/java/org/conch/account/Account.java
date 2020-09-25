@@ -1150,21 +1150,34 @@ public final class Account {
     }
 
     private void save(Connection con) throws SQLException {
-        try (PreparedStatement pstmt = con.prepareStatement("MERGE INTO account (id, "
+        PreparedStatement pstmt = con.prepareStatement("MERGE INTO account (id, "
                 + "balance, unconfirmed_balance, forged_balance, frozen_balance,"
                 + "active_lessee_id, has_control_phasing, height, latest) "
-                + "KEY (id, height) VALUES (?, ?, ?, ?,?, ?, ?, ?, TRUE)")) {
-            int i = 0;
-            pstmt.setLong(++i, this.id);
-            pstmt.setLong(++i, this.balanceNQT);
-            pstmt.setLong(++i, this.unconfirmedBalanceNQT);
-            pstmt.setLong(++i, this.forgedBalanceNQT);
-            pstmt.setLong(++i, this.frozenBalanceNQT);
-            DbUtils.setLongZeroToNull(pstmt, ++i, this.activeLesseeId);
-            pstmt.setBoolean(++i, controls.contains(ControlType.PHASING_ONLY));
-            pstmt.setInt(++i, Conch.getHeight());
-            pstmt.executeUpdate();
+                + "KEY (id, height) VALUES (?, ?, ?, ?,?, ?, ?, ?, TRUE)");
+
+        PreparedStatement pstmtUpdateLatest = null;
+        if(Constants.TRIM_AT_INSERT){
+            pstmtUpdateLatest = con.prepareStatement("DELETE FROM account " +
+                    "WHERE id = ? AND height < ?");
+        }else{
+            pstmtUpdateLatest = con.prepareStatement("UPDATE account SET "
+                    + "latest = false WHERE id = ? AND height < ?");
         }
+
+        int i = 0;
+        pstmt.setLong(++i, this.id);
+        pstmt.setLong(++i, this.balanceNQT);
+        pstmt.setLong(++i, this.unconfirmedBalanceNQT);
+        pstmt.setLong(++i, this.forgedBalanceNQT);
+        pstmt.setLong(++i, this.frozenBalanceNQT);
+        DbUtils.setLongZeroToNull(pstmt, ++i, this.activeLesseeId);
+        pstmt.setBoolean(++i, controls.contains(ControlType.PHASING_ONLY));
+        pstmt.setInt(++i, Conch.getHeight());
+        pstmt.executeUpdate();
+
+        pstmtUpdateLatest.setLong(1, this.id);
+        pstmtUpdateLatest.setInt(2, Conch.getHeight());
+        pstmtUpdateLatest.executeUpdate();
     }
 
     private void save() {
@@ -2099,9 +2112,16 @@ public final class Account {
                     + "WHERE account_id = ? and height = ?");
             PreparedStatement pstmtUpdate = con.prepareStatement("MERGE INTO account_guaranteed_balance (account_id, "
                     + " additions, height) KEY (account_id, height) VALUES(?, ?, ?)");
-            PreparedStatement pstmtUpdateLatest = con.prepareStatement("UPDATE account_guaranteed_balance SET "
-                    + "latest = false WHERE account_id = ? AND height < ?");
-            
+
+            PreparedStatement pstmtUpdateLatest = null;
+            if(Constants.TRIM_AT_INSERT){
+                pstmtUpdateLatest = con.prepareStatement("DELETE FROM account_guaranteed_balance " +
+                        "WHERE account_id = ? AND height < ?");
+            }else{
+                pstmtUpdateLatest = con.prepareStatement("UPDATE account_guaranteed_balance SET "
+                        + "latest = false WHERE account_id = ? AND height < ?");
+            }
+
             pstmtSelect.setLong(1, this.id);
             pstmtSelect.setInt(2, blockchainHeight);
 

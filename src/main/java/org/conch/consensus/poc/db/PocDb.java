@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.conch.Conch;
 import org.conch.chain.BlockchainImpl;
+import org.conch.common.Constants;
 import org.conch.consensus.poc.PocScore;
 import org.conch.consensus.poc.tx.PocTxBody;
 import org.conch.consensus.poc.tx.PocTxWrapper;
@@ -208,9 +209,15 @@ public class PocDb  {
 
             PreparedStatement pstmtInsert = con.prepareStatement("INSERT INTO account_poc_score(account_id, "
                     + " poc_score, height, poc_detail) VALUES(?, ?, ?, ?)");
-            PreparedStatement updateStmt = con.prepareStatement("UPDATE account_poc_score "
-                    + "SET latest = false WHERE account_id = ? AND height < ?");
+            PreparedStatement updateStmt = null;
 
+            if(Constants.TRIM_AT_INSERT){
+                updateStmt = con.prepareStatement("DELETE FROM account_poc_score "
+                        + "WHERE account_id = ? AND height < ?");
+            }else{
+                updateStmt = con.prepareStatement("UPDATE account_poc_score "
+                        + "SET latest = false WHERE account_id = ? AND height < ?");
+            }
 
             pstmtInsert.setLong(1, pocScore.getAccountId());
             pstmtInsert.setLong(2, pocScore.total().longValue());
