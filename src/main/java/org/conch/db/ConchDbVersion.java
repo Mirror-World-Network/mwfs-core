@@ -1223,7 +1223,7 @@ public class ConchDbVersion extends DbVersion {
             case 502:
                 apply("CREATE INDEX IF NOT EXISTS peer_account_height_idx ON certified_peer (account_id, height DESC)");
             case 503:
-                apply("create table ACCOUNT_CACHE\n" +
+                apply("create table IF NOT EXISTS ACCOUNT_CACHE\n" +
                         "(\n" +
                         "    DB_ID               BIGINT auto_increment,\n" +
                         "    ID                  BIGINT                not null,\n" +
@@ -1237,10 +1237,8 @@ public class ConchDbVersion extends DbVersion {
                         "    FROZEN_BALANCE      BIGINT  default 0     not null,\n" +
                         "    primary key (DB_ID)\n" +
                         ");\n" +
-                        "create unique index ACCOUNT_CACHE_ID_HEIGHT_IDX on ACCOUNT_CACHE (ID asc, HEIGHT desc);\n" +
-                        "create index ACCOUNT_CACHE_ACTIVE_LESSEE_ID_IDX on ACCOUNT_CACHE (ACTIVE_LESSEE_ID);\n" +
-                        "create index ACCOUNT_CACHE_HEIGHT_ID_IDX on ACCOUNT_CACHE (HEIGHT, ID);");
-                apply("create table ACCOUNT_HISTORY\n" +
+
+                "create table IF NOT EXISTS ACCOUNT_HISTORY\n" +
                         "(\n" +
                         "    DB_ID               BIGINT auto_increment,\n" +
                         "    ID                  BIGINT                not null,\n" +
@@ -1254,10 +1252,7 @@ public class ConchDbVersion extends DbVersion {
                         "    FROZEN_BALANCE      BIGINT  default 0     not null,\n" +
                         "    primary key (DB_ID)\n" +
                         ");\n" +
-                        "create unique index ACCOUNT_HISTORY_ID_HEIGHT_IDX on ACCOUNT_HISTORY (ID asc, HEIGHT desc);\n" +
-                        "create index ACCOUNT_HISTORY_ACTIVE_LESSEE_ID_IDX on ACCOUNT_HISTORY (ACTIVE_LESSEE_ID);\n" +
-                        "create index ACCOUNT_HISTORY_HEIGHT_ID_IDX on ACCOUNT_HISTORY (HEIGHT, ID);");
-                apply("create table ACCOUNT_GUARANTEED_BALANCE_CACHE\n" +
+                "create table IF NOT EXISTS ACCOUNT_GUARANTEED_BALANCE_CACHE\n" +
                         "(\n" +
                         "    DB_ID      BIGINT auto_increment,\n" +
                         "    ACCOUNT_ID BIGINT               not null,\n" +
@@ -1266,9 +1261,8 @@ public class ConchDbVersion extends DbVersion {
                         "    LATEST     BOOLEAN default TRUE not null,\n" +
                         "    primary key (DB_ID)\n" +
                         ");\n" +
-                        "create unique index ACCOUNT_GUARANTEED_BALANCE_CACHE_ID_HEIGHT_IDX on ACCOUNT_GUARANTEED_BALANCE_CACHE (ACCOUNT_ID asc, HEIGHT desc);\n" +
-                        "create index ACCOUNT_GUARANTEED_BALANCE_CACHE_HEIGHT_IDX on ACCOUNT_GUARANTEED_BALANCE_CACHE (HEIGHT);");
-                apply("create table ACCOUNT_GUARANTEED_BALANCE_HISTORY\n" +
+
+                "create table IF NOT EXISTS ACCOUNT_GUARANTEED_BALANCE_HISTORY\n" +
                         "(\n" +
                         "    DB_ID      BIGINT auto_increment,\n" +
                         "    ACCOUNT_ID BIGINT               not null,\n" +
@@ -1277,9 +1271,8 @@ public class ConchDbVersion extends DbVersion {
                         "    LATEST     BOOLEAN default TRUE not null,\n" +
                         "    primary key (DB_ID)\n" +
                         ");\n" +
-                        "create unique index ACCOUNT_GUARANTEED_BALANCE_HISTORY_ID_HEIGHT_IDX on ACCOUNT_GUARANTEED_BALANCE_HISTORY (ACCOUNT_ID asc, HEIGHT desc);\n" +
-                        "create index ACCOUNT_GUARANTEED_BALANCE_HISTORY_HEIGHT_IDX on ACCOUNT_GUARANTEED_BALANCE_HISTORY (HEIGHT);");
-                apply("create table ACCOUNT_LEDGER_CACHE\n" +
+
+                "create table IF NOT EXISTS ACCOUNT_LEDGER_CACHE\n" +
                         "(\n" +
                         "    DB_ID        BIGINT auto_increment,\n" +
                         "    ACCOUNT_ID   BIGINT               not null,\n" +
@@ -1295,9 +1288,8 @@ public class ConchDbVersion extends DbVersion {
                         "    LATEST       BOOLEAN default TRUE not null,\n" +
                         "    primary key (DB_ID)\n" +
                         ");\n" +
-                        "create index ACCOUNT_LEDGER_CACHE_ID_IDX on ACCOUNT_LEDGER_CACHE (ACCOUNT_ID, DB_ID);\n" +
-                        "create index ACCOUNT_LEDGER_CACHE_HEIGHT_IDX on ACCOUNT_LEDGER_CACHE (HEIGHT);");
-                apply("create table ACCOUNT_LEDGER_HISTORY\n" +
+
+                "create table IF NOT EXISTS ACCOUNT_LEDGER_HISTORY\n" +
                         "(\n" +
                         "    DB_ID        BIGINT auto_increment,\n" +
                         "    ACCOUNT_ID   BIGINT               not null,\n" +
@@ -1313,9 +1305,8 @@ public class ConchDbVersion extends DbVersion {
                         "    LATEST       BOOLEAN default TRUE not null,\n" +
                         "    primary key (DB_ID)\n" +
                         ");\n" +
-                        "create index ACCOUNT_LEDGER_HISTORY_ID_IDX ACCOUNT_LEDGER_HISTORY (ACCOUNT_ID, DB_ID);\n" +
-                        "create index ACCOUNT_LEDGER_HISTORY_HEIGHT_IDX on ACCOUNT_LEDGER_HISTORY (HEIGHT);");
-                apply("create table ACCOUNT_POC_SCORE_CACHE\n" +
+
+                "create table IF NOT EXISTS ACCOUNT_POC_SCORE_CACHE\n" +
                         "(\n" +
                         "    DB_ID      BIGINT auto_increment,\n" +
                         "    ACCOUNT_ID BIGINT               not null,\n" +
@@ -1325,8 +1316,8 @@ public class ConchDbVersion extends DbVersion {
                         "    LATEST     BOOLEAN default TRUE not null,\n" +
                         "    primary key (DB_ID)\n" +
                         ");\n" +
-                        "create index ACCOUNT_POC_SCORE_CACHE_IDX on ACCOUNT_POC_SCORE_CACHE (ACCOUNT_ID asc, HEIGHT desc);");
-                apply("create table ACCOUNT_POC_SCORE_HISTORY\n" +
+
+                "CREATE TABLE IF NOT EXISTS ACCOUNT_POC_SCORE_HISTORY\n" +
                         "(\n" +
                         "    DB_ID      BIGINT auto_increment,\n" +
                         "    ACCOUNT_ID BIGINT               not null,\n" +
@@ -1336,7 +1327,36 @@ public class ConchDbVersion extends DbVersion {
                         "    LATEST     BOOLEAN default TRUE not null,\n" +
                         "    primary key (DB_ID)\n" +
                         ");\n" +
-                        "create index ACCOUNT_HEIGHT_HISTORY_IDX on ACCOUNT_POC_SCORE_HISTORY (ACCOUNT_ID asc, HEIGHT desc);");
+                "create unique index IF NOT EXISTS ACCOUNT_CACHE_ID_HEIGHT_IDX on ACCOUNT_CACHE (ID asc, HEIGHT desc);\n" +
+                "create index IF NOT EXISTS ACCOUNT_CACHE_ACTIVE_LESSEE_ID_IDX on ACCOUNT_CACHE (ACTIVE_LESSEE_ID);\n" +
+                "create index IF NOT EXISTS ACCOUNT_CACHE_HEIGHT_ID_IDX on ACCOUNT_CACHE (HEIGHT, ID);\n"+
+
+                "create unique index IF NOT EXISTS ACCOUNT_HISTORY_ID_HEIGHT_IDX on ACCOUNT_HISTORY (ID asc, HEIGHT desc);\n" +
+                "create index IF NOT EXISTS ACCOUNT_HISTORY_ACTIVE_LESSEE_ID_IDX on ACCOUNT_HISTORY (ACTIVE_LESSEE_ID);\n" +
+                "create index IF NOT EXISTS ACCOUNT_HISTORY_HEIGHT_ID_IDX on ACCOUNT_HISTORY (HEIGHT, ID);\n"+
+
+                "create unique index IF NOT EXISTS ACCOUNT_GUARANTEED_BALANCE_CACHE_ID_HEIGHT_IDX on ACCOUNT_GUARANTEED_BALANCE_CACHE (ACCOUNT_ID asc, HEIGHT desc);\n" +
+                "create index IF NOT EXISTS ACCOUNT_GUARANTEED_BALANCE_CACHE_HEIGHT_IDX on ACCOUNT_GUARANTEED_BALANCE_CACHE (HEIGHT);\n"+
+
+                "create unique index IF NOT EXISTS ACCOUNT_GUARANTEED_BALANCE_HISTORY_ID_HEIGHT_IDX on ACCOUNT_GUARANTEED_BALANCE_HISTORY (ACCOUNT_ID asc, HEIGHT desc);\n" +
+                "create index IF NOT EXISTS ACCOUNT_GUARANTEED_BALANCE_HISTORY_HEIGHT_IDX on ACCOUNT_GUARANTEED_BALANCE_HISTORY (HEIGHT);\n"+
+
+                "create index IF NOT EXISTS ACCOUNT_LEDGER_CACHE_ID_IDX on ACCOUNT_LEDGER_CACHE (ACCOUNT_ID, DB_ID);\n" +
+                "create index IF NOT EXISTS ACCOUNT_LEDGER_CACHE_HEIGHT_IDX on ACCOUNT_LEDGER_CACHE (HEIGHT);\n"+
+
+                "create index IF NOT EXISTS ACCOUNT_LEDGER_HISTORY_ID_IDX on ACCOUNT_LEDGER_HISTORY (ACCOUNT_ID, DB_ID);\n" +
+                "create index IF NOT EXISTS ACCOUNT_LEDGER_HISTORY_HEIGHT_IDX on ACCOUNT_LEDGER_HISTORY (HEIGHT);\n"+
+
+                "create index IF NOT EXISTS ACCOUNT_HEIGHT_HISTORY_IDX on ACCOUNT_POC_SCORE_HISTORY (ACCOUNT_ID asc, HEIGHT desc);\n"+
+                "create index IF NOT EXISTS ACCOUNT_POC_SCORE_CACHE_IDX on ACCOUNT_POC_SCORE_CACHE (ACCOUNT_ID asc, HEIGHT desc);\n"+
+
+                "create index IF NOT EXISTS ACCOUNT_POC_SCORE_HEIGHT_INDEX on ACCOUNT_POC_SCORE (HEIGHT desc);\n"+
+                "create index IF NOT EXISTS ACCOUNT_POC_SCORE_HISTORY_HEIGHT_INDEX on ACCOUNT_POC_SCORE_HISTORY (HEIGHT desc);\n"+
+                "create index IF NOT EXISTS ACCOUNT_POC_SCORE_CACHE_HEIGHT_INDEX on ACCOUNT_POC_SCORE_CACHE (HEIGHT desc);\n"+
+
+                "ALTER TABLE ACCOUNT_GUARANTEED_BALANCE ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT TRUE;\n"+
+                "ALTER TABLE ACCOUNT_LEDGER ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT TRUE;");
+
                 break;
             default:
                 throw new RuntimeException("Blockchain database inconsistent with code, at update " + nextUpdate

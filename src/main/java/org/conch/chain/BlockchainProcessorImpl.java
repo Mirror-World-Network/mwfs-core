@@ -307,7 +307,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             if (workRs.next() && historyRs.next() ) {
                 int workHeight = workRs.getInt("height");
                 int historyHeight = historyRs.getInt("height");
-                return (workHeight - historyHeight > Constants.SYNC_WORK_BLOCK_NUM);
+                return (workHeight - historyHeight > Constants.SYNC_WORK_BLOCK_NUM) && Boolean.valueOf(Constants.SYNC_BUTTON);
             }
         } catch (Exception e) {
             Logger.logDebugMessage(e.getMessage());
