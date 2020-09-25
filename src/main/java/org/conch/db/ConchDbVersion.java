@@ -1226,7 +1226,7 @@ public class ConchDbVersion extends DbVersion {
                 break;
             default:
                 throw new RuntimeException("Blockchain database inconsistent with code, at update " + nextUpdate
-                        + ", probably trying to run older code on newer database[ you can check the code in ConchDbVersion.java firstly]");
+                        + ", probably trying to run older code on newer database[ you can check the sql in ConchDbVersion.java firstly]");
         }
     }
 }
