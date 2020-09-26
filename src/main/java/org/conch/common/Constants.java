@@ -278,8 +278,15 @@ public final class Constants {
     public static final int SYNC_WORK_BLOCK_NUM = Conch.getIntProperty("sharder.sync.workblocknum");
     public static final int SYNC_TIME = Conch.getIntProperty("sharder.sync.time");
     public static final String SYNC_BUTTON = Conch.getStringProperty("sharder.sync.button");
-    public static final Boolean TRIM_AT_INSERT = Conch.getBooleanProperty("sharder.trimAtInsert");
+    public static final String HISTORY_RECORD_MODE = Conch.getStringProperty("sharder.historyRecordMode", "update");
+    public static final Boolean HISTORY_RECORD_CLEAR = Conch.getBooleanProperty("sharder.historyRecordClear", true);
 
+    public static boolean updateHistoryRecord(){
+        if("new".equalsIgnoreCase(HISTORY_RECORD_MODE)){
+            return false;
+        }
+        return true;
+    }
     /**
      * chain begin time
      * @param index 0: conch chain, 1: testnet of sharder, otherwise is mainnet of sharder

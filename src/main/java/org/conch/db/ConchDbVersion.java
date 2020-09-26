@@ -1223,183 +1223,139 @@ public class ConchDbVersion extends DbVersion {
             case 502:
                 apply("CREATE INDEX IF NOT EXISTS peer_account_height_idx ON certified_peer (account_id, height DESC)");
             case 503:
-                apply("create table IF NOT EXISTS ACCOUNT_CACHE\n" +
-                        "(\n" +
-                        "    DB_ID               BIGINT auto_increment,\n" +
-                        "    ID                  BIGINT                not null,\n" +
-                        "    BALANCE             BIGINT                not null,\n" +
-                        "    UNCONFIRMED_BALANCE BIGINT                not null,\n" +
-                        "    FORGED_BALANCE      BIGINT                not null,\n" +
-                        "    ACTIVE_LESSEE_ID    BIGINT,\n" +
-                        "    HAS_CONTROL_PHASING BOOLEAN default FALSE not null,\n" +
-                        "    HEIGHT              INT                   not null,\n" +
-                        "    LATEST              BOOLEAN default TRUE  not null,\n" +
-                        "    FROZEN_BALANCE      BIGINT  default 0     not null,\n" +
-                        "    primary key (DB_ID)\n" +
-                        ");\n" +
-
-                        "create table IF NOT EXISTS ACCOUNT_HISTORY\n" +
-                        "(\n" +
-                        "    DB_ID               BIGINT auto_increment,\n" +
-                        "    ID                  BIGINT                not null,\n" +
-                        "    BALANCE             BIGINT                not null,\n" +
-                        "    UNCONFIRMED_BALANCE BIGINT                not null,\n" +
-                        "    FORGED_BALANCE      BIGINT                not null,\n" +
-                        "    ACTIVE_LESSEE_ID    BIGINT,\n" +
-                        "    HAS_CONTROL_PHASING BOOLEAN default FALSE not null,\n" +
-                        "    HEIGHT              INT                   not null,\n" +
-                        "    LATEST              BOOLEAN default TRUE  not null,\n" +
-                        "    FROZEN_BALANCE      BIGINT  default 0     not null,\n" +
-                        "    primary key (DB_ID)\n" +
-                        ");\n" +
-                        "create table IF NOT EXISTS ACCOUNT_GUARANTEED_BALANCE_CACHE\n" +
-                        "(\n" +
-                        "    DB_ID      BIGINT auto_increment,\n" +
-                        "    ACCOUNT_ID BIGINT               not null,\n" +
-                        "    ADDITIONS  BIGINT               not null,\n" +
-                        "    HEIGHT     INT                  not null,\n" +
-                        "    LATEST     BOOLEAN default TRUE not null,\n" +
-                        "    primary key (DB_ID)\n" +
-                        ");\n" +
-
-                        "create table IF NOT EXISTS ACCOUNT_GUARANTEED_BALANCE_HISTORY\n" +
-                        "(\n" +
-                        "    DB_ID      BIGINT auto_increment,\n" +
-                        "    ACCOUNT_ID BIGINT               not null,\n" +
-                        "    ADDITIONS  BIGINT               not null,\n" +
-                        "    HEIGHT     INT                  not null,\n" +
-                        "    LATEST     BOOLEAN default TRUE not null,\n" +
-                        "    primary key (DB_ID)\n" +
-                        ");\n" +
-
-                        "create table IF NOT EXISTS ACCOUNT_LEDGER_CACHE\n" +
-                        "(\n" +
-                        "    DB_ID        BIGINT auto_increment,\n" +
-                        "    ACCOUNT_ID   BIGINT               not null,\n" +
-                        "    EVENT_TYPE   TINYINT              not null,\n" +
-                        "    EVENT_ID     BIGINT               not null,\n" +
-                        "    HOLDING_TYPE TINYINT              not null,\n" +
-                        "    HOLDING_ID   BIGINT,\n" +
-                        "    CHANGE       BIGINT               not null,\n" +
-                        "    BALANCE      BIGINT               not null,\n" +
-                        "    BLOCK_ID     BIGINT               not null,\n" +
-                        "    HEIGHT       INT                  not null,\n" +
-                        "    TIMESTAMP    INT                  not null,\n" +
-                        "    LATEST       BOOLEAN default TRUE not null,\n" +
-                        "    primary key (DB_ID)\n" +
-                        ");\n" +
-
-                        "create table IF NOT EXISTS ACCOUNT_LEDGER_HISTORY\n" +
-                        "(\n" +
-                        "    DB_ID        BIGINT auto_increment,\n" +
-                        "    ACCOUNT_ID   BIGINT               not null,\n" +
-                        "    EVENT_TYPE   TINYINT              not null,\n" +
-                        "    EVENT_ID     BIGINT               not null,\n" +
-                        "    HOLDING_TYPE TINYINT              not null,\n" +
-                        "    HOLDING_ID   BIGINT,\n" +
-                        "    CHANGE       BIGINT               not null,\n" +
-                        "    BALANCE      BIGINT               not null,\n" +
-                        "    BLOCK_ID     BIGINT               not null,\n" +
-                        "    HEIGHT       INT                  not null,\n" +
-                        "    TIMESTAMP    INT                  not null,\n" +
-                        "    LATEST       BOOLEAN default TRUE not null,\n" +
-                        "    primary key (DB_ID)\n" +
-                        ");\n" +
-
-                        "create table IF NOT EXISTS ACCOUNT_POC_SCORE_CACHE\n" +
-                        "(\n" +
-                        "    DB_ID      BIGINT auto_increment,\n" +
-                        "    ACCOUNT_ID BIGINT               not null,\n" +
-                        "    POC_SCORE  BIGINT               not null,\n" +
-                        "    HEIGHT     INT                  not null,\n" +
-                        "    POC_DETAIL VARCHAR,\n" +
-                        "    LATEST     BOOLEAN default TRUE not null,\n" +
-                        "    primary key (DB_ID)\n" +
-                        ");\n" +
-
-                        "CREATE TABLE IF NOT EXISTS ACCOUNT_POC_SCORE_HISTORY\n" +
-                        "(\n" +
-                        "    DB_ID      BIGINT auto_increment,\n" +
-                        "    ACCOUNT_ID BIGINT               not null,\n" +
-                        "    POC_SCORE  BIGINT               not null,\n" +
-                        "    HEIGHT     INT                  not null,\n" +
-                        "    POC_DETAIL VARCHAR,\n" +
-                        "    LATEST     BOOLEAN default TRUE not null,\n" +
-                        "    primary key (DB_ID)\n" +
-                        ");\n" +
-                        "create unique index IF NOT EXISTS ACCOUNT_CACHE_ID_HEIGHT_IDX on ACCOUNT_CACHE (ID asc, HEIGHT desc);\n" +
-                        "create index IF NOT EXISTS ACCOUNT_CACHE_ACTIVE_LESSEE_ID_IDX on ACCOUNT_CACHE (ACTIVE_LESSEE_ID);\n" +
-                        "create index IF NOT EXISTS ACCOUNT_CACHE_HEIGHT_ID_IDX on ACCOUNT_CACHE (HEIGHT, ID);\n" +
-
-                        "create unique index IF NOT EXISTS ACCOUNT_HISTORY_ID_HEIGHT_IDX on ACCOUNT_HISTORY (ID asc, HEIGHT desc);\n" +
-                        "create index IF NOT EXISTS ACCOUNT_HISTORY_ACTIVE_LESSEE_ID_IDX on ACCOUNT_HISTORY (ACTIVE_LESSEE_ID);\n" +
-                        "create index IF NOT EXISTS ACCOUNT_HISTORY_HEIGHT_ID_IDX on ACCOUNT_HISTORY (HEIGHT, ID);\n" +
-
-                        "create unique index IF NOT EXISTS ACCOUNT_GUARANTEED_BALANCE_CACHE_ID_HEIGHT_IDX on ACCOUNT_GUARANTEED_BALANCE_CACHE (ACCOUNT_ID asc, HEIGHT desc);\n" +
-                        "create index IF NOT EXISTS ACCOUNT_GUARANTEED_BALANCE_CACHE_HEIGHT_IDX on ACCOUNT_GUARANTEED_BALANCE_CACHE (HEIGHT);\n" +
-
-                        "create unique index IF NOT EXISTS ACCOUNT_GUARANTEED_BALANCE_HISTORY_ID_HEIGHT_IDX on ACCOUNT_GUARANTEED_BALANCE_HISTORY (ACCOUNT_ID asc, HEIGHT desc);\n" +
-                        "create index IF NOT EXISTS ACCOUNT_GUARANTEED_BALANCE_HISTORY_HEIGHT_IDX on ACCOUNT_GUARANTEED_BALANCE_HISTORY (HEIGHT);\n" +
-
-                        "create index IF NOT EXISTS ACCOUNT_LEDGER_CACHE_ID_IDX on ACCOUNT_LEDGER_CACHE (ACCOUNT_ID, DB_ID);\n" +
-                        "create index IF NOT EXISTS ACCOUNT_LEDGER_CACHE_HEIGHT_IDX on ACCOUNT_LEDGER_CACHE (HEIGHT);\n" +
-
-                        "create index IF NOT EXISTS ACCOUNT_LEDGER_HISTORY_ID_IDX on ACCOUNT_LEDGER_HISTORY (ACCOUNT_ID, DB_ID);\n" +
-                        "create index IF NOT EXISTS ACCOUNT_LEDGER_HISTORY_HEIGHT_IDX on ACCOUNT_LEDGER_HISTORY (HEIGHT);\n" +
-
-                        "create index IF NOT EXISTS ACCOUNT_HEIGHT_HISTORY_IDX on ACCOUNT_POC_SCORE_HISTORY (ACCOUNT_ID asc, HEIGHT desc);\n" +
-                        "create index IF NOT EXISTS ACCOUNT_POC_SCORE_CACHE_IDX on ACCOUNT_POC_SCORE_CACHE (ACCOUNT_ID asc, HEIGHT desc);\n" +
-
-                        "create index IF NOT EXISTS ACCOUNT_POC_SCORE_HEIGHT_INDEX on ACCOUNT_POC_SCORE (HEIGHT desc);\n" +
-                        "create index IF NOT EXISTS ACCOUNT_POC_SCORE_HISTORY_HEIGHT_INDEX on ACCOUNT_POC_SCORE_HISTORY (HEIGHT desc);\n" +
-                        "create index IF NOT EXISTS ACCOUNT_POC_SCORE_CACHE_HEIGHT_INDEX on ACCOUNT_POC_SCORE_CACHE (HEIGHT desc);\n" +
-
-                        "ALTER TABLE ACCOUNT_GUARANTEED_BALANCE ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT FALSE;\n" +
-                        "ALTER TABLE ACCOUNT_LEDGER ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT FALSE;");
+//                apply("create table IF NOT EXISTS ACCOUNT_CACHE\n" +
+//                        "(\n" +
+//                        "    DB_ID               BIGINT auto_increment,\n" +
+//                        "    ID                  BIGINT                not null,\n" +
+//                        "    BALANCE             BIGINT                not null,\n" +
+//                        "    UNCONFIRMED_BALANCE BIGINT                not null,\n" +
+//                        "    FORGED_BALANCE      BIGINT                not null,\n" +
+//                        "    ACTIVE_LESSEE_ID    BIGINT,\n" +
+//                        "    HAS_CONTROL_PHASING BOOLEAN default FALSE not null,\n" +
+//                        "    HEIGHT              INT                   not null,\n" +
+//                        "    LATEST              BOOLEAN default TRUE  not null,\n" +
+//                        "    FROZEN_BALANCE      BIGINT  default 0     not null,\n" +
+//                        "    primary key (DB_ID)\n" +
+//                        ");\n" +
+//
+//                        "create table IF NOT EXISTS ACCOUNT_HISTORY\n" +
+//                        "(\n" +
+//                        "    DB_ID               BIGINT auto_increment,\n" +
+//                        "    ID                  BIGINT                not null,\n" +
+//                        "    BALANCE             BIGINT                not null,\n" +
+//                        "    UNCONFIRMED_BALANCE BIGINT                not null,\n" +
+//                        "    FORGED_BALANCE      BIGINT                not null,\n" +
+//                        "    ACTIVE_LESSEE_ID    BIGINT,\n" +
+//                        "    HAS_CONTROL_PHASING BOOLEAN default FALSE not null,\n" +
+//                        "    HEIGHT              INT                   not null,\n" +
+//                        "    LATEST              BOOLEAN default TRUE  not null,\n" +
+//                        "    FROZEN_BALANCE      BIGINT  default 0     not null,\n" +
+//                        "    primary key (DB_ID)\n" +
+//                        ");\n" +
+//                        "create table IF NOT EXISTS ACCOUNT_GUARANTEED_BALANCE_CACHE\n" +
+//                        "(\n" +
+//                        "    DB_ID      BIGINT auto_increment,\n" +
+//                        "    ACCOUNT_ID BIGINT               not null,\n" +
+//                        "    ADDITIONS  BIGINT               not null,\n" +
+//                        "    HEIGHT     INT                  not null,\n" +
+//                        "    LATEST     BOOLEAN default TRUE not null,\n" +
+//                        "    primary key (DB_ID)\n" +
+//                        ");\n" +
+//
+//                        "create table IF NOT EXISTS ACCOUNT_GUARANTEED_BALANCE_HISTORY\n" +
+//                        "(\n" +
+//                        "    DB_ID      BIGINT auto_increment,\n" +
+//                        "    ACCOUNT_ID BIGINT               not null,\n" +
+//                        "    ADDITIONS  BIGINT               not null,\n" +
+//                        "    HEIGHT     INT                  not null,\n" +
+//                        "    LATEST     BOOLEAN default TRUE not null,\n" +
+//                        "    primary key (DB_ID)\n" +
+//                        ");\n" +
+//
+//                        "create table IF NOT EXISTS ACCOUNT_LEDGER_CACHE\n" +
+//                        "(\n" +
+//                        "    DB_ID        BIGINT auto_increment,\n" +
+//                        "    ACCOUNT_ID   BIGINT               not null,\n" +
+//                        "    EVENT_TYPE   TINYINT              not null,\n" +
+//                        "    EVENT_ID     BIGINT               not null,\n" +
+//                        "    HOLDING_TYPE TINYINT              not null,\n" +
+//                        "    HOLDING_ID   BIGINT,\n" +
+//                        "    CHANGE       BIGINT               not null,\n" +
+//                        "    BALANCE      BIGINT               not null,\n" +
+//                        "    BLOCK_ID     BIGINT               not null,\n" +
+//                        "    HEIGHT       INT                  not null,\n" +
+//                        "    TIMESTAMP    INT                  not null,\n" +
+//                        "    LATEST       BOOLEAN default TRUE not null,\n" +
+//                        "    primary key (DB_ID)\n" +
+//                        ");\n" +
+//
+//                        "create table IF NOT EXISTS ACCOUNT_LEDGER_HISTORY\n" +
+//                        "(\n" +
+//                        "    DB_ID        BIGINT auto_increment,\n" +
+//                        "    ACCOUNT_ID   BIGINT               not null,\n" +
+//                        "    EVENT_TYPE   TINYINT              not null,\n" +
+//                        "    EVENT_ID     BIGINT               not null,\n" +
+//                        "    HOLDING_TYPE TINYINT              not null,\n" +
+//                        "    HOLDING_ID   BIGINT,\n" +
+//                        "    CHANGE       BIGINT               not null,\n" +
+//                        "    BALANCE      BIGINT               not null,\n" +
+//                        "    BLOCK_ID     BIGINT               not null,\n" +
+//                        "    HEIGHT       INT                  not null,\n" +
+//                        "    TIMESTAMP    INT                  not null,\n" +
+//                        "    LATEST       BOOLEAN default TRUE not null,\n" +
+//                        "    primary key (DB_ID)\n" +
+//                        ");\n" +
+//
+//                        "create table IF NOT EXISTS ACCOUNT_POC_SCORE_CACHE\n" +
+//                        "(\n" +
+//                        "    DB_ID      BIGINT auto_increment,\n" +
+//                        "    ACCOUNT_ID BIGINT               not null,\n" +
+//                        "    POC_SCORE  BIGINT               not null,\n" +
+//                        "    HEIGHT     INT                  not null,\n" +
+//                        "    POC_DETAIL VARCHAR,\n" +
+//                        "    LATEST     BOOLEAN default TRUE not null,\n" +
+//                        "    primary key (DB_ID)\n" +
+//                        ");\n" +
+//
+//                        "CREATE TABLE IF NOT EXISTS ACCOUNT_POC_SCORE_HISTORY\n" +
+//                        "(\n" +
+//                        "    DB_ID      BIGINT auto_increment,\n" +
+//                        "    ACCOUNT_ID BIGINT               not null,\n" +
+//                        "    POC_SCORE  BIGINT               not null,\n" +
+//                        "    HEIGHT     INT                  not null,\n" +
+//                        "    POC_DETAIL VARCHAR,\n" +
+//                        "    LATEST     BOOLEAN default TRUE not null,\n" +
+//                        "    primary key (DB_ID)\n" +
+//                        ");\n" +
+//                        "create unique index IF NOT EXISTS ACCOUNT_CACHE_ID_HEIGHT_IDX on ACCOUNT_CACHE (ID asc, HEIGHT desc);\n" +
+//                        "create index IF NOT EXISTS ACCOUNT_CACHE_ACTIVE_LESSEE_ID_IDX on ACCOUNT_CACHE (ACTIVE_LESSEE_ID);\n" +
+//                        "create index IF NOT EXISTS ACCOUNT_CACHE_HEIGHT_ID_IDX on ACCOUNT_CACHE (HEIGHT, ID);\n" +
+//
+//                        "create unique index IF NOT EXISTS ACCOUNT_HISTORY_ID_HEIGHT_IDX on ACCOUNT_HISTORY (ID asc, HEIGHT desc);\n" +
+//                        "create index IF NOT EXISTS ACCOUNT_HISTORY_ACTIVE_LESSEE_ID_IDX on ACCOUNT_HISTORY (ACTIVE_LESSEE_ID);\n" +
+//                        "create index IF NOT EXISTS ACCOUNT_HISTORY_HEIGHT_ID_IDX on ACCOUNT_HISTORY (HEIGHT, ID);\n" +
+//
+//                        "create unique index IF NOT EXISTS ACCOUNT_GUARANTEED_BALANCE_CACHE_ID_HEIGHT_IDX on ACCOUNT_GUARANTEED_BALANCE_CACHE (ACCOUNT_ID asc, HEIGHT desc);\n" +
+//                        "create index IF NOT EXISTS ACCOUNT_GUARANTEED_BALANCE_CACHE_HEIGHT_IDX on ACCOUNT_GUARANTEED_BALANCE_CACHE (HEIGHT);\n" +
+//
+//                        "create unique index IF NOT EXISTS ACCOUNT_GUARANTEED_BALANCE_HISTORY_ID_HEIGHT_IDX on ACCOUNT_GUARANTEED_BALANCE_HISTORY (ACCOUNT_ID asc, HEIGHT desc);\n" +
+//                        "create index IF NOT EXISTS ACCOUNT_GUARANTEED_BALANCE_HISTORY_HEIGHT_IDX on ACCOUNT_GUARANTEED_BALANCE_HISTORY (HEIGHT);\n" +
+//
+//                        "create index IF NOT EXISTS ACCOUNT_LEDGER_CACHE_ID_IDX on ACCOUNT_LEDGER_CACHE (ACCOUNT_ID, DB_ID);\n" +
+//                        "create index IF NOT EXISTS ACCOUNT_LEDGER_CACHE_HEIGHT_IDX on ACCOUNT_LEDGER_CACHE (HEIGHT);\n" +
+//
+//                        "create index IF NOT EXISTS ACCOUNT_LEDGER_HISTORY_ID_IDX on ACCOUNT_LEDGER_HISTORY (ACCOUNT_ID, DB_ID);\n" +
+//                        "create index IF NOT EXISTS ACCOUNT_LEDGER_HISTORY_HEIGHT_IDX on ACCOUNT_LEDGER_HISTORY (HEIGHT);\n" +
+//
+//                        "create index IF NOT EXISTS ACCOUNT_HEIGHT_HISTORY_IDX on ACCOUNT_POC_SCORE_HISTORY (ACCOUNT_ID asc, HEIGHT desc);\n" +
+//                        "create index IF NOT EXISTS ACCOUNT_POC_SCORE_CACHE_IDX on ACCOUNT_POC_SCORE_CACHE (ACCOUNT_ID asc, HEIGHT desc);\n" +
+//
+//                        "create index IF NOT EXISTS ACCOUNT_POC_SCORE_HEIGHT_INDEX on ACCOUNT_POC_SCORE (HEIGHT desc);\n" +
+//                        "create index IF NOT EXISTS ACCOUNT_POC_SCORE_HISTORY_HEIGHT_INDEX on ACCOUNT_POC_SCORE_HISTORY (HEIGHT desc);\n" +
+//                        "create index IF NOT EXISTS ACCOUNT_POC_SCORE_CACHE_HEIGHT_INDEX on ACCOUNT_POC_SCORE_CACHE (HEIGHT desc);"
+//                );
+                apply(null);
             case 504:
-                try {
-                    Connection con = db.getConnection();
-                    String[] arr = { "ACCOUNT_GUARANTEED_BALANCE", "ACCOUNT_LEDGER"};
-
-                    Statement statement = con.createStatement();
-                    ResultSet rs = statement.executeQuery("SELECT distinct ID FROM ACCOUNT");
-                    while (rs.next()) {
-                        long accountId = rs.getLong("ID");
-                        PreparedStatement idStmt = con.prepareStatement("SELECT HEIGHT FROM ACCOUNT where ID = ? order by HEIGHT DESC limit 1");
-                        idStmt.setLong(1,accountId);
-                        ResultSet resultSet = idStmt.executeQuery();
-                        if (resultSet.next()) {
-                            Integer height = resultSet.getInt("HEIGHT");
-                            for (String table : arr) {
-                                boolean queryExist = false;
-                                PreparedStatement countStmt = con.prepareStatement("SELECT DB_ID FROM " + table  + " where ACCOUNT_ID = ? and HEIGHT = ?");
-                                countStmt.setLong(1,accountId);
-                                countStmt.setInt(2,height);
-                                ResultSet queryRS = countStmt.executeQuery();
-                                if(queryRS != null && queryRS.next()){
-                                    queryExist = true;
-                                }
-
-                                PreparedStatement update = null;
-                                if(Constants.TRIM_AT_INSERT) {
-                                    System.out.println(String.format("DELETE FROM %s WHERE HEIGHT < %d and ACCOUNT_ID = %s", table, height, accountId));
-                                    update = con.prepareStatement("DELETE FROM " + table + " WHERE HEIGHT < ? and ACCOUNT_ID = ?");
-                                }else{
-                                    update = con.prepareStatement("update " + table + " set LATEST = false where WHERE DB_ID <> ? and ACCOUNT_ID = ?");
-                                }
-
-                                if(queryExist) {
-                                    update.setInt(1,height);
-                                    update.setLong(2,accountId);
-                                    update.executeUpdate();
-                                }
-                            }
-                        }
-                    }
-                } catch (SQLException e) {
-                    throw new RuntimeException(e.toString(), e);
-                }
-            case 505:
                 break;
             default:
                 throw new RuntimeException("Blockchain database inconsistent with code, at update " + nextUpdate

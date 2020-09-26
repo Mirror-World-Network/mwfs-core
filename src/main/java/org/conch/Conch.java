@@ -777,6 +777,24 @@ public final class Conch {
         runtimeMode.shutdown();
     }
 
+    /**
+     * delete un-unnecessary table
+     * trim the tables
+     */
+    private static void clearHistoryRecords(){
+        if(!Constants.HISTORY_RECORD_CLEAR) {
+            return;
+        }
+
+        Logger.logMessage("[HistoryRecords] Trim all tables");
+        getBlockchainProcessor().trimDerivedTables();
+        Logger.logMessage("[HistoryRecords] Trim finished");
+
+        Logger.logMessage("[HistoryRecords] Trim all tables");
+        getBlockchainProcessor().trimDerivedTables();
+        Logger.logMessage("[HistoryRecords] Trim finished");
+    }
+
     private static class Init {
 
         static volatile boolean initialized = false;
@@ -853,12 +871,7 @@ public final class Conch {
                 DebugTrace.init();
                 DbBackup.init();
 
-                if(LocalDebugTool.isLocalDebug()){
-                    Logger.logMessage("trigger to trim all tables");
-                    getBlockchainProcessor().trimDerivedTables();
-                    Logger.logMessage("trim finished, shutdown the COS service");
-                    System.exit(0);
-                }
+                clearHistoryRecords();
 
                 int timeMultiplier = (Constants.isTestnetOrDevnet() && Constants.isOffline) ? Math.max(Conch.getIntProperty("sharder.timeMultiplier"), 1) : 1;
                 ThreadPool.start(timeMultiplier);
