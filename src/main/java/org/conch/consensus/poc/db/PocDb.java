@@ -20,10 +20,7 @@ import org.conch.tx.TransactionType;
 import org.conch.util.Convert;
 import org.conch.util.Logger;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
 import java.util.Map;
 
@@ -207,31 +204,45 @@ public class PocDb  {
                 return 0;
             }
 
-            PreparedStatement pstmtInsert = con.prepareStatement("INSERT INTO account_poc_score(account_id, "
-                    + " poc_score, height, poc_detail) VALUES(?, ?, ?, ?)");
-            PreparedStatement updateStmt = null;
+            boolean insertNew = false;
+            if(Constants.updateHistoryRecord()){
+                PreparedStatement pstmt = con.prepareStatement("SELECT db_id, height FROM account_poc_score"
+                        + " WHERE account_id=? AND latest = TRUE ORDER BY height DESC LIMIT 1");
+                pstmt.setLong(1, pocScore.getAccountId());
 
-            if(Constants.TRIM_AT_INSERT){
-                updateStmt = con.prepareStatement("DELETE FROM account_poc_score "
-                        + "WHERE account_id = ? AND height < ?");
-            }else{
-                updateStmt = con.prepareStatement("UPDATE account_poc_score "
-                        + "SET latest = false WHERE account_id = ? AND height < ?");
+                ResultSet queryRS = pstmt.executeQuery();
+                if(queryRS != null && queryRS.next()){
+                    Long dbid = queryRS.getLong("db_id");
+                    pstmt = con.prepareStatement("UPDATE account_poc_score "
+                            + "SET height = ?"
+                            + ",poc_score = ?"
+                            + ",poc_detail = ?"
+                            + " WHERE DB_ID = ?"
+                    );
+                    pstmt.setInt(1, pocScore.getHeight());
+                    pstmt.setLong(2, pocScore.total().longValue());
+                    pstmt.setString(3, pocScore.toSimpleJson());
+                    pstmt.setLong(4, dbid);
+                    pstmt.executeUpdate();
+                }else{
+                    insertNew = true;
+                }
             }
 
-            pstmtInsert.setLong(1, pocScore.getAccountId());
-            pstmtInsert.setLong(2, pocScore.total().longValue());
-            pstmtInsert.setInt(3, pocScore.getHeight());
-            pstmtInsert.setString(4, pocScore.toSimpleJson());
+            if(insertNew){
+                PreparedStatement pstmtInsert = con.prepareStatement("INSERT INTO account_poc_score(account_id, "
+                        + " poc_score, height, poc_detail) VALUES(?, ?, ?, ?)");
+                PreparedStatement updateStmt = null;
 
-            updateStmt.setLong(1, pocScore.getAccountId());
-            updateStmt.setInt(2, pocScore.getHeight());
-            int i = updateStmt.executeUpdate();
-            if (i < 0) {
-                return i;
+                pstmtInsert.setLong(1, pocScore.getAccountId());
+                pstmtInsert.setLong(2, pocScore.total().longValue());
+                pstmtInsert.setInt(3, pocScore.getHeight());
+                pstmtInsert.setString(4, pocScore.toSimpleJson());
+                pstmtInsert.executeUpdate();
             }
-            return pstmtInsert.executeUpdate();
+            return 1;
         }
+
 
         private int update(Connection con, PocScore pocScore, Long dbId) throws SQLException {
             String detail = pocScore.toSimpleJson();

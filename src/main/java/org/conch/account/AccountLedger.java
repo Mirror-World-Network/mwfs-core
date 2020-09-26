@@ -245,6 +245,20 @@ public class AccountLedger {
         pendingEntries.add(ledgerEntry);
     }
 
+    public void clearAllHistoryEntries(){
+        try {
+            Db.db.beginTransaction();
+            accountLedgerTable.truncate();
+            Db.db.commitTransaction();
+        } catch (Exception e) {
+            Logger.logErrorMessage(e.toString(), e);
+            Db.db.rollbackTransaction();
+            throw e;
+        } finally {
+            Db.db.endTransaction();
+        }
+    }
+
     /**
      * Commit pending ledger entries
      */
@@ -857,44 +871,76 @@ public class AccountLedger {
          * @throws  SQLException            Database error occurred
          */
         private void save(Connection con) throws SQLException {
-            PreparedStatement stmt = con.prepareStatement("INSERT INTO account_ledger "
-                    + "(account_id, event_type, event_id, holding_type, holding_id, change, balance, "
-                    + "block_id, height, timestamp) "
-                    + "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-            PreparedStatement updateStmt = null;
+            boolean insertNew = false;
+            if(Constants.updateHistoryRecord()){
+                PreparedStatement pstmt = con.prepareStatement("SELECT db_id, height FROM account_ledger"
+                        + " WHERE account_id=? AND latest = TRUE ORDER BY height DESC LIMIT 1");
+                pstmt.setLong(1, this.accountId);
 
-            if(Constants.TRIM_AT_INSERT){
-                updateStmt = con.prepareStatement("DELETE FROM account_ledger "
-                        + "WHERE account_id = ? AND height < ?");
-            }else{
-                updateStmt = con.prepareStatement("UPDATE account_ledger "
-                        + "SET latest = false WHERE account_id = ? AND height < ?");
-            }
-
-            int i=0;
-            stmt.setLong(++i, accountId);
-            stmt.setByte(++i, (byte) event.getCode());
-            stmt.setLong(++i, eventId);
-            if (holding != null) {
-                stmt.setByte(++i, (byte)holding.getCode());
-            } else {
-                stmt.setByte(++i, (byte)-1);
-            }
-            DbUtils.setLong(stmt, ++i, holdingId);
-            stmt.setLong(++i, change);
-            stmt.setLong(++i, balance);
-            stmt.setLong(++i, blockId);
-            stmt.setInt(++i, height);
-            stmt.setInt(++i, timestamp);
-            stmt.executeUpdate();
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    ledgerId = rs.getLong(1);
+                ResultSet queryRS = pstmt.executeQuery();
+                if(queryRS != null && queryRS.next()){
+                    Long dbid = queryRS.getLong("db_id");
+                    pstmt = con.prepareStatement("UPDATE account_ledger "
+                            + "SET height = ?"
+                            + ",event_type = ?"
+                            + ",event_id = ?"
+                            + ",holding_type = ?"
+                            + ",holding_id = ?"
+                            + ",change = ?"
+                            + ",balance = ?"
+                            + ",block_id = ?"
+                            + ",timestamp = ?"
+                            + " WHERE DB_ID = ?"
+                    );
+                    int i=0;
+                    pstmt.setInt(++i, this.height);
+                    pstmt.setByte(++i, (byte) this.event.getCode());
+                    pstmt.setLong(++i, this.eventId);
+                    if (holding != null) {
+                        pstmt.setByte(++i, (byte)holding.getCode());
+                    } else {
+                        pstmt.setByte(++i, (byte)-1);
+                    }
+                    DbUtils.setLong(pstmt, ++i, holdingId);
+                    pstmt.setLong(++i, change);
+                    pstmt.setLong(++i, balance);
+                    pstmt.setLong(++i, blockId);
+                    pstmt.setInt(++i, timestamp);
+                    pstmt.setLong(++i, dbid);
+                    pstmt.executeUpdate();
+                }else{
+                    insertNew = true;
                 }
             }
-            updateStmt.setLong(1, accountId);
-            updateStmt.setInt(2, height);
-            updateStmt.executeUpdate();
+
+            if(insertNew){
+                PreparedStatement stmt = con.prepareStatement("INSERT INTO account_ledger "
+                        + "(account_id, event_type, event_id, holding_type, holding_id, change, balance, "
+                        + "block_id, height, timestamp) "
+                        + "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                int i=0;
+                stmt.setLong(++i, accountId);
+                stmt.setByte(++i, (byte) event.getCode());
+                stmt.setLong(++i, eventId);
+                if (holding != null) {
+                    stmt.setByte(++i, (byte)holding.getCode());
+                } else {
+                    stmt.setByte(++i, (byte)-1);
+                }
+                DbUtils.setLong(stmt, ++i, holdingId);
+                stmt.setLong(++i, change);
+                stmt.setLong(++i, balance);
+                stmt.setLong(++i, blockId);
+                stmt.setInt(++i, height);
+                stmt.setInt(++i, timestamp);
+                stmt.executeUpdate();
+                try (ResultSet rs = stmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        ledgerId = rs.getLong(1);
+                    }
+                }
+            }
+
         }
     }
 }

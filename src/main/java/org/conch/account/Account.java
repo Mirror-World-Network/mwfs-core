@@ -45,10 +45,7 @@ import org.conch.util.Listener;
 import org.conch.util.Listeners;
 import org.conch.util.Logger;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -1150,34 +1147,57 @@ public final class Account {
     }
 
     private void save(Connection con) throws SQLException {
-        PreparedStatement pstmt = con.prepareStatement("MERGE INTO account (id, "
-                + "balance, unconfirmed_balance, forged_balance, frozen_balance,"
-                + "active_lessee_id, has_control_phasing, height, latest) "
-                + "KEY (id, height) VALUES (?, ?, ?, ?,?, ?, ?, ?, TRUE)");
+        boolean insertNew = false;
+        if(Constants.updateHistoryRecord()){
+                PreparedStatement pstmt = con.prepareStatement("SELECT db_id, height FROM account"
+                    + " WHERE id=? AND latest = TRUE ORDER BY height DESC LIMIT 1");
+                pstmt.setLong(1, this.id);
 
-        PreparedStatement pstmtUpdateLatest = null;
-        if(Constants.TRIM_AT_INSERT){
-            pstmtUpdateLatest = con.prepareStatement("DELETE FROM account " +
-                    "WHERE id = ? AND height < ?");
-        }else{
-            pstmtUpdateLatest = con.prepareStatement("UPDATE account SET "
-                    + "latest = false WHERE id = ? AND height < ?");
+                ResultSet queryRS = pstmt.executeQuery();
+                if(queryRS != null && queryRS.next()){
+                    Long dbid = queryRS.getLong("db_id");
+                    pstmt = con.prepareStatement("UPDATE account "
+                            + "SET height = ?"
+                            + ",balance = ?"
+                            + ",unconfirmed_balance = ?"
+                            + ",forged_balance = ?"
+                            + ",frozen_balance = ?"
+                            + ",active_lessee_id = ?"
+                            + ",has_control_phasing = ?"
+                            + ",latest = ?"
+                            + " WHERE DB_ID = ?"
+                    );
+                    pstmt.setInt(1, Conch.getHeight());
+                    pstmt.setLong(2, this.balanceNQT);
+                    pstmt.setLong(3, this.unconfirmedBalanceNQT);
+                    pstmt.setLong(4, this.forgedBalanceNQT);
+                    pstmt.setLong(5, this.frozenBalanceNQT);
+                    DbUtils.setLongZeroToNull(pstmt, 6, this.activeLesseeId);
+                    pstmt.setBoolean(7, controls.contains(ControlType.PHASING_ONLY));
+                    pstmt.setBoolean(8, true);
+                    pstmt.setLong(9, dbid);
+                    pstmt.executeUpdate();
+                }else{
+                    insertNew = true;
+                }
         }
 
-        int i = 0;
-        pstmt.setLong(++i, this.id);
-        pstmt.setLong(++i, this.balanceNQT);
-        pstmt.setLong(++i, this.unconfirmedBalanceNQT);
-        pstmt.setLong(++i, this.forgedBalanceNQT);
-        pstmt.setLong(++i, this.frozenBalanceNQT);
-        DbUtils.setLongZeroToNull(pstmt, ++i, this.activeLesseeId);
-        pstmt.setBoolean(++i, controls.contains(ControlType.PHASING_ONLY));
-        pstmt.setInt(++i, Conch.getHeight());
-        pstmt.executeUpdate();
-
-        pstmtUpdateLatest.setLong(1, this.id);
-        pstmtUpdateLatest.setInt(2, Conch.getHeight());
-        pstmtUpdateLatest.executeUpdate();
+        if(insertNew){
+            PreparedStatement pstmt = con.prepareStatement("MERGE INTO account (id, "
+                    + "balance, unconfirmed_balance, forged_balance, frozen_balance,"
+                    + "active_lessee_id, has_control_phasing, height, latest) "
+                    + "KEY (id, height) VALUES (?, ?, ?, ?,?, ?, ?, ?, TRUE)");
+            int i = 0;
+            pstmt.setLong(++i, this.id);
+            pstmt.setLong(++i, this.balanceNQT);
+            pstmt.setLong(++i, this.unconfirmedBalanceNQT);
+            pstmt.setLong(++i, this.forgedBalanceNQT);
+            pstmt.setLong(++i, this.frozenBalanceNQT);
+            DbUtils.setLongZeroToNull(pstmt, ++i, this.activeLesseeId);
+            pstmt.setBoolean(++i, controls.contains(ControlType.PHASING_ONLY));
+            pstmt.setInt(++i, Conch.getHeight());
+            pstmt.executeUpdate();
+        }
     }
 
     private void save() {
@@ -1388,9 +1408,10 @@ public final class Account {
 
     private void resetGuaranteedBalance(Connection con, final long balance) {
         long currentGuarantBalance = getGuaranteedBalanceNQT();
-        if(currentGuarantBalance == balance) return;
-        
-     
+        if(currentGuarantBalance == balance) {
+            return;
+        }
+
         try {
             Conch.getBlockchain().readLock();
             Connection connDel = Db.db.getConnection();
@@ -1846,7 +1867,9 @@ public final class Account {
     }
     
     private long frozenAmountValidation(long amountNQT){
-        if(amountNQT >= 0) return amountNQT;
+        if(amountNQT >= 0) {
+            return amountNQT;
+        }
         
         long absAmount = Math.abs(amountNQT);
         
@@ -1915,7 +1938,9 @@ public final class Account {
      * @param changeUnconfirmed
      */
     private void frozen(AccountLedger.LedgerEvent event, long eventId, long amountNQT, boolean changeUnconfirmed){
-        if (amountNQT == 0)   return;
+        if (amountNQT == 0) {
+            return;
+        }
 
         amountNQT = frozenAmountValidation(amountNQT);
         
@@ -1938,7 +1963,9 @@ public final class Account {
             }
             save();
         }catch(Account.DoubleSpendingException e) {
-            if(!CheckSumValidator.isDirtyPoolTx(Conch.getHeight(), id)) throw e;
+            if(!CheckSumValidator.isDirtyPoolTx(Conch.getHeight(), id)) {
+                throw e;
+            }
         }
     }
 
@@ -1960,11 +1987,17 @@ public final class Account {
 
 
     private long balanceAmountValidation(long amountNQT){
-        if(!Constants.isTestnet()) return amountNQT;
-        if(Conch.getHeight() < Constants.POC_BALANCE_CORRECTION_HEIGHT) return amountNQT;
-        
-        // this.balanceNQT is null or 0
-        if(amountNQT >= 0) return amountNQT;
+        if(!Constants.isTestnet()) {
+            return amountNQT;
+        }
+        if(Conch.getHeight() < Constants.POC_BALANCE_CORRECTION_HEIGHT) {
+            return amountNQT;
+        }
+
+        /* this.balanceNQT is null or 0 */
+        if(amountNQT >= 0) {
+            return amountNQT;
+        }
         
         long absAmount = Math.abs(amountNQT);
         if(this.balanceNQT <= absAmount){
@@ -2113,14 +2146,14 @@ public final class Account {
             PreparedStatement pstmtUpdate = con.prepareStatement("MERGE INTO account_guaranteed_balance (account_id, "
                     + " additions, height) KEY (account_id, height) VALUES(?, ?, ?)");
 
-            PreparedStatement pstmtUpdateLatest = null;
-            if(Constants.TRIM_AT_INSERT){
-                pstmtUpdateLatest = con.prepareStatement("DELETE FROM account_guaranteed_balance " +
-                        "WHERE account_id = ? AND height < ?");
-            }else{
-                pstmtUpdateLatest = con.prepareStatement("UPDATE account_guaranteed_balance SET "
-                        + "latest = false WHERE account_id = ? AND height < ?");
-            }
+//            PreparedStatement pstmtUpdateLatest = null;
+//            if(Constants.TRIM_AT_INSERT){
+//                pstmtUpdateLatest = con.prepareStatement("DELETE FROM account_guaranteed_balance " +
+//                        "WHERE account_id = ? AND height < ?");
+//            }else{
+//                pstmtUpdateLatest = con.prepareStatement("UPDATE account_guaranteed_balance SET "
+//                        + "latest = false WHERE account_id = ? AND height < ?");
+//            }
 
             pstmtSelect.setLong(1, this.id);
             pstmtSelect.setInt(2, blockchainHeight);
@@ -2135,9 +2168,9 @@ public final class Account {
                 pstmtUpdate.setInt(3, blockchainHeight);
                 pstmtUpdate.executeUpdate();
 
-                pstmtUpdateLatest.setLong(1, this.id);
-                pstmtUpdateLatest.setInt(2, blockchainHeight);
-                pstmtUpdateLatest.executeUpdate();
+//                pstmtUpdateLatest.setLong(1, this.id);
+//                pstmtUpdateLatest.setInt(2, blockchainHeight);
+//                pstmtUpdateLatest.executeUpdate();
             }
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
@@ -2464,5 +2497,56 @@ public final class Account {
         }finally {
             DbUtils.close(con);
         }
+    }
+
+    public static void historyData(){
+//        try {
+//            Connection con = db.getConnection();
+////                    String[] arr = { "ACCOUNT_GUARANTEED_BALANCE", "ACCOUNT_LEDGER"};
+//
+//            String[] arr = { "ACCOUNT_GUARANTEED_BALANCE"};
+//            Statement statement = con.createStatement();
+//            ResultSet rs = statement.executeQuery("SELECT distinct ID FROM ACCOUNT");
+//
+//            rs.last(); // 将光标移动到最后一行
+//            int rowCount = rs.getRow(); // 得到当前行号，即结果集记录数
+//            rs.beforeFirst(); //指针再移到初始化的位置
+//
+//            while (rs.next()) {
+//                long accountId = rs.getLong("ID");
+//                PreparedStatement idStmt = con.prepareStatement("SELECT HEIGHT FROM ACCOUNT where ID = ? order by HEIGHT DESC limit 1");
+//                idStmt.setLong(1,accountId);
+//                ResultSet resultSet = idStmt.executeQuery();
+//                if (resultSet.next()) {
+//                    Integer height = resultSet.getInt("HEIGHT");
+//                    for (String table : arr) {
+//                        boolean queryExist = false;
+//                        PreparedStatement countStmt = con.prepareStatement("SELECT DB_ID FROM " + table  + " where ACCOUNT_ID = ? and HEIGHT = ?");
+//                        countStmt.setLong(1,accountId);
+//                        countStmt.setInt(2,height);
+//                        ResultSet queryRS = countStmt.executeQuery();
+//                        if(queryRS != null && queryRS.next()){
+//                            queryExist = true;
+//                        }
+//
+//                        PreparedStatement update = null;
+//                        if(Constants.TRIM_AT_INSERT) {
+//                            System.out.println(String.format("DELETE FROM %s WHERE HEIGHT < %d and ACCOUNT_ID = %s", table, height, accountId));
+//                            update = con.prepareStatement("DELETE FROM " + table + " WHERE HEIGHT < ? and ACCOUNT_ID = ?");
+//                        }else{
+//                            update = con.prepareStatement("update " + table + " set LATEST = false where WHERE DB_ID <> ? and ACCOUNT_ID = ?");
+//                        }
+//
+//                        if(queryExist) {
+//                            update.setInt(1,height);
+//                            update.setLong(2,accountId);
+//                            update.executeUpdate();
+//                        }
+//                    }
+//                }
+//            }
+//        } catch (SQLException e) {
+//            throw new RuntimeException(e.toString(), e);
+//        }
     }
 }
