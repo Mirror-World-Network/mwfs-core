@@ -787,6 +787,8 @@ public final class Conch {
 //        Logger.logMessage("[HistoryRecords] Trim all tables");
 //        getBlockchainProcessor().trimDerivedTables();
 
+        long clearStartMS = System.currentTimeMillis();
+
         int trimEndHeight = getHeight();
         if(trimEndHeight == 0) {
             try{
@@ -797,14 +799,15 @@ public final class Conch {
             }
         }
         int height = trimEndHeight - Constants.MAX_ROLLBACK;
-        Logger.logMessage("[HistoryRecords] Trim account and poc_score tables before height " + height);
+        Logger.logMessage("[HistoryRecords] Trim account and account_poc_score tables before height " + height);
         Account.trimHistoryData(height);
+
         PocDb.trimHistoryData(height);
 
-        Logger.logMessage("[HistoryRecords] Clear all account ledger records");
+        Logger.logMessage("[HistoryRecords] Truncate account_ledger table");
         AccountLedger.clearAllHistoryEntries();
 
-        Logger.logMessage("[HistoryRecords] Finished to clear history records");
+        Logger.logMessage(String.format("[HistoryRecords] Finished to clear history records, used %d S",(System.currentTimeMillis() - clearStartMS) / 1000));
     }
 
     private static class Init {

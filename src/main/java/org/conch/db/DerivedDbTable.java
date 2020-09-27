@@ -96,7 +96,9 @@ public abstract class DerivedDbTable {
             boolean cycleDelMode = false;
             if(rs != null && rs.next()) {
                 int deletionCount = rs.getInt("deletion_count");
-                if(deletionCount > 100000) cycleDelMode = true;
+                if(deletionCount > 100000) {
+                    cycleDelMode = true;
+                }
             }
 
             if(cycleDelMode) {
@@ -153,7 +155,9 @@ public abstract class DerivedDbTable {
         int startHeight = height;
         while(needDeleting) {
             int endHeight = startHeight - delCountOneTurn;
-            if(endHeight < 0) endHeight = 0;
+            if(endHeight < 0) {
+                endHeight = 0;
+            }
 
             PreparedStatement countStatement = con.prepareStatement(
                 "SELECT count(1) as count FROM " + tableName
@@ -176,7 +180,6 @@ public abstract class DerivedDbTable {
                     PreparedStatement deleteStatement = con.prepareStatement(trimSql);
                     deleteStatement.setInt(1, startHeight);
                     deleteStatement.setInt(2, endHeight);
-                    con.commit();
 
                     startHeight = endHeight;
                 }else {
