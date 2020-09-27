@@ -180,7 +180,7 @@ public abstract class DerivedDbTable {
                     PreparedStatement deleteStatement = con.prepareStatement(trimSql);
                     deleteStatement.setInt(1, startHeight);
                     deleteStatement.setInt(2, endHeight);
-
+                    deleteStatement.executeQuery();
                     startHeight = endHeight;
                 }else {
                     needDeleting = false;
