@@ -36,15 +36,13 @@ import org.conch.asset.AssetDividend;
 import org.conch.asset.AssetTransfer;
 import org.conch.asset.token.Currency;
 import org.conch.asset.token.*;
-import org.conch.chain.Blockchain;
-import org.conch.chain.BlockchainImpl;
-import org.conch.chain.BlockchainProcessor;
-import org.conch.chain.BlockchainProcessorImpl;
+import org.conch.chain.*;
 import org.conch.common.ConchException;
 import org.conch.common.Constants;
 import org.conch.common.UrlManager;
 import org.conch.consensus.poc.PocProcessor;
 import org.conch.consensus.poc.PocProcessorImpl;
+import org.conch.consensus.poc.db.PocDb;
 import org.conch.consensus.poc.hardware.SystemInfo;
 import org.conch.crypto.Crypto;
 import org.conch.db.Db;
@@ -786,13 +784,27 @@ public final class Conch {
             return;
         }
 
-        Logger.logMessage("[HistoryRecords] Trim all tables");
-        getBlockchainProcessor().trimDerivedTables();
-        Logger.logMessage("[HistoryRecords] Trim finished");
+//        Logger.logMessage("[HistoryRecords] Trim all tables");
+//        getBlockchainProcessor().trimDerivedTables();
 
-        Logger.logMessage("[HistoryRecords] Trim all tables");
-        getBlockchainProcessor().trimDerivedTables();
-        Logger.logMessage("[HistoryRecords] Trim finished");
+        int trimEndHeight = getHeight();
+        if(trimEndHeight == 0) {
+            try{
+                BlockImpl lastBlock = BlockDb.findLastBlock();
+                trimEndHeight =  lastBlock != null ? lastBlock.getHeight() : 0 ;
+            }catch(Exception e){
+                Logger.logErrorMessage("can't get the last block height in the HistoryRecords processing", e);
+            }
+        }
+        int height = trimEndHeight - Constants.MAX_ROLLBACK;
+        Logger.logMessage("[HistoryRecords] Trim account and poc_score tables before height " + height);
+        Account.trimHistoryData(height);
+        PocDb.trimHistoryData(height);
+
+        Logger.logMessage("[HistoryRecords] Clear all account ledger records");
+        AccountLedger.clearAllHistoryEntries();
+
+        Logger.logMessage("[HistoryRecords] Finished to clear history records");
     }
 
     private static class Init {

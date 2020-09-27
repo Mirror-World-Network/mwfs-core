@@ -775,7 +775,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 BlockImpl block = peerBlock.getBlock();
                 if (blockchain.getLastBlock().getId() == block.getPreviousBlockId()) {
                     try {
-                        Logger.logInfoMessage("Pushing block[%d - %s] into current chain at height %d ...", block.getHeight(), Account.rsAccount(block.getGeneratorId()) , Conch.getHeight());
+                        Logger.logInfoMessage("Pushing block[%d- %s] into current chain at height %d ...", block.getId(), Account.rsAccount(block.getGeneratorId()) , Conch.getHeight());
                         pushBlock(block);
                     } catch (GeneratorNotAcceptedException e) {
                         Generator.blackGenerator(e.getGeneratorId());
@@ -1399,7 +1399,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             Logger.logInfoMessage("Create a thread 'GetMoreBlocks' to sync the blocks from other peers.....");
             ThreadPool.scheduleThread("GetMoreBlocks", getMoreBlocksThread, 1);
         }
-        if (true) {
+        if (Boolean.valueOf(Constants.SYNC_BUTTON)) {
             ThreadPool.scheduleThread("SyncAccountBlockMsg", syncAccountBlockMsg, Constants.SYNC_TIME, TimeUnit.SECONDS);
             ThreadPool.scheduleThread("syncAccountGuaranteedBalanceBlockMsg", syncAccountGuaranteedBalanceBlockMsg, Constants.SYNC_TIME, TimeUnit.SECONDS);
             ThreadPool.scheduleThread("syncAccountLedgerBlockMsg", syncAccountLedgerBlockMsg, Constants.SYNC_TIME, TimeUnit.SECONDS);

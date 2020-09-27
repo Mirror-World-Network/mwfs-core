@@ -245,7 +245,7 @@ public class AccountLedger {
         pendingEntries.add(ledgerEntry);
     }
 
-    public void clearAllHistoryEntries(){
+    public static void clearAllHistoryEntries(){
         try {
             Db.db.beginTransaction();
             accountLedgerTable.truncate();
