@@ -799,10 +799,12 @@ public final class Conch {
             }
         }
         int height = trimEndHeight - Constants.MAX_ROLLBACK;
-        Logger.logMessage("[HistoryRecords] Trim account and account_poc_score tables before height " + height);
-        Account.trimHistoryData(height);
-
+        Logger.logMessage("[HistoryRecords] Trim account_poc_score table before height " + height);
         PocDb.trimHistoryData(height);
+        Logger.logMessage(String.format("[HistoryRecords] Trim account_poc_score table used %d S",(System.currentTimeMillis() - clearStartMS) / 1000));
+
+        Logger.logMessage("[HistoryRecords] Trim account and account_guaranteed_balance tables before height " + height);
+        Account.trimHistoryData(height);
 
         Logger.logMessage("[HistoryRecords] Truncate account_ledger table");
         AccountLedger.clearAllHistoryEntries();
