@@ -26,9 +26,7 @@ import org.conch.chain.BlockDb;
 import org.conch.chain.BlockchainProcessorImpl;
 import org.conch.common.Constants;
 import org.conch.util.Convert;
-import org.conch.util.Logger;
 
-import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -1434,10 +1432,14 @@ public class ConchDbVersion extends DbVersion {
                 break;
             case 505:
                 apply(
-                        "create index IF NOT EXISTS ACCOUNT_HEIGHT_ID_IDX on ACCOUNT_HISTORY (HEIGHT, ID);\n" +
-                                "create index IF NOT EXISTS ACCOUNT_POC_SCORE_HISTORY_HEIGHT_INDEX on ACCOUNT_POC_SCORE_HISTORY (HEIGHT desc);\n" +
-                                "ALTER TABLE ACCOUNT_GUARANTEED_BALANCE_HISTORY ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT false;\n" +
-                                "ALTER TABLE ACCOUNT_LEDGER_HISTORY ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT false;");
+                        "create index IF NOT EXISTS ACCOUNT_HEIGHT_ID_IDX on ACCOUNT_HISTORY (HEIGHT, ID);\n"
+                        + "create index IF NOT EXISTS ACCOUNT_POC_SCORE_HISTORY_HEIGHT_INDEX on ACCOUNT_POC_SCORE_HISTORY (HEIGHT desc);\n"
+                        + "ALTER TABLE ACCOUNT_GUARANTEED_BALANCE_HISTORY ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT false;\n"
+                        + "ALTER TABLE ACCOUNT_LEDGER_HISTORY ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT false;\n"
+                        + "DROP INDEX IF EXISTS ACCOUNT_HEIGHT_IDX;\n"
+                        + "CREATE INDEX IF NOT EXISTS ACCOUNT_HEIGHT_IDX ON ACCOUNT (HEIGHT DESC);\n"
+                        + "CREATE INDEX IF NOT EXISTS ACCOUNT_POC_SCORE_HEIGHT_IDX ON ACCOUNT_POC_SCORE (HEIGHT DESC);\n"
+                );
                 break;
             case 506:
                 break;
