@@ -122,7 +122,7 @@ public abstract class DerivedDbTable {
         }
     }
 
-    private static int delCountPerTurn = 500;
+    private static int delCountPerTurn = 144;
     private static void cycleDeleteByDbId(Connection con, String tableName, int height, boolean containLatestField) throws SQLException {
         boolean needDeleting = true;
         while(needDeleting) {
