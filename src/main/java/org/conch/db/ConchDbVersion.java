@@ -1359,6 +1359,11 @@ public class ConchDbVersion extends DbVersion {
 //                        "create index IF NOT EXISTS ACCOUNT_POC_SCORE_CACHE_HEIGHT_INDEX on ACCOUNT_POC_SCORE_CACHE (HEIGHT desc);"
 //                );
             case 504:
+                apply("DROP INDEX IF EXISTS account_height_idx;\n"
+                        + "CREATE INDEX IF NOT EXISTS account_height_idx ON account (height DESC);\n"
+                        + "CREATE INDEX IF NOT EXISTS account_poc_score_height_idx ON account_poc_score (height DESC);\n"
+                );
+            case 505:
                 break;
             default:
                 throw new RuntimeException("Blockchain database inconsistent with code, at update " + nextUpdate
