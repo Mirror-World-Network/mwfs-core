@@ -1223,6 +1223,10 @@ public class ConchDbVersion extends DbVersion {
             case 502:
                 apply("CREATE INDEX IF NOT EXISTS peer_account_height_idx ON certified_peer (account_id, height DESC)");
             case 503:
+                apply("DROP INDEX IF EXISTS account_height_idx;\n"
+                        + "CREATE INDEX IF NOT EXISTS account_height_idx ON account (height DESC);\n"
+                        + "CREATE INDEX IF NOT EXISTS account_poc_score_height_idx ON account_poc_score (height DESC);\n"
+                );
 //                apply("create table IF NOT EXISTS ACCOUNT_CACHE\n" +
 //                        "(\n" +
 //                        "    DB_ID               BIGINT auto_increment,\n" +
@@ -1354,7 +1358,6 @@ public class ConchDbVersion extends DbVersion {
 //                        "create index IF NOT EXISTS ACCOUNT_POC_SCORE_HISTORY_HEIGHT_INDEX on ACCOUNT_POC_SCORE_HISTORY (HEIGHT desc);\n" +
 //                        "create index IF NOT EXISTS ACCOUNT_POC_SCORE_CACHE_HEIGHT_INDEX on ACCOUNT_POC_SCORE_CACHE (HEIGHT desc);"
 //                );
-                apply(null);
             case 504:
                 break;
             default:
