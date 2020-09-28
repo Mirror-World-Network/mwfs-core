@@ -122,14 +122,14 @@ public abstract class DerivedDbTable {
         }
     }
 
-    private static int delCountOneTurn = 144;
+    private static int delCountPerTurn = 500;
     private static void cycleDeleteByDbId(Connection con, String tableName, int height, boolean containLatestField) throws SQLException {
         boolean needDeleting = true;
         while(needDeleting) {
             PreparedStatement queryStatement = con.prepareStatement("SELECT db_id FROM " + tableName
                     + " WHERE height < ?"
                     + (containLatestField ? " AND latest <> TRUE" : "")
-                    + " ORDER BY height ASC limit " + delCountOneTurn);
+                    + " ORDER BY height ASC limit " + delCountPerTurn);
             queryStatement.setInt(1, height);
 
             ResultSet rs = queryStatement.executeQuery();
@@ -142,7 +142,7 @@ public abstract class DerivedDbTable {
                     deleteStatement.setLong(1, existDbId);
                     deleteStatement.executeUpdate();
                 }
-                Logger.logInfoMessage("deleted %d %s records in cycle delete in the table trimming", delCountOneTurn, tableName);
+                Logger.logInfoMessage("deleted %d %s records in cycle delete in the table trimming", delCountPerTurn, tableName);
             }else{
                 needDeleting = false;
             }
@@ -154,20 +154,21 @@ public abstract class DerivedDbTable {
         boolean needDeleting = true;
         int startHeight = height;
         while(needDeleting) {
-            int endHeight = startHeight - delCountOneTurn;
+            int endHeight = startHeight - delCountPerTurn;
             if(endHeight < 0) {
                 endHeight = 0;
             }
 
             String trimSql = "DELETE FROM " + tableName
-                    + " WHERE height < ?"
-                    + " AND height >= ?"
+                    + " WHERE height < " + startHeight
+                    + " AND height >= " + endHeight
                     + (containLatestField ? " AND latest <> TRUE" : "");
-            Logger.logDebugMessage("DELETE FROM %s WHERE height < %d AND height >= %d", tableName, startHeight, endHeight);
+            Logger.logDebugMessage(trimSql);
             PreparedStatement deleteStatement = con.prepareStatement(trimSql);
-            deleteStatement.setInt(1, startHeight);
-            deleteStatement.setInt(2, endHeight);
-            deleteStatement.executeUpdate();
+//            deleteStatement.setInt(1, startHeight);
+//            deleteStatement.setInt(2, endHeight);
+            int count = deleteStatement.executeUpdate();
+            Logger.logDebugMessage("DELETE " + count + " records after execute [" + trimSql + "]" );
             startHeight = endHeight;
             if(startHeight == 0) {
                 needDeleting = false;
