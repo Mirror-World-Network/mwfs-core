@@ -253,7 +253,11 @@ public abstract class DerivedDbTable {
                         }
                         PreparedStatement preparedStatement = con.prepareStatement(insert.append(values).toString());
                         for (int i = 1; i <= columnCount; i++) {
-                            preparedStatement.setObject(i, cacheResult.getObject(i));
+                            if ("latest".equalsIgnoreCase(metaData.getColumnName(i))) {
+                                preparedStatement.setObject(i, true);
+                            } else {
+                                preparedStatement.setObject(i, cacheResult.getObject(i));
+                            }
                         }
                         preparedStatement.executeUpdate();
                     } while (cacheResult.next());

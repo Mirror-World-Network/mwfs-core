@@ -28,10 +28,7 @@ import org.conch.common.Constants;
 import org.conch.util.Convert;
 import org.conch.util.Logger;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -1373,54 +1370,75 @@ public class ConchDbVersion extends DbVersion {
                     "create index IF NOT EXISTS ACCOUNT_POC_SCORE_CACHE_HEIGHT_INDEX on ACCOUNT_POC_SCORE_CACHE (HEIGHT desc);"
                 );
                 break;
-            case 505:
-                apply(
-                "create index IF NOT EXISTS ACCOUNT_HEIGHT_ID_IDX on ACCOUNT_HISTORY (HEIGHT, ID);\n" +
-                    "create index IF NOT EXISTS ACCOUNT_POC_SCORE_HISTORY_HEIGHT_INDEX on ACCOUNT_POC_SCORE_HISTORY (HEIGHT desc);\n" +
-                    "ALTER TABLE ACCOUNT_GUARANTEED_BALANCE_HISTORY ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT false;\n" +
-                    "ALTER TABLE ACCOUNT_LEDGER_HISTORY ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT false;");
-                break;
             case 504:
-                BufferedReader br = null;
-                try (Connection con = db.getConnection()){
-                    //Connection con = Db.db.beginTransaction();
-                    String[] arr = {"ACCOUNT", "ACCOUNT_LEDGER", "ACCOUNT_GUARANTEED_BALANCE", "ACCOUNT_POC_SCORE"};
-                    for (String fileName : arr) {
+                try (Connection con = Db.db.beginTransaction()){
+                    String[] dataArr = {"ACCOUNT", "ACCOUNT_LEDGER", "ACCOUNT_GUARANTEED_BALANCE", "ACCOUNT_POC_SCORE"};
+                    for (String table : dataArr) {
                         Statement statement = con.createStatement();
-                        String path = "./data/" + fileName + ".txt";
-                        File f = new File(path);
-                        int count = 0;
-                        if (f.exists()) {
-                            if (f.isFile()) {
-                                br = new BufferedReader(new FileReader(path));
-                                String s = null;
-                                while ((s = br.readLine()) != null) {
-                                    count++;
-                                    int i = statement.executeUpdate(s);
-                                    if (i < 1) {
-                                        Logger.logDebugMessage("data insert fail,count :" + count);
-                                        throw new SQLException("data insert fail,sql:" + s);
+                        String idColumn;
+                        if ("ACCOUNT".equalsIgnoreCase(table)) {
+                            idColumn = "ID";
+                        } else {
+                            idColumn = "ACCOUNT_ID";
+                        }
+                        ResultSet rs = statement.executeQuery("SELECT distinct " + idColumn + " FROM " + table + "_history");
+                        while (rs.next()) {
+                            long accountId = rs.getLong(idColumn);
+                            PreparedStatement maxHeight = con.prepareStatement("SELECT max(HEIGHT) maxHeight FROM " + table + "_history" + " where " + idColumn + " = ?");
+                            maxHeight.setLong(1, accountId);
+                            ResultSet idSet = maxHeight.executeQuery();
+                            if (idSet.next()) {
+                                PreparedStatement update = con.prepareStatement("select * from " + table + "_history" + " where HEIGHT = ? and " + idColumn + " = ?");
+                                update.setInt(1, idSet.getInt("maxHeight"));
+                                update.setLong(2, accountId);
+                                ResultSet data = update.executeQuery();
+                                if (data != null && data.next()) {
+                                    ResultSetMetaData metaData = data.getMetaData();
+                                    int columnCount = metaData.getColumnCount();
+                                    StringBuilder insert = new StringBuilder();
+                                    StringBuilder values = new StringBuilder();
+                                    for (int i = 1; i <= columnCount; i++) {
+                                        if (i == 1) {
+                                            insert.append("insert into " + table + " (");
+                                            insert.append(metaData.getColumnName(i)).append(",");
+                                            values.append("values (").append("?,");
+                                        } else if (1 < i && i < columnCount) {
+                                            insert.append(metaData.getColumnName(i)).append(",");
+                                            values.append("?,");
+                                        } else {
+                                            insert.append(metaData.getColumnName(i)).append(")");
+                                            values.append("?)");
+                                        }
                                     }
+                                    PreparedStatement preparedStatement = con.prepareStatement(insert.append(values).toString());
+                                    for (int i = 1; i <= columnCount; i++) {
+                                        if ("latest".equalsIgnoreCase(metaData.getColumnName(i))) {
+                                            preparedStatement.setObject(i, true);
+                                        } else {
+                                            preparedStatement.setObject(i, data.getObject(i));
+                                        }
+                                    }
+                                    preparedStatement.executeUpdate();
                                 }
                             }
                         }
-                        Logger.logDebugMessage("data count++++++++++:" + count);
                     }
                     apply(null);
-                    //Db.db.commitTransaction();
-                } catch (IOException | SQLException throwables) {
-                    //Db.db.rollbackTransaction();
+                    Db.db.commitTransaction();
+                } catch (SQLException throwables) {
+                    Db.db.rollbackTransaction();
                     throwables.printStackTrace();
                 }finally {
-                    //Db.db.endTransaction();
-                    if (br != null) {
-                        try {
-                            br.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                    Db.db.endTransaction();
                 }
+                break;
+            case 505:
+                apply(
+                        "create index IF NOT EXISTS ACCOUNT_HEIGHT_ID_IDX on ACCOUNT_HISTORY (HEIGHT, ID);\n" +
+                                "create index IF NOT EXISTS ACCOUNT_POC_SCORE_HISTORY_HEIGHT_INDEX on ACCOUNT_POC_SCORE_HISTORY (HEIGHT desc);\n" +
+                                "ALTER TABLE ACCOUNT_GUARANTEED_BALANCE_HISTORY ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT false;\n" +
+                                "ALTER TABLE ACCOUNT_LEDGER_HISTORY ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT false;");
+                break;
             case 506:
                 break;
             default:
