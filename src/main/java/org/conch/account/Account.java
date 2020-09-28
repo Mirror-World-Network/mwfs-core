@@ -45,10 +45,7 @@ import org.conch.util.Listener;
 import org.conch.util.Listeners;
 import org.conch.util.Logger;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -2605,6 +2602,22 @@ public final class Account {
     public static void trimHistoryData(int height){
         accountGuaranteedBalanceTable.trim(height);
         accountTable.trim(height);
+    }
+
+    public static void truncateAccountLedger(){
+        Connection con = null;
+        try {
+            con = Db.db.getConnection();
+            Statement stmt = con.createStatement();
+            Logger.logMessage("[HistoryRecords] Truncate ACCOUNT_LEDGER_HISTORY table");
+            stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_LEDGER_HISTORY");
+            Logger.logMessage("[HistoryRecords] Truncate ACCOUNT_LEDGER table");
+            stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_LEDGER");
+        } catch (SQLException e) {
+            throw new RuntimeException(e.toString(), e);
+        }finally {
+            DbUtils.close(con);
+        }
     }
 
     public static void historyData(int height){

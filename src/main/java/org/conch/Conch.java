@@ -787,10 +787,7 @@ public final class Conch {
         }
 
         long clearStartMS = System.currentTimeMillis();
-
-        Logger.logMessage("[HistoryRecords] Truncate account_ledger table");
-        AccountLedger.clearAllHistoryEntries();
-
+        Account.truncateAccountLedger();
 //        Logger.logMessage("[HistoryRecords] Trim all tables");
 //        getBlockchainProcessor().trimDerivedTables();
 
