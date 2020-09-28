@@ -489,6 +489,39 @@ public final class Account {
         public void trim(int height) {
             _trim("account",height);
         }
+
+        @Override
+        public void rollback(int height) {
+            rollbackAndPush("account", height, true);
+        }
+    };
+
+    private static final VersionedEntityDbTable<Account> accountCacheTable = new VersionedEntityDbTable<Account>("account_cache", accountDbKeyFactory) {
+
+        @Override
+        protected Account load(Connection con, ResultSet rs, DbKey dbKey) throws SQLException {
+            return new Account(rs, dbKey);
+        }
+
+        @Override
+        protected void save(Connection con, Account account) throws SQLException {
+            account.save(con);
+        }
+
+    };
+
+    private static final VersionedEntityDbTable<Account> accountHistoryTable = new VersionedEntityDbTable<Account>("account_history", accountDbKeyFactory) {
+
+        @Override
+        protected Account load(Connection con, ResultSet rs, DbKey dbKey) throws SQLException {
+            return new Account(rs, dbKey);
+        }
+
+        @Override
+        protected void save(Connection con, Account account) throws SQLException {
+            account.save(con);
+        }
+
     };
 
     private static final DbKey.LongKeyFactory<AccountInfo> accountInfoDbKeyFactory = new DbKey.LongKeyFactory<AccountInfo>("account_id") {
@@ -660,6 +693,10 @@ public final class Account {
             _trim("account_guaranteed_balance", height, false);
         }
 
+        @Override
+        public void rollback(int height) {
+            rollbackAndPush("account_guaranteed_balance", height, false);
+        }
     };
 
     private static final DbKey.LongKeyFactory<AccountProperty> accountPropertyDbKeyFactory = new DbKey.LongKeyFactory<AccountProperty>("id") {
@@ -849,10 +886,16 @@ public final class Account {
         DbKey dbKey = accountDbKeyFactory.newKey(id);
         Account account = accountTable.get(dbKey, height);
         if (account == null) {
-            PublicKey publicKey = publicKeyTable.get(dbKey, height);
-            if (publicKey != null) {
-                account = accountTable.newEntity(dbKey);
-                account.publicKey = publicKey;
+            account =accountCacheTable.get(dbKey, height);
+            if (account == null) {
+                account = accountHistoryTable.get(dbKey, height);
+                if (account == null) {
+                    PublicKey publicKey = publicKeyTable.get(dbKey, height);
+                    if (publicKey != null) {
+                        account = accountTable.newEntity(dbKey);
+                        account.publicKey = publicKey;
+                    }
+                }
             }
         }
         return account;
@@ -1489,7 +1532,7 @@ public final class Account {
         return getGuaranteedBalanceNQT(Constants.GUARANTEED_BALANCE_CONFIRMATIONS, Conch.getHeight());
     }
 
-    public long getGuaranteedBalanceNQT(final int numberOfConfirmations, final int currentHeight) {
+    public long getGuaranteedBalanceNQT(final int numberOfConfirmations,final int currentHeight) {
       
         try {
             Conch.getBlockchain().readLock();
@@ -1505,17 +1548,50 @@ public final class Account {
             Connection con = null;
             try {
                 con = Db.db.getConnection();
-                PreparedStatement pstmt = con.prepareStatement("SELECT SUM (additions) AS additions "
+                Long additions = 0l;
+                int toHeight = currentHeight;
+                PreparedStatement pstmt = con.prepareStatement("SELECT SUM (additions) AS additions, min(height) as height "
                         + "FROM account_guaranteed_balance WHERE account_id = ? AND height > ? AND height <= ?");
                 pstmt.setLong(1, this.id);
                 pstmt.setInt(2, fromHeight);
-                pstmt.setInt(3, currentHeight);
-                try (ResultSet rs = pstmt.executeQuery()) {
-                    if (!rs.next()) {
-                        return balanceNQT;
-                    }
-                    return Math.max(Math.subtractExact(balanceNQT, rs.getLong("additions")), 0);
+                pstmt.setInt(3, toHeight);
+                ResultSet workRs = pstmt.executeQuery();
+                String cacheSql;
+                if (workRs.next()) {
+                    cacheSql = "SELECT SUM (additions) AS additions, min(height) as height "
+                            + "FROM account_guaranteed_balance_cache WHERE account_id = ? AND height > ? AND height < ?";
+                    toHeight = workRs.getInt("height");
+                    additions += workRs.getLong("additions");
+                } else {
+                    cacheSql = "SELECT SUM (additions) AS additions, min(height) as height "
+                            + "FROM account_guaranteed_balance_cache WHERE account_id = ? AND height > ? AND height <= ?";
                 }
+                PreparedStatement cachePstmt = con.prepareStatement(cacheSql);
+                cachePstmt.setLong(1, this.id);
+                cachePstmt.setInt(2, fromHeight);
+                cachePstmt.setInt(3, toHeight);
+                ResultSet cacheRs = cachePstmt.executeQuery();
+                String historySql;
+                if (cacheRs.next()) {
+                    historySql = "SELECT SUM (additions) AS additions "
+                            + "FROM account_guaranteed_balance_history WHERE account_id = ? AND height > ? AND height < ?";
+                    toHeight = cacheRs.getInt("height");
+                    additions += cacheRs.getLong("additions");
+                } else {
+                    if (toHeight == currentHeight) {
+                        historySql = "SELECT SUM (additions) AS additions "
+                                + "FROM account_guaranteed_balance_history WHERE account_id = ? AND height > ? AND height <= ?";
+                    } else {
+                        historySql = "SELECT SUM (additions) AS additions "
+                                + "FROM account_guaranteed_balance_history WHERE account_id = ? AND height > ? AND height < ?";
+                    }
+                }
+                PreparedStatement historyPstmt = con.prepareStatement(historySql);
+                historyPstmt.setLong(1, this.id);
+                historyPstmt.setInt(2, fromHeight);
+                historyPstmt.setInt(3, toHeight);
+                ResultSet historyRs = historyPstmt.executeQuery();
+                return Math.max(Math.subtractExact(balanceNQT, additions + (workRs.next() ? historyRs.getLong("additions") : 0)), 0);
             } catch (SQLException e) {
                 throw new RuntimeException(e.toString(), e);
             }finally {

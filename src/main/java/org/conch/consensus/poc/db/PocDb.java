@@ -44,9 +44,13 @@ public class PocDb  {
                 throw new IllegalStateException("Not in transaction");
             }
             try (Connection con = Db.db.getConnection();
-                PreparedStatement pstmtDelete = con.prepareStatement("DELETE FROM ACCOUNT_POC_SCORE WHERE height > ?")) {
+                PreparedStatement pstmtDelete = con.prepareStatement("DELETE FROM ACCOUNT_POC_SCORE WHERE height > ?");
+                PreparedStatement pstmtDeleteCache = con.prepareStatement("DELETE FROM ACCOUNT_POC_SCORE_CACHE WHERE height > ?");
+                PreparedStatement pstmtDeleteHistory = con.prepareStatement("DELETE FROM ACCOUNT_POC_SCORE_HISTORY WHERE height > ?")) {
                 pstmtDelete.setInt(1, height);
-                return pstmtDelete.executeUpdate();
+                pstmtDeleteCache.setInt(1, height);
+                pstmtDeleteHistory.setInt(1, height);
+                return pstmtDelete.executeUpdate() & pstmtDeleteCache.executeUpdate() & pstmtDeleteHistory.executeUpdate();
             } catch (SQLException e) {
                 throw new RuntimeException(e.toString(), e);
             }
@@ -131,21 +135,52 @@ public class PocDb  {
                 con = Db.db.getConnection();
                 PreparedStatement pstmt = con.prepareStatement("SELECT poc_detail AS detail, poc_score, account_id, height "
                         + "FROM account_poc_score WHERE account_id = ?"
-                        + (loadHistory ? " AND height <= ?" : " AND height = ?")
-                        + (appointStart != -1 ? " AND height > ?" : "")
+                        + " AND height = ?"
                         + " ORDER BY height DESC LIMIT 1");
-
                 pstmt.setLong(1, accountId);
-                pstmt.setInt(2, height);
-
-                if(appointStart != -1) {
-                    pstmt.setInt(3, appointStart);
-                }
-
+                pstmt.setLong(2, height);
                 ResultSet rs = pstmt.executeQuery();
-                if(rs !=null && rs.next()){
+                if (rs != null && rs.next()) {
                     PocScore pocScore = new PocScore(rs.getLong("account_id"), rs.getInt("height"), rs.getString("detail"));
                     return pocScore.setTotal(rs.getLong("poc_score"));
+                } else {
+                    PreparedStatement cachePstmt = con.prepareStatement("SELECT poc_detail AS detail, poc_score, account_id, height "
+                            + "FROM account_poc_score_cache WHERE account_id = ?"
+                            + (loadHistory ? " AND height <= ?" : " AND height = ?")
+                            + (appointStart != -1 ? " AND height > ?" : "")
+                            + " ORDER BY height DESC LIMIT 1");
+
+                    cachePstmt.setLong(1, accountId);
+                    cachePstmt.setInt(2, height);
+
+                    if(appointStart != -1) {
+                        cachePstmt.setInt(3, appointStart);
+                    }
+
+                    rs = cachePstmt.executeQuery();
+                    if (rs != null && rs.next()) {
+                        PocScore pocScore = new PocScore(rs.getLong("account_id"), rs.getInt("height"), rs.getString("detail"));
+                        return pocScore.setTotal(rs.getLong("poc_score"));
+                    } else {
+                        PreparedStatement history = con.prepareStatement("SELECT poc_detail AS detail, poc_score, account_id, height "
+                                + "FROM account_poc_score_history WHERE account_id = ?"
+                                + (loadHistory ? " AND height <= ?" : " AND height = ?")
+                                + (appointStart != -1 ? " AND height > ?" : "")
+                                + " ORDER BY height DESC LIMIT 1");
+
+                        history.setLong(1, accountId);
+                        history.setInt(2, height);
+
+                        if(appointStart != -1) {
+                            history.setInt(3, appointStart);
+                        }
+
+                        rs = history.executeQuery();
+                        if (rs != null && rs.next()) {
+                            PocScore pocScore = new PocScore(rs.getLong("account_id"), rs.getInt("height"), rs.getString("detail"));
+                            return pocScore.setTotal(rs.getLong("poc_score"));
+                        }
+                    }
                 }
             } catch (SQLException e) {
                 throw new RuntimeException(e.toString(), e);
@@ -276,7 +311,7 @@ public class PocDb  {
 
         @Override
         public void rollback(int height) {
-            countAndRollback(height);
+            rollbackAndPush("account_poc_score", height, true);
         }
 
         /**
