@@ -2371,35 +2371,38 @@
             },
             sendTransfer: function (formData) {
                 const _this = this;
-                return new Promise(function (resolve, reject) {
-                    let config = {
-                        headers: {
-                            'Content-Type': 'multipart/form-data'
-                        }
-                    };
-                    _this.$http.post('/sharder?requestType=sendMoney', formData, config).then(res => {
-                        if (typeof res.data.errorDescription === 'undefined') {
-                            if (res.data.broadcasted) {
-                                _this.$message.success(_this.$t('notification.transfer_success'));
-                                resolve(res.data);
-                                _this.closeDialog();
-                                _this.$global.setUnconfirmedTransactions(_this, SSO.account).then(res => {
-                                    _this.$store.commit("setUnconfirmedNotificationsList", res.data);
-                                });
-                            } else {
-                                console.log(res.data);
-                                _this.transfer.fee = res.data.transactionJSON.feeNQT / 100000000;
-                                resolve(res.data);
-                            }
-                        } else {
-                            _this.$message.error(res.data.errorDescription);
-                            resolve(res.data);
-                        }
-                    }).catch(err => {
-                        reject(err);
-                        console.log(err);
-                    });
-                });
+                SSO.sendMoney(formData, _this);
+
+                // return new Promise(function (resolve, reject) {
+                //     let config = {
+                //         headers: {
+                //             'Content-Type': 'multipart/form-data'
+                //         }
+                //     };
+                //     _this.$http.post('/sharder?requestType=sendMoney', formData, config).then(res => {
+                //         if (typeof res.data.errorDescription === 'undefined') {
+                //             if (res.data.broadcasted) {
+                //                 _this.$message.success(_this.$t('notification.transfer_success'));
+                //                 resolve(res.data);
+                //                 _this.closeDialog();
+                //                 _this.$global.setUnconfirmedTransactions(_this, SSO.account).then(res => {
+                //                     _this.$store.commit("setUnconfirmedNotificationsList", res.data);
+                //                 });
+                //             } else {
+                //                 console.log(res.data);
+                //                 _this.transfer.fee = res.data.transactionJSON.feeNQT / 100000000;
+                //                 resolve(res.data);
+                //             }
+                //         } else {
+                //             _this.$message.error(res.data.errorDescription);
+                //             resolve(res.data);
+                //         }
+                //     }).catch(err => {
+                //         reject(err);
+                //         console.log(err);
+                //     });
+                //
+                // });
             },
             getAccountTransactionList: function () {
                 const _this = this;
@@ -3188,8 +3191,6 @@
             });
             window.onbeforeunload = function (e) {
                 e = e || window.event;
-
-                debugger;
 
                 // 兼容IE8和Firefox 4之前的版本
                 if (e) {

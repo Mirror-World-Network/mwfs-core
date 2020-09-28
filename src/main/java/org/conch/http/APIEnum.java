@@ -98,6 +98,7 @@ public enum APIEnum {
     GET_BLOCK_ID("getBlockId", GetBlockId.instance),
     GET_BLOCKS("getBlocks", GetBlocks.instance),
     GET_COMMAND_LINE_CLIENT_INFO("getCommandLineClientInfo", GetCommandLineClientInfo.instance),
+    GET_SNAPSHOT_ACCOUNTS("getSnapshotAccounts", GetSnapshotAccounts.instance),
     GET_BLOCKCHAIN_STATUS("getBlockchainStatus", GetBlockchainStatus.instance),
     GET_BLOCKCHAIN_TRANSACTIONS("getBlockchainTransactions", GetBlockchainTransactions.instance),
     GET_BLOCKCHAIN_TRANSACTIONS_COUNT("getBlockchainTransactionsCount",GetBlockchainTransactionsCount.instance),
