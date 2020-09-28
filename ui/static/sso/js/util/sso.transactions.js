@@ -25,7 +25,33 @@ var NRS = (function(NRS, $, undefined) {
 	NRS.unconfirmedTransactionsChange = true;
 
 
-	NRS.sendMoney = function (formData, _this) {
+	NRS.sendMessage = function (formData, _this) {
+	    var jsonData = {};
+        formData.forEach((value, key) => jsonData[key] = value);
+        NRS.sendRequest("sendMessage", jsonData, function (res) {
+            // NRS.logConsole(JSON.stringify(response));
+            console.log("res", res);
+            if (typeof res.errorDescription === 'undefined') {
+                if (res.broadcasted) {
+                    _this.$message.success(_this.$t('notification.transfer_success'));
+                    _this.closeDialog();
+                    _this.$global.setUnconfirmedTransactions(_this, SSO.account).then(res => {
+                        _this.$store.commit("setUnconfirmedNotificationsList", res);
+                    });
+                } else {
+                    console.log(res);
+                    _this.transfer.fee = res.transactionJSON.feeNQT / 100000000;
+                }
+            } else {
+                if (res.errorDescription.indexOf("$.t")) {
+                    _this.$message.error(_this.$t(res.errorDescription.slice(3, -1)));
+                } else {
+                    _this.$message.error(res.errorDescription);
+                }
+            }
+        })
+    };
+    NRS.sendMoney = function (formData, _this) {
 	    var jsonData = {};
         formData.forEach((value, key) => jsonData[key] = value);
         NRS.sendRequest("sendMoney", jsonData, function (res) {
