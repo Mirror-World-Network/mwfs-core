@@ -2503,8 +2503,8 @@ public final class Account {
     }
 
     public static void trimHistoryData(int height){
-        accountTable.trim(height);
         accountGuaranteedBalanceTable.trim(height);
+        accountTable.trim(height);
     }
 
     public static void historyData(int height){
