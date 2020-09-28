@@ -2263,36 +2263,37 @@
             },
             sendMessage: function (formData) {
                 const _this = this;
-                return new Promise(function (resolve, reject) {
-                    let config = {
-                        headers: {
-                            'Content-Type': 'multipart/form-data'
-                        }
-                    };
-                    _this.$http.post('/sharder?requestType=sendMessage', formData, config).then(res => {
-
-                        if (typeof res.data.errorDescription === 'undefined') {
-                            if (res.data.broadcasted) {
-                                _this.$message.success(_this.$t('notification.sendmessage_success'));
-                                resolve(res.data);
-                                _this.closeDialog();
-                                _this.$global.setUnconfirmedTransactions(_this, SSO.account).then(res => {
-                                    _this.$store.commit("setUnconfirmedNotificationsList", res.data);
-                                });
-                            } else {
-                                console.log(res.data);
-                                _this.messageForm.fee = res.data.transactionJSON.feeNQT / 100000000;
-                                resolve(res.data);
-                            }
-                        } else {
-                            _this.$message.error(res.data.errorDescription);
-                            resolve(res.data);
-                        }
-                    }).catch(err => {
-                        reject(err);
-                        console.log(err);
-                    });
-                });
+                SSO.sendMessage(formData, _this);
+                // return new Promise(function (resolve, reject) {
+                //     let config = {
+                //         headers: {
+                //             'Content-Type': 'multipart/form-data'
+                //         }
+                //     };
+                //     _this.$http.post('/sharder?requestType=sendMessage', formData, config).then(res => {
+                //
+                //         if (typeof res.data.errorDescription === 'undefined') {
+                //             if (res.data.broadcasted) {
+                //                 _this.$message.success(_this.$t('notification.sendmessage_success'));
+                //                 resolve(res.data);
+                //                 _this.closeDialog();
+                //                 _this.$global.setUnconfirmedTransactions(_this, SSO.account).then(res => {
+                //                     _this.$store.commit("setUnconfirmedNotificationsList", res.data);
+                //                 });
+                //             } else {
+                //                 console.log(res.data);
+                //                 _this.messageForm.fee = res.data.transactionJSON.feeNQT / 100000000;
+                //                 resolve(res.data);
+                //             }
+                //         } else {
+                //             _this.$message.error(res.data.errorDescription);
+                //             resolve(res.data);
+                //         }
+                //     }).catch(err => {
+                //         reject(err);
+                //         console.log(err);
+                //     });
+                // });
 
             },
             sendTransferInfo: function () {
