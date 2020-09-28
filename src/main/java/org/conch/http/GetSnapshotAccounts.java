@@ -5,7 +5,6 @@ import org.conch.account.Account;
 import org.conch.common.ConchException;
 import org.conch.common.Constants;
 import org.conch.db.DbUtils;
-import org.conch.db.SnapshotDb;
 import org.conch.util.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONStreamAware;
