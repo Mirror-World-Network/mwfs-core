@@ -511,6 +511,18 @@ public final class Account {
             account.save(con);
         }
 
+        @Override
+        public void trim(int height) {
+        }
+
+        @Override
+        public void rollback(int height) {
+        }
+
+        @Override
+        public void truncate() {
+        }
+
     };
 
     private static final VersionedEntityDbTable<Account> accountHistoryTable = new VersionedEntityDbTable<Account>("account_history", accountDbKeyFactory) {
@@ -523,6 +535,18 @@ public final class Account {
         @Override
         protected void save(Connection con, Account account) throws SQLException {
             account.save(con);
+        }
+
+        @Override
+        public void trim(int height) {
+        }
+
+        @Override
+        public void rollback(int height) {
+        }
+
+        @Override
+        public void truncate() {
         }
 
     };
