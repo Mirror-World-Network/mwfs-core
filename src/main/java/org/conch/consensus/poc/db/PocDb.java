@@ -723,4 +723,8 @@ public class PocDb  {
         return null;
     }
 
+    public static void trimHistoryData(int height){
+        pocScoreTable.trim(height);
+    }
+
 }

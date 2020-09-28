@@ -45,7 +45,10 @@ import org.conch.util.Listener;
 import org.conch.util.Listeners;
 import org.conch.util.Logger;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -2575,9 +2578,14 @@ public final class Account {
         }
     }
 
-    public static void historyData(){
+    public static void trimHistoryData(int height){
+        accountGuaranteedBalanceTable.trim(height);
+        accountTable.trim(height);
+    }
+
+    public static void historyData(int height){
 //        try {
-//            Connection con = db.getConnection();
+//            Connection con = Db.db.getConnection();
 ////                    String[] arr = { "ACCOUNT_GUARANTEED_BALANCE", "ACCOUNT_LEDGER"};
 //
 //            String[] arr = { "ACCOUNT_GUARANTEED_BALANCE"};
@@ -2590,7 +2598,7 @@ public final class Account {
 //
 //            while (rs.next()) {
 //                long accountId = rs.getLong("ID");
-//                PreparedStatement idStmt = con.prepareStatement("SELECT HEIGHT FROM ACCOUNT where ID = ? order by HEIGHT DESC limit 1");
+//                PreparedStatement idStmt = con.prepareStatement("SELECT * FROM ACCOUNT where ID = ? order by HEIGHT DESC limit 1");
 //                idStmt.setLong(1,accountId);
 //                ResultSet resultSet = idStmt.executeQuery();
 //                if (resultSet.next()) {
@@ -2625,4 +2633,35 @@ public final class Account {
 //            throw new RuntimeException(e.toString(), e);
 //        }
     }
+    public static void migrationHistoryData(int height){
+//        try {
+//            Connection con = Db.db.getConnection();
+//
+//            PreparedStatement stmt = con.prepareStatement("SELECT * FROM ACCOUNT where HEIGHT > ?");
+//            stmt.setInt(1, height);
+//            ResultSet rs = stmt.executeQuery();
+//
+//            rs.last(); // 将光标移动到最后一行
+//            int rowCount = rs.getRow(); // 得到当前行号，即结果集记录数
+//            rs.beforeFirst(); //指针再移到初始化的位置
+//
+//            if (rs.next()) {
+//                this.id = rs.getLong("id");
+//                this.dbKey = dbKey;
+//                this.balanceNQT = rs.getLong("balance");
+//                this.unconfirmedBalanceNQT = rs.getLong("unconfirmed_balance");
+//                this.forgedBalanceNQT = rs.getLong("forged_balance");
+//                this.frozenBalanceNQT = rs.getLong("frozen_balance");
+//                this.activeLesseeId = rs.getLong("active_lessee_id");
+//                if (rs.getBoolean("has_control_phasing")) {
+//                    controls = Collections.unmodifiableSet(EnumSet.of(ControlType.PHASING_ONLY));
+//                } else {
+//                    controls = Collections.emptySet();
+//                }
+//            }
+//        } catch (SQLException e) {
+//            throw new RuntimeException(e.toString(), e);
+//        }
+    }
+
 }
