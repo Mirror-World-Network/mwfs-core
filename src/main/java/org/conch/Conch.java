@@ -791,8 +791,8 @@ public final class Conch {
         Logger.logMessage("[HistoryRecords] Truncate account_ledger table");
         AccountLedger.clearAllHistoryEntries();
 
-        Logger.logMessage("[HistoryRecords] Trim all tables");
-        getBlockchainProcessor().trimDerivedTables();
+//        Logger.logMessage("[HistoryRecords] Trim all tables");
+//        getBlockchainProcessor().trimDerivedTables();
 
 //        int trimEndHeight = getHeight();
 //        if(trimEndHeight == 0) {
