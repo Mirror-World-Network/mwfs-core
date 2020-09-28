@@ -96,7 +96,9 @@ public abstract class DerivedDbTable {
             boolean cycleDelMode = false;
             if(rs != null && rs.next()) {
                 int deletionCount = rs.getInt("deletion_count");
-                if(deletionCount > 100000) cycleDelMode = true;
+                if(deletionCount > 100000) {
+                    cycleDelMode = true;
+                }
             }
 
             if(cycleDelMode) {
@@ -120,7 +122,7 @@ public abstract class DerivedDbTable {
         }
     }
 
-    private static int delCountOneTurn = 10000;
+    private static int delCountOneTurn = 144;
     private static void cycleDeleteByDbId(Connection con, String tableName, int height, boolean containLatestField) throws SQLException {
         boolean needDeleting = true;
         while(needDeleting) {
@@ -153,38 +155,53 @@ public abstract class DerivedDbTable {
         int startHeight = height;
         while(needDeleting) {
             int endHeight = startHeight - delCountOneTurn;
-            if(endHeight < 0) endHeight = 0;
+            if(endHeight < 0) {
+                endHeight = 0;
+            }
 
-            PreparedStatement countStatement = con.prepareStatement(
-                "SELECT count(1) as count FROM " + tableName
-                + " WHERE height < ?"
-                + " AND height >= ?"
-                + (containLatestField ? " AND latest <> TRUE" : "")
-            );
-            countStatement.setInt(1, startHeight);
-            countStatement.setInt(2, endHeight);
+            String trimSql = "DELETE FROM " + tableName
+                    + " WHERE height < ?"
+                    + " AND height >= ?"
+                    + (containLatestField ? " AND latest <> TRUE" : "");
+            Logger.logDebugMessage("DELETE FROM %s WHERE height < %d AND height >= %d", tableName, startHeight, endHeight);
+            PreparedStatement deleteStatement = con.prepareStatement(trimSql);
+            deleteStatement.setInt(1, startHeight);
+            deleteStatement.setInt(2, endHeight);
+            deleteStatement.executeUpdate();
 
-            ResultSet rs = countStatement.executeQuery();
-            if(rs != null && rs.next()) {
-                int count = rs.getInt("count");
-                if(count > 0 ) {
-                    String trimSql = "DELETE FROM " + tableName
-                            + " WHERE height < ?"
-                            + " AND height >= ?"
-                            + (containLatestField ? " AND latest <> TRUE" : "");
-                    Logger.logDebugMessage("DELETE FROM %s WHERE height < %d AND height >= %d", tableName, startHeight, endHeight);
-                    PreparedStatement deleteStatement = con.prepareStatement(trimSql);
-                    deleteStatement.setInt(1, startHeight);
-                    deleteStatement.setInt(2, endHeight);
-                    con.commit();
-
-                    startHeight = endHeight;
-                }else {
-                    needDeleting = false;
-                }
-            }else{
+            startHeight = endHeight;
+            if(startHeight == 0) {
                 needDeleting = false;
             }
+//            PreparedStatement countStatement = con.prepareStatement(
+//                "SELECT count(1) as count FROM " + tableName
+//                + " WHERE height < ?"
+//                + " AND height >= ?"
+//                + (containLatestField ? " AND latest <> TRUE" : "")
+//            );
+//            countStatement.setInt(1, startHeight);
+//            countStatement.setInt(2, endHeight);
+//
+//            ResultSet rs = countStatement.executeQuery();
+//            if(rs != null && rs.next()) {
+//                int count = rs.getInt("count");
+//                if(count > 0 ) {
+//                    String trimSql = "DELETE FROM " + tableName
+//                            + " WHERE height < ?"
+//                            + " AND height >= ?"
+//                            + (containLatestField ? " AND latest <> TRUE" : "");
+//                    Logger.logDebugMessage("DELETE FROM %s WHERE height < %d AND height >= %d", tableName, startHeight, endHeight);
+//                    PreparedStatement deleteStatement = con.prepareStatement(trimSql);
+//                    deleteStatement.setInt(1, startHeight);
+//                    deleteStatement.setInt(2, endHeight);
+//                    deleteStatement.executeUpdate();
+//                    startHeight = endHeight;
+//                }else {
+//                    needDeleting = false;
+//                }
+//            }else{
+//                needDeleting = false;
+//            }
 
         }
     }

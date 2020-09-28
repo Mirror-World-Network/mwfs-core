@@ -110,7 +110,7 @@ public final class Constants {
     public static final int MAX_BLOCKTIME_LIMIT = 67;
     public static final int BASE_TARGET_GAMMA = 64;
 
-    public static final int MAX_ROLLBACK = Math.max(Conch.getIntProperty("sharder.maxRollback"), isTestnetOrDevnet() ? 144 : 720);
+    public static final int MAX_ROLLBACK = Math.max(Conch.getIntProperty("sharder.maxRollback"), isTestnetOrDevnet() ? 48 : 720);
     public static final long MAX_BASE_TARGET = MAX_BALANCE_SS * INITIAL_BASE_TARGET;
     public static final long MAX_BASE_TARGET_2 = isTestnetOrDevnet() ? MAX_BASE_TARGET : INITIAL_BASE_TARGET * 50;
     public static final long MIN_BASE_TARGET = INITIAL_BASE_TARGET * 9 / 10;
@@ -271,6 +271,22 @@ public final class Constants {
 
     //OSS
     public static final String OSS_PREFIX = "https://mwfs.oss-cn-shenzhen.aliyuncs.com/";
+
+    //syn
+    public static final int SYNC_BLOCK_NUM = Conch.getIntProperty("sharder.syncblocknum");
+    public static final int SYNC_CACHE_BLOCK_NUM = Conch.getIntProperty("sharder.sync.cacheblocknum");
+    public static final int SYNC_WORK_BLOCK_NUM = Conch.getIntProperty("sharder.sync.workblocknum");
+    public static final int SYNC_TIME = Conch.getIntProperty("sharder.sync.time");
+    public static final String SYNC_BUTTON = Conch.getStringProperty("sharder.sync.button");
+    public static final String HISTORY_RECORD_MODE = Conch.getStringProperty("sharder.historyRecordMode", "update");
+    public static final Boolean HISTORY_RECORD_CLEAR = Conch.getBooleanProperty("sharder.historyRecordClear", true);
+
+    public static boolean updateHistoryRecord(){
+        if("new".equalsIgnoreCase(HISTORY_RECORD_MODE)){
+            return false;
+        }
+        return true;
+    }
     /**
      * chain begin time
      * @param index 0: conch chain, 1: testnet of sharder, otherwise is mainnet of sharder
