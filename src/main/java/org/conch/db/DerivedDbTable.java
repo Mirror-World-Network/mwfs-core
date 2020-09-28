@@ -211,4 +211,70 @@ public abstract class DerivedDbTable {
         return table;
     }
 
+    protected static void rollbackAndPush(String tableName, int height, boolean push) {
+        if (!Db.db.isInTransaction()) {
+            throw new IllegalStateException("Not in transaction");
+        }
+        try (Connection con = Db.db.getConnection()) {
+            PreparedStatement wordQueryState = con.prepareStatement("select * from " + tableName + " where height = ? limit 1");
+            wordQueryState.setInt(1, height);
+            ResultSet resultSet = wordQueryState.executeQuery();
+            if (resultSet != null && resultSet.next()) {
+
+                PreparedStatement pstmtUpdate = con.prepareStatement("update " + tableName + " set latest = true where height = ?");
+                pstmtUpdate.setInt(1, height);
+                pstmtUpdate.executeUpdate();
+            } else {
+                PreparedStatement cacheQueryState = con.prepareStatement("select * from " + tableName + "_cache" + " where height = ?");
+                cacheQueryState.setInt(1, height);
+                ResultSet cacheResult = cacheQueryState.executeQuery();
+                if (cacheResult == null || !cacheResult.next()) {
+                    PreparedStatement historyQueryState = con.prepareStatement("select * from " + tableName + "_history" + " where height = ?");
+                    historyQueryState.setInt(1, height);
+                    cacheResult = historyQueryState.executeQuery();
+                }
+                if (cacheResult != null && cacheResult.next()) {
+                    do {
+                        ResultSetMetaData metaData = cacheResult.getMetaData();
+                        int columnCount = metaData.getColumnCount();
+                        StringBuilder insert = new StringBuilder();
+                        StringBuilder values = new StringBuilder();
+                        for (int i = 1; i <= columnCount; i++) {
+                            if (i == 1) {
+                                insert.append("insert into " + tableName + " (");
+                                insert.append(metaData.getColumnName(i)).append(",");
+                                values.append("values (").append("?,");
+                            } else if (1 < i && i < columnCount) {
+                                insert.append(metaData.getColumnName(i)).append(",");
+                                values.append("?,");
+                            } else {
+                                insert.append(metaData.getColumnName(i)).append(")");
+                                values.append("?)");
+                            }
+                        }
+                        PreparedStatement preparedStatement = con.prepareStatement(insert.append(values).toString());
+                        for (int i = 1; i <= columnCount; i++) {
+                            if ("latest".equalsIgnoreCase(metaData.getColumnName(i))) {
+                                preparedStatement.setObject(i, true);
+                            } else {
+                                preparedStatement.setObject(i, cacheResult.getObject(i));
+                            }
+                        }
+                        preparedStatement.executeUpdate();
+                    } while (cacheResult.next());
+                }
+            }
+            PreparedStatement pstmtDeleteWork = con.prepareStatement("DELETE FROM " + tableName + " WHERE height > ?");
+            pstmtDeleteWork.setInt(1, height);
+            pstmtDeleteWork.executeUpdate();
+            PreparedStatement pstmtDeleteCache = con.prepareStatement("DELETE FROM " + tableName + "_cache" + " WHERE height > ?");
+            pstmtDeleteCache.setInt(1, height);
+            pstmtDeleteCache.executeUpdate();
+            PreparedStatement pstmtDeleteHistory = con.prepareStatement("DELETE FROM " + tableName + "_history" + " WHERE height > ?");
+            pstmtDeleteHistory.setInt(1, height);
+            pstmtDeleteHistory.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.toString(), e);
+        }
+    }
 }

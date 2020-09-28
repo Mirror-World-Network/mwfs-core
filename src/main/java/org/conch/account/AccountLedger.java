@@ -129,6 +129,11 @@ public class AccountLedger {
             int trimHeight = Math.max(height - trimKeep, 0);
             _trim("account_ledger", trimHeight, false);
         }
+
+        @Override
+        public void rollback(int height) {
+            rollbackAndPush("account_ledger", height, true);
+        }
     }
     private static final AccountLedgerTable accountLedgerTable = new AccountLedgerTable();
 
