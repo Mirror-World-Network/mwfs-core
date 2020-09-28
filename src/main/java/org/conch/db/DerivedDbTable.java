@@ -168,7 +168,6 @@ public abstract class DerivedDbTable {
             deleteStatement.setInt(1, startHeight);
             deleteStatement.setInt(2, endHeight);
             deleteStatement.executeUpdate();
-
             startHeight = endHeight;
             if(startHeight == 0) {
                 needDeleting = false;

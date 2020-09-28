@@ -36,13 +36,15 @@ import org.conch.asset.AssetDividend;
 import org.conch.asset.AssetTransfer;
 import org.conch.asset.token.Currency;
 import org.conch.asset.token.*;
-import org.conch.chain.*;
+import org.conch.chain.Blockchain;
+import org.conch.chain.BlockchainImpl;
+import org.conch.chain.BlockchainProcessor;
+import org.conch.chain.BlockchainProcessorImpl;
 import org.conch.common.ConchException;
 import org.conch.common.Constants;
 import org.conch.common.UrlManager;
 import org.conch.consensus.poc.PocProcessor;
 import org.conch.consensus.poc.PocProcessorImpl;
-import org.conch.consensus.poc.db.PocDb;
 import org.conch.consensus.poc.hardware.SystemInfo;
 import org.conch.crypto.Crypto;
 import org.conch.db.Db;
@@ -784,32 +786,32 @@ public final class Conch {
             return;
         }
 
-//        Logger.logMessage("[HistoryRecords] Trim all tables");
-//        getBlockchainProcessor().trimDerivedTables();
-
         long clearStartMS = System.currentTimeMillis();
-
-        int trimEndHeight = getHeight();
-        if(trimEndHeight == 0) {
-            try{
-                BlockImpl lastBlock = BlockDb.findLastBlock();
-                trimEndHeight =  lastBlock != null ? lastBlock.getHeight() : 0 ;
-            }catch(Exception e){
-                Logger.logErrorMessage("can't get the last block height in the HistoryRecords processing", e);
-            }
-        }
-        int height = trimEndHeight - Constants.MAX_ROLLBACK;
-        Logger.logMessage("[HistoryRecords] Trim account_poc_score table before height " + height);
-        PocDb.trimHistoryData(height);
-        Logger.logMessage(String.format("[HistoryRecords] Trim account_poc_score table used %d S",(System.currentTimeMillis() - clearStartMS) / 1000));
-
-        Logger.logMessage("[HistoryRecords] Trim account and account_guaranteed_balance tables before height " + height);
-        Account.trimHistoryData(height);
 
         Logger.logMessage("[HistoryRecords] Truncate account_ledger table");
         AccountLedger.clearAllHistoryEntries();
 
-        Logger.logMessage(String.format("[HistoryRecords] Finished to clear history records, used %d S",(System.currentTimeMillis() - clearStartMS) / 1000));
+        Logger.logMessage("[HistoryRecords] Trim all tables");
+        getBlockchainProcessor().trimDerivedTables();
+
+//        int trimEndHeight = getHeight();
+//        if(trimEndHeight == 0) {
+//            try{
+//                BlockImpl lastBlock = BlockDb.findLastBlock();
+//                trimEndHeight =  lastBlock != null ? lastBlock.getHeight() : 0 ;
+//            }catch(Exception e){
+//                Logger.logErrorMessage("can't get the last block height in the HistoryRecords processing", e);
+//            }
+//        }
+//        int height = trimEndHeight - Constants.MAX_ROLLBACK;
+//        Logger.logMessage("[HistoryRecords] Trim account_poc_score table before height " + height);
+//        PocDb.trimHistoryData(height);
+//        Logger.logMessage(String.format("[HistoryRecords] Trim account_poc_score table used %d S",(System.currentTimeMillis() - clearStartMS) / 1000));
+//
+//        Logger.logMessage("[HistoryRecords] Trim account and account_guaranteed_balance tables before height " + height);
+//        Account.trimHistoryData(height);
+
+         Logger.logMessage(String.format("[HistoryRecords] Finished to clear history records, used %d S",(System.currentTimeMillis() - clearStartMS) / 1000));
     }
 
     private static class Init {
