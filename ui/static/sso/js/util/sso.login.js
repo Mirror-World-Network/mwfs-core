@@ -313,7 +313,11 @@ var NRS = (function (NRS, $, undefined) {
                 // NRS.connectionError(response.errorDescription);
                 // NRS.spinner.stop();
                 // NRS.logConsole("getBlockchainStatus returned error");
-                vue.$message.error(response.errorDescription);
+                if (response.errorDescription.includes("$.t")) {
+                    vue.$message.error(vue.$t(response.errorDescription.slice(3, -1)));
+                } else {
+                    vue.$message.error(response.errorDescription);
+                }
                 return;
             }
             // NRS.logConsole("getBlockchainStatus response received");

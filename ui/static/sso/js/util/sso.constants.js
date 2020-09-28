@@ -69,9 +69,11 @@ var NRS = (function (NRS, $) {
         "NOT_FORGING": "not_forging",
         "UNKNOWN": "unknown",
         // 'LAST_KNOWN_BLOCK': { id: "4936781828829390790", height: "1204000" }, //nxt
-        "LAST_KNOWN_BLOCK": { id: "6840612405442242239", height: "0" }, // conch
+        // "LAST_KNOWN_BLOCK": { id: "6840612405442242239", height: "0" }, // conch
+        "LAST_KNOWN_BLOCK": { id: "6840612405442241818", height: "0" }, // conch
         // 'LAST_KNOWN_TESTNET_BLOCK': { id: "5448152106691693909", height: "1152000" } //nxt test
-        "LAST_KNOWN_TESTNET_BLOCK": { id: "6840612405442242239", height: "0" } // conch
+        // "LAST_KNOWN_TESTNET_BLOCK": { id: "6840612405442242239", height: "0" } // conch
+        "LAST_KNOWN_TESTNET_BLOCK": { id: "6840612405442241818", height: "0" } // conch
     };
 
     NRS.loadAlgorithmList = function (algorithmSelect, isPhasingHash) {
