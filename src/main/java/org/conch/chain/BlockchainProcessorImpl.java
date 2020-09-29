@@ -219,8 +219,9 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     Account.syncAccountTable("ACCOUNT_CACHE","ACCOUNT_HISTORY",Constants.SYNC_CACHE_BLOCK_NUM);
                     Db.db.commitTransaction();
                     long t2 = System.currentTimeMillis();
-                    Logger.logDebugMessage("syncTime111================" + (t2 - t1));
+                    Logger.logDebugMessage("Sync ACCOUNT and ACCOUNT_CACHE tables used %d S", (t2 - t1)/1000);
                 } catch (Exception e) {
+                    Logger.logWarningMessage("Sync ACCOUNT and ACCOUNT_CACHE tables occur error %s, rollback and wait for next", e.getMessage());
                     Db.db.rollbackTransaction();
                 }finally {
                     Db.db.endTransaction();
@@ -241,8 +242,9 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     Account.syncAccountGuaranteedBalanceTable("ACCOUNT_GUARANTEED_BALANCE_CACHE","ACCOUNT_GUARANTEED_BALANCE_HISTORY",Constants.SYNC_CACHE_BLOCK_NUM);
                     Db.db.commitTransaction();
                     long t2 = System.currentTimeMillis();
-                    Logger.logDebugMessage("syncTime222================" + (t2 - t1));
+                    Logger.logDebugMessage("sync ACCOUNT_GUARANTEED_BALANCE and ACCOUNT_GUARANTEED_BALANCE_CACHE tables used %d S", (t2 - t1)/1000);
                 } catch (Exception e) {
+                    Logger.logWarningMessage("Sync ACCOUNT_GUARANTEED_BALANCE and ACCOUNT_GUARANTEED_BALANCE_CACHE tables occur error %s, rollback and wait for next", e.getMessage());
                     Db.db.rollbackTransaction();
                 }finally {
                     Db.db.endTransaction();
@@ -263,8 +265,9 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     Account.syncAccountLedgerTable("ACCOUNT_LEDGER_CACHE","ACCOUNT_LEDGER_HISTORY",Constants.SYNC_CACHE_BLOCK_NUM);
                     Db.db.commitTransaction();
                     long t2 = System.currentTimeMillis();
-                    Logger.logDebugMessage("syncTime333================" + (t2 - t1));
+                    Logger.logDebugMessage("Sync ACCOUNT_LEDGER and ACCOUNT_LEDGER_CACHE tables used %d S", (t2 - t1)/1000);
                 } catch (Exception e) {
+                    Logger.logWarningMessage("Sync ACCOUNT_LEDGER and ACCOUNT_LEDGER_CACHE tables occur error %s, rollback and wait for next", e.getMessage());
                     Db.db.rollbackTransaction();
                 }finally {
                     Db.db.endTransaction();
@@ -285,8 +288,9 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     Account.syncAccountPocScoreTable("ACCOUNT_POC_SCORE_CACHE", "ACCOUNT_POC_SCORE_HISTORY", Constants.SYNC_CACHE_BLOCK_NUM);
                     Db.db.commitTransaction();
                     long t2 = System.currentTimeMillis();
-                    Logger.logDebugMessage("syncTime444================" + (t2 - t1));
+                    Logger.logDebugMessage("Sync ACCOUNT_POC_SCORE and ACCOUNT_POC_SCORE_CACHE tables used %d S", (t2 - t1)/1000);
                 } catch (Exception e) {
+                    Logger.logWarningMessage("Sync ACCOUNT_POC_SCORE and ACCOUNT_POC_SCORE_CACHE tables occur error %s, rollback and wait for next", e.getMessage());
                     Db.db.rollbackTransaction();
                 }finally {
                     Db.db.endTransaction();
