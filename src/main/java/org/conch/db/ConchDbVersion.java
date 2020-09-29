@@ -1365,23 +1365,23 @@ public class ConchDbVersion extends DbVersion {
                     "create index IF NOT EXISTS ACCOUNT_HEIGHT_IDX on ACCOUNT_POC_SCORE (ACCOUNT_ID asc, HEIGHT desc);\n" +
                     "create index IF NOT EXISTS ACCOUNT_POC_SCORE_CACHE_IDX on ACCOUNT_POC_SCORE_CACHE (ACCOUNT_ID asc, HEIGHT desc);\n" +
 
-                    "create index IF NOT EXISTS ACCOUNT_POC_SCORE_HEIGHT_INDEX on ACCOUNT_POC_SCORE (HEIGHT desc);\n" +
-                    "create index IF NOT EXISTS ACCOUNT_POC_SCORE_CACHE_HEIGHT_INDEX on ACCOUNT_POC_SCORE_CACHE (HEIGHT desc);"
+                    "create index IF NOT EXISTS ACCOUNT_POC_SCORE_HEIGHT_INDEX on ACCOUNT_POC_SCORE (HEIGHT desc);\n"
+                    + "create index IF NOT EXISTS ACCOUNT_POC_SCORE_CACHE_HEIGHT_INDEX on ACCOUNT_POC_SCORE_CACHE (HEIGHT desc);"
+                    + "CREATE INDEX IF NOT EXISTS ACCOUNT_HEIGHT_INDEX ON ACCOUNT (HEIGHT DESC);\n"
+                    + "CREATE INDEX IF NOT EXISTS ACCOUNT_POC_SCORE_HEIGHT_INDEX ON ACCOUNT_POC_SCORE (HEIGHT DESC);\n"
                 );
             case 504:
                 Account.migrateHistoryDataToWorkTable();
                 Account.migrateHistoryDataToCacheTable();
                 apply(null);
+//            case 505:
+//                apply(
+//                        "CREATE INDEX IF NOT EXISTS ACCOUNT_HISTORY_HEIGHT_ID_IDX on ACCOUNT_HISTORY (HEIGHT, ID);\n"
+//                        + "CREATE INDEX IF NOT EXISTS ACCOUNT_POC_SCORE_HISTORY_HEIGHT_IDX on ACCOUNT_POC_SCORE_HISTORY (HEIGHT desc);\n"
+//                        + "ALTER TABLE ACCOUNT_GUARANTEED_BALANCE_HISTORY ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT false;\n"
+//                        + "ALTER TABLE ACCOUNT_LEDGER_HISTORY ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT false;\n"
+//                );
             case 505:
-                apply(
-                        "CREATE INDEX IF NOT EXISTS ACCOUNT_HISTORY_HEIGHT_ID_IDX on ACCOUNT_HISTORY (HEIGHT, ID);\n"
-                        + "CREATE INDEX IF NOT EXISTS ACCOUNT_POC_SCORE_HISTORY_HEIGHT_IDX on ACCOUNT_POC_SCORE_HISTORY (HEIGHT desc);\n"
-                        + "ALTER TABLE ACCOUNT_GUARANTEED_BALANCE_HISTORY ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT false;\n"
-                        + "ALTER TABLE ACCOUNT_LEDGER_HISTORY ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT false;\n"
-                        + "CREATE INDEX IF NOT EXISTS ACCOUNT_HEIGHT_INDEX ON ACCOUNT (HEIGHT DESC);\n"
-                        + "CREATE INDEX IF NOT EXISTS ACCOUNT_POC_SCORE_HEIGHT_INDEX ON ACCOUNT_POC_SCORE (HEIGHT DESC);\n"
-                );
-            case 506:
                 break;
             default:
                 throw new RuntimeException("Blockchain database inconsistent with code, at update " + nextUpdate

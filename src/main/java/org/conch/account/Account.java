@@ -37,6 +37,7 @@ import org.conch.db.*;
 import org.conch.market.Exchange;
 import org.conch.market.Trade;
 import org.conch.shuffle.ShufflingTransaction;
+import org.conch.tools.CompactDatabase;
 import org.conch.tx.Appendix;
 import org.conch.tx.Attachment;
 import org.conch.tx.Transaction;
@@ -2628,6 +2629,7 @@ public final class Account {
             Logger.logMessage("[HistoryRecords] Truncate tables [ACCOUNT_HISTORY, ACCOUNT_CACHE]");
             stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_HISTORY");
             stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_CACHE");
+            Db.db.commitTransaction();
         } catch(Exception e){
             Db.db.rollbackTransaction();
             Logger.logWarningMessage("[HistoryRecords] Truncate occur error[%s], rollback and break", e.getMessage());
@@ -2635,10 +2637,14 @@ public final class Account {
             Db.db.endTransaction();
         }
         Logger.logMessage(String.format("[HistoryRecords] Finished to clear history records, used %d S",(System.currentTimeMillis() - clearStartMS) / 1000));
+
+        Logger.logMessage("[HistoryRecords] Compact the current db");
+        CompactDatabase.compact();
     }
 
     public static void migrateHistoryDataToWorkTable(){
-        String[] dataArr = {"ACCOUNT", "ACCOUNT_LEDGER", "ACCOUNT_GUARANTEED_BALANCE", "ACCOUNT_POC_SCORE"};
+//        String[] dataArr = {"ACCOUNT", "ACCOUNT_LEDGER", "ACCOUNT_GUARANTEED_BALANCE", "ACCOUNT_POC_SCORE"};
+        String[] dataArr = {"ACCOUNT", "ACCOUNT_GUARANTEED_BALANCE", "ACCOUNT_POC_SCORE"};
         Logger.logInfoMessage("[HistoryRecords] Migrate history data to working table " + Arrays.toString(dataArr) + ", it will take a few minutes...");
 
         long startMS = System.currentTimeMillis();
@@ -2702,7 +2708,7 @@ public final class Account {
                                 preparedStatement.executeUpdate();
                             }
                         }
-                        if(executionCount++ % 10 == 0) {
+                        if(executionCount++ % 1000 == 0) {
                             Logger.logDebugMessage("[HistoryRecords] Migration progress %d/%d [from %s to %s]", executionCount, totalCount, (table + "_history"), table);
                         }
                     }catch(Exception e){
@@ -2726,14 +2732,14 @@ public final class Account {
         // migrate from history table to cache table
         try (Connection con = Db.db.beginTransaction()){
             //TODO 增加目标表里记录的检查逻辑，如果目标表的记录超过了 Constants.SYNC_CACHE_BLOCK_NUM，就无需进行数据迁移和同步
-            Logger.logInfoMessage("[HistoryRecords] Migrate %d records from %s to %s", Constants.SYNC_CACHE_BLOCK_NUM, "ACCOUNT_HISTORY", "ACCOUNT_CACHE");
-            Account.syncAccountTable("ACCOUNT_HISTORY", "ACCOUNT_CACHE", Constants.SYNC_CACHE_BLOCK_NUM);
+            Logger.logInfoMessage("[HistoryRecords] Migrate %d records from %s to %s", Constants.MAX_ROLLBACK, "ACCOUNT_HISTORY", "ACCOUNT_CACHE");
+            Account.syncAccountTable("ACCOUNT_HISTORY", "ACCOUNT_CACHE", Constants.MAX_ROLLBACK);
 
-            Logger.logInfoMessage("[HistoryRecords] Migrate %d records from %s to %s", Constants.SYNC_CACHE_BLOCK_NUM, "ACCOUNT_GUARANTEED_BALANCE_HISTORY", "ACCOUNT_GUARANTEED_BALANCE_CACHE");
-            Account.syncAccountGuaranteedBalanceTable("ACCOUNT_GUARANTEED_BALANCE_HISTORY","ACCOUNT_GUARANTEED_BALANCE_CACHE",Constants.SYNC_CACHE_BLOCK_NUM);
+            Logger.logInfoMessage("[HistoryRecords] Migrate %d records from %s to %s", Constants.MAX_ROLLBACK, "ACCOUNT_GUARANTEED_BALANCE_HISTORY", "ACCOUNT_GUARANTEED_BALANCE_CACHE");
+            Account.syncAccountGuaranteedBalanceTable("ACCOUNT_GUARANTEED_BALANCE_HISTORY","ACCOUNT_GUARANTEED_BALANCE_CACHE",Constants.MAX_ROLLBACK);
 
-            Logger.logInfoMessage("[HistoryRecords] Migrate %d records from %s to %s", Constants.SYNC_CACHE_BLOCK_NUM, "ACCOUNT_POC_SCORE_HISTORY", "ACCOUNT_POC_SCORE_CACHE");
-            Account.syncAccountPocScoreTable("ACCOUNT_POC_SCORE_HISTORY", "ACCOUNT_POC_SCORE_CACHE", Constants.SYNC_CACHE_BLOCK_NUM);
+            Logger.logInfoMessage("[HistoryRecords] Migrate %d records from %s to %s", Constants.MAX_ROLLBACK, "ACCOUNT_POC_SCORE_HISTORY", "ACCOUNT_POC_SCORE_CACHE");
+            Account.syncAccountPocScoreTable("ACCOUNT_POC_SCORE_HISTORY", "ACCOUNT_POC_SCORE_CACHE", Constants.MAX_ROLLBACK);
 
             Db.db.commitTransaction();
         } catch (SQLException throwables) {

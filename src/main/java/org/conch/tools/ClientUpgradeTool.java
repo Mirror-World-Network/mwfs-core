@@ -7,6 +7,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.conch.Conch;
+import org.conch.chain.BlockDb;
+import org.conch.chain.BlockImpl;
 import org.conch.common.Constants;
 import org.conch.common.UrlManager;
 import org.conch.db.Db;
@@ -286,7 +288,7 @@ public class ClientUpgradeTool {
      * Update the local db to specified archived db file
      * @param dbFileName target restore db file name
      */
-    private static void restoreDb(String dbFileName){
+    private static boolean restoreDb(String dbFileName){
         try{
 //            if(restoring) return;
 //            restoring = true;
@@ -294,7 +296,7 @@ public class ClientUpgradeTool {
             if(StringUtils.isEmpty(dbFileName)
             || lastDbArchiveObj == null) {
                 Logger.logDebugMessage("[ UPGRADE DB ] upgrade db file name is null, break.");
-                return;
+                return false;
             }
 
             String urlPrefix = lastDbArchiveObj.getString(ENV_PREFIX + KEY_DB_DOWNLOAD_URL);
@@ -302,11 +304,11 @@ public class ClientUpgradeTool {
             try {
                 if(!RestfulHttpClient.findResource(downloadingUrl)) {
                     Logger.logWarningMessage("[ UPGRADE DB ] db archive %s dose not exist, break.");
-                    return;
+                    return false;
                 }
             }catch(Exception e){
                 Logger.logWarningMessage("[ UPGRADE DB ] db archive exist judgement occur error: %s, break and wait for next check turn.", e.getMessage());
-                return;
+                return false;
             }
 
             Logger.logDebugMessage("[ UPGRADE DB ] Start to update the local db, pause the mining and blocks sync firstly");
@@ -338,15 +340,21 @@ public class ClientUpgradeTool {
                     FileUtils.copyURLToFile(new URL(downloadingUrl), archivedDbFile);
                 }catch(Exception e){
                     Logger.logWarningMessage("[ UPGRADE DB ] db archive downloading occur error: %s, break and wait for next check turn.", e.getMessage());
-                    return;
+                    return false;
                 }
                 lastDownloadDbArchiveTime = System.currentTimeMillis();
             }
 
+            int height = Conch.getHeight();
+            if(!Conch.isInitialized()) {
+                BlockImpl lastBlock = BlockDb.findLastBlock();
+                height = (lastBlock != null) ? lastBlock.getHeight() : 0;
+            }
+
             // compare archive height with the current height
-            if(lastDbArchiveHeight <= Conch.getHeight()){
+            if(lastDbArchiveHeight <= height){
                 Logger.logInfoMessage("[ UPGRADE DB ] Give up current db restore, because db archive height %d <= current height %d", lastDbArchiveHeight, Conch.getHeight());
-                return;
+                return false;
             }
 
             Conch.pause();
@@ -379,12 +387,15 @@ public class ClientUpgradeTool {
             Logger.logInfoMessage("[ UPGRADE DB ] Finish the local db upgrade, resume the block mining and blocks sync", dbFileName);
             Conch.unpause();
         }
+        return true;
     }
 
 
     private static void _restoreDbToLastArchive(boolean restartClient){
         if(lastDbArchive == null || lastDbArchiveHeight == null) fetchLastDbArchive();
-        restoreDb(lastDbArchive);
+        boolean restored = restoreDb(lastDbArchive);
+        if(!restored) return;
+
         forceDownloadFromOSS = false;
         if(restartClient) Conch.restartApplication(null);
     }
