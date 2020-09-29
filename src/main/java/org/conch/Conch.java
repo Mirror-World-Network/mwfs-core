@@ -72,6 +72,7 @@ import org.conch.storage.StorageManager;
 import org.conch.storage.TaggedData;
 import org.conch.storage.tx.StorageTxProcessorImpl;
 import org.conch.tools.ClientUpgradeTool;
+import org.conch.tools.CompactDatabase;
 import org.conch.tx.*;
 import org.conch.user.Users;
 import org.conch.util.*;
@@ -791,6 +792,7 @@ public final class Conch {
                 Thread secureRandomInitThread = initSecureRandom();
                 ForceConverge.init();
                 setServerStatus(ServerStatus.BEFORE_DATABASE, null);
+                CompactDatabase.checkAndRestore();
                 try {
                     Db.init();
                 }catch(Exception e){
@@ -799,6 +801,7 @@ public final class Conch {
                     ClientUpgradeTool.restoreDbToLastArchive(true, true);
                     ClientUpgradeTool.forceDownloadFromOSS = false;
                 }
+
                 setServerStatus(ServerStatus.AFTER_DATABASE, null);
                 StorageManager.init();
 

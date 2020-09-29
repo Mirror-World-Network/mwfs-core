@@ -46,7 +46,7 @@ public final class Db {
     }
 
     public static void shutdown() {
-        db.shutdown();
+        db.shutdown("COMPACT");
     }
 
     private Db() {} // never

@@ -345,10 +345,16 @@ public class ClientUpgradeTool {
                 lastDownloadDbArchiveTime = System.currentTimeMillis();
             }
 
-            int height = Conch.getHeight();
             if(!Conch.isInitialized()) {
-                BlockImpl lastBlock = BlockDb.findLastBlock();
-                height = (lastBlock != null) ? lastBlock.getHeight() : 0;
+                Logger.logInfoMessage("[ UPGRADE DB ] Give up current db restore, because client is still in the initializing");
+                return false;
+            }
+
+            BlockImpl lastBlock = BlockDb.findLastBlock();
+            int height = (lastBlock != null) ? lastBlock.getHeight() : 0;
+            if(height == 0) {
+                Logger.logInfoMessage("[ UPGRADE DB ] Give up current db restore, because current height is 0");
+                return false;
             }
 
             // compare archive height with the current height
@@ -383,6 +389,7 @@ public class ClientUpgradeTool {
             Logger.logInfoMessage("[ UPGRADE DB ] Success to update the local db[upgrade db file=%s]", dbFileName);
         }catch(Exception e) {
             Logger.logErrorMessage("[ UPGRADE DB ] Failed to update the local db[upgrade db file=%s] caused by [%s]", dbFileName, e.getMessage());
+            return false;
         }finally{
             Logger.logInfoMessage("[ UPGRADE DB ] Finish the local db upgrade, resume the block mining and blocks sync", dbFileName);
             Conch.unpause();

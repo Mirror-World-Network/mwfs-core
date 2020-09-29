@@ -156,7 +156,14 @@ public class BasicDb {
         initialized = true;
     }
 
-    public void shutdown() {
+    /**
+     * IMMEDIATELY
+     * COMPACT
+     * DEFRAG
+     *
+     * @param mode
+     */
+    public void shutdown(String mode) {
         if (!initialized) {
             return;
         }
@@ -164,7 +171,7 @@ public class BasicDb {
             FullTextTrigger.setActive(false);
             Connection con = cp.getConnection();
             Statement stmt = con.createStatement();
-            stmt.execute("SHUTDOWN COMPACT");
+            stmt.execute("SHUTDOWN " + mode);
             Logger.logShutdownMessage("Database shutdown completed");
         } catch (SQLException e) {
             Logger.logShutdownMessage(e.toString(), e);

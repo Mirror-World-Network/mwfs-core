@@ -2605,6 +2605,8 @@ public final class Account {
         accountTable.trim(height);
     }
 
+
+    public static boolean needCompact = true;
     public static void truncateHistoryData(){
         if(!Constants.HISTORY_RECORD_CLEAR) {
             return;
@@ -2638,8 +2640,14 @@ public final class Account {
         }
         Logger.logMessage(String.format("[HistoryRecords] Finished to clear history records, used %d S",(System.currentTimeMillis() - clearStartMS) / 1000));
 
-        Logger.logMessage("[HistoryRecords] Compact the current db");
-        CompactDatabase.compact();
+        if(needCompact) {
+            Logger.logMessage("[HistoryRecords] Compact the current db");
+            int code = CompactDatabase.compactAndRestoreDB();
+            if(code != 2) {
+                Logger.logInfoMessage("[HistoryRecords] You need restart the client to finish the compact & restore db");
+                Conch.shutdown();
+            }
+        }
     }
 
     public static void migrateHistoryDataToWorkTable(){

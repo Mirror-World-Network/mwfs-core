@@ -22,6 +22,7 @@
 package org.conch.tools;
 
 import org.conch.Conch;
+import org.conch.account.Account;
 import org.conch.common.Constants;
 import org.conch.util.Logger;
 
@@ -57,7 +58,7 @@ public class CompactDatabase {
         //
         // Compact the database
         //
-        int exitCode = compactDatabase();
+        int exitCode = compactAndRestoreDB();
         //
         // Shutdown the logger and exit
         //
@@ -65,36 +66,38 @@ public class CompactDatabase {
         System.exit(exitCode);
     }
 
-    public static int compact(){
-        return compactDatabase();
-    }
 
-    /**
-     * Compact the database
-     */
-    private static int compactDatabase() {
-        int exitCode = 0;
+    static String dbPrefix;
+    static String dbType;
+    static String dbUrl;
+    static String dbParams;
+    static String dbUsername;
+    static String dbPassword;
+    static String dbDir;
+
+    private static void initDb() throws Exception{
         //
         // Get the database URL
         //
-        String dbPrefix = Constants.isTestnetOrDevnet() ? "sharder.testDb" : "sharder.db";
-        String dbType = Conch.getStringProperty(dbPrefix + "Type");
+        dbPrefix = Constants.isTestnetOrDevnet() ? "sharder.testDb" : "sharder.db";
+        dbType = Conch.getStringProperty(dbPrefix + "Type");
         if (!"h2".equals(dbType)) {
             Logger.logErrorMessage("Database type must be 'h2'");
-            return 1;
+            throw new RuntimeException("Database type must be 'h2'");
         }
-        String dbUrl = Conch.getStringProperty(dbPrefix + "Url");
+        dbUrl = Conch.getStringProperty(dbPrefix + "Url");
         if (dbUrl == null) {
             String dbPath = Conch.getDbDir(Conch.getStringProperty(dbPrefix + "Dir"));
             dbUrl = String.format("jdbc:%s:%s", dbType, dbPath);
         }
-        String dbParams = Conch.getStringProperty(dbPrefix + "Params");
+        dbParams = Conch.getStringProperty(dbPrefix + "Params");
         dbUrl += ";" + dbParams;
         if (!dbUrl.contains("MV_STORE=")) {
             dbUrl += ";MV_STORE=FALSE";
         }
-        String dbUsername = Conch.getStringProperty(dbPrefix + "Username", "sa");
-        String dbPassword = Conch.getStringProperty(dbPrefix + "Password", "sa", true);
+        dbUsername = Conch.getStringProperty(dbPrefix + "Username", "sa");
+        dbPassword = Conch.getStringProperty(dbPrefix + "Password", "sa", true);
+
         //
         // Get the database path.  This is the third colon-separated operand and is
         // terminated by a semi-colon or by the end of the string.
@@ -105,9 +108,9 @@ public class CompactDatabase {
         }
         if (pos < 0) {
             Logger.logErrorMessage("Malformed database URL: " + dbUrl);
-            return 1;
+            throw new RuntimeException("Malformed database URL: " + dbUrl);
         }
-        String dbDir;
+
         int startPos = pos + 1;
         int endPos = dbUrl.indexOf(';', startPos);
         if (endPos < 0) {
@@ -118,7 +121,9 @@ public class CompactDatabase {
         //
         // Remove the optional 'file' operand
         //
-        if (dbDir.startsWith("file:")) dbDir = dbDir.substring(5);
+        if (dbDir.startsWith("file:")) {
+            dbDir = dbDir.substring(5);
+        }
         //
         // Remove the database prefix from the end of the database path.  The path
         // separator can be either '/' or '\' (Windows will accept either separator
@@ -135,10 +140,71 @@ public class CompactDatabase {
         }
         if (endPos < 0) {
             Logger.logErrorMessage("Malformed database URL: " + dbUrl);
-            return 1;
+            throw new RuntimeException("Malformed database URL: " + dbUrl);
         }
         dbDir = dbDir.substring(0, endPos);
         Logger.logInfoMessage("Database directory is '" + dbDir + '"');
+    }
+
+    public static boolean checkAndRestore(){
+        String sqlFilePath = null;
+        try {
+            initDb();
+            File sqlFile = new File(dbDir, "backup.sql.gz");
+            sqlFilePath = sqlFile.getPath();
+            if(!sqlFile.exists()){
+                Logger.logInfoMessage("No restore sql %s found, no needs to restore db " + sqlFilePath);
+                return false;
+            }
+            restore(dbUrl, dbUsername, dbPassword, sqlFile, true);
+        } catch (Throwable exc) {
+            Logger.logErrorMessage("Unable to restore the database from " + sqlFilePath, exc);
+            return false;
+        }
+        Account.needCompact = false;
+        return true;
+    }
+
+    public static boolean restore(String dbUrl, String dbUsername, String dbPassword, File sqlFile, boolean delAfter) throws Exception {
+        String sqlPath = sqlFile.getPath();
+        initDb();
+        Connection conn = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+        Statement s = conn.createStatement();
+        Logger.logInfoMessage("Restore the '%s' from SQL script '%s'", dbUrl, sqlPath);
+        s.execute("RUNSCRIPT FROM '" + sqlPath + "' COMPRESSION GZIP CHARSET 'UTF-8'");
+        s.execute("ANALYZE");
+
+        File dbFile = new File(dbDir, "mw.h2.db");
+        File oldDbFile = new File(dbFile.getPath() + ".bak");
+        if(delAfter) {
+            delOldFiles(dbFile, oldDbFile);
+        }
+
+        return true;
+    }
+
+    private static void delOldFiles(File... files){
+        for (int i = 0 ; i < files.length; i++) {
+            if (files[i].exists()
+                && !files[i].delete()) {
+                Logger.logErrorMessage(String.format("Unable to delete '%s'", files[i].getPath()));
+            }
+        }
+    }
+
+    /**
+     * Compact the database
+     */
+    public static int compactAndRestoreDB() {
+        int exitCode = 0;
+
+        try{
+           initDb();
+        }catch(Exception e){
+            e.printStackTrace();
+            return 1;
+        }
+
         //
         // Create our files
         //
@@ -148,7 +214,7 @@ public class CompactDatabase {
         if (!dbFile.exists()) {
             dbFile = new File(dbDir, "mw.mv.db");
             if (!dbFile.exists()) {
-                Logger.logErrorMessage("Database not found");
+                Logger.logErrorMessage("Database %s not found", dbFile.getName());
                 return 1;
             }
         }
@@ -157,7 +223,7 @@ public class CompactDatabase {
             //
             // Create the SQL script
             //
-            Logger.logInfoMessage("Creating the SQL script");
+            Logger.logInfoMessage("Creating the SQL script %s", sqlFile.getName());
             if (sqlFile.exists()) {
                 if (!sqlFile.delete()) {
                     throw new IOException(String.format("Unable to delete '%s'", sqlFile.getPath()));
@@ -165,22 +231,20 @@ public class CompactDatabase {
             }
             try (Connection conn = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
                  Statement s = conn.createStatement()) {
-                s.execute("SCRIPT TO '" + sqlFile.getPath() + "' COMPRESSION GZIP CHARSET 'UTF-8'");
+                 s.execute("SCRIPT TO '" + sqlFile.getPath() + "' COMPRESSION GZIP CHARSET 'UTF-8'");
             }
+
             //
             // Create the new database
             //
-            Logger.logInfoMessage("Creating the new database");
+            Logger.logInfoMessage("Creating the new database and rename the current db %s to %s", dbFile.getName(), oldFile.getName());
             if (!dbFile.renameTo(oldFile)) {
                 throw new IOException(
                         String.format("Unable to rename '%s' to '%s'", dbFile.getPath(), oldFile.getPath()));
             }
+
             phase = 1;
-            try (Connection conn = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
-                 Statement s = conn.createStatement()) {
-                s.execute("RUNSCRIPT FROM '" + sqlFile.getPath() + "' COMPRESSION GZIP CHARSET 'UTF-8'");
-                s.execute("ANALYZE");
-            }
+            restore(dbUrl, dbUsername, dbPassword, sqlFile, false);
             //
             // New database has been created
             //
@@ -218,22 +282,17 @@ public class CompactDatabase {
                             }
                         }
                     }
-                    if (!oldFile.renameTo(dbFile)) {
-                        Logger.logErrorMessage(
-                                String.format(
-                                        "Unable to rename '%s' to '%s'", oldFile.getPath(), dbFile.getPath()));
-                    }
+//                    if (!oldFile.renameTo(dbFile)) {
+//                        Logger.logErrorMessage(
+//                                String.format(
+//                                        "Unable to rename '%s' to '%s'", oldFile.getPath(), dbFile.getPath()));
+//                    }
                     break;
                 case 2:
                     //
                     // New database created
                     //
-                    if (!sqlFile.delete()) {
-                        Logger.logErrorMessage(String.format("Unable to delete '%s'", sqlFile.getPath()));
-                    }
-                    if (!oldFile.delete()) {
-                        Logger.logErrorMessage(String.format("Unable to delete '%s'", oldFile.getPath()));
-                    }
+                    delOldFiles(dbFile, oldFile);
                     break;
             }
         }
