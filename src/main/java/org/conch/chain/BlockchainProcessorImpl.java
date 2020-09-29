@@ -779,7 +779,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 BlockImpl block = peerBlock.getBlock();
                 if (blockchain.getLastBlock().getId() == block.getPreviousBlockId()) {
                     try {
-                        Logger.logInfoMessage("Pushing block[id-%d#%s] into current chain at height %d ...", block.getId(), Account.rsAccount(block.getGeneratorId()) , Conch.getHeight());
+                        Logger.logInfoMessage("Pushing block%s into current chain at height %d ...", block.toSummary(), Conch.getHeight());
                         pushBlock(block);
                     } catch (GeneratorNotAcceptedException e) {
                         Generator.blackGenerator(e.getGeneratorId());

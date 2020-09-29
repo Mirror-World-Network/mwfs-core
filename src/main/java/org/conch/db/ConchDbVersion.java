@@ -1369,7 +1369,8 @@ public class ConchDbVersion extends DbVersion {
                     "create index IF NOT EXISTS ACCOUNT_POC_SCORE_CACHE_HEIGHT_INDEX on ACCOUNT_POC_SCORE_CACHE (HEIGHT desc);"
                 );
             case 504:
-                Account.migrationHistoryData();
+                Account.migrateHistoryDataToWorkTable();
+                Account.migrateHistoryDataToCacheTable();
                 apply(null);
             case 505:
                 apply(

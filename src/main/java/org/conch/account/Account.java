@@ -2605,38 +2605,44 @@ public final class Account {
     }
 
     public static void truncateHistoryData(){
-        Connection con = null;
-        try {
-            con = Db.db.getConnection();
+        if(!Constants.HISTORY_RECORD_CLEAR) {
+            return;
+        }
+        long clearStartMS = System.currentTimeMillis();
+
+        try (Connection con = Db.db.beginTransaction()){
             Statement stmt = con.createStatement();
-            Logger.logMessage("[HistoryRecords] Truncate ACCOUNT_LEDGER_HISTORY table");
+            Logger.logMessage("[HistoryRecords] Truncate tables [ACCOUNT_LEDGER_HISTORY, ACCOUNT_LEDGER_CACHE, ACCOUNT_LEDGER]");
             stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_LEDGER_HISTORY");
-            Logger.logMessage("[HistoryRecords] Truncate ACCOUNT_LEDGER_CACHE table");
             stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_LEDGER_CACHE");
-            Logger.logMessage("[HistoryRecords] Truncate ACCOUNT_LEDGER table");
             stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_LEDGER");
 
-            Logger.logMessage("[HistoryRecords] Truncate ACCOUNT_POC_SCORE_HISTORY table");
+            Logger.logMessage("[HistoryRecords] Truncate tables [ACCOUNT_POC_SCORE_HISTORY, ACCOUNT_POC_SCORE_CACHE]");
             stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_POC_SCORE_HISTORY");
-            Logger.logMessage("[HistoryRecords] Truncate ACCOUNT_POC_SCORE_CACHE table");
             stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_POC_SCORE_CACHE");
 
-            Logger.logMessage("[HistoryRecords] Truncate ACCOUNT_HISTORY table");
+            Logger.logMessage("[HistoryRecords] Truncate tables [ACCOUNT_GUARANTEED_BALANCE_HISTORY, ACCOUNT_GUARANTEED_BALANCE_CACHE]");
+            stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_GUARANTEED_BALANCE_HISTORY");
+            stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_GUARANTEED_BALANCE_CACHE");
+
+            Logger.logMessage("[HistoryRecords] Truncate tables [ACCOUNT_HISTORY, ACCOUNT_CACHE]");
             stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_HISTORY");
-            Logger.logMessage("[HistoryRecords] Truncate ACCOUNT_CACHE table");
             stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_CACHE");
-        } catch (SQLException e) {
-            throw new RuntimeException(e.toString(), e);
+        } catch(Exception e){
+            Db.db.rollbackTransaction();
+            Logger.logWarningMessage("[HistoryRecords] Truncate occur error[%s], rollback and break", e.getMessage());
         }finally {
-            DbUtils.close(con);
+            Db.db.endTransaction();
         }
+        Logger.logMessage(String.format("[HistoryRecords] Finished to clear history records, used %d S",(System.currentTimeMillis() - clearStartMS) / 1000));
     }
 
-    public static void migrationHistoryData(){
+    public static void migrateHistoryDataToWorkTable(){
+        String[] dataArr = {"ACCOUNT", "ACCOUNT_LEDGER", "ACCOUNT_GUARANTEED_BALANCE", "ACCOUNT_POC_SCORE"};
+        Logger.logInfoMessage("[HistoryRecords] Migrate history data to working table " + Arrays.toString(dataArr) + ", it will take a few minutes...");
+
         long startMS = System.currentTimeMillis();
         try (Connection con = Db.db.beginTransaction()){
-            String[] dataArr = {"ACCOUNT", "ACCOUNT_LEDGER", "ACCOUNT_GUARANTEED_BALANCE", "ACCOUNT_POC_SCORE"};
-            Logger.logInfoMessage("[HistoryRecords] Migrate table data " + Arrays.toString(dataArr));
             for (String table : dataArr) {
                 String idColumn;
                 if ("ACCOUNT".equalsIgnoreCase(table)) {
@@ -2712,6 +2718,31 @@ public final class Account {
             Db.db.endTransaction();
         }
         Logger.logMessage(String.format("[HistoryRecords] Migrate history records used %d S",(System.currentTimeMillis() - startMS) / 1000));
+    }
+
+    public static void migrateHistoryDataToCacheTable(){
+        Logger.logInfoMessage("[HistoryRecords] Migrate history records to cache table, it will take a few minutes...");
+        long startMS = System.currentTimeMillis();
+        // migrate from history table to cache table
+        try (Connection con = Db.db.beginTransaction()){
+            //TODO 增加目标表里记录的检查逻辑，如果目标表的记录超过了 Constants.SYNC_CACHE_BLOCK_NUM，就无需进行数据迁移和同步
+            Logger.logInfoMessage("[HistoryRecords] Migrate %d records from %s to %s", Constants.SYNC_CACHE_BLOCK_NUM, "ACCOUNT_HISTORY", "ACCOUNT_CACHE");
+            Account.syncAccountTable("ACCOUNT_HISTORY", "ACCOUNT_CACHE", Constants.SYNC_CACHE_BLOCK_NUM);
+
+            Logger.logInfoMessage("[HistoryRecords] Migrate %d records from %s to %s", Constants.SYNC_CACHE_BLOCK_NUM, "ACCOUNT_GUARANTEED_BALANCE_HISTORY", "ACCOUNT_GUARANTEED_BALANCE_CACHE");
+            Account.syncAccountGuaranteedBalanceTable("ACCOUNT_GUARANTEED_BALANCE_HISTORY","ACCOUNT_GUARANTEED_BALANCE_CACHE",Constants.SYNC_CACHE_BLOCK_NUM);
+
+            Logger.logInfoMessage("[HistoryRecords] Migrate %d records from %s to %s", Constants.SYNC_CACHE_BLOCK_NUM, "ACCOUNT_POC_SCORE_HISTORY", "ACCOUNT_POC_SCORE_CACHE");
+            Account.syncAccountPocScoreTable("ACCOUNT_POC_SCORE_HISTORY", "ACCOUNT_POC_SCORE_CACHE", Constants.SYNC_CACHE_BLOCK_NUM);
+
+            Db.db.commitTransaction();
+        } catch (SQLException throwables) {
+            Db.db.rollbackTransaction();
+            throwables.printStackTrace();
+        }finally {
+            Db.db.endTransaction();
+        }
+        Logger.logMessage(String.format("[HistoryRecords] Migrate history records to cache table used %d S",(System.currentTimeMillis() - startMS) / 1000));
     }
 
 }

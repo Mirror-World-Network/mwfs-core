@@ -532,7 +532,7 @@ public final class BlockImpl implements Block {
             return validHit || isIgnoreBlock;
 
         } catch (RuntimeException e) {
-            Logger.logMessage("Error verifying block generation signature " + toSummary(), e);
+            Logger.logMessage("Error verifying block generation signature " + toSummaryWithSign(), e);
             return false;
         }
     }
@@ -641,11 +641,20 @@ public final class BlockImpl implements Block {
     }
 
     public String toSummary(){
-        return String.format(" [block id=%d, block generator=%s, block timestamp=%d, block string id=%s, block signature=%s]"
+        return String.format(" [id=%d, miner=%s, time=%s, previous block id=%d]"
                 , getId()
                 , Account.rsAccount(getGeneratorId())
-                , getTimestamp()
-                , getStringId()
+                , Convert.dateFromEpochTime(getTimestamp())
+                , getPreviousBlockId()
+        );
+    }
+
+    public String toSummaryWithSign(){
+        return String.format(" [id=%d, miner=%s, time=%s, previous block id=%d, block sign=%s]"
+                , getId()
+                , Account.rsAccount(getGeneratorId())
+                , Convert.dateFromEpochTime(getTimestamp())
+                , getPreviousBlockId()
                 , Convert.toHexString(getBlockSignature())
         );
     }
