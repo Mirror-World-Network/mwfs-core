@@ -2606,7 +2606,7 @@ public final class Account {
     }
 
 
-    public static boolean needCompact = true;
+    public static boolean needCompact = false;
     public static void truncateHistoryData(){
         if(!Constants.HISTORY_RECORD_CLEAR) {
             return;
@@ -2620,17 +2620,14 @@ public final class Account {
             stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_LEDGER_CACHE");
             stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_LEDGER");
 
-            Logger.logMessage("[HistoryRecords] Truncate tables [ACCOUNT_POC_SCORE_HISTORY, ACCOUNT_POC_SCORE_CACHE]");
-            stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_POC_SCORE_HISTORY");
-            stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_POC_SCORE_CACHE");
-
-            Logger.logMessage("[HistoryRecords] Truncate tables [ACCOUNT_GUARANTEED_BALANCE_HISTORY, ACCOUNT_GUARANTEED_BALANCE_CACHE]");
-            stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_GUARANTEED_BALANCE_HISTORY");
-            stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_GUARANTEED_BALANCE_CACHE");
-
-            Logger.logMessage("[HistoryRecords] Truncate tables [ACCOUNT_HISTORY, ACCOUNT_CACHE]");
-            stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_HISTORY");
-            stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_CACHE");
+//            Logger.logMessage("[HistoryRecords] Truncate tables [ACCOUNT_POC_SCORE_HISTORY,]");
+//            stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_POC_SCORE_HISTORY");
+//
+//            Logger.logMessage("[HistoryRecords] Truncate tables [ACCOUNT_GUARANTEED_BALANCE_HISTORY]");
+//            stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_GUARANTEED_BALANCE_HISTORY");
+//
+//            Logger.logMessage("[HistoryRecords] Truncate tables [ACCOUNT_HISTORY]");
+//            stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_HISTORY");
             Db.db.commitTransaction();
         } catch(Exception e){
             Db.db.rollbackTransaction();
@@ -2644,8 +2641,8 @@ public final class Account {
             Logger.logMessage("[HistoryRecords] Compact the current db");
             int code = CompactDatabase.compactAndRestoreDB();
             if(code != 2) {
-                Logger.logInfoMessage("[HistoryRecords] You need restart the client to finish the compact & restore db");
-                Conch.shutdown();
+//                Logger.logInfoMessage("[HistoryRecords] You need restart the client to finish the compact & restore db");
+//                Conch.shutdown();
             }
         }
     }
