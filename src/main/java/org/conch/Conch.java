@@ -777,19 +777,6 @@ public final class Conch {
         runtimeMode.shutdown();
     }
 
-    /**
-     * delete un-unnecessary table
-     * trim the tables
-     */
-    private static void clearHistoryRecords(){
-        if(!Constants.HISTORY_RECORD_CLEAR) {
-            return;
-        }
-        long clearStartMS = System.currentTimeMillis();
-        Account.truncateHistoryData();
-        Logger.logMessage(String.format("[HistoryRecords] Finished to clear history records, used %d S",(System.currentTimeMillis() - clearStartMS) / 1000));
-    }
-
     private static class Init {
 
         static volatile boolean initialized = false;
@@ -866,7 +853,7 @@ public final class Conch {
                 DebugTrace.init();
                 DbBackup.init();
 
-                clearHistoryRecords();
+                Account.truncateHistoryData();
 
                 int timeMultiplier = (Constants.isTestnetOrDevnet() && Constants.isOffline) ? Math.max(Conch.getIntProperty("sharder.timeMultiplier"), 1) : 1;
                 ThreadPool.start(timeMultiplier);
