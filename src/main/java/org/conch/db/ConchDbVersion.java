@@ -21,6 +21,7 @@
 
 package org.conch.db;
 
+import org.conch.account.Account;
 import org.conch.account.FxtDistribution;
 import org.conch.chain.BlockDb;
 import org.conch.chain.BlockchainProcessorImpl;
@@ -1367,79 +1368,18 @@ public class ConchDbVersion extends DbVersion {
                     "create index IF NOT EXISTS ACCOUNT_POC_SCORE_HEIGHT_INDEX on ACCOUNT_POC_SCORE (HEIGHT desc);\n" +
                     "create index IF NOT EXISTS ACCOUNT_POC_SCORE_CACHE_HEIGHT_INDEX on ACCOUNT_POC_SCORE_CACHE (HEIGHT desc);"
                 );
-                break;
             case 504:
-                try (Connection con = Db.db.beginTransaction()){
-                    String[] dataArr = {"ACCOUNT", "ACCOUNT_LEDGER", "ACCOUNT_GUARANTEED_BALANCE", "ACCOUNT_POC_SCORE"};
-                    for (String table : dataArr) {
-                        Statement statement = con.createStatement();
-                        String idColumn;
-                        if ("ACCOUNT".equalsIgnoreCase(table)) {
-                            idColumn = "ID";
-                        } else {
-                            idColumn = "ACCOUNT_ID";
-                        }
-                        ResultSet rs = statement.executeQuery("SELECT distinct " + idColumn + " FROM " + table + "_history");
-                        while (rs.next()) {
-                            long accountId = rs.getLong(idColumn);
-                            PreparedStatement maxHeight = con.prepareStatement("SELECT max(HEIGHT) maxHeight FROM " + table + "_history" + " where " + idColumn + " = ?");
-                            maxHeight.setLong(1, accountId);
-                            ResultSet idSet = maxHeight.executeQuery();
-                            if (idSet.next()) {
-                                PreparedStatement update = con.prepareStatement("select * from " + table + "_history" + " where HEIGHT = ? and " + idColumn + " = ?");
-                                update.setInt(1, idSet.getInt("maxHeight"));
-                                update.setLong(2, accountId);
-                                ResultSet data = update.executeQuery();
-                                if (data != null && data.next()) {
-                                    ResultSetMetaData metaData = data.getMetaData();
-                                    int columnCount = metaData.getColumnCount();
-                                    StringBuilder insert = new StringBuilder();
-                                    StringBuilder values = new StringBuilder();
-                                    for (int i = 1; i <= columnCount; i++) {
-                                        if (i == 1) {
-                                            insert.append("insert into " + table + " (");
-                                            insert.append(metaData.getColumnName(i)).append(",");
-                                            values.append("values (").append("?,");
-                                        } else if (1 < i && i < columnCount) {
-                                            insert.append(metaData.getColumnName(i)).append(",");
-                                            values.append("?,");
-                                        } else {
-                                            insert.append(metaData.getColumnName(i)).append(")");
-                                            values.append("?)");
-                                        }
-                                    }
-                                    PreparedStatement preparedStatement = con.prepareStatement(insert.append(values).toString());
-                                    for (int i = 1; i <= columnCount; i++) {
-                                        if ("latest".equalsIgnoreCase(metaData.getColumnName(i))) {
-                                            preparedStatement.setObject(i, true);
-                                        } else {
-                                            preparedStatement.setObject(i, data.getObject(i));
-                                        }
-                                    }
-                                    preparedStatement.executeUpdate();
-                                }
-                            }
-                        }
-                    }
-                    apply(null);
-                    Db.db.commitTransaction();
-                } catch (SQLException throwables) {
-                    Db.db.rollbackTransaction();
-                    throwables.printStackTrace();
-                }finally {
-                    Db.db.endTransaction();
-                }
-                break;
+                Account.migrationHistoryData();
+                apply(null);
             case 505:
                 apply(
-                        "create index IF NOT EXISTS ACCOUNT_HEIGHT_ID_IDX on ACCOUNT_HISTORY (HEIGHT, ID);\n"
-                        + "create index IF NOT EXISTS ACCOUNT_POC_SCORE_HISTORY_HEIGHT_INDEX on ACCOUNT_POC_SCORE_HISTORY (HEIGHT desc);\n"
+                        "CREATE INDEX IF NOT EXISTS ACCOUNT_HISTORY_HEIGHT_ID_IDX on ACCOUNT_HISTORY (HEIGHT, ID);\n"
+                        + "CREATE INDEX IF NOT EXISTS ACCOUNT_POC_SCORE_HISTORY_HEIGHT_IDX on ACCOUNT_POC_SCORE_HISTORY (HEIGHT desc);\n"
                         + "ALTER TABLE ACCOUNT_GUARANTEED_BALANCE_HISTORY ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT false;\n"
                         + "ALTER TABLE ACCOUNT_LEDGER_HISTORY ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT false;\n"
-                        + "CREATE INDEX IF NOT EXISTS ACCOUNT_HEIGHT_IDX ON ACCOUNT (HEIGHT DESC);\n"
-                        + "CREATE INDEX IF NOT EXISTS ACCOUNT_POC_SCORE_HEIGHT_IDX ON ACCOUNT_POC_SCORE (HEIGHT DESC);\n"
+                        + "CREATE INDEX IF NOT EXISTS ACCOUNT_HEIGHT_INDEX ON ACCOUNT (HEIGHT DESC);\n"
+                        + "CREATE INDEX IF NOT EXISTS ACCOUNT_POC_SCORE_HEIGHT_INDEX ON ACCOUNT_POC_SCORE (HEIGHT DESC);\n"
                 );
-                break;
             case 506:
                 break;
             default:

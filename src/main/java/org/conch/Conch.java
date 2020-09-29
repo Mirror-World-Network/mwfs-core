@@ -785,30 +785,9 @@ public final class Conch {
         if(!Constants.HISTORY_RECORD_CLEAR) {
             return;
         }
-
         long clearStartMS = System.currentTimeMillis();
-        Account.truncateAccountLedger();
-//        Logger.logMessage("[HistoryRecords] Trim all tables");
-//        getBlockchainProcessor().trimDerivedTables();
-
-//        int trimEndHeight = getHeight();
-//        if(trimEndHeight == 0) {
-//            try{
-//                BlockImpl lastBlock = BlockDb.findLastBlock();
-//                trimEndHeight =  lastBlock != null ? lastBlock.getHeight() : 0 ;
-//            }catch(Exception e){
-//                Logger.logErrorMessage("can't get the last block height in the HistoryRecords processing", e);
-//            }
-//        }
-//        int height = trimEndHeight - Constants.MAX_ROLLBACK;
-//        Logger.logMessage("[HistoryRecords] Trim account_poc_score table before height " + height);
-//        PocDb.trimHistoryData(height);
-//        Logger.logMessage(String.format("[HistoryRecords] Trim account_poc_score table used %d S",(System.currentTimeMillis() - clearStartMS) / 1000));
-//
-//        Logger.logMessage("[HistoryRecords] Trim account and account_guaranteed_balance tables before height " + height);
-//        Account.trimHistoryData(height);
-
-         Logger.logMessage(String.format("[HistoryRecords] Finished to clear history records, used %d S",(System.currentTimeMillis() - clearStartMS) / 1000));
+        Account.truncateHistoryData();
+        Logger.logMessage(String.format("[HistoryRecords] Finished to clear history records, used %d S",(System.currentTimeMillis() - clearStartMS) / 1000));
     }
 
     private static class Init {

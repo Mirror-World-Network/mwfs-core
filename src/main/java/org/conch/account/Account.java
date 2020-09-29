@@ -2604,15 +2604,27 @@ public final class Account {
         accountTable.trim(height);
     }
 
-    public static void truncateAccountLedger(){
+    public static void truncateHistoryData(){
         Connection con = null;
         try {
             con = Db.db.getConnection();
             Statement stmt = con.createStatement();
             Logger.logMessage("[HistoryRecords] Truncate ACCOUNT_LEDGER_HISTORY table");
             stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_LEDGER_HISTORY");
+            Logger.logMessage("[HistoryRecords] Truncate ACCOUNT_LEDGER_CACHE table");
+            stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_LEDGER_CACHE");
             Logger.logMessage("[HistoryRecords] Truncate ACCOUNT_LEDGER table");
             stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_LEDGER");
+
+            Logger.logMessage("[HistoryRecords] Truncate ACCOUNT_POC_SCORE_HISTORY table");
+            stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_POC_SCORE_HISTORY");
+            Logger.logMessage("[HistoryRecords] Truncate ACCOUNT_POC_SCORE_CACHE table");
+            stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_POC_SCORE_CACHE");
+
+            Logger.logMessage("[HistoryRecords] Truncate ACCOUNT_HISTORY table");
+            stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_HISTORY");
+            Logger.logMessage("[HistoryRecords] Truncate ACCOUNT_CACHE table");
+            stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_CACHE");
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
         }finally {
@@ -2620,85 +2632,86 @@ public final class Account {
         }
     }
 
-    public static void historyData(int height){
-//        try {
-//            Connection con = Db.db.getConnection();
-////                    String[] arr = { "ACCOUNT_GUARANTEED_BALANCE", "ACCOUNT_LEDGER"};
-//
-//            String[] arr = { "ACCOUNT_GUARANTEED_BALANCE"};
-//            Statement statement = con.createStatement();
-//            ResultSet rs = statement.executeQuery("SELECT distinct ID FROM ACCOUNT");
-//
-//            rs.last(); // 将光标移动到最后一行
-//            int rowCount = rs.getRow(); // 得到当前行号，即结果集记录数
-//            rs.beforeFirst(); //指针再移到初始化的位置
-//
-//            while (rs.next()) {
-//                long accountId = rs.getLong("ID");
-//                PreparedStatement idStmt = con.prepareStatement("SELECT * FROM ACCOUNT where ID = ? order by HEIGHT DESC limit 1");
-//                idStmt.setLong(1,accountId);
-//                ResultSet resultSet = idStmt.executeQuery();
-//                if (resultSet.next()) {
-//                    Integer height = resultSet.getInt("HEIGHT");
-//                    for (String table : arr) {
-//                        boolean queryExist = false;
-//                        PreparedStatement countStmt = con.prepareStatement("SELECT DB_ID FROM " + table  + " where ACCOUNT_ID = ? and HEIGHT = ?");
-//                        countStmt.setLong(1,accountId);
-//                        countStmt.setInt(2,height);
-//                        ResultSet queryRS = countStmt.executeQuery();
-//                        if(queryRS != null && queryRS.next()){
-//                            queryExist = true;
-//                        }
-//
-//                        PreparedStatement update = null;
-//                        if(Constants.TRIM_AT_INSERT) {
-//                            System.out.println(String.format("DELETE FROM %s WHERE HEIGHT < %d and ACCOUNT_ID = %s", table, height, accountId));
-//                            update = con.prepareStatement("DELETE FROM " + table + " WHERE HEIGHT < ? and ACCOUNT_ID = ?");
-//                        }else{
-//                            update = con.prepareStatement("update " + table + " set LATEST = false where WHERE DB_ID <> ? and ACCOUNT_ID = ?");
-//                        }
-//
-//                        if(queryExist) {
-//                            update.setInt(1,height);
-//                            update.setLong(2,accountId);
-//                            update.executeUpdate();
-//                        }
-//                    }
-//                }
-//            }
-//        } catch (SQLException e) {
-//            throw new RuntimeException(e.toString(), e);
-//        }
-    }
-    public static void migrationHistoryData(int height){
-//        try {
-//            Connection con = Db.db.getConnection();
-//
-//            PreparedStatement stmt = con.prepareStatement("SELECT * FROM ACCOUNT where HEIGHT > ?");
-//            stmt.setInt(1, height);
-//            ResultSet rs = stmt.executeQuery();
-//
-//            rs.last(); // 将光标移动到最后一行
-//            int rowCount = rs.getRow(); // 得到当前行号，即结果集记录数
-//            rs.beforeFirst(); //指针再移到初始化的位置
-//
-//            if (rs.next()) {
-//                this.id = rs.getLong("id");
-//                this.dbKey = dbKey;
-//                this.balanceNQT = rs.getLong("balance");
-//                this.unconfirmedBalanceNQT = rs.getLong("unconfirmed_balance");
-//                this.forgedBalanceNQT = rs.getLong("forged_balance");
-//                this.frozenBalanceNQT = rs.getLong("frozen_balance");
-//                this.activeLesseeId = rs.getLong("active_lessee_id");
-//                if (rs.getBoolean("has_control_phasing")) {
-//                    controls = Collections.unmodifiableSet(EnumSet.of(ControlType.PHASING_ONLY));
-//                } else {
-//                    controls = Collections.emptySet();
-//                }
-//            }
-//        } catch (SQLException e) {
-//            throw new RuntimeException(e.toString(), e);
-//        }
+    public static void migrationHistoryData(){
+        long startMS = System.currentTimeMillis();
+        try (Connection con = Db.db.beginTransaction()){
+            String[] dataArr = {"ACCOUNT", "ACCOUNT_LEDGER", "ACCOUNT_GUARANTEED_BALANCE", "ACCOUNT_POC_SCORE"};
+            Logger.logInfoMessage("[HistoryRecords] Migrate table data " + Arrays.toString(dataArr));
+            for (String table : dataArr) {
+                String idColumn;
+                if ("ACCOUNT".equalsIgnoreCase(table)) {
+                    idColumn = "ID";
+                } else {
+                    idColumn = "ACCOUNT_ID";
+                }
+                Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+                String idQuerySql = "SELECT distinct " + idColumn + " FROM " + table + "_history";
+                Logger.logDebugMessage("[HistoryRecords] %s", idQuerySql);
+                ResultSet rs = statement.executeQuery(idQuerySql);
+
+                rs.last();
+                int totalCount = rs.getRow();
+
+                Logger.logInfoMessage("[HistoryRecords] Migrate %d records from %s to %s", totalCount, (table + "_history"), table);
+                rs.beforeFirst();
+                int executionCount = 0;
+                while (rs.next()) {
+                    // migrate from history table to working table
+                    try{
+                        long accountId = rs.getLong(idColumn);
+                        PreparedStatement maxHeight = con.prepareStatement("SELECT max(HEIGHT) maxHeight FROM " + table + "_history" + " where " + idColumn + " = ?");
+                        maxHeight.setLong(1, accountId);
+                        ResultSet idSet = maxHeight.executeQuery();
+                        if (idSet.next()) {
+                            PreparedStatement update = con.prepareStatement("select * from " + table + "_history" + " where HEIGHT = ? and " + idColumn + " = ?");
+                            update.setInt(1, idSet.getInt("maxHeight"));
+                            update.setLong(2, accountId);
+                            ResultSet data = update.executeQuery();
+                            if (data != null && data.next()) {
+                                ResultSetMetaData metaData = data.getMetaData();
+                                int columnCount = metaData.getColumnCount();
+                                StringBuilder insert = new StringBuilder();
+                                StringBuilder values = new StringBuilder();
+                                for (int i = 1; i <= columnCount; i++) {
+                                    if (i == 1) {
+                                        insert.append("insert into " + table + " (");
+                                        insert.append(metaData.getColumnName(i)).append(",");
+                                        values.append("values (").append("?,");
+                                    } else if (1 < i && i < columnCount) {
+                                        insert.append(metaData.getColumnName(i)).append(",");
+                                        values.append("?,");
+                                    } else {
+                                        insert.append(metaData.getColumnName(i)).append(")");
+                                        values.append("?)");
+                                    }
+                                }
+                                PreparedStatement preparedStatement = con.prepareStatement(insert.append(values).toString());
+                                for (int i = 1; i <= columnCount; i++) {
+                                    if ("latest".equalsIgnoreCase(metaData.getColumnName(i))) {
+                                        preparedStatement.setObject(i, true);
+                                    } else {
+                                        preparedStatement.setObject(i, data.getObject(i));
+                                    }
+                                }
+                                preparedStatement.executeUpdate();
+                            }
+                        }
+                        if(executionCount++ % 10 == 0) {
+                            Logger.logDebugMessage("[HistoryRecords] Migration progress %d/%d [from %s to %s]", executionCount, totalCount, (table + "_history"), table);
+                        }
+                    }catch(Exception e){
+                        Logger.logWarningMessage("[HistoryRecords] Migration from %s to %s occur error[%s], ignore and process next", (table + "_history"), table, e.getMessage());
+                    }
+                }
+            }
+            Db.db.commitTransaction();
+        } catch (SQLException throwables) {
+            Db.db.rollbackTransaction();
+            throwables.printStackTrace();
+        }finally {
+            Db.db.endTransaction();
+        }
+        Logger.logMessage(String.format("[HistoryRecords] Migrate history records used %d S",(System.currentTimeMillis() - startMS) / 1000));
     }
 
 }
