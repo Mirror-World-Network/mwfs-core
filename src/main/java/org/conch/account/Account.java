@@ -2647,7 +2647,12 @@ public final class Account {
         }
     }
 
-    public static void migrateHistoryDataToWorkTable(){
+    /**
+     * Migrate the all account's records to working table and cache table
+     * latest height record to working table
+     * others to cache table
+     */
+    public static void migrateHistoryData(){
 //        String[] dataArr = {"ACCOUNT", "ACCOUNT_LEDGER", "ACCOUNT_GUARANTEED_BALANCE", "ACCOUNT_POC_SCORE"};
         String[] dataArr = {"ACCOUNT", "ACCOUNT_GUARANTEED_BALANCE", "ACCOUNT_POC_SCORE"};
         Logger.logInfoMessage("[HistoryRecords] Migrate history data to working table " + Arrays.toString(dataArr) + ", it will take a few minutes...");
@@ -2655,6 +2660,8 @@ public final class Account {
         long startMS = System.currentTimeMillis();
         try (Connection con = Db.db.beginTransaction()){
             for (String table : dataArr) {
+                String historyTable = table + "_HISTORY";
+                String cacheTable = table + "_CACHE";
                 String idColumn;
                 if ("ACCOUNT".equalsIgnoreCase(table)) {
                     idColumn = "ID";
@@ -2662,73 +2669,99 @@ public final class Account {
                     idColumn = "ACCOUNT_ID";
                 }
                 Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-                String idQuerySql = "SELECT distinct " + idColumn + " FROM " + table + "_history";
+                String idQuerySql = "SELECT distinct " + idColumn + " FROM " + historyTable;
                 Logger.logDebugMessage("[HistoryRecords] %s", idQuerySql);
-                ResultSet rs = statement.executeQuery(idQuerySql);
 
-                rs.last();
-                int totalCount = rs.getRow();
+                ResultSet accountIdRs = statement.executeQuery(idQuerySql);
+                accountIdRs.last();
+                int totalAccountCount = accountIdRs.getRow();
+                accountIdRs.beforeFirst();
+                Logger.logInfoMessage("[HistoryRecords] Migrate %d unique account's records from %s to %s", totalAccountCount, historyTable, table);
 
-                Logger.logInfoMessage("[HistoryRecords] Migrate %d records from %s to %s", totalCount, (table + "_history"), table);
-                rs.beforeFirst();
-                int executionCount = 0;
-                while (rs.next()) {
-                    // migrate from history table to working table
+                int accountMigrateCount = 0;
+                while (accountIdRs.next()) {
+                    // migrate all account's records from history table to working & cache tables
+                    long accountId = accountIdRs.getLong(idColumn);
                     try{
-                        long accountId = rs.getLong(idColumn);
-                        PreparedStatement maxHeight = con.prepareStatement("SELECT max(HEIGHT) maxHeight FROM " + table + "_history" + " where " + idColumn + " = ?");
-                        maxHeight.setLong(1, accountId);
-                        ResultSet idSet = maxHeight.executeQuery();
+                        PreparedStatement maxHeightStmt = con.prepareStatement("SELECT max(HEIGHT) maxHeight FROM " + historyTable + " WHERE " + idColumn + " = ?");
+                        maxHeightStmt.setLong(1, accountId);
+                        ResultSet idSet = maxHeightStmt.executeQuery();
                         if (idSet.next()) {
-                            PreparedStatement update = con.prepareStatement("select * from " + table + "_history" + " where HEIGHT = ? and " + idColumn + " = ?");
-                            update.setInt(1, idSet.getInt("maxHeight"));
-                            update.setLong(2, accountId);
-                            ResultSet data = update.executeQuery();
-                            if (data != null && data.next()) {
-                                ResultSetMetaData metaData = data.getMetaData();
-                                int columnCount = metaData.getColumnCount();
-                                StringBuilder insert = new StringBuilder();
-                                StringBuilder values = new StringBuilder();
-                                for (int i = 1; i <= columnCount; i++) {
-                                    if (i == 1) {
-                                        insert.append("insert into " + table + " (");
-                                        insert.append(metaData.getColumnName(i)).append(",");
-                                        values.append("values (").append("?,");
-                                    } else if (1 < i && i < columnCount) {
-                                        insert.append(metaData.getColumnName(i)).append(",");
-                                        values.append("?,");
-                                    } else {
-                                        insert.append(metaData.getColumnName(i)).append(")");
-                                        values.append("?)");
+                            int maxHeight = idSet.getInt("maxHeight");
+                            int migrationStartHeight = maxHeight - Constants.MAX_ROLLBACK;
+
+                            Statement selectStmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+                            String recordsQuerySql = String.format("SELECT * FROM %s WHERE HEIGHT >= %d and %s = %d ORDER BY HEIGHT DESC", historyTable, migrationStartHeight, idColumn, accountId);
+                            Logger.logDebugMessage("[HistoryRecords] %s", recordsQuerySql);
+
+                            ResultSet data = selectStmt.executeQuery(recordsQuerySql);
+                            data.last();
+                            int totalRecordsCount = data.getRow();
+                            data.beforeFirst();
+                            Logger.logInfoMessage("[HistoryRecords] Migrate account[%d] %d records from %s to %s where height >= %d", accountId, totalRecordsCount, historyTable, table, migrationStartHeight);
+
+                            // migrate single account's records: first to working table, others to cache table
+                            int historyDataMigrateCount = 0;
+                            while (data != null && data.next()) {
+                                historyDataMigrateCount++;
+                                String migrationTable = (historyDataMigrateCount == 1) ? table : cacheTable;
+
+                                try{
+                                    ResultSetMetaData metaData = data.getMetaData();
+                                    int columnCount = metaData.getColumnCount();
+                                    StringBuilder insert = new StringBuilder();
+                                    StringBuilder values = new StringBuilder();
+                                    for (int i = 1; i <= columnCount; i++) {
+                                        if (i == 1) {
+                                            insert.append("insert into " + migrationTable + " (");
+                                            insert.append(metaData.getColumnName(i)).append(",");
+                                            values.append("values (").append("?,");
+                                        } else if (1 < i && i < columnCount) {
+                                            insert.append(metaData.getColumnName(i)).append(",");
+                                            values.append("?,");
+                                        } else {
+                                            insert.append(metaData.getColumnName(i)).append(")");
+                                            values.append("?)");
+                                        }
                                     }
-                                }
-                                PreparedStatement preparedStatement = con.prepareStatement(insert.append(values).toString());
-                                for (int i = 1; i <= columnCount; i++) {
-                                    if ("latest".equalsIgnoreCase(metaData.getColumnName(i))) {
-                                        preparedStatement.setObject(i, true);
-                                    } else {
-                                        preparedStatement.setObject(i, data.getObject(i));
+                                    PreparedStatement insertStmt = con.prepareStatement(insert.append(values).toString());
+                                    for (int i = 1; i <= columnCount; i++) {
+                                        if ("latest".equalsIgnoreCase(metaData.getColumnName(i))) {
+                                            insertStmt.setObject(i, true);
+                                        } else {
+                                            insertStmt.setObject(i, data.getObject(i));
+                                        }
                                     }
+                                    insertStmt.executeUpdate();
+                                } catch(Exception e){
+                                    Logger.logWarningMessage("[HistoryRecords] Migration account[%d]'s records[from %s to %s] occur error[%s], ignore and process next", accountId, historyTable, migrationTable, e.getMessage());
                                 }
-                                preparedStatement.executeUpdate();
+
+                                if(historyDataMigrateCount % 1000 == 0) {
+                                    Logger.logDebugMessage("[HistoryRecords] Migrate account[%d]'s records progress %d/%d [from %s to %s]", historyDataMigrateCount, totalRecordsCount, historyTable, table);
+                                }
+
                             }
                         }
-                        if(executionCount++ % 1000 == 0) {
-                            Logger.logDebugMessage("[HistoryRecords] Migration progress %d/%d [from %s to %s]", executionCount, totalCount, (table + "_history"), table);
+
+                        if(accountMigrateCount++ % 1000 == 0) {
+                            Logger.logDebugMessage("[HistoryRecords] Migration all accounts progress %d/%d [from %s to %s]", accountMigrateCount, totalAccountCount, historyTable, table);
                         }
                     }catch(Exception e){
-                        Logger.logWarningMessage("[HistoryRecords] Migration from %s to %s occur error[%s], ignore and process next", (table + "_history"), table, e.getMessage());
+                        Logger.logWarningMessage("[HistoryRecords] Migration account[%d] occur error[%s], ignore and process next", accountId,  e.getMessage());
                     }
                 }
             }
             Db.db.commitTransaction();
-        } catch (SQLException throwables) {
+        } catch (SQLException throwable) {
             Db.db.rollbackTransaction();
-            throwables.printStackTrace();
+            throwable.printStackTrace();
         }finally {
             Db.db.endTransaction();
         }
-        Logger.logMessage(String.format("[HistoryRecords] Migrate history records used %d S",(System.currentTimeMillis() - startMS) / 1000));
+        long usedS= (System.currentTimeMillis() - startMS) / 1000;
+        long usedM= usedS / 60;
+        Logger.logMessage(String.format("[HistoryRecords] Migrate history records used %d Minutes(%d S)", usedM, usedS));
     }
 
     public static void migrateHistoryDataToCacheTable(){
