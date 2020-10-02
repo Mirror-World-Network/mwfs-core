@@ -2679,6 +2679,7 @@ public final class Account {
                 Logger.logInfoMessage("[HistoryRecords] Migrate %d unique account's records from %s to %s", totalAccountCount, historyTable, table);
 
                 int accountMigrateCount = 0;
+                int totalMigrateCount = 0;
                 while (accountIdRs.next()) {
                     // migrate all account's records from history table to working & cache tables
                     long accountId = accountIdRs.getLong(idColumn);
@@ -2737,14 +2738,16 @@ public final class Account {
                                 }
 
                                 if(historyDataMigrateCount % 1000 == 0) {
-                                    Logger.logDebugMessage("[HistoryRecords] Migrate account[%d]'s records progress %d/%d [from %s to %s]", historyDataMigrateCount, totalRecordsCount, historyTable, table);
+                                    Logger.logDebugMessage("[HistoryRecords] Migrate account[%d]'s records progress %d/%d [from %s to %s]", accountId, historyDataMigrateCount, totalRecordsCount, historyTable, table);
                                 }
-
                             }
+                            // single account's history records migration finished
+                            totalMigrateCount += historyDataMigrateCount;
+                            Logger.logDebugMessage("[HistoryRecords] Migrate account[%d]'s records finished [from %s to %s]", accountId, historyTable, table);
                         }
 
                         if(accountMigrateCount++ % 1000 == 0) {
-                            Logger.logDebugMessage("[HistoryRecords] Migration all accounts progress %d/%d [from %s to %s]", accountMigrateCount, totalAccountCount, historyTable, table);
+                            Logger.logDebugMessage("[HistoryRecords] Migrated %d records and progress is %d/%d accounts [from %s to %s]", totalMigrateCount, accountMigrateCount, totalAccountCount, historyTable, table);
                         }
                     }catch(Exception e){
                         Logger.logWarningMessage("[HistoryRecords] Migration account[%d] occur error[%s], ignore and process next", accountId,  e.getMessage());
@@ -2760,7 +2763,7 @@ public final class Account {
         }
         long usedS= (System.currentTimeMillis() - startMS) / 1000;
         long usedM= usedS / 60;
-        Logger.logMessage(String.format("[HistoryRecords] Migrate history records used %d Minutes(%d S)", usedM, usedS));
+        Logger.logMessage(String.format("[HistoryRecords] Migrate history records[%d height] used %d Minutes(%d S)", migrationSize, usedM, usedS));
     }
 
     public static void migrateHistoryDataToCacheTable(){
