@@ -25,8 +25,10 @@ import org.conch.Conch;
 import org.conch.account.Account;
 import org.conch.common.Constants;
 import org.conch.util.Logger;
+import org.h2.tools.RunScript;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -166,13 +168,14 @@ public class CompactDatabase {
     }
 
     public static boolean restore(String dbUrl, String dbUsername, String dbPassword, File sqlFile, boolean delAfter) throws Exception {
-        String sqlPath = sqlFile.getPath();
         initDb();
         Connection conn = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
-        Statement s = conn.createStatement();
-        Logger.logInfoMessage("Restore the '%s' from SQL script '%s'", dbUrl, sqlPath);
-        s.execute("RUNSCRIPT FROM '" + sqlPath + "' COMPRESSION GZIP CHARSET 'UTF-8'");
-        s.execute("ANALYZE");
+//        Statement s = conn.createStatement();
+//        Logger.logInfoMessage("Restore the '%s' from SQL script '%s'", dbUrl, sqlPath);
+//        s.execute("RUNSCRIPT FROM '" + sqlFile.getPath() + "' COMPRESSION GZIP CHARSET 'UTF-8'");
+//        s.execute("ANALYZE");
+
+        RunScript.execute(conn, new FileReader(sqlFile));
 
         File dbFile = new File(dbDir, "mw.h2.db");
         File oldDbFile = new File(dbFile.getPath() + ".bak");

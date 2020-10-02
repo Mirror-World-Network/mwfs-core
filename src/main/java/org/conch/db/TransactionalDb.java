@@ -133,7 +133,7 @@ public class TransactionalDb extends BasicDb {
             long elapsed = now - ((DbConnection)con).txStart;
             if (elapsed >= txThreshold) {
                 logThreshold(String.format("Database transaction required %.3f seconds at height %d",
-                        (double)elapsed/1000.0, Conch.getBlockchain().getHeight()));
+                        (double)elapsed/1000.0, Conch.getHeight()));
             } else {
                 long count, times;
                 boolean logStats = false;

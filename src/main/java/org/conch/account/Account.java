@@ -37,7 +37,6 @@ import org.conch.db.*;
 import org.conch.market.Exchange;
 import org.conch.market.Trade;
 import org.conch.shuffle.ShufflingTransaction;
-import org.conch.tools.CompactDatabase;
 import org.conch.tx.Appendix;
 import org.conch.tx.Attachment;
 import org.conch.tx.Transaction;
@@ -2601,10 +2600,8 @@ public final class Account {
     }
 
     public static void trimHistoryData(int height){
-        accountGuaranteedBalanceTable.trim(height);
-        accountTable.trim(height);
+        DbTrimUtils.trimTables(height,"ACCOUNT_HISTORY", "ACCOUNT_GUARANTEED_BALANCE_HISTORY", "ACCOUNT_POC_SCORE_HISTORY");
     }
-
 
     public static boolean needCompact = false;
     public static void truncateHistoryData(){
@@ -2628,6 +2625,8 @@ public final class Account {
 //
 //            Logger.logMessage("[HistoryRecords] Truncate tables [ACCOUNT_HISTORY]");
 //            stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_HISTORY");
+
+            stmt.executeUpdate("ALTER TABLE ACCOUNT_GUARANTEED_BALANCE_HISTORY ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT false");
             Db.db.commitTransaction();
         } catch(Exception e){
             Db.db.rollbackTransaction();
@@ -2637,14 +2636,14 @@ public final class Account {
         }
         Logger.logMessage(String.format("[HistoryRecords] Finished to clear history records, used %d S",(System.currentTimeMillis() - clearStartMS) / 1000));
 
-        if(needCompact) {
-            Logger.logMessage("[HistoryRecords] Compact the current db");
-            int code = CompactDatabase.compactAndRestoreDB();
-            if(code != 2) {
+//        if(needCompact) {
+//            Logger.logMessage("[HistoryRecords] Compact the current db");
+//            int code = CompactDatabase.compactAndRestoreDB();
+//            if(code != 2) {
 //                Logger.logInfoMessage("[HistoryRecords] You need restart the client to finish the compact & restore db");
 //                Conch.shutdown();
-            }
-        }
+//            }
+//        }
     }
 
     /**
@@ -2655,9 +2654,10 @@ public final class Account {
     public static void migrateHistoryData(){
 //        String[] dataArr = {"ACCOUNT", "ACCOUNT_LEDGER", "ACCOUNT_GUARANTEED_BALANCE", "ACCOUNT_POC_SCORE"};
         String[] dataArr = {"ACCOUNT", "ACCOUNT_GUARANTEED_BALANCE", "ACCOUNT_POC_SCORE"};
-        Logger.logInfoMessage("[HistoryRecords] Migrate history data to working table " + Arrays.toString(dataArr) + ", it will take a few minutes...");
+        Logger.logInfoMessage("[HistoryRecords] Migrate history data to working and cache table " + Arrays.toString(dataArr) + ", it will take a few minutes...");
 
         long startMS = System.currentTimeMillis();
+        int migrationSize = 48; //Constants.MAX_ROLLBACK;
         try (Connection con = Db.db.beginTransaction()){
             for (String table : dataArr) {
                 String historyTable = table + "_HISTORY";
@@ -2688,17 +2688,16 @@ public final class Account {
                         ResultSet idSet = maxHeightStmt.executeQuery();
                         if (idSet.next()) {
                             int maxHeight = idSet.getInt("maxHeight");
-                            int migrationStartHeight = maxHeight - Constants.MAX_ROLLBACK;
+                            int migrationStartHeight = maxHeight - migrationSize;
 
                             Statement selectStmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
                             String recordsQuerySql = String.format("SELECT * FROM %s WHERE HEIGHT >= %d and %s = %d ORDER BY HEIGHT DESC", historyTable, migrationStartHeight, idColumn, accountId);
-                            Logger.logDebugMessage("[HistoryRecords] %s", recordsQuerySql);
 
                             ResultSet data = selectStmt.executeQuery(recordsQuerySql);
                             data.last();
                             int totalRecordsCount = data.getRow();
                             data.beforeFirst();
-                            Logger.logInfoMessage("[HistoryRecords] Migrate account[%d] %d records from %s to %s where height >= %d", accountId, totalRecordsCount, historyTable, table, migrationStartHeight);
+//                            Logger.logDebugMessage("[HistoryRecords] Migrate account[%d] %d records from %s to %s where height >= %d", accountId, totalRecordsCount, historyTable, table, migrationStartHeight);
 
                             // migrate single account's records: first to working table, others to cache table
                             int historyDataMigrateCount = 0;
@@ -2755,7 +2754,7 @@ public final class Account {
             Db.db.commitTransaction();
         } catch (SQLException throwable) {
             Db.db.rollbackTransaction();
-            throwable.printStackTrace();
+            Logger.logMessage(String.format("[HistoryRecords] Migrate history records occur error %s", throwable.getMessage()));
         }finally {
             Db.db.endTransaction();
         }

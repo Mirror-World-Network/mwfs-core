@@ -165,43 +165,12 @@ public abstract class DerivedDbTable {
                     + (containLatestField ? " AND latest <> TRUE" : "");
             Logger.logDebugMessage(trimSql);
             PreparedStatement deleteStatement = con.prepareStatement(trimSql);
-//            deleteStatement.setInt(1, startHeight);
-//            deleteStatement.setInt(2, endHeight);
             int count = deleteStatement.executeUpdate();
             Logger.logDebugMessage("DELETE " + count + " records after execute [" + trimSql + "]" );
             startHeight = endHeight;
             if(startHeight == 0) {
                 needDeleting = false;
             }
-//            PreparedStatement countStatement = con.prepareStatement(
-//                "SELECT count(1) as count FROM " + tableName
-//                + " WHERE height < ?"
-//                + " AND height >= ?"
-//                + (containLatestField ? " AND latest <> TRUE" : "")
-//            );
-//            countStatement.setInt(1, startHeight);
-//            countStatement.setInt(2, endHeight);
-//
-//            ResultSet rs = countStatement.executeQuery();
-//            if(rs != null && rs.next()) {
-//                int count = rs.getInt("count");
-//                if(count > 0 ) {
-//                    String trimSql = "DELETE FROM " + tableName
-//                            + " WHERE height < ?"
-//                            + " AND height >= ?"
-//                            + (containLatestField ? " AND latest <> TRUE" : "");
-//                    Logger.logDebugMessage("DELETE FROM %s WHERE height < %d AND height >= %d", tableName, startHeight, endHeight);
-//                    PreparedStatement deleteStatement = con.prepareStatement(trimSql);
-//                    deleteStatement.setInt(1, startHeight);
-//                    deleteStatement.setInt(2, endHeight);
-//                    deleteStatement.executeUpdate();
-//                    startHeight = endHeight;
-//                }else {
-//                    needDeleting = false;
-//                }
-//            }else{
-//                needDeleting = false;
-//            }
 
         }
     }
