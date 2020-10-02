@@ -2736,14 +2736,10 @@ public final class Account {
                                 } catch(Exception e){
                                     Logger.logWarningMessage("[HistoryRecords] Migration account[%d]'s records[from %s to %s] occur error[%s], ignore and process next", accountId, historyTable, migrationTable, e.getMessage());
                                 }
-
-                                if(historyDataMigrateCount % 1000 == 0) {
-                                    Logger.logDebugMessage("[HistoryRecords] Migrate account[%d]'s records progress %d/%d [from %s to %s]", accountId, historyDataMigrateCount, totalRecordsCount, historyTable, table);
-                                }
                             }
                             // single account's history records migration finished
                             totalMigrateCount += historyDataMigrateCount;
-                            Logger.logDebugMessage("[HistoryRecords] Migrate account[%d]'s records finished [from %s to %s]", accountId, historyTable, table);
+                            Logger.logInfoMessage("[HistoryRecords] Migrate account[%d]'s records %d finished [from %s to %s]", accountId, historyDataMigrateCount,  historyTable, table);
                         }
 
                         if(accountMigrateCount++ % 1000 == 0) {
