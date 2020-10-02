@@ -141,11 +141,11 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                             Logger.logDebugMessage("Don't synchronize blocks when the getMoreBlocks is set to false");
                         }
 
-                        // restart the server
-                        if (System.currentTimeMillis() - lastDownloadMS > MAX_DOWNLOAD_TIME * 2) {
-                            Logger.logInfoMessage("Can't finish the block synchronization in the %d MS, restart the COS", MAX_DOWNLOAD_TIME * 2);
-                            new Thread(() -> Conch.restartApplication(null)).start();
-                        }
+//                        // restart the server
+//                        if (System.currentTimeMillis() - lastDownloadMS > MAX_DOWNLOAD_TIME * 2) {
+//                            Logger.logInfoMessage("Can't finish the block synchronization in the %d MS, restart the COS", MAX_DOWNLOAD_TIME * 2);
+//                            new Thread(() -> Conch.restartApplication(null)).start();
+//                        }
                     }
 
                     if (Conch.hasSerialNum() && !Constants.hubLinked) {

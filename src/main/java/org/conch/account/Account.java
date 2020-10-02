@@ -2603,7 +2603,7 @@ public final class Account {
         DbTrimUtils.trimTables(height,"ACCOUNT_HISTORY", "ACCOUNT_GUARANTEED_BALANCE_HISTORY", "ACCOUNT_POC_SCORE_HISTORY");
     }
 
-    public static boolean needCompact = false;
+    public static boolean needCompact = true;
     public static void truncateHistoryData(){
         if(!Constants.HISTORY_RECORD_CLEAR) {
             return;
