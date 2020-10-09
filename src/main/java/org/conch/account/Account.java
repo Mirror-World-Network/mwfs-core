@@ -2657,7 +2657,7 @@ public final class Account {
         Logger.logInfoMessage("[HistoryRecords] Migrate history data to working and cache table " + Arrays.toString(dataArr) + ", it will take a few minutes...");
 
         long startMS = System.currentTimeMillis();
-        int migrationSize = 48; //Constants.MAX_ROLLBACK;
+        int migrationSize = 18; //Constants.MAX_ROLLBACK;
         try (Connection con = Db.db.beginTransaction()){
             for (String table : dataArr) {
                 String historyTable = table + "_HISTORY";
@@ -2690,6 +2690,9 @@ public final class Account {
                         if (idSet.next()) {
                             int maxHeight = idSet.getInt("maxHeight");
                             int migrationStartHeight = maxHeight - migrationSize;
+
+                            //TODO 增加目标表里记录的检查逻辑，如果目标表的记录超过了 Constants.SYNC_CACHE_BLOCK_NUM，就无需进行数据迁移和同步
+
 
                             Statement selectStmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
                             String recordsQuerySql = String.format("SELECT * FROM %s WHERE HEIGHT >= %d and %s = %d ORDER BY HEIGHT DESC", historyTable, migrationStartHeight, idColumn, accountId);
@@ -2760,31 +2763,6 @@ public final class Account {
         long usedS= (System.currentTimeMillis() - startMS) / 1000;
         long usedM= usedS / 60;
         Logger.logMessage(String.format("[HistoryRecords] Migrate history records[%d height] used %d Minutes(%d S)", migrationSize, usedM, usedS));
-    }
-
-    public static void migrateHistoryDataToCacheTable(){
-        Logger.logInfoMessage("[HistoryRecords] Migrate history records to cache table, it will take a few minutes...");
-        long startMS = System.currentTimeMillis();
-        // migrate from history table to cache table
-        try (Connection con = Db.db.beginTransaction()){
-            //TODO 增加目标表里记录的检查逻辑，如果目标表的记录超过了 Constants.SYNC_CACHE_BLOCK_NUM，就无需进行数据迁移和同步
-            Logger.logInfoMessage("[HistoryRecords] Migrate %d records from %s to %s", Constants.MAX_ROLLBACK, "ACCOUNT_HISTORY", "ACCOUNT_CACHE");
-            Account.syncAccountTable("ACCOUNT_HISTORY", "ACCOUNT_CACHE", Constants.MAX_ROLLBACK);
-
-            Logger.logInfoMessage("[HistoryRecords] Migrate %d records from %s to %s", Constants.MAX_ROLLBACK, "ACCOUNT_GUARANTEED_BALANCE_HISTORY", "ACCOUNT_GUARANTEED_BALANCE_CACHE");
-            Account.syncAccountGuaranteedBalanceTable("ACCOUNT_GUARANTEED_BALANCE_HISTORY","ACCOUNT_GUARANTEED_BALANCE_CACHE",Constants.MAX_ROLLBACK);
-
-            Logger.logInfoMessage("[HistoryRecords] Migrate %d records from %s to %s", Constants.MAX_ROLLBACK, "ACCOUNT_POC_SCORE_HISTORY", "ACCOUNT_POC_SCORE_CACHE");
-            Account.syncAccountPocScoreTable("ACCOUNT_POC_SCORE_HISTORY", "ACCOUNT_POC_SCORE_CACHE", Constants.MAX_ROLLBACK);
-
-            Db.db.commitTransaction();
-        } catch (SQLException throwables) {
-            Db.db.rollbackTransaction();
-            throwables.printStackTrace();
-        }finally {
-            Db.db.endTransaction();
-        }
-        Logger.logMessage(String.format("[HistoryRecords] Migrate history records to cache table used %d S",(System.currentTimeMillis() - startMS) / 1000));
     }
 
 }
