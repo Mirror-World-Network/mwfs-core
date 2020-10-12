@@ -21,6 +21,7 @@ conf/.lock
 conf/localstorage
 conf/sharder.properties
 conf/local-debug.properties
+conf/genesis.json
 
 DestroyForgePool
 ForgePools
