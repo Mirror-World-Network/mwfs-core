@@ -8,7 +8,6 @@ import org.conch.Conch;
 import org.conch.account.Account;
 import org.conch.chain.*;
 import org.conch.common.Constants;
-import org.conch.consensus.genesis.GenesisRecipient;
 import org.conch.consensus.genesis.SharderGenesis;
 import org.conch.consensus.poc.db.PocDb;
 import org.conch.consensus.poc.tx.PocTxBody;
@@ -111,6 +110,11 @@ public class PocProcessorImpl implements PocProcessor {
     // and not limited hardware score at Constants.POC_MW_POC_SCORE_CHANGE_HEIGHT
     public static boolean FORCE_RE_CALCULATE = false;
     private static synchronized void reCalculateWhenExceedPocAlgoChangeHeight(int height){
+        if(Constants.POC_SCORE_CHANGE_HEIGHT == -1){
+            Logger.logInfoMessage("Constants.POC_SCORE_CHANGE_HEIGHT is -1, don't force to re-calculate the poc score");
+           return;
+        }
+
        if(height == Constants.POC_SCORE_CHANGE_HEIGHT + 1) {
            int reCalCount = 0;
            try{
@@ -119,37 +123,6 @@ public class PocProcessorImpl implements PocProcessor {
                                + ", start to re-calculate the poc score of miners");
 
                Map<Long,TransactionImpl> pocTxMap = Maps.newConcurrentMap();
-               // load the null recipient poc txs
-               DbIterator<TransactionImpl> oldPocTxsIterator = null;
-               Connection con = null;
-               try {
-                   con = Db.db.getConnection();
-                   PreparedStatement pstmt = con.prepareStatement("SELECT * FROM transaction WHERE height <= " + Constants.POC_TX_ALLOW_RECIPIENT
-                           +  " AND sender_id=" + GenesisRecipient.POC_TX_CREATOR_ID
-                           +  " AND type=" + TransactionType.TYPE_POC
-                           +  " AND subtype=" + PocTxWrapper.SUBTYPE_POC_NODE_TYPE
-                           +  " ORDER BY block_timestamp ASC, transaction_index ASC");
-
-                   oldPocTxsIterator = (DbIterator<TransactionImpl>)Conch.getBlockchain().getTransactions(con, pstmt);
-                   while (oldPocTxsIterator.hasNext()) {
-                       TransactionImpl txImpl = oldPocTxsIterator.next();
-                       Attachment attachment = txImpl.getAttachment();
-                       if(PocTxWrapper.SUBTYPE_POC_NODE_TYPE == attachment.getTransactionType().getSubtype()) {
-                           long accountIdOfAttachment = -1L;
-                           if(attachment instanceof PocTxBody.PocNodeTypeV3){
-                               accountIdOfAttachment = ((PocTxBody.PocNodeTypeV3) attachment).getAccountId();
-                           }else if(attachment instanceof PocTxBody.PocNodeTypeV2){
-                               accountIdOfAttachment = ((PocTxBody.PocNodeTypeV2) attachment).getAccountId();
-                           }
-
-                           if(accountIdOfAttachment != -1L) {
-                               pocTxMap.put(accountIdOfAttachment, txImpl);
-                           }
-                       }
-                   }
-               } finally {
-                   DbUtils.close(oldPocTxsIterator);
-               }
 
                // genesis txs process
                SharderGenesis.nodeTypeTxs().forEach(tx -> {
@@ -172,13 +145,12 @@ public class PocProcessorImpl implements PocProcessor {
                    }
                });
 
-               // load the old right recipient poc txs
+               // load the recipient poc txs
                DbIterator<TransactionImpl> pocTxsIterator = null;
-               con = null;
+               Connection con = null;
                try {
                    con = Db.db.getConnection();
-                   PreparedStatement pstmt = con.prepareStatement("SELECT * FROM transaction WHERE height > " + Constants.POC_TX_ALLOW_RECIPIENT
-                           +  " AND type=" + TransactionType.TYPE_POC
+                   PreparedStatement pstmt = con.prepareStatement("SELECT * FROM transaction type=" + TransactionType.TYPE_POC
                            +  " AND subtype=" + PocTxWrapper.SUBTYPE_POC_NODE_TYPE
                            +  " ORDER BY block_timestamp ASC, transaction_index ASC");
 
@@ -465,67 +437,6 @@ public class PocProcessorImpl implements PocProcessor {
 
         }
         return true;
-    }
-
-//    /**
-//     * load the poc holder backup from local disk
-//     */
-//    private void loadFromDisk() {
-//        Logger.logInfoMessage("load exist poc calculator instance from local disk[" + DiskStorageUtil.getLocalStoragePath(LOCAL_STORAGE_POC_CALCULATOR) + "]");
-//        Object calcObj = DiskStorageUtil.getObjFromFile(LOCAL_STORAGE_POC_CALCULATOR);
-//        if (calcObj != null) {
-//            PocCalculator.inst = (PocCalculator) calcObj;
-//        }
-//
-//        //load and process the poc txs from history blocks
-//        if (PocHolder.inst != null
-//        && PocHolder.inst.lastHeight <= Conch.getBlockchain().getHeight()) {
-//            reprocessAllPocTxs = true;
-//        }
-//    }
-
-    /**
-     * update the recipient id of the old  poc txs
-     */
-    private static void updateRecipientIdIntoOldPocTxs() {
-        if(Conch.getHeight() > Constants.POC_TX_ALLOW_RECIPIENT) {
-            return;
-        }
-        Logger.logInfoMessage("[PocTxCorrect] update the recipient id of the old  poc txs");
-        DbIterator<? extends Transaction> iterator = null;
-        Connection updateConnection = null;
-        try {
-            iterator = Conch.getBlockchain().getTransactions(GenesisRecipient.POC_TX_CREATOR_ID, TransactionType.TYPE_POC, true, 0, Integer.MAX_VALUE);
-            updateConnection = Db.db.getConnection();
-
-            int i = 0;
-            while (iterator.hasNext()) {
-                Transaction transaction = iterator.next();
-                Attachment attachment = transaction.getAttachment();
-                if(PocTxWrapper.SUBTYPE_POC_NODE_TYPE == attachment.getTransactionType().getSubtype()
-                        && (transaction.getRecipientId() == -1 || transaction.getRecipientId() == 0)) {
-                    long accountIdOfAttachment = -1L;
-                    if(attachment instanceof PocTxBody.PocNodeTypeV3){
-                        accountIdOfAttachment = ((PocTxBody.PocNodeTypeV3) attachment).getAccountId();
-                    }else if(attachment instanceof PocTxBody.PocNodeTypeV2){
-                        accountIdOfAttachment = ((PocTxBody.PocNodeTypeV2) attachment).getAccountId();
-                    }
-
-                    try (PreparedStatement pstmt = updateConnection.prepareStatement("UPDATE transaction SET recipient_id = ? WHERE id = ?")) {
-                        pstmt.setLong(1, accountIdOfAttachment);
-                        pstmt.setLong(2, transaction.getId());
-                        pstmt.executeUpdate();
-                        i++;
-                    }
-                }
-            }
-            Logger.logInfoMessage("[PocTxCorrect] update finished. update count is " + i);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            DbUtils.close(iterator);
-            DbUtils.close(updateConnection);
-        }
     }
 
     public static String PROPERTY_REPROCESS_POC_TXS = "sharder.reprocessPocTxs";

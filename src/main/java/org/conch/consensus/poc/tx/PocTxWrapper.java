@@ -25,7 +25,6 @@ import org.conch.Conch;
 import org.conch.account.Account;
 import org.conch.account.AccountLedger;
 import org.conch.common.ConchException;
-import org.conch.common.Constants;
 import org.conch.consensus.poc.PocCalculator;
 import org.conch.tx.Attachment;
 import org.conch.tx.Transaction;
@@ -384,7 +383,7 @@ public abstract class PocTxWrapper extends TransactionType {
 
     @Override
     final public boolean canHaveRecipient() {
-        return Conch.getHeight() > Constants.POC_TX_ALLOW_RECIPIENT ? true : false;
+        return true;
     }
 
     @Override
