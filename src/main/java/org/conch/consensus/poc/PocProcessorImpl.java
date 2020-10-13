@@ -431,13 +431,31 @@ public class PocProcessorImpl implements PocProcessor {
             }
 
             // set the latest certified peer
-            PocHolder.inst.updateHeight(height);
+            PocHolder.updateHeight(height);
 
         } finally {
 
         }
         return true;
     }
+
+//    /**
+//     * load the poc holder backup from local disk
+//     */
+//    private void loadFromDisk() {
+//        Logger.logInfoMessage("load exist poc calculator instance from local disk[" + DiskStorageUtil.getLocalStoragePath(LOCAL_STORAGE_POC_CALCULATOR) + "]");
+//        Object calcObj = DiskStorageUtil.getObjFromFile(LOCAL_STORAGE_POC_CALCULATOR);
+//        if (calcObj != null) {
+//            PocCalculator.inst = (PocCalculator) calcObj;
+//        }
+//
+//        //load and process the poc txs from history blocks
+//        if (PocHolder.inst != null
+//        && PocHolder.inst.lastHeight <= Conch.getBlockchain().getHeight()) {
+//            reprocessAllPocTxs = true;
+//        }
+//    }
+
 
     public static String PROPERTY_REPROCESS_POC_TXS = "sharder.reprocessPocTxs";
     private static boolean reprocessAllPocTxs = Conch.getBooleanProperty(PROPERTY_REPROCESS_POC_TXS, false);
