@@ -1,11 +1,15 @@
 package org.conch.consensus.genesis;
 
-import com.google.common.collect.Lists;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.conch.common.Constants;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.conch.util.JSON.readJsonFile;
 
 /**
  * @author <a href="mailto:xy@sharder.org">Ben</a>
@@ -24,11 +28,25 @@ public class GenesisRecipient {
         this.signature = signature;
     }
 
+    public GenesisRecipient() {
+    }
 
     public static long POC_TX_CREATOR_ID = -3033725234207221433L;
     static Map<Constants.Network, List<GenesisRecipient>> genesisRecipients = new HashMap<>();
     static {
-        List<GenesisRecipient> devnetRecipients = Lists.newArrayList(
+        String path = "conf/genesis.json";
+        String jsonStr = readJsonFile(path);
+        JSONObject jobj = JSON.parseObject(jsonStr);
+        JSONArray jsonArrayDev = jobj.getJSONArray("devnetRecipients");
+        List<GenesisRecipient> devnetRecipients = JSONObject.parseArray(jsonArrayDev.toJSONString(), GenesisRecipient.class);
+        JSONArray jsonArrayTest = jobj.getJSONArray("testnetRecipients");
+        List<GenesisRecipient> testnetRecipients = JSONObject.parseArray(jsonArrayTest.toJSONString(), GenesisRecipient.class);
+        JSONArray jsonArrayMain = jobj.getJSONArray("mainnetRecipients");
+        List<GenesisRecipient> mainnetRecipients = JSONObject.parseArray(jsonArrayMain.toJSONString(), GenesisRecipient.class);
+        genesisRecipients.put(Constants.Network.DEVNET,devnetRecipients);
+        genesisRecipients.put(Constants.Network.TESTNET,testnetRecipients);
+        genesisRecipients.put(Constants.Network.MAINNET,mainnetRecipients);
+        /*List<GenesisRecipient> devnetRecipients = Lists.newArrayList(
                 new GenesisRecipient(6219247923802955552L, 5000000000L,
                         new byte[]{-71, -79, -127, -96, -9, -33, -46, -124, 122, 42, -79, 20, -45, -4, 72, 83, -69, 78, 65, 64, 31, 71, 33, -22, -80, 68, -12, -10, -115, 22, -40, 118},
                         new byte[]{-28,-84,16,39,-23,-81,-10,-22,-18,-60,-10,11,123,119,-79,73,-120,-123,41,97,67,39,-69,31,36,125,26,-124,35,-10,27,0,-116,-89,-110,77,-79,97,-83,127,-17,
@@ -85,11 +103,8 @@ public class GenesisRecipient {
 
         List<GenesisRecipient> mainnetRecipients = Lists.newArrayList(
 
-        );
-        
-        genesisRecipients.put(Constants.Network.DEVNET,devnetRecipients);
-        genesisRecipients.put(Constants.Network.TESTNET,testnetRecipients);
-        genesisRecipients.put(Constants.Network.MAINNET,mainnetRecipients);
+        );*/
+
     }
     
     public static GenesisRecipient getByAccountId(long accountId) {
