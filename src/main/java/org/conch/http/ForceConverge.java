@@ -393,8 +393,12 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
      * Reset the blockchain to correct the account balance of Testnet
      */
     public static void resetPoolAndAccounts(Block block){
-        boolean reachHeight = (block.getHeight() == Constants.POC_LEDGER_RESET_HEIGHT) 
-                || (block.getHeight() == Constants.POC_NEW_ALGO_HEIGHT);
+        if(Constants.POC_LEDGER_RESET_HEIGHT == -1){
+            Logger.logInfoMessage("Constants.POC_LEDGER_RESET_HEIGHT is -1, don't resetPoolAndAccounts");
+            return;
+        }
+
+        boolean reachHeight = (block.getHeight() == Constants.POC_LEDGER_RESET_HEIGHT);
         
         if(!Constants.isTestnet() || !reachHeight) return;
         String logPrefix = "[Reset-Height " + block.getHeight() + "]";
@@ -449,11 +453,7 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
                    for(long accountId : accountIds){
                        try {
                            Account account = Account.getAccount(accountId);
-                           if(block.getHeight() == Constants.POC_NEW_ALGO_HEIGHT){
-                               pocScoreList.add(Conch.getPocProcessor().calPocScore(account,block.getHeight()));
-                               scoreRecalAccounts += account.getRsAddress() + ",";
-                           }
-                           
+
                            String ba = accountMinedBalanceMap.get(accountId);
                            if(StringUtils.isEmpty(ba) || !ba.contains(",")) continue;
                            String[] baArray = ba.split(",");

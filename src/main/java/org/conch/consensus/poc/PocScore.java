@@ -335,13 +335,6 @@ public class PocScore implements Serializable {
         if(Constants.isDevnet() && SharderGenesis.isGenesisRecipients(account.getId())){
             // expand the balance to 10x at the dev env
             effectiveSS = BigInteger.valueOf(accountBalanceNQT * 10 / Constants.ONE_SS);
-        }else if(Constants.isTestnet() && height < Constants.POC_NEW_ALGO_HEIGHT){
-            if (poolProcessor != null && SharderPoolProcessor.State.WORKING.equals(poolProcessor.getState())) {
-                effectiveSS = BigInteger.valueOf(Math.max(poolProcessor.getPower() / Constants.ONE_SS, 0))
-                        .add(BigInteger.valueOf(accountBalanceNQT / Constants.ONE_SS));
-            } else {
-                effectiveSS = BigInteger.valueOf(accountBalanceNQT / Constants.ONE_SS);
-            }
         }else{
             /**
              * pool owner: my_pool_power + other_held_ss(limit is pool capacity) * ssHeldRate
@@ -350,14 +343,8 @@ public class PocScore implements Serializable {
             boolean exceedPoolMaxAmount = accountBalanceNQT >  SharderPoolProcessor.POOL_MAX_AMOUNT_NQT;
             long heldAmount = exceedPoolMaxAmount ? SharderPoolProcessor.POOL_MAX_AMOUNT_NQT : accountBalanceNQT;
 
-            // !!NOTE: effective ss calculation method be changed from multiply to divide after phase 2
-            Float ssHeldRate = ssHeldRate(height);
-            if (height < Constants.POC_SS_HELD_SCORE_PHASE2_HEIGHT) {
-                effectiveSS = BigInteger.valueOf( heldAmount / Constants.ONE_SS / ssHeldRate.longValue());
-            }else {
-                Float effectiveSSF = heldAmount / Constants.ONE_SS * ssHeldRate;
-                effectiveSS = BigInteger.valueOf(effectiveSSF.longValue());
-            }
+            Float effectiveSSF = heldAmount / Constants.ONE_SS * ssHeldRate(height);
+            effectiveSS = BigInteger.valueOf(effectiveSSF.longValue());
         }
         
         return effectiveSS;

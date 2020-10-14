@@ -19,7 +19,6 @@ import org.conch.db.DbUtils;
 import org.conch.mint.pool.SharderPoolProcessor;
 import org.conch.peer.Peer;
 import org.conch.tx.TransactionImpl;
-import org.conch.tx.TransactionType;
 import org.conch.util.*;
 
 import java.io.IOException;
@@ -189,10 +188,7 @@ public class CheckSumValidator {
     }
 
     public static boolean isDoubleSpendingIgnoreTx(TransactionImpl tx){
-        if(tx.getType() != null 
-        && TransactionType.TYPE_SHARDER_POOL == tx.getType().getType()){
-            return true;
-        }
+        //TODO: add ignore list
         return false;
     }
     

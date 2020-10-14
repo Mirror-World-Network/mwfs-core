@@ -96,8 +96,7 @@ public final class Constants {
     public static final Long BURN_OPENING_HEIGHT = isTestnetOrDevnet() ? (-1L) : 10L;
     public static final Long BURN_ADDRESS_ID = -1L;
 
-//    public static final int MAX_NUMBER_OF_TRANSACTIONS = 255;
-    public static final int MAX_NUMBER_OF_TRANSACTIONS = 5000;
+    public static final int MAX_NUMBER_OF_TRANSACTIONS = 20000;
     public static final int MIN_TRANSACTION_SIZE = 176;
     public static final int MAX_PAYLOAD_LENGTH = MAX_NUMBER_OF_TRANSACTIONS * MIN_TRANSACTION_SIZE * 244;
     public static final long MAX_BALANCE_SS = 1000000000;
@@ -105,7 +104,7 @@ public final class Constants {
     public static final long MAX_BALANCE_NQT = MAX_BALANCE_SS * ONE_SS;
     
     /** another initial env => target: 6000, min-limit: 17, max-limit=22, base-gamma: 21 */
-    public static final long INITIAL_BASE_TARGET = isTestnetOrDevnet() ? (153722867 * 67) : (153722867 * 8);
+    public static final long INITIAL_BASE_TARGET = isTestnetOrDevnet() ? (153777867 * 67) : (153722867 * 8);
     public static final int MIN_BLOCKTIME_LIMIT = 53;
     public static final int MAX_BLOCKTIME_LIMIT = 67;
     public static final int BASE_TARGET_GAMMA = 64;
@@ -218,14 +217,9 @@ public final class Constants {
     public static final int REFERENCED_TRANSACTION_FULL_HASH_BLOCK_TIMESTAMP = 0;
 
     public static final int FXT_BLOCK = isTestnetOrDevnet() ? 10000 : 10000; 
-    
     public static final int LAST_KNOWN_BLOCK = isDevnet() ?  1 : (isTestnet() ? 1 : 1);
 
-    public static final int POC_LEDGER_RESET_HEIGHT = isTestnet() ? 0 : 0;
-    public static final int POC_NEW_ALGO_HEIGHT = isTestnet() ? 0 : 0;
-    public static final int POC_SS_HELD_SCORE_PHASE2_HEIGHT = isTestnet() ? 0 : 0;
-    public static final int POC_POOL_NEVER_END_HEIGHT = isTestnet() ? 0 : 0;
-    public static final int POC_BALANCE_CORRECTION_HEIGHT = isTestnet() ? 0 : 0;
+    public static final int POC_LEDGER_RESET_HEIGHT = isTestnet() ? -1 : -1;
     // PoC calculate algorithm changed height.
     // NOTE: set the height to 0 when reset the chain or start a new chain
     public static final int POC_CAL_ALGORITHM = 0;
