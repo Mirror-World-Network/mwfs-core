@@ -72,7 +72,6 @@ import org.conch.storage.StorageManager;
 import org.conch.storage.TaggedData;
 import org.conch.storage.tx.StorageTxProcessorImpl;
 import org.conch.tools.ClientUpgradeTool;
-import org.conch.tools.CompactDatabase;
 import org.conch.tx.*;
 import org.conch.user.Users;
 import org.conch.util.*;
@@ -792,7 +791,7 @@ public final class Conch {
                 Thread secureRandomInitThread = initSecureRandom();
                 ForceConverge.init();
                 setServerStatus(ServerStatus.BEFORE_DATABASE, null);
-                CompactDatabase.checkAndRestore();
+//                CompactDatabase.checkAndRestore();
                 try {
                     Db.init();
                 }catch(Exception e){
@@ -856,7 +855,7 @@ public final class Conch {
                 DebugTrace.init();
                 DbBackup.init();
 
-                Account.truncateHistoryData();
+//                Account.truncateHistoryData();
 
                 int timeMultiplier = (Constants.isTestnetOrDevnet() && Constants.isOffline) ? Math.max(Conch.getIntProperty("sharder.timeMultiplier"), 1) : 1;
                 ThreadPool.start(timeMultiplier);

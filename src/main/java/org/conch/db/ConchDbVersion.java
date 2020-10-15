@@ -778,6 +778,7 @@ public class ConchDbVersion extends DbVersion {
                     + "CREATE INDEX IF NOT EXISTS ACCOUNT_HEIGHT_INDEX ON ACCOUNT (HEIGHT DESC);\n"
                     + "CREATE INDEX IF NOT EXISTS ACCOUNT_POC_SCORE_HEIGHT_INDEX ON ACCOUNT_POC_SCORE (HEIGHT DESC);\n"
                 );
+                break;
             default:
                 throw new RuntimeException("Blockchain database inconsistent with code, at update " + nextUpdate
                         + ", probably trying to run older code on newer database[ you can check the code in ConchDbVersion.java firstly]");
