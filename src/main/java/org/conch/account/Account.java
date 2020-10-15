@@ -1214,7 +1214,7 @@ public final class Account {
     }
 
     private void save(Connection con) throws SQLException {
-        boolean insertNew = false;
+        boolean insertNew = true;
         if(Constants.updateHistoryRecord()){
                 PreparedStatement pstmt = con.prepareStatement("SELECT db_id, height FROM account"
                     + " WHERE id=? AND latest = TRUE ORDER BY height DESC LIMIT 1");
@@ -1244,8 +1244,7 @@ public final class Account {
                     pstmt.setBoolean(8, true);
                     pstmt.setLong(9, dbid);
                     pstmt.executeUpdate();
-                }else{
-                    insertNew = true;
+                    insertNew = false;
                 }
         }
 

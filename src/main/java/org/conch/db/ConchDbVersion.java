@@ -826,6 +826,9 @@ public class ConchDbVersion extends DbVersion {
 //                        + "ALTER TABLE ACCOUNT_LEDGER_HISTORY ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT false;\n"
 //                );
             case 81:
+                apply("ALTER TABLE TRANSACTION ADD COLUMN IF NOT EXISTS HAS_REWARD_DISTRIBUTION BOOLEAN NOT NULL DEFAULT false;"
+                        + "UPDATE TRANSACTION SET HAS_REWARD_DISTRIBUTION = true"
+                );
                 break;
             case 82:
                 apply("UPDATE prunable_message SET encrypted_message = message WHERE is_encrypted IS TRUE");
@@ -839,6 +842,8 @@ public class ConchDbVersion extends DbVersion {
                 apply("UPDATE prunable_message SET is_text = FALSE where is_encrypted IS TRUE;"
                         + "UPDATE prunable_message SET transaction_timestamp = SELECT timestamp FROM transaction WHERE prunable_message.id = transaction.id;"
                 );
+            case 87:
+
             default:
                 throw new RuntimeException("Blockchain database inconsistent with code, at update " + nextUpdate
                         + ", probably trying to run older code on newer database[ you can check the code in ConchDbVersion.java firstly]");

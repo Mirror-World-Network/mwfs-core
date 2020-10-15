@@ -12,6 +12,7 @@ import org.conch.common.Constants;
 import org.conch.consensus.genesis.SharderGenesis;
 import org.conch.consensus.poc.PocHolder;
 import org.conch.consensus.poc.PocScore;
+import org.conch.db.Db;
 import org.conch.mint.pool.PoolRule;
 import org.conch.mint.pool.SharderPoolProcessor;
 import org.conch.peer.CertifiedPeer;
@@ -19,6 +20,7 @@ import org.conch.peer.Peer;
 import org.conch.tx.Attachment;
 import org.conch.tx.Attachment.CoinBase;
 import org.conch.tx.Transaction;
+import org.conch.tx.TransactionDb;
 import org.conch.tx.TransactionImpl;
 import org.conch.util.Convert;
 import org.conch.util.LocalDebugTool;
@@ -28,6 +30,7 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -177,8 +180,95 @@ public class RewardCalculator {
         return crowdMinerPocScoreMap;
     }
 
-    private static  JSONArray calAndSetCrowdMinerReward(Account minerAccount, Transaction tx, Map<Long, Long> crowdMiners, boolean stageTwo){
-        return _calAndSetCrowdMinerReward(true, minerAccount, tx, crowdMiners, stageTwo);
+    private static void setCrowdMinerReward(Account minerAccount, Transaction tx){
+        if (Db.db.isInTransaction()) {
+            try {
+                setCrowdMinerReward(tx);
+            } catch (Exception e) {
+                throw new RuntimeException(String.format("setCrowdMinerReward failed", e));
+            }
+            return;
+        }
+        try {
+            Db.db.beginTransaction();
+            setCrowdMinerReward(tx);
+            Db.db.commitTransaction();
+        } catch (Exception e) {
+            Db.db.rollbackTransaction();
+            Logger.logErrorMessage(String.format("setCrowdMinerReward failed", e));
+        }finally {
+            Db.db.endTransaction();
+        }
+
+    }
+
+    private static void setCrowdMinerReward(Transaction tx) throws Exception{
+        synchronized (RewardCalculator.class) {
+            if (!isBlockDistributionHeight()) {
+                return;
+            }
+            Map<Long,Long> crowdMinerRewardMap = Maps.newHashMap();
+
+            List<? extends Transaction> rewardDistributionTransactionList = TransactionDb.getBlockDistribution();
+            Integer heightFrom = null;
+            Integer heightTo = null;
+            for (Transaction rewardTx : rewardDistributionTransactionList) {
+                Attachment.CoinBase coinBase = (Attachment.CoinBase) rewardTx.getAttachment();
+                Account minerAccount = Account.getAccount(coinBase.getCreator());
+
+                long totalPocScoreLong = 0;
+                Map<Long, Long> crowdMiners = coinBase.getCrowdMiners();
+                for(long pocScore : crowdMiners.values()){
+                    totalPocScoreLong += pocScore;
+                }
+
+                BigDecimal totalPocScore = BigDecimal.valueOf(totalPocScoreLong);
+                long crowdMinerRewards = crowdMinerReward(tx.getHeight());
+                BigDecimal crowdMinerRewardsAmount = new BigDecimal(crowdMinerRewards);
+                // calculate the single miner's rewards
+                long allocatedRewards = 0;
+
+
+                for (Long accountId : crowdMiners.keySet()) {
+                    long pocScoreLong = crowdMiners.get(accountId);
+                    BigDecimal pocScore = BigDecimal.valueOf(pocScoreLong);
+                    BigDecimal pocScoreRate = pocScore.divide(totalPocScore, 10, BigDecimal.ROUND_DOWN);
+                    long rewards = crowdMinerRewardsAmount.multiply(pocScoreRate).longValue();
+                    if (crowdMinerRewardMap.containsKey(accountId)) {
+                        rewards = rewards + crowdMinerRewardMap.get(accountId);
+                    }
+                    crowdMinerRewardMap.put(accountId, rewards);
+                    allocatedRewards += rewards;
+                }
+
+                // remain amount distribute to creator
+                long remainRewards = (crowdMinerRewards > allocatedRewards) ? (crowdMinerRewards - allocatedRewards) : 0;
+                if (crowdMinerRewardMap.containsKey(minerAccount.getId())) {
+                    remainRewards = remainRewards + crowdMinerRewardMap.get(minerAccount.getId());
+                }
+                crowdMinerRewardMap.put(minerAccount.getId(), remainRewards);
+
+                if (heightFrom == null && heightTo == null) {
+                    heightFrom = rewardTx.getHeight();
+                    heightTo = rewardTx.getHeight();
+                } else {
+                    if (rewardTx.getHeight() > heightTo) {
+                        heightTo = rewardTx.getHeight();
+                    }
+                    if (rewardTx.getHeight() < heightFrom) {
+                        heightFrom = rewardTx.getHeight();
+                    }
+                }
+            }
+            String details = "";
+            for (Long accountId : crowdMinerRewardMap.keySet()) {
+                details += updateBalanceAndFrozeIt(Account.getAccount(accountId), tx, crowdMinerRewardMap.get(accountId), true);
+            }
+            TransactionDb.updateDistributionState(heightFrom,heightTo);
+
+            String tail = "[DEBUG] ----------------------------\n[DEBUG] Total count: " + (crowdMinerRewardMap.size());
+            Logger.logDebugMessage("[%d-StageTwo%s] Unfreeze crowdMiners rewards and add it in mined amount. \n[DEBUG] CrowdMiner Reward Detail Format: txid | address: distribution amount\n%s%s\n", tx.getHeight(), "", details, tail);
+        }
     }
 
     /**
@@ -345,7 +435,12 @@ public class RewardCalculator {
         if(coinBase.isType(Attachment.CoinBase.CoinBaseType.CROWD_BLOCK_REWARD)) {
             crowdMiners = coinBase.getCrowdMiners();
             Logger.logDebugMessage("[Rewards-%d-Stage%s] Distribute crowd miner's rewards[crowd miner size=%d] at height %d", tx.getHeight(), stage, crowdMiners.size(), Conch.getHeight());
-            calAndSetCrowdMinerReward(minerAccount, tx, crowdMiners, stageTwo);
+            if (isBlockDistributionHeight()) {
+                setCrowdMinerReward(minerAccount, tx);
+            }
+            if (crowdMiners.containsKey(-4109275216013213375l)) {
+                Logger.logDebugMessage("=========account distribution========");
+            }
             if(crowdMiners.size() > 0){
                 miningRewards = tx.getAmountNQT() - crowdMinerReward(tx.getHeight());
             }
@@ -402,6 +497,10 @@ public class RewardCalculator {
                     , Conch.getBlockchainProcessor().getLastBlockchainFeederHeight(), feeder.getAnnouncedAddress(), feeder.getHost());
         }
         return tx.getAmountNQT();
+    }
+
+    private static boolean isBlockDistributionHeight() {
+        return TransactionDb.isBlockDistributionHeight();
     }
 
     /**
@@ -470,6 +569,10 @@ public class RewardCalculator {
             }
         }
         return true;
+    }
+
+    public static boolean applyUnconfirmedReward(TransactionImpl transaction) {
+        return false;
     }
 
     //FIXME ignore the signature validation (temporary code to handle block stuck) -2020.07.24

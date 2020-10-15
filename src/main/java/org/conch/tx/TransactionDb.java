@@ -24,7 +24,7 @@ package org.conch.tx;
 import org.conch.chain.BlockDb;
 import org.conch.chain.BlockImpl;
 import org.conch.common.ConchException;
-import org.conch.db.*;
+import org.conch.common.Constants;
 import org.conch.db.*;
 import org.conch.util.Convert;
 
@@ -33,7 +33,6 @@ import java.nio.ByteOrder;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public final class TransactionDb {
@@ -416,6 +415,48 @@ public final class TransactionDb {
                     }
                 }
             }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.toString(), e);
+        }
+    }
+
+    public static boolean isBlockDistributionHeight() {
+        try (Connection con = Db.db.getConnection()) {
+            PreparedStatement pstmt = con.prepareStatement("SELECT count(id) num FROM transaction WHERE type = 8 and HAS_REWARD_DISTRIBUTION = false");
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("num") > Constants.DISTRIBUTION_BLOCK_NUM;
+                }
+                return false;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.toString(), e);
+        }
+    }
+
+    public static List<? extends Transaction> getBlockDistribution() {
+        try (Connection con = Db.db.getConnection()) {
+            PreparedStatement pstmt = con.prepareStatement("SELECT * FROM transaction WHERE type = 8 and HAS_REWARD_DISTRIBUTION = false order by height asc limit ?");
+            pstmt.setInt(1, Constants.DISTRIBUTION_BLOCK_NUM);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                List<TransactionImpl> list = new ArrayList<>();
+                while (rs.next()) {
+                    list.add(loadTransaction(con, rs));
+                }
+                return list;
+            }
+        } catch (SQLException | ConchException.NotValidException e) {
+            throw new RuntimeException(e.toString(), e);
+        }
+    }
+
+    public static void updateDistributionState(int heightFrom, int heightTo) {
+        try (Connection con = Db.db.getConnection()) {
+            PreparedStatement pstmt = con.prepareStatement("UPDATE transaction SET HAS_REWARD_DISTRIBUTION = true WHERE type = 8 and HAS_REWARD_DISTRIBUTION=false and height >= ? and height <= ?");
+            pstmt.setInt(1, heightFrom);
+            pstmt.setInt(2, heightTo);
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
         }
