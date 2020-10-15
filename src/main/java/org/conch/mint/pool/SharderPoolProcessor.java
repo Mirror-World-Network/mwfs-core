@@ -476,20 +476,6 @@ public class SharderPoolProcessor implements Serializable {
             sharderPool.updateHeight = height;
             sharderPool.clearJoiningAmount();
             
-            // never end the pool auto after the Constants.POC_POOL_NEVER_END_HEIGHT
-            if(height < Constants.POC_POOL_NEVER_END_HEIGHT){
-                //pool will be destroyed automatically when it has nobody join
-                if (sharderPool.consignors.size() == 0
-                        && height - sharderPool.startBlockNo > Constants.SHARDER_POOL_DEADLINE) {
-                    sharderPool.destroyAndRecord(height);
-                    continue;
-                }
-                if (sharderPool.endBlockNo <= height) {
-                    sharderPool.destroyAndRecord(sharderPool.endBlockNo);
-                    continue;
-                }  
-            }
-            
             // check the miner whether running before pool started
             if(sharderPool.startBlockNo-height <=3 
                 && sharderPool.startBlockNo > height){

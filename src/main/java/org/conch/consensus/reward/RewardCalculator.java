@@ -7,9 +7,7 @@ import com.google.common.collect.Maps;
 import org.conch.Conch;
 import org.conch.account.Account;
 import org.conch.account.AccountLedger;
-import org.conch.common.ConchException;
 import org.conch.common.Constants;
-import org.conch.consensus.genesis.SharderGenesis;
 import org.conch.consensus.poc.PocHolder;
 import org.conch.consensus.poc.PocScore;
 import org.conch.db.Db;
@@ -57,28 +55,29 @@ public class RewardCalculator {
         }
         
     }
-    
-//    private static final int HALVE_COUNT = 210240;
-    public static final int MINER_JOINING_PHASE = 2600; // around '2020-05-06 21:00'
+
+    // Halve height, -1 means close halve
+    private static final int HALVE_COUNT = -1;
+    public static final int NETWORK_STABLE_PHASE = 1000; // Estimated stable height after network reset
     /**
      * how much one block reward
      * @return
      */
     public static long blockReward(int height) {
-        /**
-         * halving logic
-        double turn = 0d;
-        if(Conch.getBlockchain().getHeight() > HALVE_COUNT){
-            turn = Conch.getBlockchain().getHeight() / HALVE_COUNT;
+        // Halving logic
+        if(HALVE_COUNT != -1) {
+            double turn = 0d;
+            if(Conch.getBlockchain().getHeight() > HALVE_COUNT){
+                turn = Conch.getBlockchain().getHeight() / HALVE_COUNT;
+            }
+            double rate = Math.pow(0.5d, turn);
+            return (long)(Constants.ONE_SS * RewardDef.MINT.getAmount() * rate);
         }
-        double rate = Math.pow(0.5d,turn);
-        return (long)(Constants.ONE_SS * RewardDef.MINT.getAmount() * rate);
-        **/
 
         // No block rewards in the miner joining phase
-//        if(Conch.getHeight() <= MINER_JOINING_PHASE) return 1L;
-        if(height <= MINER_JOINING_PHASE) return 1L;
-
+        if(height <= NETWORK_STABLE_PHASE) {
+            return 1L;
+        }
         return RewardDef.MINT.getAmount() * Constants.ONE_SS;
     }
 
@@ -435,12 +434,7 @@ public class RewardCalculator {
         if(coinBase.isType(Attachment.CoinBase.CoinBaseType.CROWD_BLOCK_REWARD)) {
             crowdMiners = coinBase.getCrowdMiners();
             Logger.logDebugMessage("[Rewards-%d-Stage%s] Distribute crowd miner's rewards[crowd miner size=%d] at height %d", tx.getHeight(), stage, crowdMiners.size(), Conch.getHeight());
-            if (isBlockDistributionHeight()) {
-                setCrowdMinerReward(minerAccount, tx);
-            }
-            if (crowdMiners.containsKey(-4109275216013213375l)) {
-                Logger.logDebugMessage("=========account distribution========");
-            }
+            calAndSetCrowdMinerReward(minerAccount, tx, crowdMiners, stageTwo);
             if(crowdMiners.size() > 0){
                 miningRewards = tx.getAmountNQT() - crowdMinerReward(tx.getHeight());
             }
@@ -497,10 +491,6 @@ public class RewardCalculator {
                     , Conch.getBlockchainProcessor().getLastBlockchainFeederHeight(), feeder.getAnnouncedAddress(), feeder.getHost());
         }
         return tx.getAmountNQT();
-    }
-
-    private static boolean isBlockDistributionHeight() {
-        return TransactionDb.isBlockDistributionHeight();
     }
 
     /**
@@ -576,6 +566,7 @@ public class RewardCalculator {
     }
 
     //FIXME ignore the signature validation (temporary code to handle block stuck) -2020.07.24
-    public static boolean temporaryCloseValidation = true;
+    //      Reopen validation in the 2020.10.14 when relaunch the Testnet
+    public static boolean temporaryCloseValidation = false;
 
 }

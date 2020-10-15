@@ -7,7 +7,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONStreamAware;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 public class GetBlockchainTransactionsCount extends APIServlet.APIRequestHandler {
 
@@ -39,11 +38,6 @@ public class GetBlockchainTransactionsCount extends APIServlet.APIRequestHandler
         try{
             if(type != TransactionType.TYPE_POC) {
                 count = Conch.getBlockchain().getTransactionCountByAccount(accountId,type,subtype);
-            }
-
-            if(type == -1 || type == TransactionType.TYPE_POC) {
-                List<JSONObject> txJsonObjs = GetBlockchainTransactions.checkOrLoadOldPocTxs(accountId, true);
-                count += txJsonObjs.size();
             }
 
             response.put("count",count);

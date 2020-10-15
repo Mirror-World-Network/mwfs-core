@@ -2089,9 +2089,6 @@ public final class Account {
         if(!Constants.isTestnet()) {
             return amountNQT;
         }
-        if(Conch.getHeight() < Constants.POC_BALANCE_CORRECTION_HEIGHT) {
-            return amountNQT;
-        }
 
         /* this.balanceNQT is null or 0 */
         if(amountNQT >= 0) {
