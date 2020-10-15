@@ -826,8 +826,8 @@ public class ConchDbVersion extends DbVersion {
 //                        + "ALTER TABLE ACCOUNT_LEDGER_HISTORY ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT false;\n"
 //                );
             case 81:
-                apply("ALTER TABLE TRANSACTION ADD COLUMN IF NOT EXISTS HAS_REWARD_DISTRIBUTION BOOLEAN NOT NULL DEFAULT false;"
-                        + "UPDATE TRANSACTION SET HAS_REWARD_DISTRIBUTION = true"
+                apply("ALTER TABLE BLOCK ADD COLUMN IF NOT EXISTS HAS_REWARD_DISTRIBUTION BOOLEAN NOT NULL DEFAULT false;"
+                        + "UPDATE BLOCK SET HAS_REWARD_DISTRIBUTION = true"
                 );
                 break;
             case 82:

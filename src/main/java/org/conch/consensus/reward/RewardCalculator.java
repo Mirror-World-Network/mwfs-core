@@ -7,6 +7,8 @@ import com.google.common.collect.Maps;
 import org.conch.Conch;
 import org.conch.account.Account;
 import org.conch.account.AccountLedger;
+import org.conch.chain.Block;
+import org.conch.chain.BlockDb;
 import org.conch.common.Constants;
 import org.conch.consensus.poc.PocHolder;
 import org.conch.consensus.poc.PocScore;
@@ -208,10 +210,13 @@ public class RewardCalculator {
             }
             Map<Long,Long> crowdMinerRewardMap = Maps.newHashMap();
 
-            List<? extends Transaction> rewardDistributionTransactionList = TransactionDb.getBlockDistribution();
-            Integer heightFrom = null;
-            Integer heightTo = null;
-            for (Transaction rewardTx : rewardDistributionTransactionList) {
+            List<? extends Block> rewardDistributionTransactionList = BlockDb.getBlockDistribution();
+            for (Block block : rewardDistributionTransactionList) {
+                List<TransactionImpl> blockTransactions = TransactionDb.findBlockTransactions(block.getId());
+                Transaction rewardTx = getCoinBase(blockTransactions);
+                if (null == rewardTx) {
+                    continue;
+                }
                 Attachment.CoinBase coinBase = (Attachment.CoinBase) rewardTx.getAttachment();
                 Account minerAccount = Account.getAccount(coinBase.getCreator());
 
@@ -247,27 +252,23 @@ public class RewardCalculator {
                 }
                 crowdMinerRewardMap.put(minerAccount.getId(), remainRewards);
 
-                if (heightFrom == null && heightTo == null) {
-                    heightFrom = rewardTx.getHeight();
-                    heightTo = rewardTx.getHeight();
-                } else {
-                    if (rewardTx.getHeight() > heightTo) {
-                        heightTo = rewardTx.getHeight();
-                    }
-                    if (rewardTx.getHeight() < heightFrom) {
-                        heightFrom = rewardTx.getHeight();
-                    }
-                }
+                BlockDb.updateDistributionState(block.getId());
             }
             String details = "";
             for (Long accountId : crowdMinerRewardMap.keySet()) {
-                details += updateBalanceAndFrozeIt(Account.getAccount(accountId), tx, crowdMinerRewardMap.get(accountId), true);
+                details += updateBalance(Account.getAccount(accountId), tx, crowdMinerRewardMap.get(accountId));
             }
-            TransactionDb.updateDistributionState(heightFrom,heightTo);
 
             String tail = "[DEBUG] ----------------------------\n[DEBUG] Total count: " + (crowdMinerRewardMap.size());
             Logger.logDebugMessage("[%d-StageTwo%s] Unfreeze crowdMiners rewards and add it in mined amount. \n[DEBUG] CrowdMiner Reward Detail Format: txid | address: distribution amount\n%s%s\n", tx.getHeight(), "", details, tail);
         }
+    }
+
+    private static Transaction getCoinBase(List<TransactionImpl> blockTransactions) {
+        for (Transaction transaction : blockTransactions) {
+            if(isBlockRewardTx(transaction.getAttachment())) return transaction;
+        }
+        return null;
     }
 
     /**
@@ -410,6 +411,19 @@ public class RewardCalculator {
         return  String.format("[DEBUG] txid/%d | %s: %d\n", tx.getId(), account.getRsAddress(), amount);
     }
 
+    /**
+     *
+     * @param account
+     * @param tx
+     * @param amount
+     */
+    private static String updateBalance(Account account, Transaction tx, long amount){
+        account.addBalanceAddUnconfirmed(AccountLedger.LedgerEvent.BLOCK_GENERATED, tx.getId(), amount);
+        account.addMintedBalance(amount);
+        account.pocChanged();
+        return  String.format("[DEBUG] txid/%d | %s: %d\n", tx.getId(), account.getRsAddress(), amount);
+    }
+
 
     private static long rewardCalStartMS = -1;
     /**
@@ -496,7 +510,7 @@ public class RewardCalculator {
     }
 
     private static boolean isBlockDistributionHeight() {
-        return TransactionDb.isBlockDistributionHeight();
+        return BlockDb.isBlockDistributionHeight();
     }
 
     /**

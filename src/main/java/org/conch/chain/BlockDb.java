@@ -22,8 +22,11 @@
 package org.conch.chain;
 
 import org.conch.Conch;
+import org.conch.common.ConchException;
+import org.conch.common.Constants;
 import org.conch.db.Db;
 import org.conch.db.DbUtils;
+import org.conch.tx.Transaction;
 import org.conch.tx.TransactionDb;
 import org.conch.tx.TransactionImpl;
 import org.conch.util.Logger;
@@ -408,4 +411,44 @@ public final class BlockDb {
         }
     }
 
+    public static boolean isBlockDistributionHeight() {
+        try (Connection con = Db.db.getConnection()) {
+            PreparedStatement pstmt = con.prepareStatement("SELECT count(id) num FROM block WHERE HAS_REWARD_DISTRIBUTION = false");
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("num") > Constants.DISTRIBUTION_BLOCK_NUM;
+                }
+                return false;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.toString(), e);
+        }
+    }
+
+    public static List<? extends Block> getBlockDistribution() {
+        try (Connection con = Db.db.getConnection()) {
+            PreparedStatement pstmt = con.prepareStatement("SELECT * FROM block WHERE HAS_REWARD_DISTRIBUTION = false order by height asc limit ?");
+            pstmt.setInt(1, Constants.DISTRIBUTION_BLOCK_NUM);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                List<BlockImpl> list = new ArrayList<>();
+                while (rs.next()) {
+                    list.add(loadBlock(con, rs));
+                }
+                return list;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.toString(), e);
+        }
+    }
+
+    public static void updateDistributionState(long blockId) {
+        try (Connection con = Db.db.getConnection()) {
+            PreparedStatement pstmt = con.prepareStatement("UPDATE block SET HAS_REWARD_DISTRIBUTION = true WHERE ID = ?");
+            pstmt.setLong(1, blockId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.toString(), e);
+        }
+    }
 }
