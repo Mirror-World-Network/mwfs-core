@@ -434,7 +434,9 @@ public class RewardCalculator {
         if(coinBase.isType(Attachment.CoinBase.CoinBaseType.CROWD_BLOCK_REWARD)) {
             crowdMiners = coinBase.getCrowdMiners();
             Logger.logDebugMessage("[Rewards-%d-Stage%s] Distribute crowd miner's rewards[crowd miner size=%d] at height %d", tx.getHeight(), stage, crowdMiners.size(), Conch.getHeight());
-            calAndSetCrowdMinerReward(minerAccount, tx, crowdMiners, stageTwo);
+            if (isBlockDistributionHeight()) {
+                setCrowdMinerReward(minerAccount, tx);
+            }
             if(crowdMiners.size() > 0){
                 miningRewards = tx.getAmountNQT() - crowdMinerReward(tx.getHeight());
             }
@@ -493,6 +495,10 @@ public class RewardCalculator {
         return tx.getAmountNQT();
     }
 
+    private static boolean isBlockDistributionHeight() {
+        return TransactionDb.isBlockDistributionHeight();
+    }
+
     /**
      * CoinBase tx attachment judgement
      * @param attachment
@@ -530,35 +536,6 @@ public class RewardCalculator {
             Logger.logErrorMessage("calculate the size of crowd miners failed", e);
         }
         return 0;
-    }
-
-    /**
-     * No needs to validate in the tx creation. rewards calculate and distribute at the block accepted in the Pool processor:
-     * org.conch.consensus.reward.RewardCalculator#blockRewardDistribution(org.conch.tx.Transaction, boolean)
-     * Ben-07.15.2020
-     *
-     * To replace the org.conch.tx.TransactionType.CoinBase#validateByType
-     * @param transaction
-     * @return
-     */
-    public static boolean validateCoinbaseTx(Transaction transaction) throws ConchException.NotValidException {
-//        if(transaction.getAmountNQT() > RewardCalculator.blockReward(transaction.getHeight())){
-//            throw new ConchException.NotValidException("block reward is large than the maxium amount " + );
-//        }
-        Attachment.CoinBase coinBase = (Attachment.CoinBase) transaction.getAttachment();
-        if (Attachment.CoinBase.CoinBaseType.BLOCK_REWARD == coinBase.getCoinBaseType()) {
-            // FIXME sum the consi
-            Map<Long, Long> consignors = coinBase.getConsignors();
-
-            if(consignors.size() <= 0) return true;
-        } else if(CoinBase.CoinBaseType.CROWD_BLOCK_REWARD == coinBase.getCoinBaseType()){
-            // sum the
-        } else if (Attachment.CoinBase.CoinBaseType.GENESIS == coinBase.getCoinBaseType()) {
-            if (!SharderGenesis.isGenesisCreator(coinBase.getCreator())) {
-                throw new ConchException.NotValidException("the Genesis coin base tx is not created by genesis creator");
-            }
-        }
-        return true;
     }
 
     public static boolean applyUnconfirmedReward(TransactionImpl transaction) {
