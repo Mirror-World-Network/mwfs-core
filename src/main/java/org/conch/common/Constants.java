@@ -232,7 +232,7 @@ public final class Constants {
     public static final int TRANSPARENT_FORGING_BLOCK_HUB_ANNOUNCEMENT = Integer.MAX_VALUE;
     public static final int MONETARY_SYSTEM_BLOCK = Integer.MAX_VALUE;
 
-    public static final int SHUFFLING_BLOCK_HEIGHT = isTestnetOrDevnet() ? 0 : 0;
+    public static final int SHUFFLING_BLOCK_HEIGHT = 0;
   
     public static final int MAX_REFERENCED_TRANSACTION_TIMESPAN = 60 * 1440 * 60;
 
@@ -434,16 +434,7 @@ public final class Constants {
 
     public static final String DATA = "data";
 
-    public static final String STATUS = "status";
-
     public static final String HTTP = "http://";
-
-    public static final String CURLY_BRACES = "{";
-
-    public static final String BRACKET = "[";
-
-    public static final String HOST_FILTER_INFO = "Not valid host! ONLY {} can do this operation!";
-    
 
     public static final boolean hubLinked = Conch.getBooleanProperty("sharder.HubBind");
     public static final boolean initFromArchivedDbFile = Conch.getBooleanProperty("sharder.initFromArchivedDbFile");
