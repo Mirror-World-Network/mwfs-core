@@ -399,7 +399,8 @@ public class Generator implements Comparable<Generator> {
         }
 
         long accountBalanceNQT = (minerAccount != null) ? minerAccount.getEffectiveBalanceNQT(Conch.getHeight()) : 0L;
-        if(accountBalanceNQT < Constants.MINING_HOLDING_LIMIT) {
+        if(accountBalanceNQT < Constants.MINING_HOLDING_LIMIT
+        && height > 0) {
             if(Logger.printNow(Logger.Generator_startMining)) {
                 Logger.logWarningMessage("Invalid miner %s can't start auto mining or mint block. Because the MW holding limit of the mining is %d and current balance is %d",
                         minerRs,
