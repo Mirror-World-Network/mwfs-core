@@ -36,19 +36,12 @@ public final class Constants {
      * Network definition
      */
     public enum Network {
-        /**
-         * online
-         */
         MAINNET("Mainnet"),
-        /**
-         * test environment
-         */
         TESTNET("Testnet"),
         DEVNET("Devnet");
 
         private final String name;
 
-        /** Private constructor so it cannot be instantiated */
         Network(String name) {
             this.name = name;
         }
