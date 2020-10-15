@@ -368,17 +368,19 @@ public class Generator implements Comparable<Generator> {
         if(LocalDebugTool.isLocalDebugAndBootNodeMode) return true;
 
         Account minerAccount = Account.getAccount(minerId, height);
+        String minerRs = minerAccount != null ? minerAccount.getRsAddress() : "null";
         if(minerAccount == null) {
             if(Logger.printNow(Logger.Generator_startMining)) {
-                Logger.logWarningMessage("Current miner account[id=%d] can't start auto mining or mint block. Because it is a new account at this height %d, please create some txs or receive some MW from other accounts", minerId, height);
+                Logger.logWarningMessage("Current miner[addr=%s, id=%d] can't start auto mining or mint block when it's a new account at this height %d. " +
+                        "Please CREATE tx by yourself or RECEIVE tx from other declared accounts", minerRs, minerId, height);
             }
             return false;
         }
 
         if(isBlackedMiner(minerId)) {
             if(Logger.printNow(Logger.Generator_startMining)) {
-                Logger.logWarningMessage("Invalid miner account %s can't start auto mining or mint block. Because this account is in the black list! ",
-                        minerAccount.getRsAddress(),
+                Logger.logWarningMessage("Invalid miner [addr=%s, id=%d] can't start auto mining or mint block when it's in the black list! ",
+                        minerRs, minerId,
                         Conch.getHeight());
             }
             return false;
@@ -388,9 +390,9 @@ public class Generator implements Comparable<Generator> {
         boolean isCertifiedPeer = Conch.getPocProcessor().isCertifiedPeerBind(minerId, height);
         if(!isCertifiedPeer) {
             if(Logger.printNow(Logger.Generator_startMining)) {
-                Logger.logWarningMessage("Invalid miner account %s(it didn't linked to a certified peer before the height %d) can't start auto mining or mint block. " +
+                Logger.logWarningMessage("Invalid miner %s(it didn't linked to a certified peer before the height %d) can't start auto mining or mint block. " +
                                 "Maybe it didn't create a PocNodeTypeTx statement. please INIT or RESET the client firstly! ",
-                        minerAccount.getRsAddress(),
+                        minerRs,
                         Conch.getHeight());
             }
             return false;
@@ -399,8 +401,8 @@ public class Generator implements Comparable<Generator> {
         long accountBalanceNQT = (minerAccount != null) ? minerAccount.getEffectiveBalanceNQT(Conch.getHeight()) : 0L;
         if(accountBalanceNQT < Constants.MINING_HOLDING_LIMIT) {
             if(Logger.printNow(Logger.Generator_startMining)) {
-                Logger.logWarningMessage("Invalid miner account %s can't start auto mining or mint block. Because the MW holding limit of the mining is %d and current balance is %d",
-                        minerAccount.getRsAddress(),
+                Logger.logWarningMessage("Invalid miner %s can't start auto mining or mint block. Because the MW holding limit of the mining is %d and current balance is %d",
+                        minerRs,
                         (Constants.MINING_HOLDING_LIMIT / Constants.ONE_SS),
                         (accountBalanceNQT / Constants.ONE_SS));
             }
@@ -801,7 +803,7 @@ public class Generator implements Comparable<Generator> {
         }
         
         int start = Conch.getEpochTime();
-        if(isBootNode 
+        if(isBootNode
         && isAutoMiningAccount(accountId)
         && Conch.getBlockchainProcessor().isObsolete()){
             Logger.logInfoMessage("[BootNode] Current blockchain was stuck, use the current system time %d to replace the original block generation time %d."
