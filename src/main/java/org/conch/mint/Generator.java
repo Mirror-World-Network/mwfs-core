@@ -137,15 +137,15 @@ public class Generator implements Comparable<Generator> {
         // boot node check before the last known height
         if(isBootNode && Conch.getHeight() < Constants.LAST_KNOWN_BLOCK) {
             if(Logger.isLevel(Logger.Level.DEBUG)) {
-                Logger.logInfoMessage("[BootNode] Start to mining directly at height[%d].", lastBlock.getHeight());
+                Logger.logInfoMessage("[BootNode] Start to mining directly at height %d.", lastBlock.getHeight());
             }else if(Logger.printNow(Logger.Generator_isMintHeightReached)) {
-                Logger.logInfoMessage("[BootNode] Start to mining directly at height[%d].", lastBlock.getHeight());
+                Logger.logInfoMessage("[BootNode] Start to mining directly at height %d.", lastBlock.getHeight());
             }
             return true;
         }
 
         if(Constants.isOffline && isBootNode){
-            Logger.logInfoMessage("[BootNode] Keep mining in the offline mode at height[%d].", lastBlock.getHeight());
+            Logger.logInfoMessage("[BootNode] Keep mining in the offline mode at height %d.", lastBlock.getHeight());
             return true;
         }
 
@@ -187,15 +187,15 @@ public class Generator implements Comparable<Generator> {
             if(foundBlockStuckOnBootNode && linkedGenerator != null) {
                 int timestamp = linkedGenerator.getTimestamp(generationLimit);
                 if (verifyHit(linkedGenerator.hit, linkedGenerator.pocScore, lastBlock, timestamp)) {
-                    Logger.logInfoMessage("[BootNode] Current blockchain was stuck[sinceLastBlock=%d minutes], but boot node should keep mining when the miner[%s]' hit is matched at height[%d].", minutesSinceLastBlock,linkedGenerator.rsAddress, lastBlock.getHeight());
+                    Logger.logInfoMessage("[BootNode] Current blockchain was stuck[sinceLastBlock=%d minutes], but boot node should keep mining when the miner[%s]' hit is matched at height %d.", minutesSinceLastBlock,linkedGenerator.rsAddress, lastBlock.getHeight());
                 }else{
-                    Logger.logDebugMessage("[BootNode] Current blockchain was stuck[sinceLastBlock=%d minutes], but boot node miner[%s]'s hit[%d] didn't matched now at height[%d], wait for next round check.", minutesSinceLastBlock,linkedGenerator.rsAddress,linkedGenerator.hit, lastBlock.getHeight());
+                    Logger.logDebugMessage("[BootNode] Current blockchain was stuck[sinceLastBlock=%d minutes], but boot node miner[%s]'s hit[%d] didn't matched now at height %d, wait for next round check.", minutesSinceLastBlock,linkedGenerator.rsAddress,linkedGenerator.hit, lastBlock.getHeight());
                     return false;
                 }
             }else{
                 if(Logger.printNow(Logger.Generator_isBlockStuckOnBootNode)) {
                     String nodeType = isBootNode ? "Boot" : "Normal";
-                    Logger.logInfoMessage("[ TIPS ] Current node is %s node and block chain state isn't UP_TO_DATE, maybe it is downloading blocks or stuck at height[%d]. wait for blocks synchronizing finished...", nodeType, lastBlock.getHeight());
+                    Logger.logInfoMessage("[ TIPS ] Current node is %s node and block chain state isn't UP_TO_DATE, maybe it is downloading blocks or stuck at height %d. wait for blocks synchronizing finished...", nodeType, lastBlock.getHeight());
                 }
                 return false;
             }
@@ -204,7 +204,7 @@ public class Generator implements Comparable<Generator> {
         
         if(!Conch.getPocProcessor().pocTxsProcessed(lastBlock.getHeight())) {
             if(Logger.printNow(Logger.Generator_isPocTxsProcessed)) {
-                Logger.logDebugMessage("[ TIPS ] Delayed or old poc txs haven't processed, don't mining till poc txs be processed before height[%d]...", lastBlock.getHeight());
+                Logger.logDebugMessage("[ TIPS ] Delayed or old poc txs haven't processed, don't mining till poc txs be processed before height %d...", lastBlock.getHeight());
             }
             return false;
         }
@@ -365,7 +365,9 @@ public class Generator implements Comparable<Generator> {
      * @return true-valid miner
      */
     public static boolean isValidMiner(long minerId, int height){
-        if(LocalDebugTool.isLocalDebugAndBootNodeMode) return true;
+        if(LocalDebugTool.isLocalDebugAndBootNodeMode) {
+            return true;
+        }
 
         Account minerAccount = Account.getAccount(minerId, height);
         String minerRs = minerAccount != null ? minerAccount.getRsAddress() : "null";
@@ -400,7 +402,7 @@ public class Generator implements Comparable<Generator> {
 
         long accountBalanceNQT = (minerAccount != null) ? minerAccount.getEffectiveBalanceNQT(Conch.getHeight()) : 0L;
         if(accountBalanceNQT < Constants.MINING_HOLDING_LIMIT
-        && height > 0) {
+        && height > Constants.LAST_KNOWN_BLOCK) {
             if(Logger.printNow(Logger.Generator_startMining)) {
                 Logger.logWarningMessage("Invalid miner %s can't start auto mining or mint block. Because the MW holding limit of the mining is %d and current balance is %d",
                         minerRs,
@@ -644,7 +646,7 @@ public class Generator implements Comparable<Generator> {
         this.rsAddress = Account.rsAccount(accountId);
         Conch.getBlockchain().updateLock();
         try {
-            if (Conch.getBlockchain().getHeight() >= Constants.LAST_KNOWN_BLOCK) {
+            if (Conch.getHeight() >= Constants.LAST_KNOWN_BLOCK) {
                 setLastBlock(Conch.getBlockchain().getLastBlock());
             }
             sortedMiners = null;
