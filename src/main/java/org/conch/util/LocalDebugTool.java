@@ -41,7 +41,7 @@ public class LocalDebugTool {
      * @return true： local debug mode
      */
     public static boolean isLocalDebug(){
-        String localDebugEnv = System.getProperty(RuntimeEnvironment.LOCALDEBUG_ARG);
+        String localDebugEnv = System.getProperty(RuntimeEnvironment.LOCAL_DEBUG_ARG);
         return StringUtils.isNotEmpty(localDebugEnv) ? Boolean.parseBoolean(localDebugEnv) : false;
     }
 

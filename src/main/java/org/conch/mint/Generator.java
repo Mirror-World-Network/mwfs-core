@@ -31,6 +31,7 @@ import org.conch.chain.*;
 import org.conch.common.Constants;
 import org.conch.consensus.poc.PocScore;
 import org.conch.crypto.Crypto;
+import org.conch.env.RuntimeEnvironment;
 import org.conch.mint.pool.SharderPoolProcessor;
 import org.conch.peer.CertifiedPeer;
 import org.conch.peer.Peer;
@@ -327,11 +328,10 @@ public class Generator implements Comparable<Generator> {
     }
     
     private static final boolean bootNodeCheck() {
-        return false;
-//        String isBootNode = System.getProperty(RuntimeEnvironment.BOOTNODE_ARG);
-//        if (StringUtils.isEmpty(isBootNode) || StringUtils.isBlank(isBootNode)) return false;
-//
-//        return Boolean.valueOf(isBootNode);
+        String isBootNode = System.getProperty(RuntimeEnvironment.GUIDE_ARG);
+        if (StringUtils.isEmpty(isBootNode) || StringUtils.isBlank(isBootNode)) return false;
+
+        return Boolean.valueOf(isBootNode);
     }
 
     public static void init() {
