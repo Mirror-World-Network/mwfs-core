@@ -1340,7 +1340,8 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     if (block.getHeight() % 5000 == 0) {
                         Logger.logMessage("processed block " + block.getHeight());
                     }
-                    if (trimDerivedTables && block.getHeight() % trimFrequency == 0) {
+                    if (block.getHeight() != 0
+                        && (trimDerivedTables && block.getHeight() % trimFrequency == 0)) {
                         doTrimDerivedTables();
                     }
                 },

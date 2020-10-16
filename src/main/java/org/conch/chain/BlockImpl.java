@@ -485,16 +485,18 @@ public final class BlockImpl implements Block {
 //            if(Constants.isTestnet() && Conch.getHeight() <= 1000 && SharderGenesis.isGenesisRecipients(getGeneratorId())){
 //                return true;
 //            }
-            
+
             BlockImpl previousBlock = BlockchainImpl.getInstance().getBlock(getPreviousBlockId());
+            int currentMiningHeight = previousBlock.getHeight()+1;
             if (previousBlock == null) {
                 throw new BlockchainProcessor.BlockOutOfOrderException("Can't verify signature because previous block is missing", this);
             }
             Account creator = Account.getAccount(getGeneratorId());
             
-            PocScore pocScoreObj = Conch.getPocProcessor().calPocScore(creator,previousBlock.getHeight());
+            PocScore pocScoreObj = Conch.getPocProcessor().calPocScore(creator, previousBlock.getHeight());
             BigInteger pocScore = pocScoreObj.total();
-            if (!pocScoreObj.qualifiedMiner()) {
+            if (!pocScoreObj.qualifiedMiner()
+            && !Generator.isBootDirectlyMiningPhase(currentMiningHeight)) {
                 Logger.logWarningMessage(creator.getRsAddress() + " poc score is less than 0 in this block calculation generation signature verification");
                 return false;
             }
@@ -521,13 +523,12 @@ public final class BlockImpl implements Block {
 
             boolean isIgnoreBlock = CheckSumValidator.isKnownIgnoreBlock(this.id, this.getBlockSignature());
             if(isIgnoreBlock) {
-                Logger.logWarningMessage("Known ignore block[id=%d, height=%d] in %s, skip validation", this.getId(), (previousBlock.getHeight()+1), Constants.getNetwork().getName());
+                Logger.logWarningMessage("Known ignore block[id=%d, height=%d] in %s, skip validation", this.getId(), currentMiningHeight, Constants.getNetwork().getName());
             }
 
-            if(LocalDebugTool.isCheckPocAccount(creator.getId())
-            && (previousBlock.getHeight()+1) > 1101) {
+            if(LocalDebugTool.isCheckPocAccount(creator.getId())) {
                 Logger.logDebugMessage("[LocalDebugMode] block creator %s is in the poc accounts check list, ", creator.getRsAddress());
-                return (previousBlock.getHeight()+1) <= 1377 ? true : false;
+                return true;
             }
             return validHit || isIgnoreBlock;
 

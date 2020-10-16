@@ -137,15 +137,15 @@ public class Generator implements Comparable<Generator> {
         // boot node check before the last known height
         if(isBootNode && Conch.getHeight() < Constants.LAST_KNOWN_BLOCK) {
             if(Logger.isLevel(Logger.Level.DEBUG)) {
-                Logger.logInfoMessage("[BootNode] Start to mining directly at height %d.", lastBlock.getHeight());
+                Logger.logInfoMessage("[BootNode] Start to mining directly at height %d", lastBlock.getHeight());
             }else if(Logger.printNow(Logger.Generator_isMintHeightReached)) {
-                Logger.logInfoMessage("[BootNode] Start to mining directly at height %d.", lastBlock.getHeight());
+                Logger.logInfoMessage("[BootNode] Start to mining directly at height %d", lastBlock.getHeight());
             }
             return true;
         }
 
         if(Constants.isOffline && isBootNode){
-            Logger.logInfoMessage("[BootNode] Keep mining in the offline mode at height %d.", lastBlock.getHeight());
+            Logger.logInfoMessage("[BootNode] Keep mining in the offline mode at height %d", lastBlock.getHeight());
             return true;
         }
 
@@ -187,9 +187,9 @@ public class Generator implements Comparable<Generator> {
             if(foundBlockStuckOnBootNode && linkedGenerator != null) {
                 int timestamp = linkedGenerator.getTimestamp(generationLimit);
                 if (verifyHit(linkedGenerator.hit, linkedGenerator.pocScore, lastBlock, timestamp)) {
-                    Logger.logInfoMessage("[BootNode] Current blockchain was stuck[sinceLastBlock=%d minutes], but boot node should keep mining when the miner[%s]' hit is matched at height %d.", minutesSinceLastBlock,linkedGenerator.rsAddress, lastBlock.getHeight());
+                    Logger.logInfoMessage("[BootNode] Current blockchain was stuck[sinceLastBlock=%d minutes], but boot node should keep mining when the miner[%s]' hit is matched at height %d", minutesSinceLastBlock,linkedGenerator.rsAddress, lastBlock.getHeight());
                 }else{
-                    Logger.logDebugMessage("[BootNode] Current blockchain was stuck[sinceLastBlock=%d minutes], but boot node miner[%s]'s hit[%d] didn't matched now at height %d, wait for next round check.", minutesSinceLastBlock,linkedGenerator.rsAddress,linkedGenerator.hit, lastBlock.getHeight());
+                    Logger.logDebugMessage("[BootNode] Current blockchain was stuck[sinceLastBlock=%d minutes], but boot node miner[%s]'s hit[%d] didn't matched now at height %d, wait for next round check", minutesSinceLastBlock,linkedGenerator.rsAddress,linkedGenerator.hit, lastBlock.getHeight());
                     return false;
                 }
             }else{
@@ -259,7 +259,8 @@ public class Generator implements Comparable<Generator> {
                                     continue;
                                 }
 
-                                if (generator.pocScore.signum() > 0) {
+                                if (generator.pocScore.signum() > 0
+                                || isBootDirectlyMiningPhase(Conch.getHeight())) {
                                     forgers.add(generator);
                                 }
                             }
@@ -329,7 +330,7 @@ public class Generator implements Comparable<Generator> {
         isBootNode = bootNodeCheck();
     }
 
-    private static final boolean isBootDirectlyMiningPhase(int height) {
+    public static final boolean isBootDirectlyMiningPhase(int height) {
         return isBootNode && height <= Constants.LAST_KNOWN_BLOCK;
     }
 
@@ -571,6 +572,10 @@ public class Generator implements Comparable<Generator> {
      * @return
      */
     public static boolean verifyHit(BigInteger hit, BigInteger pocScore, Block previousBlock, int timestamp) {
+        if(isBootDirectlyMiningPhase(previousBlock.getHeight()+1)){
+            return true;
+        }
+
         int elapsedTime = timestamp - previousBlock.getTimestamp();
         if (elapsedTime <= 0) {
             if(Generator.isBootNode) {
@@ -813,8 +818,7 @@ public class Generator implements Comparable<Generator> {
 
         boolean isDirectlyMiningPhase = isBootDirectlyMiningPhase(lastHeight);
         int timestamp = getTimestamp(generationLimit);
-        if (!verifyHit(hit, pocScore, lastBlock, timestamp)
-        && !isDirectlyMiningPhase) {
+        if (!verifyHit(hit, pocScore, lastBlock, timestamp)) {
             Logger.logInfoMessage(this.toString() + " failed to mint at " + timestamp + " height " + lastHeight + " last timestamp " + lastBlock.getTimestamp());
             return false;
         }
@@ -1100,7 +1104,6 @@ public class Generator implements Comparable<Generator> {
         String miningPR = getAutoMiningPR();
         if(StringUtils.isNotEmpty(miningPR)) {
             linkedGenerator = startMining(miningPR.trim());
-
             if(linkedGenerator == null) {
                 return;
             }

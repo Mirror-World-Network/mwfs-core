@@ -495,13 +495,14 @@ public class RewardCalculator {
         long totalUsedMs = System.currentTimeMillis() - rewardCalStartMS;
 
         Peer feeder = Conch.getBlockchainProcessor().getLastBlockchainFeeder();
-
+        String feederAddress = feeder != null ? feeder.getAnnouncedAddress() : "NoFeeder";
+        String feederHost = feeder != null ? feeder.getHost() : "NoFeeder";
         if(Logger.isLevel(Logger.Level.INFO)) {
             Logger.logInfoMessage("[Rewards-%d-Stage%s] Distribution detail[crowd miner size=%d, mining joiner size=%d, processing used time≈ %d S(%d MS)] at current height %d(%s mined at %s) -> height %d of feeder %s[%s]\n",
                     tx.getHeight(), stage, crowdMiners.size(), miningJoinerCount
                     , totalUsedMs / 1000, totalUsedMs
                     , Conch.getHeight(), minerAccount.getRsAddress(), Convert.dateFromEpochTime(tx.getBlockTimestamp())
-                    , Conch.getBlockchainProcessor().getLastBlockchainFeederHeight(), feeder.getAnnouncedAddress(), feeder.getHost());
+                    , Conch.getBlockchainProcessor().getLastBlockchainFeederHeight(), feederAddress, feederHost);
         }else {
             Logger.logDebugMessage("[Rewards-%d-Stage%s] Distribution used time[crowd miners≈ %d S(%d MS), mining joiners≈ %d S(%d MS)], reward distribution detail[crowd miner size=%d, mining joiner size=%d] at height %d(%s mined at %s) -> height %d of feeder %s[%s]\n",
                     tx.getHeight(), stage
@@ -509,7 +510,7 @@ public class RewardCalculator {
                     , miningRewardProcessingMS / 1000, miningRewardProcessingMS
                     , crowdMiners.size(), miningJoinerCount
                     , Conch.getHeight(), minerAccount.getRsAddress(), Convert.dateFromEpochTime(tx.getBlockTimestamp())
-                    , Conch.getBlockchainProcessor().getLastBlockchainFeederHeight(), feeder.getAnnouncedAddress(), feeder.getHost());
+                    , Conch.getBlockchainProcessor().getLastBlockchainFeederHeight(), feederAddress, feederHost);
         }
         return tx.getAmountNQT();
     }
