@@ -51,6 +51,7 @@ public class ConchDbVersion extends DbVersion {
                         + "CREATE UNIQUE INDEX IF NOT EXISTS block_timestamp_idx ON block (timestamp DESC);"
                         + "ALTER TABLE block DROP COLUMN IF EXISTS generator_public_key;"
                         + "ALTER TABLE block ADD COLUMN IF NOT EXISTS ext BINARY(237);"
+                        + "ALTER TABLE BLOCK ADD COLUMN IF NOT EXISTS HAS_REWARD_DISTRIBUTION BOOLEAN NOT NULL DEFAULT false;"
                 );
             case 2:
                 apply("CREATE TABLE IF NOT EXISTS transaction (db_id IDENTITY, id BIGINT NOT NULL, "
