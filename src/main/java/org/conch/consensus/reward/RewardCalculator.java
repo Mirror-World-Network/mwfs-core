@@ -30,7 +30,6 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 
 /**
@@ -205,7 +204,7 @@ public class RewardCalculator {
 
     private static void setCrowdMinerReward(Transaction tx) throws Exception{
         synchronized (RewardCalculator.class) {
-            if (!isBlockDistributionHeight()) {
+            if (!BlockDb.isRewardDistributionHeight()) {
                 return;
             }
             Map<Long,Long> crowdMinerRewardMap = Maps.newHashMap();
@@ -448,7 +447,7 @@ public class RewardCalculator {
         if(coinBase.isType(Attachment.CoinBase.CoinBaseType.CROWD_BLOCK_REWARD)) {
             crowdMiners = coinBase.getCrowdMiners();
             Logger.logDebugMessage("[Rewards-%d-Stage%s] Distribute crowd miner's rewards[crowd miner size=%d] at height %d", tx.getHeight(), stage, crowdMiners.size(), Conch.getHeight());
-            if (isBlockDistributionHeight()) {
+            if (BlockDb.isRewardDistributionHeight()) {
                 setCrowdMinerReward(minerAccount, tx);
             }
             if(crowdMiners.size() > 0){
@@ -509,17 +508,15 @@ public class RewardCalculator {
         return tx.getAmountNQT();
     }
 
-    private static boolean isBlockDistributionHeight() {
-        return BlockDb.isBlockDistributionHeight();
-    }
-
     /**
      * CoinBase tx attachment judgement
      * @param attachment
      * @return
      */
     public static boolean isBlockRewardTx(Attachment attachment) {
-        if(!(attachment instanceof Attachment.CoinBase)) return false;
+        if(!(attachment instanceof Attachment.CoinBase)) {
+            return false;
+        }
 
         Attachment.CoinBase coinbaseBody = (Attachment.CoinBase) attachment;
         return coinbaseBody.isType(Attachment.CoinBase.CoinBaseType.BLOCK_REWARD)
@@ -541,7 +538,9 @@ public class RewardCalculator {
     public static int crowdMinerCount(Attachment attachment) {
         try{
             Attachment.CoinBase coinBaseObj = parseToCoinBase(attachment);
-            if(coinBaseObj == null) return -1;
+            if(coinBaseObj == null) {
+                return -1;
+            }
 
             if(coinBaseObj.isType(Attachment.CoinBase.CoinBaseType.CROWD_BLOCK_REWARD)) {
                 return coinBaseObj.getCrowdMiners() != null ? coinBaseObj.getCrowdMiners().size() : 0;

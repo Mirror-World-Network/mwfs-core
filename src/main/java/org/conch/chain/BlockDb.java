@@ -22,11 +22,9 @@
 package org.conch.chain;
 
 import org.conch.Conch;
-import org.conch.common.ConchException;
 import org.conch.common.Constants;
 import org.conch.db.Db;
 import org.conch.db.DbUtils;
-import org.conch.tx.Transaction;
 import org.conch.tx.TransactionDb;
 import org.conch.tx.TransactionImpl;
 import org.conch.util.Logger;
@@ -411,7 +409,11 @@ public final class BlockDb {
         }
     }
 
-    public static boolean isBlockDistributionHeight() {
+    /**
+     *
+     * @return
+     */
+    public static boolean isRewardDistributionHeight() {
         try (Connection con = Db.db.getConnection()) {
             PreparedStatement pstmt = con.prepareStatement("SELECT count(id) num FROM block WHERE HAS_REWARD_DISTRIBUTION = false");
 
