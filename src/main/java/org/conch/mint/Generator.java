@@ -255,7 +255,9 @@ public class Generator implements Comparable<Generator> {
                             for (Generator generator : generators.values()) {
                                 generator.setLastBlock(lastBlock);
 
-                                if(generator.pocScore == null) continue;
+                                if(generator.pocScore == null) {
+                                    continue;
+                                }
 
                                 if (generator.pocScore.signum() > 0) {
                                     forgers.add(generator);
@@ -326,10 +328,16 @@ public class Generator implements Comparable<Generator> {
         }
         isBootNode = bootNodeCheck();
     }
-    
+
+    private static final boolean isBootDirectlyMiningPhase(int height) {
+        return isBootNode && height <= Constants.LAST_KNOWN_BLOCK;
+    }
+
     private static final boolean bootNodeCheck() {
         String isBootNode = System.getProperty(RuntimeEnvironment.GUIDE_ARG);
-        if (StringUtils.isEmpty(isBootNode) || StringUtils.isBlank(isBootNode)) return false;
+        if (StringUtils.isEmpty(isBootNode) || StringUtils.isBlank(isBootNode)) {
+            return false;
+        }
 
         return Boolean.valueOf(isBootNode);
     }
@@ -415,7 +423,9 @@ public class Generator implements Comparable<Generator> {
     }
 
     public static Generator startMining(String secretPhrase) {
-        if(StringUtils.isEmpty(secretPhrase)) return null;
+        if(StringUtils.isEmpty(secretPhrase)) {
+            return null;
+        }
 
         // check the mining max count if miner is not the owner of this node
         boolean isOwner = secretPhrase.equalsIgnoreCase(getAutoMiningPR());
@@ -424,11 +434,12 @@ public class Generator implements Comparable<Generator> {
         }
 
         // mining condition: holding limit check
-        long minerAccountId = Account.getId(secretPhrase);
-        if(!isValidMiner(minerAccountId, Conch.getHeight())) {
+        long minerId = Account.getId(secretPhrase);
+        String minerRs = Account.rsAccount(minerId);
+        if(!isValidMiner(minerId, Conch.getHeight())) {
             if(Logger.printNow(Logger.Generator_startMining)) {
-                Logger.logWarningMessage("Current miner account[id=%d] isn't a valid miner, so can't start auto mining at this height %d",
-                        minerAccountId,
+                Logger.logWarningMessage("Current miner account[rs=%s, id=%d] isn't a valid miner, so can't start auto mining at this height %d",
+                        minerRs, minerId,
                         Conch.getHeight());
             }
             return null;
@@ -794,23 +805,28 @@ public class Generator implements Comparable<Generator> {
      * @throws BlockchainProcessor.GeneratorNotAcceptedException
      */
     boolean mint(Block lastBlock, int generationLimit) throws BlockchainProcessor.BlockNotAcceptedException, BlockchainProcessor.GeneratorNotAcceptedException {
-        if(!isValidMiner(accountId, lastBlock.getHeight())){
-            Logger.logWarningMessage("%s failed to mint at height %d last timestamp %d, because this account is invalid miner.", this.toString(), lastBlock.getHeight(), lastBlock.getTimestamp());
+        int lastHeight = lastBlock.getHeight();
+        if(!isValidMiner(accountId, lastHeight)){
+            Logger.logWarningMessage("%s failed to mint at height %d last timestamp %d, because this account is invalid miner.", this.toString(), lastHeight, lastBlock.getTimestamp());
             return false;
         }
 
+        boolean isDirectlyMiningPhase = isBootDirectlyMiningPhase(lastHeight);
         int timestamp = getTimestamp(generationLimit);
-        if (!verifyHit(hit, pocScore, lastBlock, timestamp)) {
-            Logger.logInfoMessage(this.toString() + " failed to mint at " + timestamp + " height " + lastBlock.getHeight() + " last timestamp " + lastBlock.getTimestamp());
+        if (!verifyHit(hit, pocScore, lastBlock, timestamp)
+        && !isDirectlyMiningPhase) {
+            Logger.logInfoMessage(this.toString() + " failed to mint at " + timestamp + " height " + lastHeight + " last timestamp " + lastBlock.getTimestamp());
             return false;
         }
         
         int start = Conch.getEpochTime();
-        if(isBootNode
-        && isAutoMiningAccount(accountId)
-        && Conch.getBlockchainProcessor().isObsolete()){
-            Logger.logInfoMessage("[BootNode] Current blockchain was stuck, use the current system time %d to replace the original block generation time %d."
-            , start, timestamp);
+        boolean isStuck = isBootNode
+                && isAutoMiningAccount(accountId)
+                && Conch.getBlockchainProcessor().isObsolete();
+        String phaseStr = isDirectlyMiningPhase ? "in direct mining phase" : "stuck";
+        if(isStuck || isDirectlyMiningPhase){
+            Logger.logInfoMessage("[BootNode] Current blockchain was %s, use the current system time %d to replace the original block generation time %d."
+            , phaseStr, start, timestamp);
             timestamp = start;
         }
         
@@ -1085,7 +1101,9 @@ public class Generator implements Comparable<Generator> {
         if(StringUtils.isNotEmpty(miningPR)) {
             linkedGenerator = startMining(miningPR.trim());
 
-            if(linkedGenerator == null) return;
+            if(linkedGenerator == null) {
+                return;
+            }
 
             Logger.logInfoMessage("Account %s start to mining [next mining time is %s] ...", linkedGenerator.rsAddress, Convert.dateFromEpochTime(linkedGenerator.hitTime));
         }
