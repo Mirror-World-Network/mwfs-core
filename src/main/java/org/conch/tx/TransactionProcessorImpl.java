@@ -752,7 +752,8 @@ public final class TransactionProcessorImpl implements TransactionProcessor {
     }
 
     private void processPeerTransactions(JSONArray transactionsData) throws ConchException.NotValidException {
-        if (Conch.getBlockchain().getHeight() <= Constants.LAST_KNOWN_BLOCK && !testUnconfirmedTransactions) {
+        if (Conch.getHeight() <= Constants.LAST_KNOWN_BLOCK
+            && !testUnconfirmedTransactions) {
             return;
         }
         
@@ -838,7 +839,8 @@ public final class TransactionProcessorImpl implements TransactionProcessor {
         try {
             try {
                 Db.db.beginTransaction();
-                if (Conch.getBlockchain().getHeight() < Constants.LAST_KNOWN_BLOCK && !testUnconfirmedTransactions) {
+                if (Conch.getHeight() < Constants.LAST_KNOWN_BLOCK
+                    && !testUnconfirmedTransactions) {
                     throw new ConchException.NotCurrentlyValidException(String.format("Blockchain not ready to accept transactions caused by current height %d is less than %d", Conch.getBlockchain().getHeight() , Constants.LAST_KNOWN_BLOCK));
                 }
 

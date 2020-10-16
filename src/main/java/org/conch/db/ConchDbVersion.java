@@ -234,8 +234,6 @@ public class ConchDbVersion extends DbVersion {
                         + "CREATE INDEX IF NOT EXISTS unconfirmed_transaction_expiration_idx ON unconfirmed_transaction (expiration DESC);"
                 );
             case 19:
-                apply(null);
-            case 20:
                 apply("CREATE TABLE IF NOT EXISTS asset_transfer (db_id IDENTITY, id BIGINT NOT NULL, asset_id BIGINT NOT NULL, "
                         + "sender_id BIGINT NOT NULL, recipient_id BIGINT NOT NULL, quantity BIGINT NOT NULL, timestamp INT NOT NULL, "
                         + "height INT NOT NULL);"
@@ -245,14 +243,14 @@ public class ConchDbVersion extends DbVersion {
                         + "CREATE INDEX IF NOT EXISTS asset_transfer_recipient_id_idx ON asset_transfer (recipient_id, height DESC);"
                         + "CREATE INDEX IF NOT EXISTS asset_transfer_height_idx ON asset_transfer(height);"
                 );
-            case 21:
+            case 20:
                 apply("CREATE TABLE IF NOT EXISTS tag (db_id IDENTITY, tag VARCHAR NOT NULL, in_stock_count INT NOT NULL, "
                         + "total_count INT NOT NULL, height INT NOT NULL, latest BOOLEAN NOT NULL DEFAULT TRUE);"
                         + "CREATE UNIQUE INDEX IF NOT EXISTS tag_tag_idx ON tag (tag, height DESC);"
                         + "CREATE INDEX IF NOT EXISTS tag_in_stock_count_idx ON tag (in_stock_count DESC, height DESC);"
                         + "CREATE INDEX IF NOT EXISTS tag_height_tag_idx ON tag (height, tag);"
                 );
-            case 22:
+            case 21:
                 apply("CREATE TABLE IF NOT EXISTS currency (db_id IDENTITY, id BIGINT NOT NULL, account_id BIGINT NOT NULL, "
                         + "name VARCHAR NOT NULL, name_lower VARCHAR AS LOWER (name) NOT NULL, code VARCHAR NOT NULL, "
                         + "description VARCHAR, type INT NOT NULL, initial_supply BIGINT NOT NULL DEFAULT 0, "
@@ -271,7 +269,7 @@ public class ConchDbVersion extends DbVersion {
                         + "CREATE INDEX IF NOT EXISTS currency_issuance_height_idx ON currency (issuance_height);"
                         + "CREATE INDEX IF NOT EXISTS currency_height_id_idx ON currency (height, id);"
                 );
-            case 23:
+            case 22:
                 apply("CREATE TABLE IF NOT EXISTS account_currency (db_id IDENTITY, account_id BIGINT NOT NULL, "
                         + "currency_id BIGINT NOT NULL, units BIGINT NOT NULL, unconfirmed_units BIGINT NOT NULL, height INT NOT NULL, "
                         + "latest BOOLEAN NOT NULL DEFAULT TRUE);"
@@ -280,7 +278,7 @@ public class ConchDbVersion extends DbVersion {
                         + "CREATE INDEX IF NOT EXISTS account_currency_currency_id_idx ON account_currency (currency_id);"
                         + "CREATE INDEX IF NOT EXISTS account_currency_height_id_idx ON account_currency (height, account_id, currency_id);"
                 );
-            case 24:
+            case 23:
                 apply("CREATE TABLE IF NOT EXISTS currency_founder (db_id IDENTITY, currency_id BIGINT NOT NULL, "
                         + "account_id BIGINT NOT NULL, amount BIGINT NOT NULL, "
                         + "height INT NOT NULL, latest BOOLEAN NOT NULL DEFAULT TRUE);"
@@ -288,13 +286,13 @@ public class ConchDbVersion extends DbVersion {
                         + "CREATE INDEX IF NOT EXISTS currency_founder_account_id_idx ON currency_founder (account_id, height DESC);"
                         + "CREATE INDEX IF NOT EXISTS currency_founder_height_id_idx ON currency_founder (height, currency_id, account_id);"
                 );
-            case 25:
+            case 24:
                 apply("CREATE TABLE IF NOT EXISTS currency_mint (db_id IDENTITY, currency_id BIGINT NOT NULL, account_id BIGINT NOT NULL, "
                         + "counter BIGINT NOT NULL, height INT NOT NULL, latest BOOLEAN NOT NULL DEFAULT TRUE);"
                         + "CREATE UNIQUE INDEX IF NOT EXISTS currency_mint_currency_id_account_id_idx ON currency_mint (currency_id, account_id, height DESC);"
                         + "CREATE INDEX IF NOT EXISTS currency_mint_height_id_idx ON currency_mint (height, currency_id, account_id);"
                 );
-            case 26:
+            case 25:
                 apply("CREATE TABLE IF NOT EXISTS buy_offer (db_id IDENTITY, id BIGINT NOT NULL, currency_id BIGINT NOT NULL, account_id BIGINT NOT NULL,"
                         + "rate BIGINT NOT NULL, unit_limit BIGINT NOT NULL, supply BIGINT NOT NULL, expiration_height INT NOT NULL, transaction_height INT NOT NULL, "
                         + "creation_height INT NOT NULL, transaction_index SMALLINT NOT NULL, height INT NOT NULL, latest BOOLEAN NOT NULL DEFAULT TRUE);"
@@ -304,7 +302,7 @@ public class ConchDbVersion extends DbVersion {
                         + "ALTER TABLE buy_offer ADD COLUMN IF NOT EXISTS transaction_height INT NOT NULL;"
                         + "CREATE INDEX IF NOT EXISTS buy_offer_height_id_idx ON buy_offer (height, id);"
                 );
-            case 27:
+            case 26:
                 apply("CREATE TABLE IF NOT EXISTS sell_offer (db_id IDENTITY, id BIGINT NOT NULL, currency_id BIGINT NOT NULL, account_id BIGINT NOT NULL, "
                         + "rate BIGINT NOT NULL, unit_limit BIGINT NOT NULL, supply BIGINT NOT NULL, expiration_height INT NOT NULL, transaction_height INT NOT NULL, "
                         + "creation_height INT NOT NULL, transaction_index SMALLINT NOT NULL, height INT NOT NULL, latest BOOLEAN NOT NULL DEFAULT TRUE);"
@@ -314,7 +312,7 @@ public class ConchDbVersion extends DbVersion {
                         + "ALTER TABLE sell_offer ADD COLUMN IF NOT EXISTS transaction_height INT NOT NULL;"
                         + "CREATE INDEX IF NOT EXISTS sell_offer_height_id_idx ON sell_offer (height, id);"
                 );
-            case 28:
+            case 27:
                 apply("CREATE TABLE IF NOT EXISTS exchange (db_id IDENTITY, transaction_id BIGINT NOT NULL, currency_id BIGINT NOT NULL, block_id BIGINT NOT NULL, "
                         + "offer_id BIGINT NOT NULL, seller_id BIGINT NOT NULL, "
                         + "buyer_id BIGINT NOT NULL, units BIGINT NOT NULL, "
@@ -326,7 +324,7 @@ public class ConchDbVersion extends DbVersion {
                         + "CREATE INDEX IF NOT EXISTS exchange_height_idx ON exchange(height);"
                         + "CREATE INDEX IF NOT EXISTS exchange_height_db_id_idx ON exchange (height DESC, db_id DESC);"
                 );
-            case 29:
+            case 28:
                 apply("CREATE TABLE IF NOT EXISTS currency_transfer (db_id IDENTITY, id BIGINT NOT NULL, currency_id BIGINT NOT NULL, "
                         + "sender_id BIGINT NOT NULL, recipient_id BIGINT NOT NULL, units BIGINT NOT NULL, timestamp INT NOT NULL, "
                         + "height INT NOT NULL);"
@@ -336,44 +334,33 @@ public class ConchDbVersion extends DbVersion {
                         + "CREATE INDEX IF NOT EXISTS currency_transfer_recipient_id_idx ON currency_transfer (recipient_id, height DESC);"
                         + "CREATE INDEX IF NOT EXISTS currency_transfer_height_idx ON currency_transfer(height);"
                 );
-            case 30:
-                BlockDb.deleteAll(false);
-                apply(null);
-            case 31:
-                apply("TRUNCATE TABLE ask_order");
-            case 32:
-                apply("TRUNCATE TABLE bid_order");
-            case 33:
+            case 29:
                 apply("CREATE TABLE IF NOT EXISTS scan (rescan BOOLEAN NOT NULL DEFAULT FALSE, height INT NOT NULL DEFAULT 0, "
                         + "validate BOOLEAN NOT NULL DEFAULT FALSE);"
                         + "INSERT INTO scan (rescan, height, validate) VALUES (false, 0, false);"
                 );
-            case 34:
+            case 30:
                 apply("CREATE TABLE IF NOT EXISTS currency_supply (db_id IDENTITY, id BIGINT NOT NULL, "
                         + "current_supply BIGINT NOT NULL, current_reserve_per_unit_nqt BIGINT NOT NULL, height INT NOT NULL, "
                         + "latest BOOLEAN NOT NULL DEFAULT TRUE);"
                         + "CREATE UNIQUE INDEX IF NOT EXISTS currency_supply_id_height_idx ON currency_supply (id, height DESC);"
                         + "CREATE INDEX IF NOT EXISTS currency_supply_height_id_idx ON currency_supply (height, id);"
                 );
-            case 35:
-                apply("TRUNCATE TABLE currency");
-            case 36:
+            case 31:
                 apply("CREATE TABLE IF NOT EXISTS public_key (db_id IDENTITY, account_id BIGINT NOT NULL, "
                         + "public_key BINARY(32), height INT NOT NULL, FOREIGN KEY (height) REFERENCES block (height) ON DELETE CASCADE, "
                         + "latest BOOLEAN NOT NULL DEFAULT TRUE);"
                         + "ALTER TABLE public_key ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT TRUE;"
                         + "CREATE UNIQUE INDEX IF NOT EXISTS public_key_account_id_height_idx ON public_key (account_id, height DESC);"
                 );
-            case 37:
-                BlockDb.deleteBlocksFromHeight(Constants.PHASING_BLOCK_HEIGHT);
-            case 38:
+            case 32:
                 apply("CREATE TABLE IF NOT EXISTS vote (db_id IDENTITY, id BIGINT NOT NULL, " +
                         "poll_id BIGINT NOT NULL, voter_id BIGINT NOT NULL, vote_bytes VARBINARY NOT NULL, height INT NOT NULL);"
                         + "CREATE UNIQUE INDEX IF NOT EXISTS vote_id_idx ON vote (id);"
                         + "CREATE UNIQUE INDEX IF NOT EXISTS vote_poll_id_idx ON vote (poll_id, voter_id);"
                         + "CREATE INDEX IF NOT EXISTS vote_height_idx ON vote(height);"
                 );
-            case 39:
+            case 33:
                 apply("CREATE TABLE IF NOT EXISTS poll (db_id IDENTITY, id BIGINT NOT NULL, "
                         + "account_id BIGINT NOT NULL, name VARCHAR NOT NULL, "
                         + "description VARCHAR, options ARRAY NOT NULL, min_num_options TINYINT, max_num_options TINYINT, "
@@ -386,14 +373,14 @@ public class ConchDbVersion extends DbVersion {
                         + "CREATE INDEX IF NOT EXISTS poll_finish_height_idx ON poll(finish_height DESC);"
                         + "ALTER TABLE poll ADD COLUMN IF NOT EXISTS timestamp INT NOT NULL;"
                 );
-            case 40:
+            case 34:
                 apply("CREATE TABLE IF NOT EXISTS poll_result (db_id IDENTITY, poll_id BIGINT NOT NULL, "
                         + "result BIGINT, weight BIGINT NOT NULL, height INT NOT NULL);"
                         + "CREATE INDEX IF NOT EXISTS poll_result_poll_id_idx ON poll_result(poll_id);"
                         + "CREATE INDEX IF NOT EXISTS poll_result_height_idx ON poll_result(height);"
 
                 );
-            case 41:
+            case 35:
                 apply("CREATE TABLE IF NOT EXISTS phasing_poll (db_id IDENTITY, id BIGINT NOT NULL, "
                         + "account_id BIGINT NOT NULL, whitelist_size TINYINT NOT NULL DEFAULT 0, "
                         + "finish_height INT NOT NULL, voting_model TINYINT NOT NULL, quorum BIGINT, "
@@ -405,36 +392,34 @@ public class ConchDbVersion extends DbVersion {
                         + "CREATE INDEX IF NOT EXISTS phasing_poll_holding_id_idx ON phasing_poll(holding_id, height DESC);"
                         + "ALTER TABLE phasing_poll DROP COLUMN IF EXISTS linked_full_hashes;"
                 );
-            case 42:
+            case 36:
                 apply("CREATE TABLE IF NOT EXISTS phasing_vote (db_id IDENTITY, vote_id BIGINT NOT NULL, "
                         + "transaction_id BIGINT NOT NULL, voter_id BIGINT NOT NULL, "
                         + "height INT NOT NULL);"
                         + "CREATE UNIQUE INDEX IF NOT EXISTS phasing_vote_transaction_voter_idx ON phasing_vote(transaction_id, voter_id);"
                         + "CREATE INDEX IF NOT EXISTS phasing_vote_height_idx ON phasing_vote(height);"
                 );
-            case 43:
+            case 37:
                 apply("CREATE TABLE IF NOT EXISTS phasing_poll_voter (db_id IDENTITY, "
                         + "transaction_id BIGINT NOT NULL, voter_id BIGINT NOT NULL, "
                         + "height INT NOT NULL);"
                         + "CREATE UNIQUE INDEX IF NOT EXISTS phasing_poll_voter_transaction_voter_idx ON phasing_poll_voter(transaction_id, voter_id);"
                         + "CREATE INDEX IF NOT EXISTS phasing_poll_voter_height_idx ON phasing_poll_voter(height);"
                 );
-            case 44:
+            case 38:
                 apply("CREATE TABLE IF NOT EXISTS phasing_poll_result (db_id IDENTITY, id BIGINT NOT NULL, "
                         + "result BIGINT NOT NULL, approved BOOLEAN NOT NULL, height INT NOT NULL);"
                         + "CREATE UNIQUE INDEX IF NOT EXISTS phasing_poll_result_id_idx ON phasing_poll_result(id);"
                         + "CREATE INDEX IF NOT EXISTS phasing_poll_result_height_idx ON phasing_poll_result(height);"
 
                 );
-            case 45:
+            case 39:
                 apply("CREATE TABLE IF NOT EXISTS account_info (db_id IDENTITY, account_id BIGINT NOT NULL, "
                         + "name VARCHAR, description VARCHAR, height INT NOT NULL, latest BOOLEAN NOT NULL DEFAULT TRUE);"
                         + "CREATE UNIQUE INDEX IF NOT EXISTS account_info_id_height_idx ON account_info (account_id, height DESC);"
                         + "CREATE INDEX IF NOT EXISTS account_info_height_id_idx ON account_info (height, account_id);"
                 );
-            case 46:
-                apply("TRUNCATE TABLE poll");
-            case 47:
+            case 40:
                 apply("CREATE TABLE IF NOT EXISTS prunable_message (db_id IDENTITY, id BIGINT NOT NULL, sender_id BIGINT NOT NULL, "
                         + "recipient_id BIGINT, message VARBINARY NOT NULL, is_text BOOLEAN NOT NULL, is_compressed BOOLEAN NOT NULL, "
                         + "encrypted_message VARBINARY, encrypted_is_text BOOLEAN DEFAULT FALSE, "
@@ -454,9 +439,7 @@ public class ConchDbVersion extends DbVersion {
                         + "ALTER TABLE prunable_message DROP COLUMN IF EXISTS is_encrypted;"
 
                 );
-            case 48:
-                apply("TRUNCATE TABLE unconfirmed_transaction");
-            case 49:
+            case 41:
                 apply("CREATE TABLE IF NOT EXISTS tagged_data (db_id IDENTITY, id BIGINT NOT NULL, account_id BIGINT NOT NULL, "
                         + "name VARCHAR NOT NULL, description VARCHAR, tags VARCHAR, parsed_tags ARRAY, type VARCHAR, data VARBINARY NOT NULL, "
                         + "is_text BOOLEAN NOT NULL, filename VARCHAR, channel VARCHAR, block_timestamp INT NOT NULL, transaction_timestamp INT NOT NULL, "
@@ -468,21 +451,19 @@ public class ConchDbVersion extends DbVersion {
                         + "ALTER TABLE tagged_data ADD COLUMN IF NOT EXISTS channel VARCHAR;"
                         + "CREATE INDEX IF NOT EXISTS tagged_data_channel_idx ON tagged_data (channel, height DESC);"
                 );
-            case 50:
+            case 42:
                 apply("CREATE TABLE IF NOT EXISTS data_tag (db_id IDENTITY, tag VARCHAR NOT NULL, tag_count INT NOT NULL, "
                         + "height INT NOT NULL, FOREIGN KEY (height) REFERENCES block (height) ON DELETE CASCADE, latest BOOLEAN NOT NULL DEFAULT TRUE);"
                         + "CREATE UNIQUE INDEX IF NOT EXISTS data_tag_tag_height_idx ON data_tag (tag, height DESC);"
                         + "CREATE INDEX IF NOT EXISTS data_tag_count_height_idx ON data_tag (tag_count DESC, height DESC);"
                 );
-            case 51:
+            case 43:
                 apply("CREATE TABLE IF NOT EXISTS tagged_data_timestamp (db_id IDENTITY, id BIGINT NOT NULL, timestamp INT NOT NULL, "
                         + "height INT NOT NULL, latest BOOLEAN NOT NULL DEFAULT TRUE);"
                         + "CREATE UNIQUE INDEX IF NOT EXISTS tagged_data_timestamp_id_height_idx ON tagged_data_timestamp (id, height DESC);"
                         + "CREATE INDEX IF NOT EXISTS tagged_data_timestamp_height_id_idx ON tagged_data_timestamp (height, id);"
                 );
-            case 52:
-                apply("TRUNCATE TABLE account");
-            case 53:
+            case 44:
                 apply("CREATE TABLE IF NOT EXISTS account_lease (db_id IDENTITY, lessor_id BIGINT NOT NULL, "
                         + "current_leasing_height_from INT, current_leasing_height_to INT, current_lessee_id BIGINT, "
                         + "next_leasing_height_from INT, next_leasing_height_to INT, next_lessee_id BIGINT, "
@@ -493,7 +474,7 @@ public class ConchDbVersion extends DbVersion {
                         + "CREATE INDEX IF NOT EXISTS account_lease_height_id_idx ON account_lease (height, lessor_id);"
 
                 );
-            case 54:
+            case 45:
                 apply("CREATE TABLE IF NOT EXISTS exchange_request (db_id IDENTITY, id BIGINT NOT NULL, account_id BIGINT NOT NULL, "
                         + "currency_id BIGINT NOT NULL, units BIGINT NOT NULL, rate BIGINT NOT NULL, is_buy BOOLEAN NOT NULL, "
                         + "timestamp INT NOT NULL, height INT NOT NULL);"
@@ -503,7 +484,7 @@ public class ConchDbVersion extends DbVersion {
                         + "CREATE INDEX IF NOT EXISTS exchange_request_height_db_id_idx ON exchange_request (height DESC, db_id DESC);"
                         + "CREATE INDEX IF NOT EXISTS exchange_request_height_idx ON exchange_request (height);"
                 );
-            case 55:
+            case 46:
                 apply("CREATE TABLE IF NOT EXISTS account_ledger (db_id IDENTITY, account_id BIGINT NOT NULL, "
                         + "event_type TINYINT NOT NULL, event_id BIGINT NOT NULL, holding_type TINYINT NOT NULL, "
                         + "holding_id BIGINT, change BIGINT NOT NULL, balance BIGINT NOT NULL, "
@@ -512,20 +493,16 @@ public class ConchDbVersion extends DbVersion {
                         + "CREATE INDEX IF NOT EXISTS account_ledger_height_idx ON account_ledger(height);"
 
                 );
-            case 56:
+            case 47:
                 apply("CREATE TABLE IF NOT EXISTS tagged_data_extend (db_id IDENTITY, id BIGINT NOT NULL, "
                         + "extend_id BIGINT NOT NULL, height INT NOT NULL, latest BOOLEAN NOT NULL DEFAULT TRUE);"
                         + "CREATE INDEX IF NOT EXISTS tagged_data_extend_id_height_idx ON tagged_data_extend(id, height DESC);"
                         + "CREATE INDEX IF NOT EXISTS tagged_data_extend_height_id_idx ON tagged_data_extend(height, id);"
                 );
-            case 57:
-                apply("UPDATE transaction SET has_prunable_attachment = TRUE WHERE type = 6");
-            case 58:
+            case 48:
                 FullTextTrigger.init();
                 apply(null);
-            case 59:
-                apply("TRUNCATE TABLE account_ledger");
-            case 60:
+            case 49:
                 apply("CREATE TABLE IF NOT EXISTS shuffling (db_id IDENTITY, id BIGINT NOT NULL, holding_id BIGINT NULL, holding_type TINYINT NOT NULL, "
                         + "issuer_id BIGINT NOT NULL, amount BIGINT NOT NULL, participant_count TINYINT NOT NULL, blocks_remaining SMALLINT NULL, "
                         + "stage TINYINT NOT NULL, assignee_account_id BIGINT NULL, registrant_count TINYINT NOT NULL, "
@@ -537,7 +514,7 @@ public class ConchDbVersion extends DbVersion {
                         + "ALTER TABLE shuffling ADD COLUMN IF NOT EXISTS registrant_count TINYINT NOT NULL;"
                         + "CREATE INDEX IF NOT EXISTS shuffling_blocks_remaining_height_idx ON shuffling (blocks_remaining, height DESC);"
                 );
-            case 61:
+            case 50:
                 apply("CREATE TABLE IF NOT EXISTS shuffling_participant (db_id IDENTITY, shuffling_id BIGINT NOT NULL, "
                         + "account_id BIGINT NOT NULL, next_account_id BIGINT NULL, participant_index TINYINT NOT NULL, "
                         + "state TINYINT NOT NULL, blame_data ARRAY, key_seeds ARRAY, data_transaction_full_hash BINARY(32), "
@@ -545,14 +522,14 @@ public class ConchDbVersion extends DbVersion {
                         + "CREATE UNIQUE INDEX IF NOT EXISTS shuffling_participant_shuffling_id_account_id_idx ON shuffling_participant (shuffling_id, account_id, height DESC);"
                         + "CREATE INDEX IF NOT EXISTS shuffling_participant_height_idx ON shuffling_participant (height, shuffling_id, account_id);"
                 );
-            case 62:
+            case 51:
                 apply("CREATE TABLE IF NOT EXISTS shuffling_data (db_id IDENTITY, shuffling_id BIGINT NOT NULL, account_id BIGINT NOT NULL, "
                         + "data ARRAY, transaction_timestamp INT NOT NULL, height INT NOT NULL, "
                         + "FOREIGN KEY (height) REFERENCES block (height) ON DELETE CASCADE);"
                         + "CREATE UNIQUE INDEX IF NOT EXISTS shuffling_data_id_height_idx ON shuffling_data (shuffling_id, height DESC);"
                         + "CREATE INDEX shuffling_data_transaction_timestamp_idx ON shuffling_data (transaction_timestamp DESC);"
                 );
-            case 63:
+            case 52:
                 apply("CREATE TABLE IF NOT EXISTS phasing_poll_linked_transaction (db_id IDENTITY, "
                         + "transaction_id BIGINT NOT NULL, linked_full_hash BINARY(32) NOT NULL, linked_transaction_id BIGINT NOT NULL, "
                         + "height INT NOT NULL);"
@@ -562,7 +539,7 @@ public class ConchDbVersion extends DbVersion {
                         + "CREATE " + (Constants.isTestnetOrDevnet() ? "" : "UNIQUE ") + "INDEX IF NOT EXISTS phasing_poll_linked_transaction_link_id_idx "
                         + "ON phasing_poll_linked_transaction (linked_transaction_id, transaction_id);"
                 );
-            case 64:
+            case 53:
                 apply("CREATE TABLE IF NOT EXISTS account_control_phasing (db_id IDENTITY, account_id BIGINT NOT NULL, "
                         + "whitelist ARRAY, voting_model TINYINT NOT NULL, quorum BIGINT, min_balance BIGINT, "
                         + "holding_id BIGINT, min_balance_model TINYINT, max_fees BIGINT, min_duration SMALLINT, max_duration SMALLINT, "
@@ -570,7 +547,7 @@ public class ConchDbVersion extends DbVersion {
                         + "CREATE UNIQUE INDEX IF NOT EXISTS account_control_phasing_id_height_idx ON account_control_phasing (account_id, height DESC);"
                         + "CREATE INDEX IF NOT EXISTS account_control_phasing_height_id_idx ON account_control_phasing (height, account_id);"
                 );
-            case 65:
+            case 54:
                 apply("CREATE TABLE IF NOT EXISTS account_property (db_id IDENTITY, id BIGINT NOT NULL, account_id BIGINT NOT NULL, setter_id BIGINT, "
                         + "property VARCHAR NOT NULL, value VARCHAR, height INT NOT NULL, latest BOOLEAN NOT NULL DEFAULT TRUE);"
                         + "CREATE UNIQUE INDEX IF NOT EXISTS account_property_id_height_idx ON account_property (id, height DESC);"
@@ -579,7 +556,7 @@ public class ConchDbVersion extends DbVersion {
                         + "CREATE INDEX IF NOT EXISTS account_property_setter_recipient_idx ON account_property (setter_id, account_id);"
                         + "ALTER TABLE account_property ALTER COLUMN account_id RENAME TO recipient_id;"
                 );
-            case 66:
+            case 55:
                 apply("CREATE TABLE IF NOT EXISTS asset_delete (db_id IDENTITY, id BIGINT NOT NULL, asset_id BIGINT NOT NULL, "
                         + "account_id BIGINT NOT NULL, quantity BIGINT NOT NULL, timestamp INT NOT NULL, height INT NOT NULL);"
                         + "CREATE UNIQUE INDEX IF NOT EXISTS asset_delete_id_idx ON asset_delete (id);"
@@ -587,13 +564,13 @@ public class ConchDbVersion extends DbVersion {
                         + "CREATE INDEX IF NOT EXISTS asset_delete_account_id_idx ON asset_delete (account_id, height DESC);"
                         + "CREATE INDEX IF NOT EXISTS asset_delete_height_idx ON asset_delete (height);"
                 );
-            case 67:
+            case 56:
                 apply("CREATE TABLE IF NOT EXISTS referenced_transaction (db_id IDENTITY, transaction_id BIGINT NOT NULL, "
                         + "FOREIGN KEY (transaction_id) REFERENCES transaction (id) ON DELETE CASCADE, "
                         + "referenced_transaction_id BIGINT NOT NULL);"
                         + "CREATE INDEX IF NOT EXISTS referenced_transaction_referenced_transaction_id_idx ON referenced_transaction (referenced_transaction_id);"
                 );
-            case 68:
+            case 57:
                 try (Connection con = db.getConnection();
                      PreparedStatement pstmt = con.prepareStatement(
                              "SELECT id, referenced_transaction_full_hash FROM transaction WHERE referenced_transaction_full_hash IS NOT NULL");
@@ -609,11 +586,7 @@ public class ConchDbVersion extends DbVersion {
                     throw new RuntimeException(e.toString(), e);
                 }
                 apply(null);
-            case 69:
-                BlockDb.deleteBlocksFromHeight(Constants.SHUFFLING_BLOCK_HEIGHT);
-                BlockchainProcessorImpl.getInstance().scheduleScan(0, false);
-                apply(null);
-            case 70:
+            case 58:
                 try (Connection con = db.getConnection();
                      Statement stmt = con.createStatement();
                      ResultSet rs = stmt.executeQuery("SELECT CONSTRAINT_NAME FROM INFORMATION_SCHEMA.CONSTRAINTS "
@@ -629,17 +602,11 @@ public class ConchDbVersion extends DbVersion {
                 } catch (SQLException e) {
                     throw new RuntimeException(e.toString(), e);
                 }
-            case 71:
+            case 59:
                 apply("CREATE TABLE IF NOT EXISTS account_fxt (id BIGINT NOT NULL, balance VARBINARY NOT NULL, height INT NOT NULL);"
                         + "CREATE UNIQUE INDEX IF NOT EXISTS account_fxt_id_idx ON account_fxt (id, height DESC);"
                 );
-            case 72:
-                BlockchainProcessorImpl.getInstance().scheduleScan(FxtDistribution.DISTRIBUTION_START - 1, false);
-                apply(null);
-            case 73:
-                BlockDb.deleteBlocksFromHeight(Constants.FXT_BLOCK);
-                apply(null);
-            case 74:
+            case 60:
                 apply("CREATE TABLE IF NOT EXISTS asset_dividend (db_id IDENTITY, id BIGINT NOT NULL, asset_id BIGINT NOT NULL, "
                         + "amount BIGINT NOT NULL, dividend_height INT NOT NULL, total_dividend BIGINT NOT NULL, "
                         + "num_accounts BIGINT NOT NULL, timestamp INT NOT NULL, height INT NOT NULL);"
@@ -647,28 +614,28 @@ public class ConchDbVersion extends DbVersion {
                         + "CREATE INDEX IF NOT EXISTS asset_dividend_asset_id_idx ON asset_dividend (asset_id, height DESC);"
                         + "CREATE INDEX IF NOT EXISTS asset_dividend_height_idx ON asset_dividend (height);"
                 );
-            case 75:
+            case 61:
                 apply("CREATE TABLE IF NOT EXISTS storage_backup (db_id IDENTITY, storer_id BIGINT NOT NULL, store_target VARCHAR," +
                         " store_transaction BIGINT NOT NULL, backup_transaction BIGINT NOT NULL, "
                         + "height INT NOT NULL, FOREIGN KEY (height) REFERENCES block (height) ON DELETE CASCADE)");
-            case 76:
+            case 62:
                 apply("CREATE TABLE IF NOT EXISTS account_poc_score (db_id IDENTITY, account_id BIGINT NOT NULL,"
                         + "poc_score BIGINT NOT NULL, height INT NOT NULL, poc_detail VARCHAR);"
                         + "CREATE INDEX IF NOT EXISTS account_height_idx ON account_poc_score (account_id, height DESC);"
                         + "ALTER TABLE account_poc_score ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT TRUE;"
                 );
-            case 77:
+            case 63:
                 apply("CREATE TABLE IF NOT EXISTS account_pool (db_id IDENTITY, pool_id BIGINT NOT NULL, creator_id BIGINT NOT NULL,"
                         + "state TINYINT NOT NULL, pool_detail VARCHAR);"
                         + "ALTER TABLE account_pool ADD COLUMN IF NOT EXISTS height INT NOT NULL;"
                         + "CREATE INDEX IF NOT EXISTS pool_id_height_idx ON account_pool (pool_id, height DESC);"
                 );
-            case 78:
+            case 64:
                 apply("CREATE TABLE IF NOT EXISTS certified_peer (db_id IDENTITY, host VARCHAR NOT NULL, account_id BIGINT NOT NULL,"
                         + "type INT NOT NULL, height INT NOT NULL, last_updated INT, latest BOOLEAN NOT NULL DEFAULT TRUE);"
                         + "CREATE INDEX IF NOT EXISTS peer_account_height_idx ON certified_peer (account_id, height DESC);"
                 );
-            case 79:
+            case 65:
                 apply(
                 "alter table ACCOUNT rename to ACCOUNT_HISTORY;\n" +
                     "alter index ACCOUNT_ID_HEIGHT_IDX rename to ACCOUNT_HISTORY_ID_HEIGHT_IDX;\n" +
@@ -815,35 +782,7 @@ public class ConchDbVersion extends DbVersion {
                     + "CREATE INDEX IF NOT EXISTS ACCOUNT_HEIGHT_INDEX ON ACCOUNT (HEIGHT DESC);\n"
                     + "CREATE INDEX IF NOT EXISTS ACCOUNT_POC_SCORE_HEIGHT_INDEX ON ACCOUNT_POC_SCORE (HEIGHT DESC);\n"
                 );
-            case 80:
-                Account.migrateHistoryData();
-                apply(null);
-//            case 505:
-//                apply(
-//                        "CREATE INDEX IF NOT EXISTS ACCOUNT_HISTORY_HEIGHT_ID_IDX on ACCOUNT_HISTORY (HEIGHT, ID);\n"
-//                        + "CREATE INDEX IF NOT EXISTS ACCOUNT_POC_SCORE_HISTORY_HEIGHT_IDX on ACCOUNT_POC_SCORE_HISTORY (HEIGHT desc);\n"
-//                        + "ALTER TABLE ACCOUNT_GUARANTEED_BALANCE_HISTORY ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT false;\n"
-//                        + "ALTER TABLE ACCOUNT_LEDGER_HISTORY ADD COLUMN IF NOT EXISTS latest BOOLEAN NOT NULL DEFAULT false;\n"
-//                );
-            case 81:
-                apply("ALTER TABLE BLOCK ADD COLUMN IF NOT EXISTS HAS_REWARD_DISTRIBUTION BOOLEAN NOT NULL DEFAULT false;"
-                        + "UPDATE BLOCK SET HAS_REWARD_DISTRIBUTION = true"
-                );
                 break;
-            case 82:
-                apply("UPDATE prunable_message SET encrypted_message = message WHERE is_encrypted IS TRUE");
-            case 83:
-                apply("UPDATE prunable_message SET message = NULL WHERE is_encrypted IS TRUE");
-            case 84:
-                apply("UPDATE prunable_message SET encrypted_is_text = TRUE WHERE is_encrypted IS TRUE AND is_text IS TRUE");
-            case 85:
-                apply("UPDATE prunable_message SET encrypted_is_text = FALSE WHERE is_encrypted IS TRUE AND is_text IS FALSE");
-            case 86:
-                apply("UPDATE prunable_message SET is_text = FALSE where is_encrypted IS TRUE;"
-                        + "UPDATE prunable_message SET transaction_timestamp = SELECT timestamp FROM transaction WHERE prunable_message.id = transaction.id;"
-                );
-            case 87:
-
             default:
                 throw new RuntimeException("Blockchain database inconsistent with code, at update " + nextUpdate
                         + ", probably trying to run older code on newer database[ you can check the code in ConchDbVersion.java firstly]");

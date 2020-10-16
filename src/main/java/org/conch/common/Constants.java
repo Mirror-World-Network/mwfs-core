@@ -36,19 +36,12 @@ public final class Constants {
      * Network definition
      */
     public enum Network {
-        /**
-         * online
-         */
         MAINNET("Mainnet"),
-        /**
-         * test environment
-         */
         TESTNET("Testnet"),
         DEVNET("Devnet");
 
         private final String name;
 
-        /** Private constructor so it cannot be instantiated */
         Network(String name) {
             this.name = name;
         }
@@ -217,7 +210,7 @@ public final class Constants {
     public static final int REFERENCED_TRANSACTION_FULL_HASH_BLOCK_TIMESTAMP = 0;
 
     public static final int FXT_BLOCK = isTestnetOrDevnet() ? 10000 : 10000; 
-    public static final int LAST_KNOWN_BLOCK = isDevnet() ?  1 : (isTestnet() ? 1 : 1);
+    public static final int LAST_KNOWN_BLOCK = isDevnet() ?  2 : (isTestnet() ? 2 : 2);
 
     public static final int POC_LEDGER_RESET_HEIGHT = isTestnet() ? -1 : -1;
     // PoC calculate algorithm changed height.
