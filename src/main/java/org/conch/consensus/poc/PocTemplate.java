@@ -92,9 +92,10 @@ public class PocTemplate implements Serializable {
     this.ip = ip;
     this.port = port;
 
-    this.nodeTypeWeight = 25L;
-    this.ssHoldWeight = 17L;
-    this.hardwareConfWeight = 45L;
+    // rate definitions
+    this.nodeTypeWeight = 10L;
+    this.ssHoldWeight = 45L;
+    this.hardwareConfWeight = 32L;
     this.netWorkConfWeight = 8L;
     this.txHandlePerformanceWeight = 5L;
 
