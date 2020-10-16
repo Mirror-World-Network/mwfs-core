@@ -24,7 +24,8 @@ package org.conch.tx;
 import org.conch.chain.BlockDb;
 import org.conch.chain.BlockImpl;
 import org.conch.common.ConchException;
-import org.conch.db.*;
+import org.conch.common.Constants;
+import org.conch.consensus.reward.RewardCalculator;
 import org.conch.db.*;
 import org.conch.util.Convert;
 
@@ -33,7 +34,6 @@ import java.nio.ByteOrder;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public final class TransactionDb {

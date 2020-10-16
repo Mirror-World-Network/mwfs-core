@@ -239,7 +239,7 @@ public class PocDb  {
                 return 0;
             }
 
-            boolean insertNew = false;
+            boolean insertNew = true;
             if(Constants.updateHistoryRecord()){
                 PreparedStatement pstmt = con.prepareStatement("SELECT db_id, height FROM account_poc_score"
                         + " WHERE account_id=? AND latest = TRUE ORDER BY height DESC LIMIT 1");
@@ -259,8 +259,7 @@ public class PocDb  {
                     pstmt.setString(3, pocScore.toSimpleJson());
                     pstmt.setLong(4, dbid);
                     pstmt.executeUpdate();
-                }else{
-                    insertNew = true;
+                    insertNew = false;
                 }
             }
 

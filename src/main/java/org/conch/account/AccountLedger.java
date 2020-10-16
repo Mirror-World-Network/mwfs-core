@@ -876,7 +876,7 @@ public class AccountLedger {
          * @throws  SQLException            Database error occurred
          */
         private void save(Connection con) throws SQLException {
-            boolean insertNew = false;
+            boolean insertNew = true;
             if(Constants.updateHistoryRecord()){
                 PreparedStatement pstmt = con.prepareStatement("SELECT db_id, height FROM account_ledger"
                         + " WHERE account_id=? AND latest = TRUE ORDER BY height DESC LIMIT 1");
@@ -913,8 +913,7 @@ public class AccountLedger {
                     pstmt.setInt(++i, timestamp);
                     pstmt.setLong(++i, dbid);
                     pstmt.executeUpdate();
-                }else{
-                    insertNew = true;
+                    insertNew = false;
                 }
             }
 

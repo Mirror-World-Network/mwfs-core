@@ -2031,6 +2031,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
 
     }
 
+
     private void accept(
             BlockImpl block,
             List<TransactionImpl> validPhasedTransactions,
@@ -2045,6 +2046,8 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     if (CheckSumValidator.isKnownIgnoreTx(transaction.getId())) {
                         Logger.logWarningMessage("this tx[id=%d, creator=%s, height=%d] is known ignored tx, don't apply and ignore it"
                                 , transaction.getId(), Account.rsAccount(transaction.getSenderId()), transaction.getHeight());
+                    } else if (RewardCalculator.applyUnconfirmedReward(transaction)) {
+
                     } else {
                         throw new TransactionNotAcceptedException("Double spending", transaction);
                     }
