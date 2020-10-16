@@ -413,9 +413,9 @@ public final class BlockDb {
      *
      * @return
      */
-    public static boolean isRewardDistributionHeight() {
+    public static boolean reachRewardSettlementHeight(int height) {
         try (Connection con = Db.db.getConnection()) {
-            PreparedStatement pstmt = con.prepareStatement("SELECT count(id) num FROM block WHERE HAS_REWARD_DISTRIBUTION = false");
+            PreparedStatement pstmt = con.prepareStatement("SELECT count(id) num FROM block WHERE HAS_REWARD_DISTRIBUTION = false AND HEIGHT <= " + height);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
@@ -428,10 +428,15 @@ public final class BlockDb {
         }
     }
 
-    public static List<? extends Block> getBlockDistribution() {
+    /**
+     * Load all un-settlement blocks: current turn blocks & missing/un-settlement blocks
+     * @param height
+     * @return
+     */
+    public static List<? extends Block> getSettlementBlocks(int height) {
         try (Connection con = Db.db.getConnection()) {
-            PreparedStatement pstmt = con.prepareStatement("SELECT * FROM block WHERE HAS_REWARD_DISTRIBUTION = false order by height asc limit ?");
-            pstmt.setInt(1, Constants.DISTRIBUTION_BLOCK_NUM);
+            PreparedStatement pstmt = con.prepareStatement("SELECT * FROM block WHERE HAS_REWARD_DISTRIBUTION = false and Height <= ? order by height asc");
+            pstmt.setInt(1, height);
             try (ResultSet rs = pstmt.executeQuery()) {
                 List<BlockImpl> list = new ArrayList<>();
                 while (rs.next()) {

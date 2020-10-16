@@ -499,7 +499,9 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
                     Block pastBlock = Conch.getBlockchain().getBlockAtHeight(block.getHeight() - i);
     
                     for (Transaction tx : pastBlock.getTransactions()) {
-                        if(!RewardCalculator.isBlockRewardTx(tx.getAttachment())) continue;
+                        if(!RewardCalculator.isBlockRewardTx(tx.getAttachment())) {
+                            continue;
+                        }
 
                         RewardCalculator.blockRewardDistribution(tx,false);
                     }

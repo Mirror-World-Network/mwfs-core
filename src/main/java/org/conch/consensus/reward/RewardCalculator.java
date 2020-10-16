@@ -180,36 +180,31 @@ public class RewardCalculator {
         return crowdMinerPocScoreMap;
     }
 
-    private static void setCrowdMinerReward(Account minerAccount, Transaction tx){
-        if (Db.db.isInTransaction()) {
-            try {
-                setCrowdMinerReward(tx);
-            } catch (Exception e) {
-                throw new RuntimeException(String.format("setCrowdMinerReward failed", e));
-            }
-            return;
-        }
+    /**
+     * Check whether reach the settlement height
+     * Settle all un-settlement blocks before this height
+     * Combine changes of the same account from these blocks
+     *
+     * @param tx coinbase tx of block at the settlement height
+     */
+    private static void checkAndSettleCrowdMinerRewards(Transaction tx) {
         try {
             Db.db.beginTransaction();
-            setCrowdMinerReward(tx);
-            Db.db.commitTransaction();
-        } catch (Exception e) {
-            Db.db.rollbackTransaction();
-            Logger.logErrorMessage(String.format("setCrowdMinerReward failed", e));
-        }finally {
-            Db.db.endTransaction();
-        }
 
-    }
-
-    private static void setCrowdMinerReward(Transaction tx) throws Exception{
-        synchronized (RewardCalculator.class) {
-            if (!BlockDb.isRewardDistributionHeight()) {
+            int settlementHeight = tx.getHeight();
+            if(settlementHeight <= 0) {
+                Logger.logWarningMessage("Can't finish the crowd miner rewards settlement when height %d <= 0. Break and wait next turn.", settlementHeight);
                 return;
             }
-            Map<Long,Long> crowdMinerRewardMap = Maps.newHashMap();
 
-            List<? extends Block> rewardDistributionTransactionList = BlockDb.getBlockDistribution();
+            if(!BlockDb.reachRewardSettlementHeight(settlementHeight)){
+                Logger.logDebugMessage("Current height %d not reach the crowd miner rewards settlement height. Break and wait next turn.", settlementHeight);
+                return;
+            }
+
+            // Settlement
+            Map<Long,Long> crowdMinerRewardMap = Maps.newHashMap();
+            List<? extends Block> rewardDistributionTransactionList = BlockDb.getSettlementBlocks(settlementHeight);
             for (Block block : rewardDistributionTransactionList) {
                 List<TransactionImpl> blockTransactions = TransactionDb.findBlockTransactions(block.getId());
                 Transaction rewardTx = getCoinBase(blockTransactions);
@@ -230,7 +225,6 @@ public class RewardCalculator {
                 BigDecimal crowdMinerRewardsAmount = new BigDecimal(crowdMinerRewards);
                 // calculate the single miner's rewards
                 long allocatedRewards = 0;
-
 
                 for (Long accountId : crowdMiners.keySet()) {
                     long pocScoreLong = crowdMiners.get(accountId);
@@ -259,7 +253,14 @@ public class RewardCalculator {
             }
 
             String tail = "[DEBUG] ----------------------------\n[DEBUG] Total count: " + (crowdMinerRewardMap.size());
-            Logger.logDebugMessage("[%d-StageTwo%s] Unfreeze crowdMiners rewards and add it in mined amount. \n[DEBUG] CrowdMiner Reward Detail Format: txid | address: distribution amount\n%s%s\n", tx.getHeight(), "", details, tail);
+            Logger.logDebugMessage("[%d-StageTwo%s] Unfreeze crowdMiners rewards and add it in mined amount. \n[DEBUG] CrowdMiner Reward Detail Format: txid | address: distribution amount\n%s%s\n", settlementHeight, "", details, tail);
+
+            Db.db.commitTransaction();
+        } catch (Exception e) {
+            Db.db.rollbackTransaction();
+            Logger.logErrorMessage(String.format("setCrowdMinerReward occur error", e));
+        }finally {
+            Db.db.endTransaction();
         }
     }
 
@@ -328,7 +329,9 @@ public class RewardCalculator {
         JSONArray crowdMinerRewardArray = new JSONArray();
         Map<Long,Long> crowdMinerRewardMap = Maps.newHashMap();
 
-        if (crowdMiners.size() == 0) return crowdMinerRewardArray;
+        if (crowdMiners.size() == 0) {
+            return crowdMinerRewardArray;
+        }
 
         long totalPocScoreLong = 0;
         for(long pocScore : crowdMiners.values()){
@@ -343,7 +346,9 @@ public class RewardCalculator {
 
         String details = "";
         for (Long accountId : crowdMiners.keySet()) {
-            if (crowdMinerRewardMap.containsKey(accountId)) continue;
+            if (crowdMinerRewardMap.containsKey(accountId)) {
+                continue;
+            }
 
             long pocScoreLong = crowdMiners.get(accountId);
             BigDecimal pocScore = BigDecimal.valueOf(pocScoreLong);
@@ -447,9 +452,9 @@ public class RewardCalculator {
         if(coinBase.isType(Attachment.CoinBase.CoinBaseType.CROWD_BLOCK_REWARD)) {
             crowdMiners = coinBase.getCrowdMiners();
             Logger.logDebugMessage("[Rewards-%d-Stage%s] Distribute crowd miner's rewards[crowd miner size=%d] at height %d", tx.getHeight(), stage, crowdMiners.size(), Conch.getHeight());
-            if (BlockDb.isRewardDistributionHeight()) {
-                setCrowdMinerReward(minerAccount, tx);
-            }
+
+            checkAndSettleCrowdMinerRewards(tx);
+
             if(crowdMiners.size() > 0){
                 miningRewards = tx.getAmountNQT() - crowdMinerReward(tx.getHeight());
             }
