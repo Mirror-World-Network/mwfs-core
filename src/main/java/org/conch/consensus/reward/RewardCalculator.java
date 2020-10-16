@@ -27,6 +27,7 @@ import org.conch.util.LocalDebugTool;
 import org.conch.util.Logger;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -204,6 +205,7 @@ public class RewardCalculator {
 
             // Settlement
             Map<Long,Long> crowdMinerRewardMap = Maps.newHashMap();
+            List<Long> blockIds = new ArrayList<>();
             List<? extends Block> rewardDistributionTransactionList = BlockDb.getSettlementBlocks(settlementHeight);
             for (Block block : rewardDistributionTransactionList) {
                 List<TransactionImpl> blockTransactions = TransactionDb.findBlockTransactions(block.getId());
@@ -244,14 +246,13 @@ public class RewardCalculator {
                     remainRewards = remainRewards + crowdMinerRewardMap.get(minerAccount.getId());
                 }
                 crowdMinerRewardMap.put(minerAccount.getId(), remainRewards);
-
-                BlockDb.updateDistributionState(block.getId());
+                blockIds.add(block.getId());
             }
             String details = "";
             for (Long accountId : crowdMinerRewardMap.keySet()) {
                 details += updateBalance(Account.getAccount(accountId), tx, crowdMinerRewardMap.get(accountId));
             }
-
+            BlockDb.updateDistributionState(blockIds);
             String tail = "[DEBUG] ----------------------------\n[DEBUG] Total count: " + (crowdMinerRewardMap.size());
             Logger.logDebugMessage("[%d-StageTwo%s] Unfreeze crowdMiners rewards and add it in mined amount. \n[DEBUG] CrowdMiner Reward Detail Format: txid | address: distribution amount\n%s%s\n", settlementHeight, "", details, tail);
 

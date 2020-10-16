@@ -449,11 +449,16 @@ public final class BlockDb {
         }
     }
 
-    public static void updateDistributionState(long blockId) {
+    public static void updateDistributionState(List<Long> blockIds) {
         try (Connection con = Db.db.getConnection()) {
-            PreparedStatement pstmt = con.prepareStatement("UPDATE block SET HAS_REWARD_DISTRIBUTION = true WHERE ID = ?");
-            pstmt.setLong(1, blockId);
-            pstmt.executeUpdate();
+            Statement stmt = con.createStatement();
+            StringBuilder sqlStringBuilder = new StringBuilder();
+            sqlStringBuilder.append("UPDATE block SET HAS_REWARD_DISTRIBUTION = true WHERE ID in (");
+            for (Long blockId : blockIds) {
+                sqlStringBuilder.append(blockId + ",");
+            }
+            sqlStringBuilder.append(")");
+            stmt.execute(sqlStringBuilder.toString());
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
         }
