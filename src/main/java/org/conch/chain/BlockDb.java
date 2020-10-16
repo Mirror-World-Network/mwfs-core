@@ -419,7 +419,7 @@ public final class BlockDb {
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt("num") > Constants.DISTRIBUTION_BLOCK_NUM;
+                    return rs.getInt("num") > Constants.SETTLEMENT_INTERVAL_SIZE;
                 }
                 return false;
             }
