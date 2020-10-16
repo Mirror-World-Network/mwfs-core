@@ -1492,30 +1492,30 @@ public final class Account {
             } finally {
                 DbUtils.close(connDel);
             }
-            
-            
+
+
             if(balance > currentGuarantBalance) {
                 PreparedStatement pstmtUpdate = con.prepareStatement("INSERT INTO ACCOUNT_GUARANTEED_BALANCE (ACCOUNT_ID,"
                         + " ADDITIONS, HEIGHT) VALUES (?, ?, ?)");
-                
+
                 long additions = balance - currentGuarantBalance;
                 pstmtUpdate.setLong(1, this.id);
                 pstmtUpdate.setLong(2, additions);
                 pstmtUpdate.setInt(3, Conch.getHeight());
                 pstmtUpdate.executeUpdate();
             }else {
-                PreparedStatement pstmt = con.prepareStatement("SELECT DB_ID, ADDITIONS "
-                        + "FROM ACCOUNT_GUARANTEED_BALANCE WHERE ACCOUNT_ID = ? AND HEIGHT <= ? ORDER BY HEIGHT DESC");
+                PreparedStatement pstmt = con.prepareStatement("SELECT DB_ID, ADDITIONS, min(height) minHeight"
+                        + "FROM ACCOUNT_GUARANTEED_BALANCE WHERE ACCOUNT_ID = ? AND HEIGHT < ? ORDER BY HEIGHT DESC");
+                int queryHeight = Conch.getHeight() + 1;
                 pstmt.setLong(1, this.id);
-                pstmt.setInt(2, Conch.getHeight());
+                pstmt.setInt(2, queryHeight);
                 long afterSub = currentGuarantBalance;
-                
                 String delIds = "";
                 Set<Long> delList = Sets.newHashSet();
                 try (ResultSet rs = pstmt.executeQuery()) {
                     while (rs.next()) {
                         long tmp = Math.subtractExact(afterSub, rs.getLong("ADDITIONS"));
-                        
+                        queryHeight = rs.getInt("minHeight");
                         Long dbId = rs.getLong("DB_ID");
                         delList.add(dbId);
                         delIds += dbId + ",";
@@ -1527,13 +1527,59 @@ public final class Account {
                         }
                     }
                 }
-                
+
+                PreparedStatement cachePstmt = con.prepareStatement("SELECT DB_ID, ADDITIONS, min(height) minHeight"
+                        + "FROM ACCOUNT_GUARANTEED_BALANCE_CACHE WHERE ACCOUNT_ID = ? AND HEIGHT < ? ORDER BY HEIGHT DESC");
+                cachePstmt.setLong(1, this.id);
+                cachePstmt.setInt(2, queryHeight);
+
+                try (ResultSet rs = cachePstmt.executeQuery()) {
+                    while (rs.next()) {
+                        long tmp = Math.subtractExact(afterSub, rs.getLong("ADDITIONS"));
+                        queryHeight = rs.getInt("minHeight");
+                        Long dbId = rs.getLong("DB_ID");
+                        delList.add(dbId);
+                        delIds += dbId + ",";
+                        if(tmp > balance) {
+                            afterSub = tmp;
+                        }else{
+                            afterSub = Math.subtractExact(afterSub,balance);
+                            break;
+                        }
+                    }
+                }
+
+                PreparedStatement historyPstmt = con.prepareStatement("SELECT DB_ID, ADDITIONS "
+                        + "FROM ACCOUNT_GUARANTEED_BALANCE_HISTORY WHERE ACCOUNT_ID = ? AND HEIGHT < ? ORDER BY HEIGHT DESC");
+                historyPstmt.setLong(1, this.id);
+                historyPstmt.setInt(2, queryHeight);
+
+                try (ResultSet rs = historyPstmt.executeQuery()) {
+                    while (rs.next()) {
+                        long tmp = Math.subtractExact(afterSub, rs.getLong("ADDITIONS"));
+
+                        Long dbId = rs.getLong("DB_ID");
+                        delList.add(dbId);
+                        delIds += dbId + ",";
+                        if(tmp > balance) {
+                            afterSub = tmp;
+                        }else{
+                            afterSub = Math.subtractExact(afterSub,balance);
+                            break;
+                        }
+                    }
+                }
+
                 if(delIds.length() > 1) {
                     delIds = delIds.substring(0, delIds.length() - 1);
                     PreparedStatement pstmtUpdate = con.prepareStatement("DELETE FROM ACCOUNT_GUARANTEED_BALANCE WHERE DB_ID IN (" + delIds + ")");
                     pstmtUpdate.executeUpdate();
+                    PreparedStatement cachePstmtUpdate = con.prepareStatement("DELETE FROM ACCOUNT_GUARANTEED_BALANCE_CACHE WHERE DB_ID IN (" + delIds + ")");
+                    cachePstmtUpdate.executeUpdate();
+                    PreparedStatement historyPstmtUpdate = con.prepareStatement("DELETE FROM ACCOUNT_GUARANTEED_BALANCE_HISTORY WHERE DB_ID IN (" + delIds + ")");
+                    historyPstmtUpdate.executeUpdate();
                 }
-                
+
                 if(afterSub > 0) {
                     PreparedStatement pstmtUpdate = con.prepareStatement("INSERT INTO ACCOUNT_GUARANTEED_BALANCE (ACCOUNT_ID,"
                             + " ADDITIONS, HEIGHT) VALUES (?, ?, ?)");
@@ -1541,7 +1587,7 @@ public final class Account {
                     pstmtUpdate.setLong(1, this.id);
                     pstmtUpdate.setLong(2, afterSub);
                     pstmtUpdate.setInt(3, Conch.getHeight());
-                    pstmtUpdate.executeUpdate(); 
+                    pstmtUpdate.executeUpdate();
                 }
             }
         } catch (SQLException e) {
@@ -1556,14 +1602,14 @@ public final class Account {
     }
 
     public long getGuaranteedBalanceNQT(final int numberOfConfirmations,final int currentHeight) {
-      
+
         try {
             Conch.getBlockchain().readLock();
-            
+
             int fromHeight = currentHeight - numberOfConfirmations;
             if(fromHeight < 0){
                 fromHeight = 0;
-            } 
+            }
 //            if (fromHeight + Constants.GUARANTEED_BALANCE_CONFIRMATIONS < Conch.getBlockchainProcessor().getMinRollbackHeight()
 //                    || fromHeight > Conch.getBlockchain().getHeight()) {
 //                throw new IllegalArgumentException("Height " + fromHeight + " not available for guaranteed balance calculation");
@@ -1572,44 +1618,31 @@ public final class Account {
             try {
                 con = Db.db.getConnection();
                 Long additions = 0l;
-                int toHeight = currentHeight;
+                int toHeight = currentHeight + 1;
                 PreparedStatement pstmt = con.prepareStatement("SELECT SUM (additions) AS additions, min(height) as height "
-                        + "FROM account_guaranteed_balance WHERE account_id = ? AND height > ? AND height <= ?");
+                        + "FROM account_guaranteed_balance WHERE account_id = ? AND height > ? AND height < ?");
                 pstmt.setLong(1, this.id);
                 pstmt.setInt(2, fromHeight);
                 pstmt.setInt(3, toHeight);
                 ResultSet workRs = pstmt.executeQuery();
                 String cacheSql;
                 if (workRs.next()) {
-                    cacheSql = "SELECT SUM (additions) AS additions, min(height) as height "
-                            + "FROM account_guaranteed_balance_cache WHERE account_id = ? AND height > ? AND height < ?";
                     toHeight = workRs.getInt("height");
                     additions += workRs.getLong("additions");
-                } else {
-                    cacheSql = "SELECT SUM (additions) AS additions, min(height) as height "
-                            + "FROM account_guaranteed_balance_cache WHERE account_id = ? AND height > ? AND height <= ?";
                 }
-                PreparedStatement cachePstmt = con.prepareStatement(cacheSql);
+                PreparedStatement cachePstmt = con.prepareStatement("SELECT SUM (additions) AS additions, min(height) as height "
+                        + "FROM account_guaranteed_balance_cache WHERE account_id = ? AND height > ? AND height < ?");
                 cachePstmt.setLong(1, this.id);
                 cachePstmt.setInt(2, fromHeight);
                 cachePstmt.setInt(3, toHeight);
                 ResultSet cacheRs = cachePstmt.executeQuery();
                 String historySql;
                 if (cacheRs.next()) {
-                    historySql = "SELECT SUM (additions) AS additions "
-                            + "FROM account_guaranteed_balance_history WHERE account_id = ? AND height > ? AND height < ?";
                     toHeight = cacheRs.getInt("height");
                     additions += cacheRs.getLong("additions");
-                } else {
-                    if (toHeight == currentHeight) {
-                        historySql = "SELECT SUM (additions) AS additions "
-                                + "FROM account_guaranteed_balance_history WHERE account_id = ? AND height > ? AND height <= ?";
-                    } else {
-                        historySql = "SELECT SUM (additions) AS additions "
-                                + "FROM account_guaranteed_balance_history WHERE account_id = ? AND height > ? AND height < ?";
-                    }
                 }
-                PreparedStatement historyPstmt = con.prepareStatement(historySql);
+                PreparedStatement historyPstmt = con.prepareStatement("SELECT SUM (additions) AS additions "
+                        + "FROM account_guaranteed_balance_history WHERE account_id = ? AND height > ? AND height < ?");
                 historyPstmt.setLong(1, this.id);
                 historyPstmt.setInt(2, fromHeight);
                 historyPstmt.setInt(3, toHeight);
