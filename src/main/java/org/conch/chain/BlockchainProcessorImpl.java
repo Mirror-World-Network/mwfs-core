@@ -102,7 +102,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
     private volatile boolean alreadyInitialized = false;
 
     private static long lastDownloadMS = System.currentTimeMillis();
-    private static final long MAX_DOWNLOAD_TIME = Constants.isDevnet() ? (1 * 1000L) : (8 * 60 * 60 * 1000L);
+    private static final long MAX_DOWNLOAD_TIME = Constants.isDevnet() ? (1 * 1000L) : (60 * 60 * 1000L);
 
 
     private boolean peerHasMore;
@@ -141,11 +141,11 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                             Logger.logDebugMessage("Don't synchronize blocks when the getMoreBlocks is set to false");
                         }
 
-//                        // restart the server
-//                        if (System.currentTimeMillis() - lastDownloadMS > MAX_DOWNLOAD_TIME * 2) {
-//                            Logger.logInfoMessage("Can't finish the block synchronization in the %d MS, restart the COS", MAX_DOWNLOAD_TIME * 2);
-//                            new Thread(() -> Conch.restartApplication(null)).start();
-//                        }
+                        // re-connect all peers when download can't finish long time
+                        if (System.currentTimeMillis() - lastDownloadMS > MAX_DOWNLOAD_TIME) {
+                            Logger.logInfoMessage("Can't finish the block synchronization in the %d Minutes, re-connect all peers", MAX_DOWNLOAD_TIME/1000/60);
+                            Peers.checkOrReConnectAllPeers();
+                        }
                     }
 
                     if (Conch.hasSerialNum() && !Constants.hubLinked) {

@@ -371,7 +371,9 @@ public final class Peers {
 
         /** mint accounts of my peer **/
         String autoMintRs = Generator.getAutoMiningRS();
-        if (StringUtils.isNotEmpty(autoMintRs)) myPeerInfoJson.put("bindRsAccount", autoMintRs);
+        if (StringUtils.isNotEmpty(autoMintRs)) {
+            myPeerInfoJson.put("bindRsAccount", autoMintRs);
+        }
 
         /** running mode of my peer **/
         myPeerInfoJson.put("runningMode", Conch.runningMode.getName());
@@ -1078,7 +1080,9 @@ public final class Peers {
             return peers.get(host);
         }
         
-        if(peers.containsKey(host)) return peers.get(host);
+        if(peers.containsKey(host)) {
+            return peers.get(host);
+        }
         
         // check by announced address
         for(PeerImpl peer : peers.values()){
@@ -1216,9 +1220,15 @@ public final class Peers {
     }
     
     private static boolean hostSameAsAddress(Peer peer){
-        if(peer == null) return false;
-        if(StringUtils.isEmpty(peer.getAnnouncedAddress())) return false;
-        if(StringUtils.isEmpty(peer.getHost())) return false;
+        if(peer == null) {
+            return false;
+        }
+        if(StringUtils.isEmpty(peer.getAnnouncedAddress())) {
+            return false;
+        }
+        if(StringUtils.isEmpty(peer.getHost())) {
+            return false;
+        }
         
         return StringUtils.equalsIgnoreCase(peer.getAnnouncedAddress(), peer.getHost());
     }
@@ -1390,7 +1400,9 @@ public final class Peers {
      * @return
      */
     public static Peer getWeightedPeer(List<Peer> selectedPeers) {
-        if (selectedPeers.isEmpty()) return null;
+        if (selectedPeers.isEmpty()) {
+            return null;
+        }
 
         long totalWeight = 0;
         for (Peer peer : selectedPeers) {
@@ -1734,5 +1746,13 @@ public final class Peers {
         return connectedNodes;
     }
 
+    public static void checkOrReConnectAllPeers(){
+        for (Peer peer : peers.values()) {
+            if (Peer.State.CONNECTED != peer.getState()) {
+                connectPeer(peer);
+            }
+        }
+        checkOrConnectAllBootNodes();
+    }
 
 }
