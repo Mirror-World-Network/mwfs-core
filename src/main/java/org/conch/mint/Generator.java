@@ -700,7 +700,7 @@ public class Generator implements Comparable<Generator> {
 
     @Override
     public String toString() {
-        return "Miner[id=" + Long.toUnsignedString(accountId) + ", rs=" + rsAddress + ", poc score=" + pocScore + "] deadline " + getDeadline() + " hit " + hitTime;
+        return "Miner[id=" + Long.toUnsignedString(accountId) + ", rs=" + rsAddress + ", poc=" + pocScore + ", deadline=" + getDeadline() + ", hit=" + hitTime + "] ";
     }
 
     public JSONObject toJson(boolean loadPoolInfo) {
@@ -812,14 +812,14 @@ public class Generator implements Comparable<Generator> {
     boolean mint(Block lastBlock, int generationLimit) throws BlockchainProcessor.BlockNotAcceptedException, BlockchainProcessor.GeneratorNotAcceptedException {
         int lastHeight = lastBlock.getHeight();
         if(!isValidMiner(accountId, lastHeight)){
-            Logger.logWarningMessage("%s failed to mint at height %d last timestamp %d, because this account is invalid miner.", this.toString(), lastHeight, lastBlock.getTimestamp());
+            Logger.logWarningMessage("%s failed to mint at height %d last timestamp %d, because this account is invalid", this.toString(), lastHeight, lastBlock.getTimestamp());
             return false;
         }
 
         boolean isDirectlyMiningPhase = isBootDirectlyMiningPhase(lastHeight);
         int timestamp = getTimestamp(generationLimit);
         if (!verifyHit(hit, pocScore, lastBlock, timestamp)) {
-            Logger.logInfoMessage(this.toString() + " failed to mint at " + timestamp + " height " + lastHeight + " last timestamp " + lastBlock.getTimestamp());
+            Logger.logInfoMessage("%s failed to mint at height %d last timestamp %d, because hit is invalid", this.toString(), lastHeight, lastBlock.getTimestamp());
             return false;
         }
         

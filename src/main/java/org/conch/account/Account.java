@@ -1617,7 +1617,7 @@ public final class Account {
             Connection con = null;
             try {
                 con = Db.db.getConnection();
-                Long additions = 0l;
+                Long additions = 0L;
                 int toHeight = currentHeight + 1;
                 PreparedStatement pstmt = con.prepareStatement("SELECT SUM (additions) AS additions, min(height) as height "
                         + "FROM account_guaranteed_balance WHERE account_id = ? AND height > ? AND height < ?");
@@ -1647,7 +1647,7 @@ public final class Account {
                 historyPstmt.setInt(2, fromHeight);
                 historyPstmt.setInt(3, toHeight);
                 ResultSet historyRs = historyPstmt.executeQuery();
-                return Math.max(Math.subtractExact(balanceNQT, additions + (workRs.next() ? historyRs.getLong("additions") : 0)), 0);
+                return Math.max(Math.subtractExact(balanceNQT, additions + (historyRs.next() ? historyRs.getLong("additions") : 0)), 0);
             } catch (SQLException e) {
                 throw new RuntimeException(e.toString(), e);
             }finally {
