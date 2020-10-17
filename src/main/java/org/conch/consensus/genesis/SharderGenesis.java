@@ -24,10 +24,7 @@ import java.util.*;
  * @date 01/19/2019
  */
 public class SharderGenesis {
-
-//  public static final long GENESIS_BLOCK_ID = 6840612405442248888L;
-//  public static final long CREATOR_ID = 7235585442644638682L;
-    public static final long GENESIS_BLOCK_ID = 6840612405442241818L;
+    public static final long GENESIS_BLOCK_ID = 6840612405442242020L;
     public static final long CREATOR_ID = 1492434941236553746L;
     public static final long KEEPER_ID = 1868021154578573726L;
     public static final byte[] CREATOR_PUBLIC_KEY = {
