@@ -1405,14 +1405,18 @@ public final class Peers {
 
         if (!Peers.enableHallmarkProtection || ThreadLocalRandom.current().nextInt(3) == 0) {
             Peer randomPeer = selectedPeers.get(ThreadLocalRandom.current().nextInt(selectedPeers.size()));
-            if(countAndCheck(randomPeer)) return randomPeer;
+            if(countAndCheck(randomPeer)) {
+                return randomPeer;
+            }
         }
         
         long hit = ThreadLocalRandom.current().nextLong(totalWeight);
         for (Peer peer : selectedPeers) {
             long weight = (peer.getWeight() == 0) ? 1 : peer.getWeight();
             if ((hit -= weight) < 0) {
-                if(countAndCheck(peer)) return peer;
+                if(countAndCheck(peer)) {
+                    return peer;
+                }
             }
         }
         return null;
@@ -1710,12 +1714,25 @@ public final class Peers {
         return myServices.contains(service);
     }
     
-    public static Peer checkOrConnectBootNode(){
+    public static Peer checkOrConnectBootNodeRandom(){
         Peer bootNode = Peers.getPeer(Constants.getBootNodeRandom(), true);
         if(bootNode != null && Peer.State.CONNECTED != bootNode.getState()) {
             connectPeer(bootNode);
         }
         return bootNode;
     }
+
+    public static List<Peer> checkOrConnectAllBootNodes(){
+        List<Peer> connectedNodes = Lists.newArrayList();
+        for(String nodeHost : Constants.bootNodesHost){
+            Peer bootNode = Peers.getPeer(nodeHost, true);
+            if(bootNode != null && Peer.State.CONNECTED != bootNode.getState()) {
+                connectPeer(bootNode);
+            }
+            connectedNodes.add(bootNode);
+        }
+        return connectedNodes;
+    }
+
 
 }

@@ -287,7 +287,7 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
             return;
         }
         
-        Peers.checkOrConnectBootNode();
+        Peers.checkOrConnectBootNodeRandom();
 
         Logger.logInfoMessage("start to check converge command and finish the fork switch");
         com.alibaba.fastjson.JSONObject cmdObj = getCmdTools();

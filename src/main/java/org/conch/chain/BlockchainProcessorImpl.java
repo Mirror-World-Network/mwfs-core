@@ -332,6 +332,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         try {
             long startTime = System.currentTimeMillis();
             int limitConnectedSize = Math.min(1, defaultNumberOfForkConfirmations);
+            Peers.checkOrConnectAllBootNodes();
             connectedPublicPeers = Peers.getPublicPeers(Peer.State.CONNECTED, true);
             int connectedSize = connectedPublicPeers.size();
             if (!Generator.isBootNode
@@ -342,14 +343,13 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 }
 
                 if (System.currentTimeMillis() - lastDownloadMS > MAX_DOWNLOAD_TIME) {
-                    Peers.checkOrConnectBootNode();
+                    Peers.checkOrConnectBootNodeRandom();
                 }
                 return;
             }
 
             peerHasMore = true;
-            final Peer peer = forceSwitchToBootNodesFork ?
-                    Peers.checkOrConnectBootNode() : Peers.getWeightedPeer(connectedPublicPeers);
+            final Peer peer = Peers.getWeightedPeer(connectedPublicPeers);
             if (peer == null
                 && Logger.printNow(Logger.BlockchainProcessor_downloadPeer_getWeightedPeer)) {
                 Logger.logDebugMessage("Can't find a weighted peer to sync the blocks, the reasons are follow:  " +
@@ -698,7 +698,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     peer = feederPeer;
                 } else {
                     if (forceSwitchToBootNodesFork) {
-                        peer = Peers.checkOrConnectBootNode();
+                        peer = Peers.checkOrConnectBootNodeRandom();
                     } else {
                         if (nextPeerIndex >= connectedPublicPeers.size()) {
                             nextPeerIndex = 0;
@@ -896,7 +896,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
 
             forceSwitchToBootNodesFork = true;
             // connect to the boot nodes
-            Peer peer = Peers.checkOrConnectBootNode();
+            Peer peer = Peers.checkOrConnectBootNodeRandom();
             if (peer == null) {
                 Logger.logWarningMessage("Can't connect to boot nodes, break and wait for next round. ForkSwitchingFailed=%d, SwitchToBootNodeFailedCount=%d",
                         forkSwitchFailedCount, switchToBootNodeFailedCount);
