@@ -52,10 +52,21 @@ public final class SignTransactionTest extends BaseTest {
     
     
     public static void blockHash(BlockImpl block) throws ConchException.NotValidException {
-        System.out.println("block id=" + block.getId());
-        System.out.println("blockHash: " + Arrays.toString(Crypto.sha256().digest(block.bytes())));
+        System.out.println("block id:"  + block.getId());
+        System.out.println("block hash: " + Arrays.toString(Crypto.sha256().digest(block.bytes())));
         System.out.println("block bytes: " + Arrays.toString(block.bytes()));
         System.out.println("block payload hash: " + Arrays.toString(block.getPayloadHash()));
+    }
+
+    public static void genesisBlockHash() throws ConchException.NotValidException {
+        List<TransactionImpl> transactions = SharderGenesis.genesisTxs();
+        byte[] payloadHash;
+        MessageDigest digest = Crypto.sha256();
+        for (TransactionImpl transaction : transactions) {
+            digest.update(transaction.bytes());
+        }
+        payloadHash = digest.digest();
+        System.out.println("genesis block payload hash: " + Arrays.toString(payloadHash));
     }
    
     public static void signTranscations(List<Transaction> transactions){
@@ -146,6 +157,7 @@ public final class SignTransactionTest extends BaseTest {
 //        newTx();
     //        System.out.println("genesis1=>");
             blockHash(SharderGenesis.genesisBlock());
+            genesisBlockHash();
 //        signPocWeightTx(getSpFromConsole());
 
 //        signCoinbaseTx(getSpFromConsole());
