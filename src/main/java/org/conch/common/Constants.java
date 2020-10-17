@@ -210,7 +210,7 @@ public final class Constants {
     public static final int REFERENCED_TRANSACTION_FULL_HASH_BLOCK_TIMESTAMP = 0;
 
     public static final int FXT_BLOCK = isTestnetOrDevnet() ? 10000 : 10000; 
-    public static final int LAST_KNOWN_BLOCK = isTestnetOrDevnet() ? 8 : 2;
+    public static final int LAST_KNOWN_BLOCK = isTestnetOrDevnet() ? 3 : 2;
 
     public static final int POC_LEDGER_RESET_HEIGHT = isTestnet() ? -1 : -1;
     // PoC calculate algorithm changed height.
