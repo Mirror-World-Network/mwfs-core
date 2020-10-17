@@ -9,6 +9,7 @@ import org.conch.common.Constants;
 import org.conch.consensus.genesis.SharderGenesis;
 import org.conch.consensus.poc.db.PocDb;
 import org.conch.consensus.poc.tx.PocTxBody;
+import org.conch.consensus.reward.RewardCalculator;
 import org.conch.mint.pool.SharderPoolProcessor;
 import org.conch.peer.Peer;
 import org.conch.util.LocalDebugTool;
@@ -49,6 +50,9 @@ public class PocScore implements Serializable {
         try{
             if(LocalDebugTool.isLocalDebugAndBootNodeMode){
                 return new BigInteger("100000");
+            }
+            if(height < RewardCalculator.NETWORK_STABLE_PHASE){
+                mag = new BigInteger("10000");
             }
         }catch(Exception e){
             e.printStackTrace();
