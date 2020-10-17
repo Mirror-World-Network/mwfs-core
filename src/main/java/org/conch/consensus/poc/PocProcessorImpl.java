@@ -111,7 +111,7 @@ public class PocProcessorImpl implements PocProcessor {
     public static boolean FORCE_RE_CALCULATE = false;
     private static synchronized void reCalculateWhenExceedPocAlgoChangeHeight(int height){
         if(Constants.POC_SCORE_CHANGE_HEIGHT == -1){
-            Logger.logInfoMessage("Constants.POC_SCORE_CHANGE_HEIGHT is -1, don't force to re-calculate the poc score");
+            Logger.logDebugMessage("Constants.POC_SCORE_CHANGE_HEIGHT is -1, don't force to re-calculate the poc score");
            return;
         }
 

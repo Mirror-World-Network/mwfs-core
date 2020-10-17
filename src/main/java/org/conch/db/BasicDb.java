@@ -216,7 +216,7 @@ public class BasicDb {
                     for (StackTraceElement ele : Thread.currentThread().getStackTrace()) {
                         stacksDetails += "[DEBUG] stack in getPooledConnection=> " + ele.getClassName() + "$" + ele.getMethodName() + "$" + ele.getFileName() + "#" + ele.getLineNumber() + "\n";
                     }
-                    Logger.logWarningMessage(stacks);
+                    Logger.logDebugMessage(stacks);
                     if(debugDetail) {
                         Logger.logDebugMessage(stacksDetails);
                     }

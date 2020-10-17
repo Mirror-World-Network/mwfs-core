@@ -2610,7 +2610,7 @@ public final class Account {
                 sb.append(resultSet.getLong("ACCOUNT_ID")).append(",");
                 sb.append(resultSet.getLong("POC_SCORE")).append(",");
                 sb.append(resultSet.getInt("HEIGHT")).append(",");
-                sb.append(resultSet.getString("POC_DETAIL")).append(",");
+                sb.append("'").append(resultSet.getString("POC_DETAIL")).append("',");
                 sb.append(resultSet.getBoolean("LATEST")).append(")").append(",");
             } while (resultSet.next());
             sb.deleteCharAt(sb.length() - 1);

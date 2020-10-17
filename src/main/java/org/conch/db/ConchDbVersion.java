@@ -21,10 +21,6 @@
 
 package org.conch.db;
 
-import org.conch.account.Account;
-import org.conch.account.FxtDistribution;
-import org.conch.chain.BlockDb;
-import org.conch.chain.BlockchainProcessorImpl;
 import org.conch.common.Constants;
 import org.conch.util.Convert;
 
@@ -783,6 +779,7 @@ public class ConchDbVersion extends DbVersion {
                     + "CREATE INDEX IF NOT EXISTS ACCOUNT_HEIGHT_INDEX ON ACCOUNT (HEIGHT DESC);\n"
                     + "CREATE INDEX IF NOT EXISTS ACCOUNT_POC_SCORE_HEIGHT_INDEX ON ACCOUNT_POC_SCORE (HEIGHT DESC);\n"
                 );
+            case 66:
                 break;
             default:
                 throw new RuntimeException("Blockchain database inconsistent with code, at update " + nextUpdate

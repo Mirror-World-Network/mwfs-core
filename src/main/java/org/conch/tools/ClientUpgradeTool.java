@@ -399,12 +399,18 @@ public class ClientUpgradeTool {
 
 
     private static void _restoreDbToLastArchive(boolean restartClient){
-        if(lastDbArchive == null || lastDbArchiveHeight == null) fetchLastDbArchive();
+        if(lastDbArchive == null || lastDbArchiveHeight == null) {
+            fetchLastDbArchive();
+        }
         boolean restored = restoreDb(lastDbArchive);
-        if(!restored) return;
+        if(!restored) {
+            return;
+        }
 
         forceDownloadFromOSS = false;
-        if(restartClient) Conch.restartApplication(null);
+        if(restartClient) {
+            Conch.restartApplication(null);
+        }
     }
 
     public static void restoreDbToLastArchive(boolean newThreadToExecute, boolean restartClient) {
@@ -417,34 +423,4 @@ public class ClientUpgradeTool {
             _restoreDbToLastArchive(restartClient);
         }
     }
-
-    /**
-     * auto db archive function is open; use the restoreDbToLastArchive to replace the restoreDbToKnownHeight
-     */
-    @Deprecated
-    public static void restoreDbToKnownHeight() {
-        if(lastDbArchive == null || lastDbArchiveHeight == null) fetchLastDbArchive();
-        
-        // calculate the restore height
-        if(restoredDbArchiveHeight == 0) {
-            restoredDbArchiveHeight = lastDbArchiveHeight;
-        } else{
-            if(knownDbArchives.size() <= 0) {
-                restoredDbArchiveHeight = lastDbArchiveHeight;
-            } else {
-                int index = knownDbArchives.size() - 1;
-                while(index > 0
-                        && restoredDbArchiveHeight > knownDbArchives.get(index)){
-                    index--;
-                }
-                restoredDbArchiveHeight = knownDbArchives.get(index);  
-            }
-        }
-        
-        if(restoredDbArchiveHeight > 0) {
-            String dbFileName =  Db.getName() + "_" + restoredDbArchiveHeight + ".zip";
-            restoreDb(dbFileName);  
-        }
-    }
-    
 }

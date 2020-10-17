@@ -810,6 +810,9 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         BigInteger curCumulativeDifficulty = blockchain.getLastBlock().getCumulativeDifficulty();
         List<BlockImpl> myPoppedOffBlocks = popOffTo(commonBlock);
 
+        String peerAddress = peer != null ? peer.getAnnouncedAddress() : "AddressUndefined";
+        String peerHost = peer != null ? peer.getHost() : "HostUndefined";
+
         // push the fork blocks into chain
         int pushedForkBlocks = 0;
         if (blockchain.getLastBlock().getId() == commonBlock.getId()) {
@@ -840,8 +843,8 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         } else {
             // check original difficulty(before pushed fork blocks) of chain with difficulty of pushed chain 
             if (pushedForkBlocks > 0
-                    && isSmallerDifficultyOnOtherFork) {
-                Logger.logDebugMessage("Pop off caused by peer " + peer.getHost() + ", blacklisting");
+            && isSmallerDifficultyOnOtherFork) {
+                Logger.logDebugMessage("Pop off caused by peer %s[%s] blacklisting", peerAddress, peerHost);
                 peer.blacklist("Pop off");
                 List<BlockImpl> peerPoppedOffBlocks = popOffTo(commonBlock);
                 pushedForkBlocks = 0;
@@ -868,7 +871,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             }
             checkAndSwitchToBootNodesFork();
         } else {
-            Logger.logDebugMessage("Switched to peer's fork");
+            Logger.logDebugMessage("Switched to peer %s[%s]'s fork", peerAddress, peerHost);
             for (BlockImpl block : myPoppedOffBlocks) {
                 TransactionProcessorImpl.getInstance().processLater(block.getTransactions());
             }
