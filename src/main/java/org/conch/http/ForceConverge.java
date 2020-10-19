@@ -127,7 +127,7 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
                     if(toHeight == -1){
                         // reset the current db
                         Logger.logDebugMessage("toHeight is -1, reset(delete db folder from disk) and restart the block chain ");
-                        manualReset();
+                        _manualReset();
                         new Thread(() -> Conch.restartApplication(null)).start();
                         response.put("done", true);
                     }else if(toHeight == 0){
@@ -251,7 +251,7 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
         return null;
     }
     
-    public static void manualReset(){
+    private static void _manualReset(){
        try{
             Conch.pause();
 
@@ -269,6 +269,16 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
         }
     }
 
+    public static void checkAndManualReset(){
+        // manual reset
+        String resetStr = Conch.getStringProperty(PROPERTY_MANUAL_RESET, null);
+        boolean needManualReset = StringUtils.isEmpty(resetStr) ? true : Boolean.valueOf(resetStr);
+        if(!needManualReset
+        || Generator.isBootNode) {
+            return;
+        }
+        _manualReset();
+    }
 
     public static final String PROPERTY_FORK_NAME = "sharder.forkName";
     public static final String PROPERTY_MANUAL_RESET = "sharder.manualReset";
@@ -350,10 +360,16 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
         }
     }
 
+    public static final String PROPERTY_RESET_FOR_OLD_NETWORK = "sharder.resetForOldClient";
+    public static final boolean resetForOldClient = Conch.getBooleanProperty(PROPERTY_RESET_FOR_OLD_NETWORK, false);
     /**
      * New Testnet is start form version v0.0.5
      */
-    private static void checkAndResetForNewNetwork(){
+    private static void checkAndResetOldClients(){
+        if(!resetForOldClient) {
+            return;
+        }
+
         try {
             String version = "0.1.5";
             String updateTime = "2020-08-20 19:19:19";
@@ -369,7 +385,7 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
 
             if(currentHeight >= 18485
             && forceReset) {
-                manualReset();
+                _manualReset();
             }
 
         } catch (Exception e) {
@@ -387,15 +403,8 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
         }
 
 //       checkOrForceDeleteBakFolder();
-
-        // manual reset
-        String resetStr = Conch.getStringProperty(PROPERTY_MANUAL_RESET, null);
-        boolean manualReset = StringUtils.isEmpty(resetStr) ? true : Boolean.valueOf(resetStr);
-        if(manualReset && !Generator.isBootNode) {
-            manualReset();
-        }
-
-//        checkAndResetForNewNetwork();
+        checkAndManualReset();
+        checkAndResetOldClients();
 
 //        // switch fork
 //        if(StringUtils.isEmpty(currentFork) || !"Giant".equals(currentFork)){
