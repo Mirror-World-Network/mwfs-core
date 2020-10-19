@@ -28,6 +28,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.conch.Conch;
 import org.conch.account.Account;
 import org.conch.chain.Block;
+import org.conch.chain.BlockDb;
+import org.conch.chain.BlockImpl;
 import org.conch.chain.CheckSumValidator;
 import org.conch.common.Constants;
 import org.conch.common.UrlManager;
@@ -348,6 +350,33 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
         }
     }
 
+    /**
+     * New Testnet is start form version v0.0.5
+     */
+    private static void checkAndResetForNewNetwork(){
+        try {
+            String version = "0.1.5";
+            String updateTime = "2020-08-20 19:19:19";
+            boolean forceReset = Conch.versionCompare(version, updateTime) <= 0;
+
+            int currentHeight = 0;
+            try{
+                BlockImpl lastBlock = BlockDb.findLastBlock();
+                currentHeight = (lastBlock != null) ? lastBlock.getHeight() : 0 ;
+            }catch(Exception e){
+                Logger.logErrorMessage("can't get the last block height in the trim processing", e);
+            }
+
+            if(currentHeight >= 18485
+            && forceReset) {
+                manualReset();
+            }
+
+        } catch (Exception e) {
+            Logger.logErrorMessage("resetForNetworkReset occur unknown exception", e);
+        }
+    }
+
     public static void init() {
         // auto upgrade
         boolean closeAutoUpgrade = Conch.getBooleanProperty(PROPERTY_CLOSE_AUTO_UPGRADE);
@@ -366,8 +395,8 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
             manualReset();
         }
 
-        // restore the DB
-        // checkAndFetchDbToReGenerateScores();
+        checkAndResetForNewNetwork();
+
         
 //        // switch fork
 //        if(StringUtils.isEmpty(currentFork) || !"Giant".equals(currentFork)){
