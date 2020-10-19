@@ -303,7 +303,7 @@ public class ClientUpgradeTool {
             String downloadingUrl = UrlManager.getDbArchiveUrl(urlPrefix + dbFileName);
             try {
                 if(!RestfulHttpClient.findResource(downloadingUrl)) {
-                    Logger.logWarningMessage("[ UPGRADE DB ] db archive %s dose not exist, break.");
+                    Logger.logWarningMessage("[ UPGRADE DB ] db archive %s dose not exist, break.", downloadingUrl);
                     return false;
                 }
             }catch(Exception e){
