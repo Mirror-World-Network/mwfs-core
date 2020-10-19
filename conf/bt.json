@@ -1,0 +1,16 @@
+{
+  "secretPhrase": "finish rant princess crimson cold forward such known lace built poetry ceiling",
+  "feeNQT": "0",
+  "deadline": "1440",
+  "list": [
+    {
+      "recipient": "CDW-9WKZ-DV7P-M6MN-5MH8B",
+      "recipientPublicKey": "6065fa6fda743b3714f1ccb66543e3d5da658f886662a698e840831d1b6f225f",
+      "amountNQT": "34"
+    },{
+      "recipient": "CDW-9WKZ-DV7P-M6MN-5MH8B",
+      "recipientPublicKey": "1e050e54f1c5516958d577380a223ea317865ff21523083ac2068e34b8237811",
+      "amountNQT": "45"
+    }
+  ]
+}
