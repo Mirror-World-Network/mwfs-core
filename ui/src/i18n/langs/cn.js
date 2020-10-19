@@ -107,6 +107,7 @@ const cn = {
         'income_and_expenditure_details': "收支明细",
         'payout': "支出",
         'income': "收入",
+        'batch_transfer': "空投",
     },
     transaction: {
         'transaction_record': "交易记录",
@@ -196,6 +197,7 @@ const cn = {
         'message_tip': "请输入信息内容",
         'secret_key': "秘钥",
         'transfer_send': "发送",
+        'batch_transfer_title': "批量转账",
     },
     account_info: {
         'account_information': "账户详情",

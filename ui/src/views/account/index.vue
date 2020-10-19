@@ -27,6 +27,16 @@
                             </span>
                             <span>{{$t('account.transfer')}}</span>
                         </button>
+                        <button class="common_btn imgBtn writeBtn" @click="openBatchTransferDialog">
+                            <span class="icon">
+                                <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 174.62 174.83">
+                                    <path
+                                            d="M25.2,105.9a75.08,75.08,0,0,1,138-47.3L80.5,141.3a6,6,0,0,0-1.3,6.7,6.28,6.28,0,0,0,5.7,3.7l34.6-.7a6.12,6.12,0,0,0,6-6.2,6,6,0,0,0-1.9-4.4,6.21,6.21,0,0,0-4.3-1.6l-19.5.4,75.4-75.4a6.2,6.2,0,0,0,1-7.3A87,87,0,0,0,33,43.2,86.52,86.52,0,0,0,13.1,107a91.17,91.17,0,0,0,3.3,17.3,5.7,5.7,0,0,0,3,3.6,6.15,6.15,0,0,0,4.6.5,5.86,5.86,0,0,0,3.6-2.9,6.15,6.15,0,0,0,.5-4.6A76.49,76.49,0,0,1,25.2,105.9ZM187,91.3a6.13,6.13,0,0,0-6.6-5.5,6.06,6.06,0,0,0-5.5,6.6A75.26,75.26,0,0,1,106.8,174,76.18,76.18,0,0,1,43,148.1L126.1,65a6.11,6.11,0,0,0,1.2-6.9,6.2,6.2,0,0,0-6.1-3.5L86.4,57.7a6.12,6.12,0,0,0,1.1,12.2l18.1-1.6L30.4,143.4a6.09,6.09,0,0,0-.5,8,89.05,89.05,0,0,0,70.4,35.1c2.5,0,5.1-.1,7.6-0.3A87.56,87.56,0,0,0,187,91.3Z"
+                                            transform="translate(-12.73 -11.67)"></path>
+                                </svg>
+                            </span>
+                            <span>{{$t('account.batch_transfer')}}</span>
+                        </button>
                         <button class="common_btn imgBtn writeBtn" v-if="whetherShowSendMsgBtn()" @click="openSendMessageDialog">
                             <span class="icon">
                                 <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 171.43 137.08">
@@ -528,6 +538,63 @@
                 </div>
             </div>
         </div>
+        <!-- view transfer account dialog -->
+        <div class="modal" id="batch_transfer_accounts_modal" v-show="batchTranferAccountsDialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button class="close" @click="closeDialog"></button>
+                        <h4 class="modal-title">{{$t('transfer.batch_transfer_title')}}</h4>
+                    </div>
+                    <div class="modal-body modal-message">
+                        <el-form>
+                            <el-form-item :label="$t('transfer.receiver')" class="item_receiver">
+                                <masked-input id="batch_tranfer_receiver" mask="AAA-****-****-****-*****"
+                                              v-model="batch_transfer.receiver"/>
+                                <img src="../../assets/img/account_directory.svg"/>
+                            </el-form-item>
+                            <el-form-item :label="$t('transfer.receiver_public_key')" v-if="batch_transfer.hasPublicKey">
+                                <el-input v-model="batch_transfer.publicKey" type="password"></el-input>
+                            </el-form-item>
+                            <el-form-item :label="$t('transfer.amount')">
+                                <input class="el-input__inner" v-model="batch_transfer.number" type="number"/>
+                                <label class="input_suffix">{{$global.unit}}</label>
+                            </el-form-item>
+                            <el-form-item :label="$t('transfer.fee')">
+                                <el-button class="calculate_fee" @click="getTransferFee()">
+                                    {{$t('transfer.calc_short')}}
+                                </el-button>
+                                <input class="el-input__inner" v-model="batch_transfer.fee" type="number"/>
+                                <label class="input_suffix">{{$global.unit}}</label>
+                            </el-form-item>
+                            <el-form-item label="">
+                                <el-checkbox v-model="batch_transfer.hasMessage">{{$t('transfer.enable_add_info')}}
+                                </el-checkbox>
+                                <el-checkbox ref="encrypted2" v-model="batch_transfer.isEncrypted"
+                                             :disabled="!batch_transfer.hasMessage">{{$t('transfer.encrypted_information')}}
+                                </el-checkbox>
+                                <el-input
+                                        type="textarea"
+                                        :autosize="{ minRows: 2, maxRows: 10}"
+                                        resize="none"
+                                        :placeholder="$t('transfer.message_tip')"
+                                        v-model="batch_transfer.message"
+                                        :disabled="!batch_transfer.hasMessage">
+                                </el-input>
+                            </el-form-item>
+                            <el-form-item :label="$t('transfer.secret_key')" v-if="!secretPhrase">
+                                <el-input v-model="batch_transfer.password" type="password"></el-input>
+                            </el-form-item>
+                        </el-form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" v-loading="batch_transfer.executing" class="btn common_btn writeBtn" @click="sendTransferInfo">
+                            {{$t('transfer.transfer_send')}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- view client init setting dialog -->
         <div class="modal_hubSetting" id="hub_init_setting" v-show="hubInitDialog">
             <div class="modal-header" @click="displaySerialNo('initial')">
@@ -961,6 +1028,7 @@
                 onChainDialog:false,
                 joinNetDialog:false,
                 tranferAccountsDialog: false,
+                batchTranferAccountsDialog: false,
                 hubSettingDialog: false,
                 hubInitDialog: false,
                 useNATServiceDialog: false,
@@ -1021,6 +1089,19 @@
                 storagefile: null,
                 onchainfile:null,
                 transfer: {
+                    receiver: "CDW-____-____-____-_____",
+                    number: 0,
+                    fee: 1,
+                    hasMessage: false,
+                    message: "",
+                    isEncrypted: false,
+                    executing: false,
+                    password: "",
+                    hasPublicKey: false,
+                    publicKey: "",
+                    errorCode: false
+                },
+                batch_transfer: {
                     receiver: "CDW-____-____-____-_____",
                     number: 0,
                     fee: 1,
@@ -2533,6 +2614,14 @@
                 this.tranferAccountsDialog = true;
                 this.transfer.executing = false;
             },
+            openBatchTransferDialog: function () {
+                if (SSO.downloadingBlockchain) {
+                    return this.$message.warning(this.$t("account.synchronization_block"));
+                }
+                this.$store.state.mask = true;
+                this.batchTranferAccountsDialog = true;
+                this.transfer.executing = false;
+            },
             openHubSettingDialog: function () {
                 const _this = this;
                 _this.getLatestHubVersion();
@@ -2692,6 +2781,7 @@
                 this.accountSecret="";
                 this.mortgageFee = 0;
                 this.tranferAccountsDialog = false;
+                this.batchTranferAccountsDialog = false;
                 this.hubSettingDialog = false;
                 this.hubInitDialog = false;
                 this.tradingInfoDialog = false;
@@ -3188,6 +3278,9 @@
                 _this.validationReceiver("messageForm");
             });
             $('#tranfer_receiver').on("blur", function () {
+                _this.validationReceiver("transfer");
+            });
+            $('#batch_tranfer_receiver').on("blur", function () {
                 _this.validationReceiver("transfer");
             });
             window.onbeforeunload = function (e) {

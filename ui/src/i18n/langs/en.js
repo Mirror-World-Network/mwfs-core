@@ -106,6 +106,7 @@ const en = {
         'income_and_expenditure_details': "Balance Details",
         'payout': "Payouts",
         'income': "Income",
+        'batch_transfer': "Air-Drop",
     },
     transaction: {
         'transaction_record': "Transaction Records",
@@ -195,6 +196,7 @@ const en = {
         'message_tip': "Please enter your message",
         'secret_key': "Mnemonic Phrase",
         'transfer_send': "Transfer",
+        'batch_transfer_title': "Air-Drop",
     },
     account_info: {
         'account_information': "Account Details",
