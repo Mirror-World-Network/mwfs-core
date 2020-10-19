@@ -397,7 +397,6 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
 
         checkAndResetForNewNetwork();
 
-        
 //        // switch fork
 //        if(StringUtils.isEmpty(currentFork) || !"Giant".equals(currentFork)){
 //            forceSwitchForkAccordingToCmdTool(); // execute immediately once

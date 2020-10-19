@@ -160,14 +160,16 @@ public class Generator implements Comparable<Generator> {
         // last known block check for the normal nodes
         if (lastBlock == null || lastBlock.getHeight() < Constants.LAST_KNOWN_BLOCK) {
             if(Logger.printNow(Logger.Generator_isMintHeightReached)) {
-                Logger.logWarningMessage("last known block height is " + Constants.LAST_KNOWN_BLOCK
+                Logger.logInfoMessage("[Tip] Last known block height is " + Constants.LAST_KNOWN_BLOCK
                         + ", and current height is " + lastBlock.getHeight()
-                        + ", don't mining till blocks sync finished...");
+                        + ", don't mining till block sync finished");
             }
             return false;
         }
         
-        if(dontWait) return true;
+        if(dontWait) {
+            return true;
+        }
         
         // blockchain is synchronizing blocks or stuck
         if(!Conch.getBlockchainProcessor().isUpToDate()) {
@@ -187,15 +189,21 @@ public class Generator implements Comparable<Generator> {
             if(foundBlockStuckOnBootNode && linkedGenerator != null) {
                 int timestamp = linkedGenerator.getTimestamp(generationLimit);
                 if (verifyHit(linkedGenerator.hit, linkedGenerator.pocScore, lastBlock, timestamp)) {
-                    Logger.logInfoMessage("[BootNode] Current blockchain was stuck[sinceLastBlock=%d minutes], but boot node should keep mining when the miner[%s]' hit is matched at height %d", minutesSinceLastBlock,linkedGenerator.rsAddress, lastBlock.getHeight());
+                    Logger.logInfoMessage("[BootNode] Current blockchain was stuck[sinceLastBlock=%d minutes], " +
+                            "but boot node should keep mining when the miner[%s]' hit is matched at height %d",
+                            minutesSinceLastBlock, linkedGenerator.rsAddress, lastBlock.getHeight());
                 }else{
-                    Logger.logDebugMessage("[BootNode] Current blockchain was stuck[sinceLastBlock=%d minutes], but boot node miner[%s]'s hit[%d] didn't matched now at height %d, wait for next round check", minutesSinceLastBlock,linkedGenerator.rsAddress,linkedGenerator.hit, lastBlock.getHeight());
+                    Logger.logDebugMessage("[BootNode] Current blockchain was stuck[sinceLastBlock=%d minutes], " +
+                            "but boot node miner[%s]'s hit didn't matched at height %d, its mining time is %s",
+                            minutesSinceLastBlock, linkedGenerator.rsAddress, lastBlock.getHeight(), Convert.dateFromEpochTime(linkedGenerator.hitTime));
                     return false;
                 }
             }else{
                 if(Logger.printNow(Logger.Generator_isBlockStuckOnBootNode)) {
                     String nodeType = isBootNode ? "Boot" : "Normal";
-                    Logger.logInfoMessage("[ TIPS ] Current node is %s node and block chain state isn't UP_TO_DATE, maybe it is downloading blocks or stuck at height %d. wait for blocks synchronizing finished...", nodeType, lastBlock.getHeight());
+                    Logger.logInfoMessage("[Tip] Current node is %s node and blockchain state isn't UP_TO_DATE, " +
+                            "maybe it is downloading blocks or stuck at height %d. wait for blocks synchronizing finished...",
+                            nodeType, lastBlock.getHeight());
                 }
                 return false;
             }
@@ -204,7 +212,8 @@ public class Generator implements Comparable<Generator> {
         
         if(!Conch.getPocProcessor().pocTxsProcessed(lastBlock.getHeight())) {
             if(Logger.printNow(Logger.Generator_isPocTxsProcessed)) {
-                Logger.logDebugMessage("[ TIPS ] Delayed or old poc txs haven't processed, don't mining till poc txs be processed before height %d...", lastBlock.getHeight());
+                Logger.logDebugMessage("[Tip] Delayed or old poc txs haven't processed, " +
+                        "don't mining till poc txs be processed before height %d...", lastBlock.getHeight());
             }
             return false;
         }
