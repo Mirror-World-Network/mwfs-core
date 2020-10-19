@@ -558,6 +558,18 @@
                     clearInterval(peerDataLoader);
                 }
             }, 15*60*1000);
+
+            window.onbeforeunload = function (e) {
+                e = e || window.event;
+
+                // 兼容IE8和Firefox 4之前的版本
+                if (e) {
+                    e.returnValue = "您是否确认离开此页面-您输入的数据可能不会被保存";
+                }
+
+                // Chrome, Safari, Firefox 4+, Opera 12+ , IE 9+
+                return "您是否确认离开此页面-您输入的数据可能不会被保存";
+            };
         },
         filters: {
             generatorRSFilter(val) {
@@ -755,22 +767,6 @@
             //     }
             // }
         },
-        mounted() {
-            window.onbeforeunload = function (e) {
-                e = e || window.event;
-
-                debugger;
-
-                // 兼容IE8和Firefox 4之前的版本
-                if (e) {
-                    e.returnValue = "您是否确认离开此页面-您输入的数据可能不会被保存";
-                }
-
-                // Chrome, Safari, Firefox 4+, Opera 12+ , IE 9+
-                return "您是否确认离开此页面-您输入的数据可能不会被保存";
-            };
-        }
-
     };
 </script>
 <style lang="scss" type="text/scss">
