@@ -160,7 +160,9 @@ public class RewardCalculator {
             }
             // qualified miner judgement
             Account declaredAccount = Account.getAccount(certifiedPeer.getBoundAccountId());
-            if(declaredAccount == null) continue;
+            if(declaredAccount == null) {
+                continue;
+            }
 
             long holdingMwAmount = 0;
             try{
@@ -169,11 +171,15 @@ public class RewardCalculator {
                 Logger.logWarningMessage("[QualifiedMiner] not valid miner because can't get balance of account %s at height %d, caused by %s",  declaredAccount.getRsAddress(), height, e.getMessage());
                 holdingMwAmount = 0;
             }
-            if(holdingMwAmount < QUALIFIED_CROWD_MINER_HOLDING_AMOUNT_MIN) continue;
+            if(holdingMwAmount < QUALIFIED_CROWD_MINER_HOLDING_AMOUNT_MIN) {
+                continue;
+            }
 
             // poc score judgement
             PocScore pocScore = PocHolder.getPocScore(height, declaredAccount.getId());
-            if(pocScore == null || pocScore.total().longValue() <= 0) continue;
+            if(pocScore == null || pocScore.total().longValue() <= 0) {
+                continue;
+            }
 
             crowdMinerPocScoreMap.put(declaredAccount.getId(), pocScore.total().longValue());
         }
