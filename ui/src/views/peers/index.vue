@@ -328,7 +328,7 @@
             // peers filter
             peersListFilter(peersList){
                 let newPeersList = [];
-                let validPrecent = 0; 
+                let validPrecent = 0;
                 console.log("[peersList]", peersList);
                 peersList.forEach(ele => {
                     if(ele.state){
@@ -340,10 +340,10 @@
                 if (validPrecent < this.standardPrecent) {
                     // 1. !NON_CONNECTED peer less than standardPrecent of all peer, filter corresponding peer
                     return newPeersList;
-                } 
+                }
                 // 2. Otherwise, do no filtering
                 return peersList;
-                    
+
             },
             getSPPeers:function(){
                 const _this = this;
@@ -534,25 +534,18 @@
             this.$global.drawPeers(this.peersLocationList, this.peersTimeList);
             window.onbeforeunload = function (e) {
                 e = e || window.event;
-
-                // 兼容IE8和Firefox 4之前的版本
-                if (e) {
-                    e.returnValue = "您是否确认离开此页面-您输入的数据可能不会被保存";
-                }
-
-                // Chrome, Safari, Firefox 4+, Opera 12+ , IE 9+
-                return "您是否确认离开此页面-您输入的数据可能不会被保存";
+                return e;
             };
-            if(Date.parse(new Date()) - this.startTimestamp > 600000 ){      
-                clearInterval(this.timer)    
-            }else{      
-                this.timer = setInterval(()=>{       
-                    this.init(this.$global.peers.peers)     
-                },SSO.downloadingBlockchain ? this.$global.cfg.soonInterval : this.$global.cfg.defaultInterval)       
-            };  
+            if(Date.parse(new Date()) - this.startTimestamp > 600000 ){
+                clearInterval(this.timer)
+            }else{
+                this.timer = setInterval(()=>{
+                    this.init(this.$global.peers.peers)
+                },SSO.downloadingBlockchain ? this.$global.cfg.soonInterval : this.$global.cfg.defaultInterval)
+            };
         },
-        destroyed(){    
-            clearInterval(this.timer)  
+        destroyed(){
+            clearInterval(this.timer)
         },
     };
 </script>
