@@ -172,7 +172,6 @@ public class PocHolder implements Serializable {
 
     static PocScore saveOrUpdate(PocScore pocScore) {
         PocDb.saveOrUpdateScore(pocScore);
-        
         PocScore pocScoreDetail = inst.scoreMap.get(pocScore.accountId);
 
         if(pocScoreDetail == null

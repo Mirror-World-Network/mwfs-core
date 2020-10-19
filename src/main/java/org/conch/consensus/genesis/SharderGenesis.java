@@ -1,5 +1,8 @@
 package org.conch.consensus.genesis;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -17,6 +20,8 @@ import org.conch.util.Logger;
 
 import java.security.MessageDigest;
 import java.util.*;
+
+import static org.conch.util.JSON.readJsonFile;
 
 /**
  * Sharder Genesis 
@@ -61,10 +66,17 @@ public class SharderGenesis {
         enableGenesisAccount = true;
     }
 
+    protected static final JSONObject genesisJsonObj = loadGenesisSettings();
+    private static JSONObject loadGenesisSettings() {
+        String path = "conf/genesis.json";
+        String jsonStr = readJsonFile(path);
+        return JSON.parseObject(jsonStr);
+    }
 
     public static class GenesisPeer {
         public String domain;
         public Peer.Type type;
+        public byte typeCode = -1;
         public long accountId;
         public long diskCapacity;
 
@@ -74,34 +86,39 @@ public class SharderGenesis {
             this.accountId = accountId;
         }
 
-        private GenesisPeer(String domain,Peer.Type type, long accountId, long diskCapacity){
+        private GenesisPeer(String domain, Peer.Type type, long accountId, long diskCapacity){
             this.domain = domain;
             this.type = type;
             this.accountId = accountId;
             this.diskCapacity = diskCapacity;
         }
 
-        static Map<Constants.Network, List<GenesisPeer>> genesisPeers = new HashMap<>();
-        static {
-            List<GenesisPeer> devnetPeers = Lists.newArrayList(
-                    new GenesisPeer("devboot.mw.run",Peer.Type.FOUNDATION, 6219247923802955552L),
-                    new GenesisPeer("devna.mw.run",Peer.Type.FOUNDATION, 3790328149872734783L),
-                    new GenesisPeer("devnb.mw.run",Peer.Type.FOUNDATION, 90778548339644322L)
-            );
+        public GenesisPeer(){}
 
-            // 1T=1073741824L
-            List<GenesisPeer> testnetPeers = Lists.newArrayList(
-                    new GenesisPeer("testboot.mw.run",Peer.Type.FOUNDATION, -5748075279486471936L, 1073741824L),
-                    new GenesisPeer("testna.mw.run",Peer.Type.FOUNDATION, -6802345313304048560L, 1073741824L),
-                    new GenesisPeer("testnb.mw.run",Peer.Type.FOUNDATION, 6066546424236439063L, 1073741824L)
-            );
+        private void mappingType(){
+            if(this.typeCode == -1) {
+                return;
+            }
+            this.type = Peer.Type.getByCode(this.typeCode);
+        }
 
-            List<GenesisPeer> mainnetPeers = Lists.newArrayList(
-                //
-            );
-            genesisPeers.put(Constants.Network.DEVNET,devnetPeers);
-            genesisPeers.put(Constants.Network.TESTNET,testnetPeers);
-            genesisPeers.put(Constants.Network.MAINNET,mainnetPeers);
+        static final Map<Constants.Network, List<GenesisPeer>> genesisPeers = loadGenesisPeers();
+        static Map<Constants.Network, List<GenesisPeer>> loadGenesisPeers() {
+            Map<Constants.Network, List<GenesisPeer>> genesisPeers = Maps.newHashMap();
+            JSONArray jsonArrayDev = SharderGenesis.genesisJsonObj.getJSONArray("devnetPeers");
+            List<GenesisPeer> devnetPeers = JSONObject.parseArray(jsonArrayDev.toJSONString(), GenesisPeer.class);
+            JSONArray jsonArrayTest = SharderGenesis.genesisJsonObj.getJSONArray("testnetPeers");
+            List<GenesisPeer> testnetPeers = JSONObject.parseArray(jsonArrayTest.toJSONString(), GenesisPeer.class);
+            JSONArray jsonArrayMain = SharderGenesis.genesisJsonObj.getJSONArray("mainnetPeers");
+            List<GenesisPeer> mainnetPeers = JSONObject.parseArray(jsonArrayMain.toJSONString(), GenesisPeer.class);
+            devnetPeers.forEach(peer -> peer.mappingType());
+            testnetPeers.forEach(peer -> peer.mappingType());
+            mainnetPeers.forEach(peer -> peer.mappingType());
+            genesisPeers.put(Constants.Network.DEVNET, devnetPeers);
+            genesisPeers.put(Constants.Network.TESTNET, testnetPeers);
+            genesisPeers.put(Constants.Network.MAINNET, mainnetPeers);
+
+            return genesisPeers;
         }
 
         public static List<GenesisPeer> getAll(){

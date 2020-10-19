@@ -31,6 +31,7 @@ import org.conch.chain.*;
 import org.conch.common.Constants;
 import org.conch.consensus.poc.PocScore;
 import org.conch.crypto.Crypto;
+import org.conch.db.Db;
 import org.conch.env.RuntimeEnvironment;
 import org.conch.mint.pool.SharderPoolProcessor;
 import org.conch.peer.CertifiedPeer;
@@ -588,13 +589,13 @@ public class Generator implements Comparable<Generator> {
         int elapsedTime = timestamp - previousBlock.getTimestamp();
         if (elapsedTime <= 0) {
             if(Generator.isBootNode) {
-                Logger.logWarningMessage("continue to validate the hit when the Boot Node's elapsed time[%d] <=0 to avoid the block stuck in the single boot node situation", elapsedTime);
+                Logger.logDebugMessage("continue to validate the hit when the Boot Node's elapsed time[%d] <=0 to avoid the block stuck in the single boot node situation", elapsedTime);
             }else {
-                Logger.logWarningMessage("verify hit failed caused by this generator missing the turn to generate when the elapsed time[%d] <=0", elapsedTime);
+                Logger.logDebugMessage("Verify hit failed caused by this generator missing the turn to generate when the elapsed time[%d] <=0", elapsedTime);
                 return false;
             }
         }else if(elapsedTime < Constants.getBlockGapSeconds()){
-            Logger.logWarningMessage("verify hit failed caused by this generator's elapsed time[%d] is in the block gap[%d]", elapsedTime,Constants.getBlockGapSeconds() );
+            Logger.logDebugMessage("Verify hit failed caused by this generator's elapsed time[%d] is in the block gap[%d]", elapsedTime,Constants.getBlockGapSeconds() );
             return false;
         }
         
@@ -607,7 +608,7 @@ public class Generator implements Comparable<Generator> {
         // 3 right situations: a) last hit < current hit < current target, b) this block is elapsed, c) in offline mode
         boolean validHit = hit.compareTo(target) < 0 && (hit.compareTo(prevTarget) >= 0 || elapsed || Constants.isOffline);
         if(!validHit) {
-            Logger.logDebugMessage("verify hit failed, hit should smaller than target [hit=%d, target=%d, poc score=%d, previous target=%d, elapsed time=%d]",hit, target, pocScore, prevTarget, elapsedTime);
+            Logger.logDebugMessage("Verify hit failed, hit should smaller than target [hit=%d, target=%d, poc score=%d, previous target=%d, elapsed time=%d]",hit, target, pocScore, prevTarget, elapsedTime);
         }
         return validHit;
     }
@@ -752,39 +753,50 @@ public class Generator implements Comparable<Generator> {
             }
         }
     }
+
+    /**
+     * Need test and finish the logic
+     * @param accountId
+     * @param height
+     * @return
+     */
+    private long CheckOrDeclareNewAccount(long accountId, int height){
+         Account newAccount = null;
+         // if the miner dose not be public to the network yet, new a account locally
+         if (!Db.db.isInTransaction()) {
+             try {
+                 Db.db.beginTransaction();
+                 Account account = Account.getAccount(accountId, height);
+                 if(account == null) {
+                     account = Account.addOrGetAccount(accountId);
+                     account.apply(Account.getPublicKey(accountId));
+                 }
+                 Db.db.commitTransaction();
+             } catch (Exception e) {
+                Db.db.rollbackTransaction();
+                throw e;
+             } finally {
+                Db.db.endTransaction();
+             }
+         }
+         return -1;
+    }
     /**
      * calculate the poc score and set the hit
      * @param lastBlock
      */
     protected void calAndSetHit(Block lastBlock) {
         if(lastBlock == null) {
-            Logger.logWarningMessage("last block is null, can't calculate the poc score and hit of account[" + rsAddress + ",id=" + accountId + "]");
+            Logger.logWarningMessage("Last block is null, can't calculate the poc score and hit of account[" + rsAddress + ",id=" + accountId + "]");
             return;
         }
         
         int lastHeight = lastBlock.getHeight();
         Account account = Account.getAccount(accountId, lastHeight);
         if(account == null) {
-            Logger.logWarningMessage("current account %s [id=%d] is a new account, please create some txs or receive some MW from other accounts", rsAddress, accountId);
+            Logger.logWarningMessage("Current account %s [id=%d] is a new account, please create some txs or receive some money from other accounts", rsAddress, accountId);
             return;
         }
-        /**
-        // if the miner dose not be public to the network yet, new a account locally
-        if (!Db.db.isInTransaction()) {
-            try {
-                Db.db.beginTransaction();
-                if(account == null) {
-                    Account.addOrGetAccount(accountId).apply(getPublicKey());
-                }
-                Db.db.commitTransaction();
-            } catch (Exception e) {
-                Db.db.rollbackTransaction();
-                throw e;
-            } finally {
-                Db.db.endTransaction();
-            }
-        }
-        **/
 
         PocScore pocScoreObj = Conch.getPocProcessor().calPocScore(account,lastHeight);
         effectiveBalance = pocScoreObj.getEffectiveBalance();

@@ -28,8 +28,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.conch.Conch;
 import org.conch.account.Account;
 import org.conch.chain.Block;
-import org.conch.chain.BlockDb;
-import org.conch.chain.BlockImpl;
 import org.conch.chain.CheckSumValidator;
 import org.conch.common.Constants;
 import org.conch.common.UrlManager;
@@ -269,7 +267,7 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
         }
     }
 
-    public static void checkAndManualReset(){
+    public static void checkOrManualReset(){
         // manual reset
         String resetStr = Conch.getStringProperty(PROPERTY_MANUAL_RESET, null);
         boolean needManualReset = StringUtils.isEmpty(resetStr) ? true : Boolean.valueOf(resetStr);
@@ -365,7 +363,7 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
     /**
      * New Testnet is start form version v0.0.5
      */
-    private static void checkAndResetOldClients(){
+    private static void checkOrResetOldClients(){
         if(!resetForOldClient) {
             return;
         }
@@ -375,21 +373,13 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
             String updateTime = "2020-08-20 19:19:19";
             boolean forceReset = Conch.versionCompare(version, updateTime) <= 0;
 
-            int currentHeight = 0;
-            try{
-                BlockImpl lastBlock = BlockDb.findLastBlock();
-                currentHeight = (lastBlock != null) ? lastBlock.getHeight() : 0 ;
-            }catch(Exception e){
-                Logger.logErrorMessage("can't get the last block height in the trim processing", e);
-            }
-
-            if(currentHeight >= 18485
-            && forceReset) {
+            if(forceReset) {
                 _manualReset();
+                Conch.restartApplication(null);
             }
 
         } catch (Exception e) {
-            Logger.logErrorMessage("resetForNetworkReset occur unknown exception", e);
+            Logger.logErrorMessage("checkOrResetOldClients occur unknown exception", e);
         }
     }
 
@@ -403,8 +393,8 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
         }
 
 //       checkOrForceDeleteBakFolder();
-        checkAndManualReset();
-        checkAndResetOldClients();
+        checkOrManualReset();
+        checkOrResetOldClients();
 
 //        // switch fork
 //        if(StringUtils.isEmpty(currentFork) || !"Giant".equals(currentFork)){

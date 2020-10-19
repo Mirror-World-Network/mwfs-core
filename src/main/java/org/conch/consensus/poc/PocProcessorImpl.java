@@ -745,7 +745,9 @@ public class PocProcessorImpl implements PocProcessor {
      * @return
      */
     private static boolean nodeTypeTxProcess(int height, Transaction tx) {
-        if (tx == null)  return false;
+        if (tx == null) {
+            return false;
+        }
 
         PocTxBody.PocNodeTypeV2 nodeTypeV2 = null;
         PocTxBody.PocNodeTypeV3 nodeTypeV3 = null;
@@ -787,10 +789,6 @@ public class PocProcessorImpl implements PocProcessor {
             Logger.logDebugMessage("[LocalDebugMode] node statement address %s is in the poc tx processing ", Account.rsAccount(accountId));
         }
 
-//        ACCOUNT_ID = -2448817859391213308 and HEIGHT = 13793
-//        if(accountId == -2448817859391213308L){
-//            Logger.logDebugMessage("at account id is -2448817859391213308L");
-//        }
         PocScore pocScoreToUpdate = PocHolder.getPocScore(height, accountId);
         PocHolder.saveOrUpdate(pocScoreToUpdate.setHeight(height).nodeTypeCal(nodeTypeV3 != null ? nodeTypeV3 : nodeTypeV2));
         
