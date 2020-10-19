@@ -2189,7 +2189,10 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             try {
                 BlockImpl block = blockchain.getLastBlock();
                 block.loadTransactions();
-                Logger.logDebugMessage("Rollback from block " + block.getStringId() + " at height " + block.getHeight() + " to " + commonBlock.getStringId() + " at height " + commonBlock.getHeight());
+                Logger.logDebugMessage("Rollback from height %d[id=%d, miner=%s] to height %d[id=%d, miner=%s]"
+                , block.getHeight(), block.getId(), Account.rsAccount(block.getGeneratorId())
+                , commonBlock.getHeight(), commonBlock.getId(), Account.rsAccount(commonBlock.getGeneratorId())
+                );
                 while (block.getId() != commonBlock.getId() && block.getId() != SharderGenesis.GENESIS_BLOCK_ID) {
                     poppedOffBlocks.add(block);
                     block = popLastBlock();

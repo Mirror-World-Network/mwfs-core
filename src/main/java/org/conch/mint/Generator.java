@@ -233,23 +233,35 @@ public class Generator implements Comparable<Generator> {
                 try {
                     BlockchainImpl.getInstance().updateLock();
                     try {
-                        if(forcePause) return;
+                        if(forcePause) {
+                            return;
+                        }
 
                         final int generationLimit = Conch.getEpochTime() - delayTime;
                         Block lastBlock = Conch.getBlockchain().getLastBlock();
-                        if(!miningConditionReached(lastBlock, generationLimit)) return;
+                        if(!miningConditionReached(lastBlock, generationLimit)) {
+                            return;
+                        }
                         
                         checkOrStartAutoMining();
                        
-                        if (lastBlock.getId() != lastBlockId || sortedMiners == null || sortedMiners.size() == 0) {
+                        if (lastBlock.getId() != lastBlockId
+                            || sortedMiners == null
+                            || sortedMiners.size() == 0) {
                             lastBlockId = lastBlock.getId();
+                            // reset the last block and add its txs into waiting tx list when last block is obsolete
                             if (lastBlock.getTimestamp() > Conch.getEpochTime() - 600) {
                                 Block previousBlock = Conch.getBlockchain().getBlock(lastBlock.getPreviousBlockId());
                                 for (Generator generator : generators.values()) {
                                     generator.setLastBlock(previousBlock);
-                                    int timestamp = generator.getTimestamp(generationLimit);
-                                    if (timestamp != generationLimit && generator.getHitTime() > 0 && timestamp < lastBlock.getTimestamp()) {
-                                        Logger.logDebugMessage("Pop off: " + generator.toString() + " will pop off last block " + lastBlock.getStringId());
+                                    int miningTime = generator.getTimestamp(generationLimit);
+                                    if (miningTime != generationLimit
+                                        && generator.getHitTime() > 0
+                                        && miningTime < lastBlock.getTimestamp()) {
+                                        Logger.logDebugMessage("Mining time is missing, pop off last block [height=%d, miner=%s, id=%d] for %s"
+                                            , lastBlock.getHeight(), lastBlock.getId(), Account.rsAccount(lastBlock.getGeneratorId())
+                                            , generator.toString()
+                                        );
                                         List<BlockImpl> poppedOffBlock = BlockchainProcessorImpl.getInstance().popOffTo(previousBlock);
                                         for (BlockImpl block : poppedOffBlock) {
                                             TransactionProcessorImpl.getInstance().processLater(block.getTransactions());
@@ -261,6 +273,7 @@ public class Generator implements Comparable<Generator> {
                                 }
                             }
 
+                            // active miners
                             List<Generator> forgers = new ArrayList<>();
                             for (Generator generator : generators.values()) {
                                 generator.setLastBlock(lastBlock);
@@ -289,8 +302,11 @@ public class Generator implements Comparable<Generator> {
                                 logged = true;
                             }
                         }
+
                         MinerPrinter.print();
                         // generationMissingMinerIds.clear();
+
+                        // mint
                         for (Generator generator : sortedMiners) {
                             if(generator.getHitTime() > generationLimit) {
                                 return;
