@@ -249,8 +249,8 @@ public class Generator implements Comparable<Generator> {
                             || sortedMiners == null
                             || sortedMiners.size() == 0) {
                             lastBlockId = lastBlock.getId();
-                            // reset the last block and add its txs into waiting tx list when last block is obsolete
-                            boolean lastBlockGeneratedInGap = lastBlock.getTimestamp() > (Conch.getEpochTime() - 600);
+                            // drop current last block, and use the previous block as the last block
+                            boolean lastBlockGeneratedInGap = lastBlock.getTimestamp() > (Conch.getEpochTime() - Constants.getBlockGapSeconds());
                             if (lastBlockGeneratedInGap
                                 && !isBootNode) {
                                 Block previousBlock = Conch.getBlockchain().getBlock(lastBlock.getPreviousBlockId());
