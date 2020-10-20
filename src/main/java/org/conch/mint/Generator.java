@@ -203,8 +203,8 @@ public class Generator implements Comparable<Generator> {
                 if(Logger.printNow(Logger.Generator_isBlockStuckOnBootNode)) {
                     String nodeType = isBootNode ? "Boot" : "Normal";
                     Logger.logInfoMessage("[Tip] Current node is %s node and blockchain state isn't UP_TO_DATE, " +
-                            "maybe it is downloading blocks or stuck at height %d. wait for blocks synchronizing finished...",
-                            nodeType, lastBlock.getHeight());
+                            "maybe it is downloading blocks or stuck[height=%d, sinceLastBlock=%d minutes, triggerDelay=%d minutes]. Wait for blocks synchronizing finished...",
+                            nodeType, lastBlock.getHeight(), minutesSinceLastBlock, OBSOLETE_DELAY);
                 }
                 return false;
             }
@@ -250,7 +250,9 @@ public class Generator implements Comparable<Generator> {
                             || sortedMiners.size() == 0) {
                             lastBlockId = lastBlock.getId();
                             // reset the last block and add its txs into waiting tx list when last block is obsolete
-                            if (lastBlock.getTimestamp() > Conch.getEpochTime() - 600) {
+                            boolean lastBlockGeneratedInGap = lastBlock.getTimestamp() > (Conch.getEpochTime() - 600);
+                            if (lastBlockGeneratedInGap
+                                && !isBootNode) {
                                 Block previousBlock = Conch.getBlockchain().getBlock(lastBlock.getPreviousBlockId());
                                 for (Generator generator : generators.values()) {
                                     generator.setLastBlock(previousBlock);
