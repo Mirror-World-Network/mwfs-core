@@ -213,6 +213,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             //check height
             if (checkHeight("ACCOUNT")) {
                 try {
+                    Conch.getBlockchain().updateLock();
                     long t1 = System.currentTimeMillis();
                     Db.db.beginTransaction();
                     Account.syncAccountTable("ACCOUNT","ACCOUNT_CACHE",Constants.SYNC_WORK_BLOCK_NUM);
@@ -225,6 +226,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     Db.db.rollbackTransaction();
                 }finally {
                     Db.db.endTransaction();
+                    Conch.getBlockchain().updateUnlock();
                 }
             }
         }
@@ -236,6 +238,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             //check height
             if (checkHeight("ACCOUNT_GUARANTEED_BALANCE")) {
                 try {
+                    Conch.getBlockchain().updateLock();
                     long t1 = System.currentTimeMillis();
                     Db.db.beginTransaction();
                     Account.syncAccountGuaranteedBalanceTable("ACCOUNT_GUARANTEED_BALANCE","ACCOUNT_GUARANTEED_BALANCE_CACHE",Constants.SYNC_WORK_BLOCK_NUM);
@@ -248,6 +251,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     Db.db.rollbackTransaction();
                 }finally {
                     Db.db.endTransaction();
+                    Conch.getBlockchain().updateUnlock();
                 }
             }
         }
@@ -282,6 +286,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             //check height
             if (checkHeight("ACCOUNT_POC_SCORE")) {
                 try {
+                    Conch.getBlockchain().updateLock();
                     long t1 = System.currentTimeMillis();
                     Db.db.beginTransaction();
                     Account.syncAccountPocScoreTable("ACCOUNT_POC_SCORE", "ACCOUNT_POC_SCORE_CACHE", Constants.SYNC_WORK_BLOCK_NUM);
@@ -294,6 +299,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     Db.db.rollbackTransaction();
                 }finally {
                     Db.db.endTransaction();
+                    Conch.getBlockchain().updateUnlock();
                 }
             }
         }
@@ -2551,8 +2557,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         byte[] generationSignature = digest.digest(publicKey);
         byte[] previousBlockHash = Crypto.sha256().digest(previousBlock.bytes());
 
-        BlockImpl block =
-                new BlockImpl(
+        BlockImpl block = new BlockImpl(
                         getBlockVersion(previousBlock.getHeight()),
                         blockTimestamp,
                         previousBlock.getId(),
@@ -2570,7 +2575,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             pushBlock(block);
             blockListeners.notify(block, Event.BLOCK_GENERATED);
             PocScore generatorScore = Conch.getPocProcessor().calPocScore(creator, previousBlock.getHeight());
-            Logger.logInfoMessage("Miner[id=%d, RS=%s, PoC=%d] generated block %d at height %d timestamp %s block reward[crowd miner count=%d] fee %d",
+            Logger.logInfoMessage("Miner[id=%d, RS=%s, PoC=%d] generated block %d at height %d timestamp %s block reward[crowd miner count=%d] fee %f",
                     creator.getId(), creator.getRsAddress(), generatorScore.total(),
                     block.getId(), block.getHeight(), Convert.dateFromEpochTime(block.getTimestamp()),RewardCalculator.crowdMinerCount(coinBaseTx.getAttachment()),
                     (float) block.getTotalFeeNQT() / Constants.ONE_SS);

@@ -190,13 +190,13 @@ public class Generator implements Comparable<Generator> {
             if(stuckOnBootNode && linkedGenerator != null) {
                 int miningTime = linkedGenerator.getTimestamp(generationLimit);
                 if (verifyHit(linkedGenerator.hit, linkedGenerator.pocScore, lastBlock, miningTime)) {
-                    Logger.logInfoMessage("[BootNode] Current blockchain was stuck[sinceLastBlock=%d minutes], " +
-                            "but boot node should keep mining when the miner[%s]' hit is matched at height %d",
-                            minutesSinceLastBlock, linkedGenerator.rsAddress, lastBlock.getHeight());
+                    Logger.logInfoMessage("[BootNode] Current blockchain was stuck[sinceLastBlock=%d minutes, triggerDelay=%d minutes], " +
+                            "but boot node will mining when the miner[%s]' hit is matched at height %d",
+                            minutesSinceLastBlock, OBSOLETE_DELAY, linkedGenerator.rsAddress, lastBlock.getHeight());
                 }else{
-                    Logger.logDebugMessage("[BootNode] Current blockchain was stuck[sinceLastBlock=%d minutes], " +
+                    Logger.logDebugMessage("[BootNode] Current blockchain was stuck[sinceLastBlock=%d minutes, triggerDelay=%d minutes], " +
                             "but boot node miner[%s]'s hit didn't matched at height %d, its mining time is %s",
-                            minutesSinceLastBlock, linkedGenerator.rsAddress, lastBlock.getHeight(), Convert.dateFromEpochTime(linkedGenerator.hitTime));
+                            minutesSinceLastBlock, OBSOLETE_DELAY, linkedGenerator.rsAddress, lastBlock.getHeight(), Convert.dateFromEpochTime(linkedGenerator.hitTime));
                     return false;
                 }
             }else{
@@ -231,7 +231,7 @@ public class Generator implements Comparable<Generator> {
         public void run() {
             try {
                 try {
-                    BlockchainImpl.getInstance().updateLock();
+                    Conch.getBlockchain().updateLock();
                     try {
                         if(forcePause) {
                             return;
@@ -258,8 +258,8 @@ public class Generator implements Comparable<Generator> {
                                     if (miningTime != generationLimit
                                         && generator.getHitTime() > 0
                                         && miningTime < lastBlock.getTimestamp()) {
-                                        Logger.logDebugMessage("Mining time is missing, pop off last block [height=%d, miner=%s, id=%d] for %s"
-                                            , lastBlock.getHeight(), lastBlock.getId(), Account.rsAccount(lastBlock.getGeneratorId())
+                                        Logger.logDebugMessage("Mining time is missed, pop off last block [height=%d, miner=%s, id=%d] for %s"
+                                            , lastBlock.getHeight(), Account.rsAccount(lastBlock.getGeneratorId()), lastBlock.getId()
                                             , generator.toString()
                                         );
                                         List<BlockImpl> poppedOffBlock = BlockchainProcessorImpl.getInstance().popOffTo(previousBlock);
@@ -273,7 +273,7 @@ public class Generator implements Comparable<Generator> {
                                 }
                             }
 
-                            // active miners
+                            // active miners and trigger re-cal
                             List<Generator> forgers = new ArrayList<>();
                             for (Generator generator : generators.values()) {
                                 generator.setLastBlock(lastBlock);
@@ -318,7 +318,7 @@ public class Generator implements Comparable<Generator> {
                         }
                         
                     } finally {
-                        BlockchainImpl.getInstance().updateUnlock();
+                        Conch.getBlockchain().updateUnlock();
                     }
                 } catch (Exception e) {
                     Logger.logErrorMessage("Error in block generation thread, ignore it and continue to next round", e);
@@ -605,8 +605,14 @@ public class Generator implements Comparable<Generator> {
         int elapsedTime = miningTime - previousBlock.getTimestamp();
         if (elapsedTime <= 0) {
             if(Generator.isBootNode) {
-                Logger.logDebugMessage("Continue to validate the hit when the Boot Node's elapsed time[%d] <=0 " +
-                                "to avoid the block stuck in the single boot node situation", elapsedTime);
+                if(linkedGenerator != null) {
+                    Logger.logDebugMessage("Set last block to re-cal the miner[%s]'s poc score and continue to validate the hit when the Boot Node's elapsed time[%d] <=0 " +
+                            "and stuck on the boot node", linkedGenerator.rsAddress, elapsedTime);
+                    linkedGenerator.setLastBlock(previousBlock);
+                    elapsedTime = linkedGenerator.getTimestamp(Conch.getEpochTime()-delayTime) - previousBlock.getTimestamp();
+                }else{
+                    return false;
+                }
             }else {
                 Logger.logDebugMessage("Verify hit failed caused by this generator missing the mining turn " +
                         "when the elapsed time[%d] <=0", elapsedTime);
@@ -619,7 +625,11 @@ public class Generator implements Comparable<Generator> {
         }
         
         BigInteger effectiveBaseTarget = BigInteger.valueOf(previousBlock.getBaseTarget()).multiply(pocScore);
-        BigInteger prevTarget = effectiveBaseTarget.multiply(BigInteger.valueOf(elapsedTime - Constants.getBlockGapSeconds() - 1));
+        int ratio = elapsedTime - Constants.getBlockGapSeconds() - 1;
+        if(ratio <= 0) {
+            ratio = 1;
+        }
+        BigInteger prevTarget = effectiveBaseTarget.multiply(BigInteger.valueOf(ratio));
         BigInteger target = prevTarget.add(effectiveBaseTarget);
         // check the elapsed time(in second) after previous block generated
         boolean elapsed = elapsedTime > Constants.getBlockGapSeconds();
@@ -627,7 +637,8 @@ public class Generator implements Comparable<Generator> {
         // 3 right situations: a) last hit < current hit < current target, b) this block is elapsed, c) in offline mode
         boolean validHit = hit.compareTo(target) < 0 && (hit.compareTo(prevTarget) >= 0 || elapsed || Constants.isOffline);
         if(!validHit) {
-            Logger.logDebugMessage("Verify hit failed, hit should smaller than target [hit=%d, target=%d, poc score=%d, previous target=%d, elapsed time=%d]",hit, target, pocScore, prevTarget, elapsedTime);
+            Logger.logDebugMessage("Verify hit failed, hit should smaller than target [hit=%d, target=%d, poc score=%d, previous target=%d, elapsed time=%d]",
+                    hit, target, pocScore, prevTarget, elapsedTime);
         }
         return validHit;
     }
@@ -852,36 +863,36 @@ public class Generator implements Comparable<Generator> {
     boolean mint(Block lastBlock, int generationLimit) throws BlockchainProcessor.BlockNotAcceptedException, BlockchainProcessor.GeneratorNotAcceptedException {
         int lastHeight = lastBlock.getHeight();
         if(!isValidMiner(accountId, lastHeight)){
-            Logger.logWarningMessage("%s failed to mint at height %d last timestamp %d, because this account is invalid", this.toString(), lastHeight, lastBlock.getTimestamp());
+            Logger.logWarningMessage("%s failed to mint at height %d last block's timestamp %s, because this account is invalid", this.toString(), lastHeight, Convert.dateFromEpochTime(lastBlock.getTimestamp()));
             return false;
         }
 
         boolean isDirectlyMiningPhase = isBootDirectlyMiningPhase(lastHeight);
-        int timestamp = getTimestamp(generationLimit);
-        if (!verifyHit(hit, pocScore, lastBlock, timestamp)) {
-            Logger.logInfoMessage("%s failed to mint at height %d last timestamp %d, because hit is invalid", this.toString(), lastHeight, lastBlock.getTimestamp());
+        int miningTime = getTimestamp(generationLimit);
+        if (!verifyHit(hit, pocScore, lastBlock, miningTime)) {
+            Logger.logInfoMessage("%s failed to mint at height %d last block's timestamp %s, because hit is invalid", this.toString(), lastHeight, Convert.dateFromEpochTime(lastBlock.getTimestamp()));
             return false;
         }
         
-        int start = Conch.getEpochTime();
+        int currentTime = Conch.getEpochTime();
         boolean isStuck = isBootNode
                 && isAutoMiningAccount(accountId)
                 && Conch.getBlockchainProcessor().isObsolete();
         String phaseStr = isDirectlyMiningPhase ? "in direct mining phase" : "stuck";
         if(isStuck || isDirectlyMiningPhase){
-            Logger.logInfoMessage("[BootNode] Current blockchain was %s, use the current system time %d to replace the original block generation time %d."
-            , phaseStr, start, timestamp);
-            timestamp = start;
+            Logger.logInfoMessage("[BootNode] Current blockchain was %s, use the current system time %s to replace the original generation time %s."
+            , phaseStr, Convert.dateFromEpochTime(currentTime), Convert.dateFromEpochTime(miningTime));
+            miningTime = currentTime;
         }
         
         while (true) {
             try {
-                BlockchainProcessorImpl.getInstance().generateBlock(secretPhrase, timestamp);
+                BlockchainProcessorImpl.getInstance().generateBlock(secretPhrase, miningTime);
                 setDelay(Constants.MINING_DELAY);
                 return true;
             } catch (BlockchainProcessor.TransactionNotAcceptedException e) {
                 // the bad transaction has been expunged, try again
-                if (Conch.getEpochTime() - start > 10) { // give up after trying for 10 s
+                if (Conch.getEpochTime() - currentTime > 10) { // give up after trying for 10 s
                     throw e;
                 }
             }
