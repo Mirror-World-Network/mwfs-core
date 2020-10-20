@@ -2447,7 +2447,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             Logger.logErrorMessage("Can't create coin base tx[current miner=" + creator.getRsAddress() + ", id=" + creator.getId() + "]", e);
         }
 
-        // generation missing
+        // generate missing tx
         try {
             if (Generator.hasGenerationMissingAccount()) {
                 TransactionImpl transaction =
@@ -2570,25 +2570,10 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             pushBlock(block);
             blockListeners.notify(block, Event.BLOCK_GENERATED);
             PocScore generatorScore = Conch.getPocProcessor().calPocScore(creator, previousBlock.getHeight());
-
-            Logger.logInfoMessage(
-                    "Miner[id="
-                            + creator.getId()
-                            + ", RS="
-                            + creator.getRsAddress()
-                            + ", PoC="
-                            + generatorScore.total()
-                            + "]"
-                            + " generated block "
-                            + block.getStringId()
-                            + " at height "
-                            + block.getHeight()
-                            + " timestamp "
-                            + block.getTimestamp()
-                            + " block reward[crowd miner count="
-                            + RewardCalculator.crowdMinerCount(coinBaseTx.getAttachment())
-                            + "] fee "
-                            + ((float) block.getTotalFeeNQT()) / Constants.ONE_SS);
+            Logger.logInfoMessage("Miner[id=%d, RS=%s, PoC=%d] generated block %d at height %d timestamp %s block reward[crowd miner count=%d] fee %d",
+                    creator.getId(), creator.getRsAddress(), generatorScore.total(),
+                    block.getId(), block.getHeight(), Convert.dateFromEpochTime(block.getTimestamp()),RewardCalculator.crowdMinerCount(coinBaseTx.getAttachment()),
+                    (float) block.getTotalFeeNQT() / Constants.ONE_SS);
 
         } catch (TransactionNotAcceptedException e) {
             Logger.logDebugMessage("Generate block failed: " + e.getMessage());

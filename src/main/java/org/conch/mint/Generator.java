@@ -89,7 +89,7 @@ public class Generator implements Comparable<Generator> {
         }
         static String reset(){
             String generatorSummary = appendSplitter("--------------Active Miners-------------",false);
-            generatorSummary += appendSplitter("Local bind account[ hub rs=" + HUB_BIND_ADDRESS + " | autoMint rs=" + AUTO_MINT_ADDRESS + " ]",false);
+            generatorSummary += appendSplitter("Local Account[linked rs=" + HUB_BIND_ADDRESS + " | autoMint rs=" + AUTO_MINT_ADDRESS + "]",false);
             count=0;
             return generatorSummary;
         }
@@ -178,7 +178,7 @@ public class Generator implements Comparable<Generator> {
             long secondsSinceLastBlock = Conch.getEpochTime() - 600 - Conch.getBlockchain().getLastBlockTimestamp();
             long minutesSinceLastBlock = secondsSinceLastBlock/60;
             boolean isObsoleteTime =  secondsSinceLastBlock > (60 * OBSOLETE_DELAY); // default block mining delay > 1h
-            boolean foundBlockStuckOnBootNode = Conch.getBlockchainProcessor().isObsolete() && isObsoleteTime && isBootNode;
+            boolean stuckOnBootNode = Conch.getBlockchainProcessor().isObsolete() && isObsoleteTime && isBootNode;
             
             if(linkedGenerator == null) {
                 String miningPR = getAutoMiningPR();
@@ -187,9 +187,9 @@ public class Generator implements Comparable<Generator> {
                 }
             }
             
-            if(foundBlockStuckOnBootNode && linkedGenerator != null) {
-                int timestamp = linkedGenerator.getTimestamp(generationLimit);
-                if (verifyHit(linkedGenerator.hit, linkedGenerator.pocScore, lastBlock, timestamp)) {
+            if(stuckOnBootNode && linkedGenerator != null) {
+                int miningTime = linkedGenerator.getTimestamp(generationLimit);
+                if (verifyHit(linkedGenerator.hit, linkedGenerator.pocScore, lastBlock, miningTime)) {
                     Logger.logInfoMessage("[BootNode] Current blockchain was stuck[sinceLastBlock=%d minutes], " +
                             "but boot node should keep mining when the miner[%s]' hit is matched at height %d",
                             minutesSinceLastBlock, linkedGenerator.rsAddress, lastBlock.getHeight());
@@ -594,24 +594,27 @@ public class Generator implements Comparable<Generator> {
      * @param hit
      * @param pocScore
      * @param previousBlock
-     * @param timestamp
+     * @param miningTime
      * @return
      */
-    public static boolean verifyHit(BigInteger hit, BigInteger pocScore, Block previousBlock, int timestamp) {
+    public static boolean verifyHit(BigInteger hit, BigInteger pocScore, Block previousBlock, int miningTime) {
         if(isBootDirectlyMiningPhase(previousBlock.getHeight()+1)){
             return true;
         }
 
-        int elapsedTime = timestamp - previousBlock.getTimestamp();
+        int elapsedTime = miningTime - previousBlock.getTimestamp();
         if (elapsedTime <= 0) {
             if(Generator.isBootNode) {
-                Logger.logDebugMessage("continue to validate the hit when the Boot Node's elapsed time[%d] <=0 to avoid the block stuck in the single boot node situation", elapsedTime);
+                Logger.logDebugMessage("Continue to validate the hit when the Boot Node's elapsed time[%d] <=0 " +
+                                "to avoid the block stuck in the single boot node situation", elapsedTime);
             }else {
-                Logger.logDebugMessage("Verify hit failed caused by this generator missing the turn to generate when the elapsed time[%d] <=0", elapsedTime);
+                Logger.logDebugMessage("Verify hit failed caused by this generator missing the mining turn " +
+                        "when the elapsed time[%d] <=0", elapsedTime);
                 return false;
             }
         }else if(elapsedTime < Constants.getBlockGapSeconds()){
-            Logger.logDebugMessage("Verify hit failed caused by this generator's elapsed time[%d] is in the block gap[%d]", elapsedTime,Constants.getBlockGapSeconds() );
+            Logger.logDebugMessage("Verify hit failed caused by this generator's elapsed time[%d] is in the block gap[%d]",
+                    elapsedTime, Constants.getBlockGapSeconds());
             return false;
         }
         
