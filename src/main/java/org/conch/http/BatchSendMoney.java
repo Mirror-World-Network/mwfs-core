@@ -24,11 +24,13 @@ package org.conch.http;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Maps;
 import org.conch.Conch;
 import org.conch.account.Account;
 import org.conch.common.ConchException;
 import org.conch.http.biz.BizParameterRequestWrapper;
 import org.json.simple.JSONStreamAware;
+import org.json.simple.JSONValue;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -94,8 +96,8 @@ public final class BatchSendMoney extends CreateTransaction {
         // parse file
         String jsonStr = readJsonFile(pathStr);
         JSONObject jobj = JSON.parseObject(jsonStr);
-        // Get common property
-        Map<String, String[]> paramter = new HashMap(16);
+
+        Map<String, String[]> paramter = Maps.newHashMap();
         paramter.put("secretPhrase", new String[]{jobj.getString("secretPhrase")});
         paramter.put("feeNQT", new String[]{jobj.getString("feeNQT")});
         paramter.put("deadline", new String[]{jobj.getString("deadline")});
@@ -105,6 +107,7 @@ public final class BatchSendMoney extends CreateTransaction {
         List<JSONStreamAware> transactionList = new ArrayList<>();
         JSONArray failTransferArray = new JSONArray();
         for (BatchTransfer batchTransfer : transferList) {
+            org.json.simple.JSONObject jsonObject = new org.json.simple.JSONObject();
             try {
                 paramter.put("recipient", new String[]{batchTransfer.recipient});
                 paramter.put("recipientPublicKey", new String[]{batchTransfer.recipientPublicKey});
@@ -118,18 +121,26 @@ public final class BatchSendMoney extends CreateTransaction {
                 if (null != transaction) {
                     org.json.simple.JSONObject transactionJsonObject = (org.json.simple.JSONObject) transaction;
                     if (transactionJsonObject.get("broadcasted").equals(true)) {
+                        // transaction was created successfully and broadcast
+                        // TODO remove non-essential attributes to simplify the return results
                         transactionList.add(transaction);
                     } else {
-                        Object json = JSON.toJSON(batchTransfer);
-                        transactionJsonObject.put("transfer", json);
-                        failTransferArray.add(transactionJsonObject);
+                        jsonObject.put("transfer", JSON.toJSON(batchTransfer));
+                        jsonObject.put("errorResponse", transaction);
+                        failTransferArray.add(jsonObject);
                     }
                 } else {
-                    failTransferArray.add(JSON.toJSON(batchTransfer));
+                    jsonObject.put("transfer", JSON.toJSON(batchTransfer));
+                    jsonObject.put("errorResponse", transaction);
+                    failTransferArray.add(jsonObject);
                 }
-            } catch (ConchException e) {
+            }catch (ParameterException e) {
+                jsonObject.put("transfer", JSON.toJSON(batchTransfer));
+                org.json.simple.JSONObject errorResponse = (org.json.simple.JSONObject) JSONValue.parse(org.conch.util.JSON.toString(e.getErrorResponse()));
+                jsonObject.put("errorResponse", errorResponse);
+                failTransferArray.add(jsonObject);
+            }catch (ConchException e) {
                 e.printStackTrace();
-                failTransferArray.add(JSON.toJSON(batchTransfer));
             } finally {
             }
         }
