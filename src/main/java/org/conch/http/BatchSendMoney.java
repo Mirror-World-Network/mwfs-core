@@ -33,10 +33,14 @@ import org.json.simple.JSONStreamAware;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.io.Writer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.System.currentTimeMillis;
+import static java.lang.System.out;
 import static org.conch.util.JSON.readJsonFile;
 
 public final class BatchSendMoney extends CreateTransaction {
@@ -48,6 +52,15 @@ public final class BatchSendMoney extends CreateTransaction {
         public String recipientPublicKey;
 
         BatchTransfer() {}
+
+        @Override
+        public String toString() {
+            return "BatchTransfer{" +
+                    "recipient='" + recipient + '\'' +
+                    ", amountNQT='" + amountNQT + '\'' +
+                    ", recipientPublicKey='" + recipientPublicKey + '\'' +
+                    '}';
+        }
     }
 
     private static String defaul = Conch.getStringProperty("sharder.batchTransfer.path");
@@ -75,32 +88,41 @@ public final class BatchSendMoney extends CreateTransaction {
 
         JSONArray list = jobj.getJSONArray("list");
         List<BatchTransfer> transferList = JSONObject.parseArray(list.toJSONString(), BatchTransfer.class);
-        List<JSONStreamAware> transactionList = null;
+        List<JSONStreamAware> transactionList = new ArrayList<>();
+        JSONArray failTransferArray = new JSONArray();
         for (BatchTransfer batchTransfer : transferList) {
             try {
-                // 根据 地址 + 公钥 获取收件人ID
                 paramter.put("recipient", new String[]{batchTransfer.recipient});
+                paramter.put("recipientPublicKey", new String[]{batchTransfer.recipientPublicKey});
                 paramter.put("amountNQT", new String[]{batchTransfer.amountNQT});
                 BizParameterRequestWrapper reqWrapper = new BizParameterRequestWrapper(req, req.getParameterMap(), paramter);
                 Account account = ParameterParser.getSenderAccount(reqWrapper);
 
                 long recipient = ParameterParser.getAccountId(reqWrapper, "recipient", true);
-                // TODO 若根据地址无法查找到recipient，应使用recipientPublicKey获取对应的账户
                 long amountNQT = ParameterParser.getAmountNQT(reqWrapper);
                 JSONStreamAware transaction = createTransaction(reqWrapper, account, recipient, amountNQT);
                 if (null != transaction) {
-                    transactionList.add(transaction);
+                    org.json.simple.JSONObject transactionJsonObject = (org.json.simple.JSONObject) transaction;
+                    if (transactionJsonObject.get("broadcasted").equals(true)) {
+                        transactionList.add(transaction);
+                    } else {
+                        Object json = JSON.toJSON(batchTransfer);
+                        transactionJsonObject.put("transfer", json);
+                        failTransferArray.add(transactionJsonObject);
+                    }
+                } else {
+                    failTransferArray.add(JSON.toJSON(batchTransfer));
                 }
             } catch (ConchException e) {
                 e.printStackTrace();
+                failTransferArray.add(JSON.toJSON(batchTransfer));
             } finally {
             }
         }
-        response.put("successTransferList", transactionList);
+        response.put("transferSuccessList", transactionList);
+        response.put("transferFailList", failTransferArray);
         response.put("transferTotalCount", list.size());
         response.put("transferSuccessCount", transactionList.size());
-        response.put("transferFailCount", list.size() - transactionList.size());
         return response;
     }
-
 }
