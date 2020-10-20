@@ -27,20 +27,16 @@ import com.alibaba.fastjson.JSONObject;
 import org.conch.Conch;
 import org.conch.account.Account;
 import org.conch.common.ConchException;
-import org.conch.consensus.genesis.GenesisRecipient;
 import org.conch.http.biz.BizParameterRequestWrapper;
 import org.json.simple.JSONStreamAware;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.lang.System.currentTimeMillis;
-import static java.lang.System.out;
+import static org.conch.http.JSONResponses.incorrect;
 import static org.conch.util.JSON.readJsonFile;
 
 public final class BatchSendMoney extends CreateTransaction {
@@ -63,10 +59,23 @@ public final class BatchSendMoney extends CreateTransaction {
         }
     }
 
-    private static String defaul = Conch.getStringProperty("sharder.batchTransfer.path");
+    private static String defaulPathName = Conch.getStringProperty("sharder.airdrop.pathName");
+
+
+    private static List<String> validKeys = Conch.getStringListProperty("sharder.airdrop.validKeys");
+
 
     private BatchSendMoney() {
-        super(new APITag[] {APITag.ACCOUNTS, APITag.CREATE_TRANSACTION}, "pathAndFileName");
+        super(new APITag[] {APITag.ACCOUNTS, APITag.CREATE_TRANSACTION}, "pathAndFileName", "key");
+    }
+
+    private boolean verifyKey(String key) {
+        for (String validKey : validKeys) {
+            if (validKey.equalsIgnoreCase(key)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -74,9 +83,14 @@ public final class BatchSendMoney extends CreateTransaction {
         org.json.simple.JSONObject response = new org.json.simple.JSONObject();
 
         String pathAndFileName = req.getParameter("pathAndFileName");
+        String key = req.getParameter("key");
         String pathStr;
 
-        pathStr = pathAndFileName==null?defaul:pathAndFileName;
+        if (!verifyKey(key)) {
+            throw new ParameterException(incorrect("key", String.format("key %s is incorrect", key)));
+        }
+
+        pathStr = pathAndFileName==null?defaulPathName:pathAndFileName;
         // parse file
         String jsonStr = readJsonFile(pathStr);
         JSONObject jobj = JSON.parseObject(jsonStr);
