@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.conch.Conch;
 import org.conch.account.Account;
 import org.conch.chain.BlockImpl;
 import org.conch.common.ConchException;
@@ -68,8 +69,8 @@ public class SharderGenesis {
 
     protected static final JSONObject genesisJsonObj = loadGenesisSettings();
     private static JSONObject loadGenesisSettings() {
-        String path = "conf/genesis.json";
-        String jsonStr = readJsonFile(path);
+        String pathName = Conch.getStringProperty("sharder.genesis.pathName");
+        String jsonStr = readJsonFile(pathName);
         return JSON.parseObject(jsonStr);
     }
 
