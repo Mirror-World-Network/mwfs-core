@@ -168,17 +168,15 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
 //                    bootNodeHeightCompare();
                     if (blockchain.getHeight() == chainHeight) {
                         if (isDownloading && !simulateEndlessDownload) {
-                            Logger.logInfoMessage(
-                                    "Finished blockchain downloaded "
-                                            + totalBlocks
-                                            + " blocks from "
-                                            + lastBlockchainFeeder.getAnnouncedAddress() + "[" + lastBlockchainFeeder.getHost() + "]"
-                                            + ", current height "
-                                            + blockchain.getHeight()
-                            );
                             isDownloading = false;
                             lastDownloadMS = System.currentTimeMillis();
-                            Peers.checkAndUpdateBlockchainState(null);
+                            Peer.BlockchainState state = Peers.checkAndUpdateBlockchainState(null);
+                            Block lastBlock = blockchain.getLastBlock();
+                            Logger.logInfoMessage("Finished blockchain downloaded %d blocks from %s[%s], sync last block[miner=%s, id=%d]" +
+                                    "current height is %d, chain state is %s" ,
+                                    totalBlocks, lastBlockchainFeeder.getAnnouncedAddress(), lastBlockchainFeeder.getHost(),
+                                    Account.rsAccount(lastBlock.getGeneratorId()), lastBlock.getId(),
+                                    blockchain.getHeight(), state.name());
                             bootNodeForkSwitchCheck(lastBlockchainFeeder);
                         }
                         break;
@@ -957,7 +955,8 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
 
     private void bootNodeForkSwitchCheck(Peer lastFeeder) {
         if (isUpToDate() && forceSwitchToBootNodesFork) {
-            Logger.logInfoMessage("Switched to BootNode %s[%s]'s fork at height %d", lastFeeder.getAnnouncedAddress(), lastFeeder.getHost(), Conch.getHeight());
+            Logger.logInfoMessage("Switched to BootNode %s[%s]'s fork at height %d",
+                lastFeeder.getAnnouncedAddress(), lastFeeder.getHost(), Conch.getHeight());
             switchToBootNodeFailedCount = 0;
             forkSwitchFailedCount = 0;
             forceSwitchToBootNodesFork = false;
