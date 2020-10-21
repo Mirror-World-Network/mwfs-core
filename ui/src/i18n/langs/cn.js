@@ -276,6 +276,7 @@ const cn = {
         'block_list_amount': "金额",
         'block_list_fee': "手续费",
         'block_list_transaction': "交易数",
+        'block_has_distribution_reward': "区块奖励",
         'block_list_generator': "出块者",
         'block_list_operating': "操作",
         'view_details': "查看详情",

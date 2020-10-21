@@ -276,6 +276,7 @@ const en = {
         'block_list_amount': "Amount",
         'block_list_fee': "Fee",
         'block_list_transaction': "Transactions",
+        'block_has_distribution_reward': "RewardDistribution",
         'block_list_generator': "Block Generator",
         'block_list_operating': "Details",
         'view_details': "View Details",
