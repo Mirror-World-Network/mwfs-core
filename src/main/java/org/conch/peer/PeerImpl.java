@@ -402,7 +402,7 @@ final class PeerImpl implements Peer {
     @Override
     public void blacklist(String cause) {
         if(isProtectPeer()) {
-            Logger.logDebugMessage("peer %s[%s] is the protected peer, can't black it now", announcedAddress, host);
+            Logger.logDebugMessage("peer %s[%s] is the protected peer, don't black it", announcedAddress, host);
             return;
         }
         

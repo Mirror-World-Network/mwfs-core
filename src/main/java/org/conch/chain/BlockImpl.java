@@ -497,7 +497,7 @@ public final class BlockImpl implements Block {
             BigInteger pocScore = pocScoreObj.total();
             if (!pocScoreObj.qualifiedMiner()
             && !Generator.isBootDirectlyMiningPhase(currentMiningHeight)) {
-                Logger.logWarningMessage(creator.getRsAddress() + " poc score is less than 0 in this block calculation generation signature verification");
+                Logger.logWarningMessage(creator.getRsAddress() + " poc score is less than 0 in signature verification");
                 return false;
             }
 
@@ -506,24 +506,19 @@ public final class BlockImpl implements Block {
             digest.update(previousBlock.generationSignature);
             generationSignatureHash = digest.digest(getGeneratorPublicKey());
             if (!Arrays.equals(generationSignature, generationSignatureHash)) {
-                Logger.logWarningMessage("current calculate generation signature of previous block is not same with previous block's generation signature");
+                Logger.logWarningMessage("Generation signature of previous block is not same with previous block's generation signature");
                 return false;
             }
 
-            BigInteger hit = new BigInteger(1, new byte[]{generationSignatureHash[7], generationSignatureHash[6], generationSignatureHash[5], generationSignatureHash[4], generationSignatureHash[3], generationSignatureHash[2], generationSignatureHash[1], generationSignatureHash[0]});
+            BigInteger hit = new BigInteger(1, new byte[]{generationSignatureHash[7], generationSignatureHash[6],
+                    generationSignatureHash[5], generationSignatureHash[4], generationSignatureHash[3],
+                    generationSignatureHash[2], generationSignatureHash[1], generationSignatureHash[0]});
             boolean validHit = Generator.verifyHit(hit, pocScore, previousBlock, timestamp);
-            // first try
-            if(!validHit) {
-                validHit = Generator.verifyHit(hit, pocScoreObj.reCalTotalForCompatibility(false), previousBlock, timestamp);
-            }
-            // last try
-            if(!validHit) {
-                validHit = Generator.verifyHit(hit, pocScoreObj.reCalTotalForCompatibility(true), previousBlock, timestamp);
-            }
 
             boolean isIgnoreBlock = CheckSumValidator.isKnownIgnoreBlock(this.id, this.getBlockSignature());
             if(isIgnoreBlock) {
-                Logger.logWarningMessage("Known ignore block[id=%d, height=%d] in %s, skip validation", this.getId(), currentMiningHeight, Constants.getNetwork().getName());
+                Logger.logWarningMessage("Known ignore block[id=%d, height=%d] in %s, skip validation",
+                        this.getId(), currentMiningHeight, Constants.getNetwork().getName());
             }
 
             if(LocalDebugTool.isCheckPocAccount(creator.getId())) {

@@ -1042,7 +1042,7 @@ public final class Conch {
         if (height < Constants.LAST_KNOWN_BLOCK) {
             if(Logger.printNow(Logger.CONCH_P_reachLastKnownBlock)) {
                 Logger.logDebugMessage("current height %d is less than last known height %s and current state is %s, wait till blocks sync finished..."
-                        , height, Constants.LAST_KNOWN_BLOCK, Peers.getMyBlockchainState());
+                        , height, Constants.LAST_KNOWN_BLOCK, Peers.getMyBlockchainStateName());
             }
             return false;
         }

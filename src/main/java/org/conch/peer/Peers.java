@@ -1652,12 +1652,12 @@ public final class Peers {
         Peer.BlockchainState state = Peer.BlockchainState.LIGHT_CLIENT;
         if(!Constants.isLightClient) {
             
-            boolean isObsoleteTime = Conch.getBlockchain().getLastBlockTimestamp() < Conch.getEpochTime() - 600;
+            boolean isObsoleted = Conch.getBlockchain().getLastBlockTimestamp() < Conch.getEpochTime() - Constants.getBlockGapSeconds();
             boolean isBiggerTarget = (Conch.getBlockchain().getLastBlock().getBaseTarget() / Constants.INITIAL_BASE_TARGET) > 10;
             
             if(Conch.getBlockchainProcessor().isDownloading()){
                 state = Peer.BlockchainState.DOWNLOADING;
-            }else if(isObsoleteTime){
+            }else if(isObsoleted){
                 state = Peer.BlockchainState.OBSOLETE;
             }else if(isBiggerTarget && Constants.isMainnet()){
                 state = Peer.BlockchainState.FORK;
@@ -1665,7 +1665,7 @@ public final class Peers {
                 state = Peer.BlockchainState.UP_TO_DATE;
             }
             
-            // if current height reach the boot node height and state is fork, change its state to UP_TO_DATE
+            // force change state
             if(setToUpToDate != null 
             && setToUpToDate == true){
                 state = Peer.BlockchainState.UP_TO_DATE;
@@ -1688,7 +1688,12 @@ public final class Peers {
     public static Peer.BlockchainState getMyBlockchainState() {
         return Constants.isOffline ? Peer.BlockchainState.UP_TO_DATE : currentBlockchainState;
     }
-    
+
+    public static String getMyBlockchainStateName() {
+        Peer.BlockchainState state = getMyBlockchainState();
+        return state != null ? state.name() : "None";
+    }
+
     public static Peer.BlockchainState checkAndUpdateBlockchainState(Boolean reachBootNodeHeight) {
         checkBlockchainStateAndGenerateMyPeerInfoRequest(reachBootNodeHeight);
         return currentBlockchainState;
