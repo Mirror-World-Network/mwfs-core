@@ -153,7 +153,7 @@ public class Generator implements Comparable<Generator> {
             // wait till Conch initialized finished
         if(!Conch.isInitialized()) {
             if(Logger.printNow(Logger.Generator_isMintHeightReached)) {
-                Logger.logDebugMessage("Wait for Conch initialized...");
+                Logger.logDebugMessage("Wait for client initialized...");
             }
             return false;
         }

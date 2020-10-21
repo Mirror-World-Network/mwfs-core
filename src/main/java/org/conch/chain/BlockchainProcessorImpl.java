@@ -204,11 +204,14 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
 
     };
 
-    private final Runnable syncAccountBlockMsg = new Runnable() {
+    private final Runnable syncToCacheAndHistoryTables = new Runnable() {
         @Override
         public void run() {
-            //check height
-            if (checkHeight("ACCOUNT")) {
+            if(!Conch.isInitialized()){
+                Logger.logDebugMessage("Dont't sync cache and history tables till client is initialized...");
+                return;
+            }
+            if (reachSyncHeight("ACCOUNT")) {
                 try {
                     Conch.getBlockchain().updateLock();
                     long t1 = System.currentTimeMillis();
@@ -226,14 +229,8 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     Conch.getBlockchain().updateUnlock();
                 }
             }
-        }
-    };
 
-    private final Runnable syncAccountGuaranteedBalanceBlockMsg = new Runnable() {
-        @Override
-        public void run() {
-            //check height
-            if (checkHeight("ACCOUNT_GUARANTEED_BALANCE")) {
+            if (reachSyncHeight("ACCOUNT_GUARANTEED_BALANCE")) {
                 try {
                     Conch.getBlockchain().updateLock();
                     long t1 = System.currentTimeMillis();
@@ -251,37 +248,8 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     Conch.getBlockchain().updateUnlock();
                 }
             }
-        }
-    };
 
-    private final Runnable syncAccountLedgerBlockMsg = new Runnable() {
-        @Override
-        public void run() {
-            //check height
-            if (checkHeight("ACCOUNT_LEDGER")) {
-                try {
-                    long t1 = System.currentTimeMillis();
-                    Db.db.beginTransaction();
-                    Account.syncAccountLedgerTable("ACCOUNT_LEDGER","ACCOUNT_LEDGER_CACHE",Constants.SYNC_WORK_BLOCK_NUM);
-                    Account.syncAccountLedgerTable("ACCOUNT_LEDGER_CACHE","ACCOUNT_LEDGER_HISTORY",Constants.SYNC_CACHE_BLOCK_NUM);
-                    Db.db.commitTransaction();
-                    long t2 = System.currentTimeMillis();
-                    Logger.logDebugMessage("Sync ACCOUNT_LEDGER and ACCOUNT_LEDGER_CACHE tables used %d S", (t2 - t1)/1000);
-                } catch (Exception e) {
-                    Logger.logWarningMessage("Sync ACCOUNT_LEDGER and ACCOUNT_LEDGER_CACHE tables occur error %s, rollback and wait for next", e.getMessage());
-                    Db.db.rollbackTransaction();
-                }finally {
-                    Db.db.endTransaction();
-                }
-            }
-        }
-    };
-
-    private final Runnable syncAccountPocScoreBlockMsg = new Runnable() {
-        @Override
-        public void run() {
-            //check height
-            if (checkHeight("ACCOUNT_POC_SCORE")) {
+            if (reachSyncHeight("ACCOUNT_POC_SCORE")) {
                 try {
                     Conch.getBlockchain().updateLock();
                     long t1 = System.currentTimeMillis();
@@ -299,10 +267,29 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     Conch.getBlockchain().updateUnlock();
                 }
             }
+
+            if (reachSyncHeight("ACCOUNT_LEDGER")) {
+                try {
+                    Conch.getBlockchain().updateLock();
+                    long t1 = System.currentTimeMillis();
+                    Db.db.beginTransaction();
+                    Account.syncAccountLedgerTable("ACCOUNT_LEDGER","ACCOUNT_LEDGER_CACHE",Constants.SYNC_WORK_BLOCK_NUM);
+                    Account.syncAccountLedgerTable("ACCOUNT_LEDGER_CACHE","ACCOUNT_LEDGER_HISTORY",Constants.SYNC_CACHE_BLOCK_NUM);
+                    Db.db.commitTransaction();
+                    long t2 = System.currentTimeMillis();
+                    Logger.logDebugMessage("Sync ACCOUNT_LEDGER and ACCOUNT_LEDGER_CACHE tables used %d S", (t2 - t1)/1000);
+                } catch (Exception e) {
+                    Logger.logWarningMessage("Sync ACCOUNT_LEDGER and ACCOUNT_LEDGER_CACHE tables occur error %s, rollback and wait for next", e.getMessage());
+                    Db.db.rollbackTransaction();
+                }finally {
+                    Db.db.endTransaction();
+                    Conch.getBlockchain().updateUnlock();
+                }
+            }
         }
     };
 
-    private boolean checkHeight(String tableName) {
+    private boolean reachSyncHeight(String tableName) {
         Connection con = null;
         try {
             con = Db.db.getConnection();
@@ -1421,10 +1408,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             ThreadPool.scheduleThread("GetMoreBlocks", getMoreBlocksThread, 1);
         }
         if (Boolean.valueOf(Constants.SYNC_BUTTON)) {
-            ThreadPool.scheduleThread("SyncAccountBlockMsg", syncAccountBlockMsg, Constants.SYNC_TIME, TimeUnit.SECONDS);
-            ThreadPool.scheduleThread("syncAccountGuaranteedBalanceBlockMsg", syncAccountGuaranteedBalanceBlockMsg, Constants.SYNC_TIME, TimeUnit.SECONDS);
-            ThreadPool.scheduleThread("syncAccountLedgerBlockMsg", syncAccountLedgerBlockMsg, Constants.SYNC_TIME, TimeUnit.SECONDS);
-            ThreadPool.scheduleThread("syncAccountPocScoreBlockMsg", syncAccountPocScoreBlockMsg, Constants.SYNC_TIME, TimeUnit.SECONDS);
+            ThreadPool.scheduleThread("syncToCacheAndHistoryTables", syncToCacheAndHistoryTables, Constants.SYNC_TIME, TimeUnit.SECONDS);
         }
     }
 
