@@ -414,7 +414,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             // fetch the db archive and restart
             if (System.currentTimeMillis() - lastDownloadMS > MAX_DOWNLOAD_TIME) {
                 Logger.logWarningMessage("Can't finish the block synchronization in the %d hours"
-                        + "try to RESET and RESTART this client manually!!"
+                        + ", try to RESET and RESTART this client manually!!"
                         , (MAX_DOWNLOAD_TIME/1000/60/60), diffCount);
 //                ClientUpgradeTool.restoreDbToLastArchive(true, true);
             }
@@ -1800,7 +1800,8 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             blockchain.writeUnlock();
         }
 
-        if (block.getTimestamp() >= curTime - 600) {
+        // broadcast block to other peers
+        if (block.getTimestamp() >= (curTime - Constants.getBlockGapSeconds())) {
             Peers.sendToSomePeers(block);
         }
 

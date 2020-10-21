@@ -153,7 +153,7 @@ public class Generator implements Comparable<Generator> {
             // wait till Conch initialized finished
         if(!Conch.isInitialized()) {
             if(Logger.printNow(Logger.Generator_isMintHeightReached)) {
-                Logger.logDebugMessage("Wait for client initialized...");
+                Logger.logDebugMessage("Don't start mining till client is initialized...");
             }
             return false;
         }
@@ -175,7 +175,7 @@ public class Generator implements Comparable<Generator> {
         // blockchain is synchronizing blocks or stuck
         if(!Conch.getBlockchainProcessor().isUpToDate()) {
             // when blockchain be blocked and last block is obsolete, boot node need mining the block
-            long secondsSinceLastBlock = Conch.getEpochTime() - 600 - Conch.getBlockchain().getLastBlockTimestamp();
+            long secondsSinceLastBlock = Conch.getEpochTime() - Conch.getBlockchain().getLastBlockTimestamp();
             long minutesSinceLastBlock = secondsSinceLastBlock/60;
             boolean isObsoleteTime =  secondsSinceLastBlock > (60 * OBSOLETE_DELAY); // default block mining delay > 1h
             boolean stuckOnBootNode = Conch.getBlockchainProcessor().isObsolete() && isObsoleteTime && isBootNode;
@@ -411,7 +411,8 @@ public class Generator implements Comparable<Generator> {
         Account minerAccount = Account.getAccount(minerId, height);
         String minerRs = minerAccount != null ? minerAccount.getRsAddress() : "null";
         if(minerAccount == null) {
-            if(Logger.printNow(Logger.Generator_startMining)) {
+            if(Logger.printNow(Logger.Generator_startMining)
+                || Logger.isLevel(Logger.Level.DEBUG)) {
                 Logger.logWarningMessage("Current miner[addr=%s, id=%d] can't start auto mining or mint block when it's a new account at this height %d. " +
                         "Please CREATE tx by yourself or RECEIVE tx from other declared accounts", minerRs, minerId, height);
             }
@@ -419,7 +420,8 @@ public class Generator implements Comparable<Generator> {
         }
 
         if(isBlackedMiner(minerId)) {
-            if(Logger.printNow(Logger.Generator_startMining)) {
+            if(Logger.printNow(Logger.Generator_startMining)
+                || Logger.isLevel(Logger.Level.DEBUG)) {
                 Logger.logWarningMessage("Invalid miner [addr=%s, id=%d] can't start auto mining or mint block when it's in the black list! ",
                         minerRs, minerId,
                         Conch.getHeight());
@@ -430,7 +432,8 @@ public class Generator implements Comparable<Generator> {
         //check the peer statement
         boolean isCertifiedPeer = Conch.getPocProcessor().isCertifiedPeerBind(minerId, height);
         if(!isCertifiedPeer) {
-            if(Logger.printNow(Logger.Generator_startMining)) {
+            if(Logger.printNow(Logger.Generator_startMining)
+                || Logger.isLevel(Logger.Level.DEBUG)) {
                 Logger.logWarningMessage("Invalid miner %s(it didn't linked to a certified peer before the height %d) can't start auto mining or mint block. " +
                                 "Maybe it didn't create a PocNodeTypeTx statement. please INIT or RESET the client firstly! ",
                         minerRs,
@@ -442,7 +445,8 @@ public class Generator implements Comparable<Generator> {
         long accountBalanceNQT = (minerAccount != null) ? minerAccount.getEffectiveBalanceNQT(Conch.getHeight()) : 0L;
         if(accountBalanceNQT < Constants.MINING_HOLDING_LIMIT
         && height > Constants.LAST_KNOWN_BLOCK) {
-            if(Logger.printNow(Logger.Generator_startMining)) {
+            if(Logger.printNow(Logger.Generator_startMining)
+                || Logger.isLevel(Logger.Level.DEBUG)) {
                 Logger.logWarningMessage("Invalid miner %s can't start auto mining or mint block. Because the MW holding limit of the mining is %d and current balance is %d",
                         minerRs,
                         (Constants.MINING_HOLDING_LIMIT / Constants.ONE_SS),
