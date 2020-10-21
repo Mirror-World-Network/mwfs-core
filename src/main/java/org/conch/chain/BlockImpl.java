@@ -595,6 +595,7 @@ public final class BlockImpl implements Block {
         }
     }
 
+    private static final long TWENTY_YEARS_SECONDS = 20 * 365 * 24 * 60 * 60;
     private void calculateBaseTarget(BlockImpl previousBlock) {
         long prevBaseTarget = previousBlock.baseTarget;
         if (previousBlock.getHeight() <= Constants.SHUFFLING_BLOCK_HEIGHT) {
@@ -635,7 +636,16 @@ public final class BlockImpl implements Block {
         } else {
             baseTarget = prevBaseTarget;
         }
+
         cumulativeDifficulty = previousBlock.cumulativeDifficulty.add(Convert.two64.divide(BigInteger.valueOf(baseTarget)));
+
+        BigInteger oneBlockDiff = BigInteger.ZERO;
+        if(TWENTY_YEARS_SECONDS > timestamp) {
+            oneBlockDiff = BigInteger.valueOf(TWENTY_YEARS_SECONDS - timestamp);
+        }else{
+            oneBlockDiff = BigInteger.valueOf(TWENTY_YEARS_SECONDS - (timestamp - TWENTY_YEARS_SECONDS));
+        }
+        cumulativeDifficulty = cumulativeDifficulty.add(oneBlockDiff);
     }
 
     @Override
