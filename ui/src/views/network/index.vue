@@ -142,7 +142,10 @@
                                 <td><span>{{$global.getBlocKTotalAmountNQT(block.totalAmountNQT)}}</span></td>
                                 <td class="pc-table"><span>{{$global.getBlockTotalFeeNQT(block.totalFeeNQT)}}</span></td>
                                 <td class="pc-table"><span>{{block.numberOfTransactions}}</span></td>
-                                <td class="pc-table"><span>{{block.hasRewardDistribution}}</span></td>
+                                <td class="pc-table">
+                                    <span v-if="block.hasRewardDistribution">{{$t('network.crowd_miner_reward_success')}}</span>
+                                    <span v-if="!block.hasRewardDistribution">{{$t('network.crowd_miner_reward_fail')}}</span>
+                                </td>
                                 <td class="linker" @click="openAccountInfo(block.generatorRS)">{{block.generatorRS | generatorRSFilter}}</td>
                                 <td class="linker pc-table" @click="openBlockInfo(block.height)">{{$t('network.view_details')}}</td>
                                 <td class="mobile icon-box">
