@@ -21,6 +21,8 @@
 
 package org.conch.util;
 
+import com.alibaba.fastjson.serializer.SerializerFeature;
+import org.conch.Conch;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONStreamAware;
@@ -269,7 +271,7 @@ public final class JSON {
     }
 
     /**
-     * 读取json文件，返回json串
+     * Read Json file,return jsonStr
      * @param fileName
      * @return
      */
@@ -291,7 +293,42 @@ public final class JSON {
             return jsonStr;
         } catch (IOException e) {
             e.printStackTrace();
+            Logger.logInfoMessage("Cannot read file " + fileName + " error " + e.getMessage());
+            JSONObject response = new JSONObject();
+            response.put("error", "file_not_found");
+            response.put("file", fileName);
+            response.put("folder", Conch.getUserHomeDir());
+            return JSON.toJSONString(response);
+        }
+    }
+
+    /**
+     * JsonObject write to Json file
+     * @param jsonObject
+     * @param fileName
+     */
+    public static String JsonWrite(JSONObject jsonObject, String fileName){
+
+        try {
+            OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(fileName),"UTF-8");
+            // json format output
+            com.alibaba.fastjson.JSONObject object = com.alibaba.fastjson.JSONObject.parseObject(jsonObject.toJSONString());
+            String pretty = com.alibaba.fastjson.JSON.toJSONString(object, SerializerFeature.PrettyFormat, SerializerFeature.WriteMapNullValue,
+                    SerializerFeature.WriteDateUseDateFormat);
+            osw.write(pretty);
+            // clear the buffer, forcing the output of data
+            osw.flush();
+            // close the output stream
+            osw.close();
             return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            Logger.logInfoMessage("Cannot write to file " + fileName + " error " + e.getMessage());
+            JSONObject response = new JSONObject();
+            response.put("error", "write_error");
+            response.put("file", fileName);
+            response.put("folder", Conch.getUserHomeDir());
+            return JSON.toJSONString(response);
         }
     }
 }

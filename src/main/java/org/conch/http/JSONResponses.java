@@ -499,6 +499,13 @@ public final class JSONResponses {
         return JSON.prepare(response);
     }
 
+    static JSONStreamAware writeFileFail(String objectName) {
+        JSONObject response = new JSONObject();
+        response.put("errorCode", 10);
+        response.put("errorDescription", "Unable write to file " + objectName);
+        return JSON.prepare(response);
+    }
+
     static JSONStreamAware error(String error) {
         JSONObject response = new JSONObject();
         response.put("errorCode", 11);
