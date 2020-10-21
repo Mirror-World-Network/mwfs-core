@@ -1398,7 +1398,7 @@ public final class Account {
         try {
             Conch.getBlockchain().readLock();
             long effectiveBalanceNQT = getLessorsGuaranteedBalanceNQT(height);
-            if (activeLesseeId == 0) {
+            if (activeLesseeId == 0 || Boolean.valueOf(Constants.SYNC_BUTTON)) {
                 effectiveBalanceNQT += getGuaranteedBalanceNQT(Constants.GUARANTEED_BALANCE_CONFIRMATIONS, height);
             }
             return  effectiveBalanceNQT;

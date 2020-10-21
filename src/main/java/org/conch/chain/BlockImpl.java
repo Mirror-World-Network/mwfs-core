@@ -51,6 +51,7 @@ public final class BlockImpl implements Block {
     private final int version;
     private final int timestamp;
     private final long previousBlockId;
+    private boolean hasRewardDistribution;
     private volatile byte[] generatorPublicKey;
     private final byte[] previousBlockHash;
     private final long totalAmountNQT;
@@ -164,6 +165,11 @@ public final class BlockImpl implements Block {
         return extensionJson.getObject(extensionEnum.name,clazz);
     }
 
+    @Override
+    public boolean getHasRewardDistribution() {
+        return hasRewardDistribution;
+    }
+
 
     public BlockImpl(int version, int timestamp, long previousBlockId, long totalAmountNQT, long totalFeeNQT, int payloadLength, byte[] payloadHash,
               byte[] generatorPublicKey, byte[] generationSignature, byte[] previousBlockHash, List<TransactionImpl> transactions, String secretPhrase) {
@@ -209,10 +215,11 @@ public final class BlockImpl implements Block {
     public BlockImpl(int version, int timestamp, long previousBlockId, long totalAmountNQT, long totalFeeNQT, int payloadLength,
               byte[] payloadHash, long generatorId, byte[] generationSignature, byte[] blockSignature,
               byte[] previousBlockHash, BigInteger cumulativeDifficulty, long baseTarget, long nextBlockId, int height, long id, byte[] extension,
-              List<TransactionImpl> blockTransactions) {
+              List<TransactionImpl> blockTransactions,boolean hasRewardDistribution) {
         this(version, timestamp, previousBlockId, totalAmountNQT, totalFeeNQT, payloadLength, payloadHash,
                 generatorId, generationSignature, blockSignature, previousBlockHash,cumulativeDifficulty,baseTarget,nextBlockId,height,id,blockTransactions);
         this.extension = extension;
+        this.hasRewardDistribution = hasRewardDistribution;
     }
 
     //just for genesis block
