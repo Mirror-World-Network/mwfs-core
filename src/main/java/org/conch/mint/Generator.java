@@ -171,7 +171,51 @@ public class Generator implements Comparable<Generator> {
         if(dontWait) {
             return true;
         }
-        
+
+        if(Conch.getBlockchainProcessor().isDownloading()) {
+            Logger.logDebugMessage("Current blockchain is downloading blocks, wait for blocks synchronizing finished...");
+            return false;
+        }
+
+        if(Conch.getBlockchainProcessor().isScanning()) {
+            Logger.logDebugMessage("Current blockchain is scanning, wait for scanning finished...");
+            return false;
+        }
+
+        if(linkedGenerator == null) {
+            String miningPR = getAutoMiningPR();
+            if(StringUtils.isNotEmpty(miningPR)) {
+                linkedGenerator = new Generator(miningPR.trim());
+            }
+        }
+
+        int miningTime = linkedGenerator.getTimestamp(generationLimit);
+        boolean hitMatched = verifyHit(linkedGenerator.hit, linkedGenerator.pocScore, lastBlock, miningTime);
+        long secondsSinceLastBlock = Conch.getEpochTime() - Conch.getBlockchain().getLastBlockTimestamp();
+        long minutesSinceLastBlock = secondsSinceLastBlock/60;
+        boolean isObsoleteTime =  (secondsSinceLastBlock - Constants.getBlockGapSeconds()) > (60 * OBSOLETE_DELAY);
+        boolean stuckOnBootNode = Conch.getBlockchainProcessor().isObsolete() && isObsoleteTime && isBootNode;
+        if(!Conch.getBlockchainProcessor().isUpToDate()) {
+            String nodeType = isBootNode ? "Boot" : "Normal";
+            if (hitMatched) {
+                Logger.logInfoMessage("Current node is %s node and blockchain state[%s] isn't " +
+                                "UP_TO_DATE[sinceLastBlock=%d minutes, triggerDelay=%d minutes], " +
+                                " still mining when the miner[%s]' hit is matched at height %d",
+                        nodeType, Peers.getMyBlockchainStateName(), minutesSinceLastBlock, OBSOLETE_DELAY,
+                        linkedGenerator.rsAddress, lastBlock.getHeight());
+            } else {
+                if (Logger.printNow(Logger.Generator_isBlockStuckOnBootNode)) {
+                    Logger.logInfoMessage("Current node is %s node and blockchain state[%s] isn't " +
+                                    "UP_TO_DATE[sinceLastBlock=%d minutes, triggerDelay=%d minutes], " +
+                                    "but boot node miner[%s]'s hit didn't matched at height %d, its mining time is %s",
+                            nodeType, Peers.getMyBlockchainStateName(), minutesSinceLastBlock, OBSOLETE_DELAY,
+                            linkedGenerator.rsAddress, lastBlock.getHeight(),
+                            Convert.dateFromEpochTime(linkedGenerator.hitTime));
+                }
+                return false;
+            }
+        }
+        /**
         // blockchain is synchronizing blocks or stuck
         if(!Conch.getBlockchainProcessor().isUpToDate()) {
             // when blockchain be blocked and last block is obsolete, boot node need mining the block
@@ -186,10 +230,11 @@ public class Generator implements Comparable<Generator> {
                     linkedGenerator = new Generator(miningPR.trim());
                 }
             }
-            
+
+            int miningTime = linkedGenerator.getTimestamp(generationLimit);
+            boolean hitMatched = verifyHit(linkedGenerator.hit, linkedGenerator.pocScore, lastBlock, miningTime);
             if(stuckOnBootNode && linkedGenerator != null) {
-                int miningTime = linkedGenerator.getTimestamp(generationLimit);
-                if (verifyHit(linkedGenerator.hit, linkedGenerator.pocScore, lastBlock, miningTime)) {
+                if (hitMatched) {
                     Logger.logInfoMessage("[BootNode] Current blockchain was stuck[sinceLastBlock=%d minutes, triggerDelay=%d minutes], " +
                             "but boot node will mining when the miner[%s]' hit is matched at height %d",
                             minutesSinceLastBlock, OBSOLETE_DELAY, linkedGenerator.rsAddress, lastBlock.getHeight());
@@ -200,18 +245,23 @@ public class Generator implements Comparable<Generator> {
                     return false;
                 }
             }else{
-                if(Logger.printNow(Logger.Generator_isBlockStuckOnBootNode)) {
-                    String nodeType = isBootNode ? "Boot" : "Normal";
-                    Logger.logInfoMessage("[Tip] Current node is %s node and blockchain state[%s] isn't UP_TO_DATE, " +
-                            "maybe it is downloading blocks or stuck[height=%d, sinceLastBlock=%d minutes, " +
-                            "triggerDelay=%d minutes]. Wait for blocks synchronizing finished...",
-                            nodeType, Peers.getMyBlockchainStateName(), lastBlock.getHeight(),
-                            minutesSinceLastBlock, OBSOLETE_DELAY);
+                if(hitMatched){
+
+                }else{
+                    if(Logger.printNow(Logger.Generator_isBlockStuckOnBootNode)) {
+                        String nodeType = isBootNode ? "Boot" : "Normal";
+                        Logger.logInfoMessage("[Tip] Current node is %s node and blockchain state[%s] isn't UP_TO_DATE, " +
+                                        "maybe it is downloading blocks or stuck[height=%d, sinceLastBlock=%d minutes, " +
+                                        "triggerDelay=%d minutes]. Wait for blocks synchronizing finished...",
+                                nodeType, Peers.getMyBlockchainStateName(), lastBlock.getHeight(),
+                                minutesSinceLastBlock, OBSOLETE_DELAY);
+                    }
+                    return false;
                 }
-                return false;
             }
             
         }
+        **/
         
         if(!Conch.getPocProcessor().pocTxsProcessed(lastBlock.getHeight())) {
             if(Logger.printNow(Logger.Generator_isPocTxsProcessed)) {
