@@ -886,8 +886,10 @@ public class Generator implements Comparable<Generator> {
         boolean isStuck = isBootNode
                 && isAutoMiningAccount(accountId)
                 && Conch.getBlockchainProcessor().isObsolete();
+        boolean reachDelayLimit = (currentTime - miningTime) > 60 * 60;
         String phaseStr = isDirectlyMiningPhase ? "in direct mining phase" : "stuck";
-        if(isStuck || isDirectlyMiningPhase){
+        if((isStuck && reachDelayLimit)
+            || isDirectlyMiningPhase){
             Logger.logInfoMessage("[BootNode] Current blockchain was %s, use the current system time %s to replace the original generation time %s."
             , phaseStr, Convert.dateFromEpochTime(currentTime), Convert.dateFromEpochTime(miningTime));
             miningTime = currentTime;
