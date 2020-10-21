@@ -694,8 +694,9 @@ public interface PocTxBody {
 
         public PocGenerationMissing(ByteBuffer buffer, byte transactionVersion) throws ConchException.NotValidException {
             super(buffer, transactionVersion);
-            this.missingAccountIds = com.alibaba.fastjson.JSONObject.parseObject(Convert.readString(buffer, buffer.getInt(), MAX_POC_ITEM_BYTEBUFFER), List.class);
             this.missingTimeStamp = buffer.getInt();
+            this.missingAccountIds = com.alibaba.fastjson.JSONObject.parseObject(Convert.readString(buffer, buffer.getInt(), MAX_POC_ITEM_BYTEBUFFER), List.class);
+
         }
 
         public PocGenerationMissing(JSONObject attachmentData) {
@@ -711,8 +712,8 @@ public interface PocTxBody {
 
         @Override
         public void putMyBytes(ByteBuffer buffer) {
-            Convert.writeList(buffer, missingAccountIds);
             buffer.putInt(missingTimeStamp);
+            Convert.writeList(buffer, missingAccountIds);
         }
 
         @Override

@@ -344,28 +344,34 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 && Logger.printNow(Logger.BlockchainProcessor_downloadPeer_getWeightedPeer)) {
                 Logger.logDebugMessage("Can't find a weighted peer to sync the blocks, the reasons are follow:  " +
                         "a) current peer's version %s is larger than other peers. " +
-                        "b) can't connect to boot nodes or other peers which have the public IP.  Wait for next turn.", Conch.getVersionWithBuild());
+                        "b) can't connect to boot nodes or other peers which have the public IP.  Wait for next turn.",
+                        Conch.getVersionWithBuild());
                 return;
             }
 
             JSONObject response = getPeersDifficulty(peer);
-
             // can't get the mining difficulty of remote peer
             BigInteger curCumulativeDifficulty = blockchain.getLastBlock().getCumulativeDifficulty();
             Object remoteDifficultyObj = response != null ? response.get("cumulativeDifficulty") : null;
-            String peerCumulativeDifficulty = remoteDifficultyObj != null ? (String) remoteDifficultyObj : null;
-            if (peerCumulativeDifficulty == null) return;
+            String peerDifficultyStr = (remoteDifficultyObj != null) ? (String) remoteDifficultyObj : null;
+            if (peerDifficultyStr == null) {
+                return;
+            }
 
             // the mining difficulty of the feeder peer is smaller than the current peer
-            BigInteger betterCumulativeDifficulty = new BigInteger(peerCumulativeDifficulty);
-            if (betterCumulativeDifficulty.compareTo(curCumulativeDifficulty) < 0) return;
+            BigInteger peerCumulativeDifficulty = new BigInteger(peerDifficultyStr);
+            if (peerCumulativeDifficulty.compareTo(curCumulativeDifficulty) < 0) {
+                return;
+            }
 
             // the mining difficulty of the feeder peer is same with the current peer
             if (response.get("blockchainHeight") != null) {
                 lastBlockchainFeeder = peer;
                 lastBlockchainFeederHeight = ((Long) response.get("blockchainHeight")).intValue();
             }
-            if (betterCumulativeDifficulty.equals(curCumulativeDifficulty)) return;
+            if (peerCumulativeDifficulty.equals(curCumulativeDifficulty)) {
+                return;
+            }
 
             // the cos version of the feeder peer is smaller than current peer
             if (Conch.versionCompare(peer.getVersion()) > 0){
@@ -379,7 +385,9 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             if (blockchain.getLastBlock().getId() != SharderGenesis.GENESIS_BLOCK_ID) {
                 commonMilestoneBlockId = getCommonMilestoneBlockId(peer);
             }
-            if (commonMilestoneBlockId == 0 || !peerHasMore) return;
+            if (commonMilestoneBlockId == 0 || !peerHasMore) {
+                return;
+            }
 
             chainBlockIds = getBlockIdsAfterCommon(peer, commonMilestoneBlockId, false);
             if (chainBlockIds.size() < 2 || !peerHasMore) {
@@ -390,7 +398,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             final Block commonBlock = blockchain.getBlock(commonBlockId);
             if (commonBlock == null || blockchain.getHeight() - commonBlock.getHeight() >= 720) {
                 if (commonBlock != null) {
-                    Logger.logDebugMessage(peer + " stay at fork with better difficulty, but the last common block is at height " + commonBlock.getHeight() + " ABORT the block sync...");
+                    Logger.logDebugMessage(peer + " stay at fork with better difficulty, but the last common block is at height " + commonBlock.getHeight() + ", ABORT the block sync...");
                 }
                 return;
             }
@@ -410,23 +418,23 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
 //                return;
 //            }
 
-            int diffCount = lastBlockchainFeederHeight - commonBlock.getHeight();
+            int heightDiffCount = lastBlockchainFeederHeight - commonBlock.getHeight();
             // fetch the db archive and restart
             if (System.currentTimeMillis() - lastDownloadMS > MAX_DOWNLOAD_TIME) {
                 Logger.logWarningMessage("Can't finish the block synchronization in the %d hours"
                         + ", try to RESET and RESTART this client manually!!"
-                        , (MAX_DOWNLOAD_TIME/1000/60/60), diffCount);
+                        , (MAX_DOWNLOAD_TIME/1000/60/60), heightDiffCount);
 //                ClientUpgradeTool.restoreDbToLastArchive(true, true);
             }
 
-            if (!isDownloading && diffCount > 6) {
+            if (!isDownloading && heightDiffCount > 6) {
                 Logger.logMessage("Blockchain download in progress[height is from " + blockchain.getHeight() + " to " + lastBlockchainFeederHeight + "]");
                 isDownloading = true;
             }
 
             blockchain.updateLock();
             try {
-                if (betterCumulativeDifficulty.compareTo(blockchain.getLastBlock().getCumulativeDifficulty()) <= 0) {
+                if (peerCumulativeDifficulty.compareTo(blockchain.getLastBlock().getCumulativeDifficulty()) <= 0) {
                     return;
                 }
                 long lastBlockId = blockchain.getLastBlock().getId();
