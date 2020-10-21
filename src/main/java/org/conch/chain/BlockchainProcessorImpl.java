@@ -2571,7 +2571,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     creator.getId(), creator.getRsAddress(), generatorScore.total(),
                     block.getId(), block.getHeight(), Convert.dateFromEpochTime(block.getTimestamp()),RewardCalculator.crowdMinerCount(coinBaseTx.getAttachment()),
                     (float) block.getTotalFeeNQT() / Constants.ONE_SS);
-
+            Peers.checkAndUpdateBlockchainState(null);
         } catch (TransactionNotAcceptedException e) {
             Logger.logDebugMessage("Generate block failed: " + e.getMessage());
             TransactionProcessorImpl.getInstance().processWaitingTransactions();

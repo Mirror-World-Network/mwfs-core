@@ -177,7 +177,7 @@ public class Generator implements Comparable<Generator> {
             // when blockchain be blocked and last block is obsolete, boot node need mining the block
             long secondsSinceLastBlock = Conch.getEpochTime() - Conch.getBlockchain().getLastBlockTimestamp();
             long minutesSinceLastBlock = secondsSinceLastBlock/60;
-            boolean isObsoleteTime =  secondsSinceLastBlock > (60 * OBSOLETE_DELAY); // default block mining delay > 1h
+            boolean isObsoleteTime =  (secondsSinceLastBlock - Constants.getBlockGapSeconds()) > (60 * OBSOLETE_DELAY);
             boolean stuckOnBootNode = Conch.getBlockchainProcessor().isObsolete() && isObsoleteTime && isBootNode;
             
             if(linkedGenerator == null) {

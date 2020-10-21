@@ -1694,8 +1694,8 @@ public final class Peers {
         return state != null ? state.name() : "None";
     }
 
-    public static Peer.BlockchainState checkAndUpdateBlockchainState(Boolean reachBootNodeHeight) {
-        checkBlockchainStateAndGenerateMyPeerInfoRequest(reachBootNodeHeight);
+    public static Peer.BlockchainState checkAndUpdateBlockchainState(Boolean forceSetToUpToDate) {
+        checkBlockchainStateAndGenerateMyPeerInfoRequest(forceSetToUpToDate);
         return currentBlockchainState;
     }
 
