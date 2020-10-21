@@ -205,7 +205,7 @@ public class Generator implements Comparable<Generator> {
                     Logger.logInfoMessage("[Tip] Current node is %s node and blockchain state[%s] isn't UP_TO_DATE, " +
                             "maybe it is downloading blocks or stuck[height=%d, sinceLastBlock=%d minutes, " +
                             "triggerDelay=%d minutes]. Wait for blocks synchronizing finished...",
-                            nodeType, Peers.getMyBlockchainState().name(), lastBlock.getHeight(),
+                            nodeType, Peers.getMyBlockchainStateName(), lastBlock.getHeight(),
                             minutesSinceLastBlock, OBSOLETE_DELAY);
                 }
                 return false;

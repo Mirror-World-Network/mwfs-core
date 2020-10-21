@@ -170,13 +170,13 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                         if (isDownloading && !simulateEndlessDownload) {
                             isDownloading = false;
                             lastDownloadMS = System.currentTimeMillis();
-                            Peer.BlockchainState state = Peers.checkAndUpdateBlockchainState(null);
+                            Peers.checkAndUpdateBlockchainState(null);
                             Block lastBlock = blockchain.getLastBlock();
                             Logger.logInfoMessage("Finished blockchain downloaded %d blocks from %s[%s], sync last block[miner=%s, id=%d]" +
                                     "current height is %d, chain state is %s" ,
                                     totalBlocks, lastBlockchainFeeder.getAnnouncedAddress(), lastBlockchainFeeder.getHost(),
                                     Account.rsAccount(lastBlock.getGeneratorId()), lastBlock.getId(),
-                                    blockchain.getHeight(), state.name());
+                                    blockchain.getHeight(), Peers.getMyBlockchainStateName());
                             bootNodeForkSwitchCheck(lastBlockchainFeeder);
                         }
                         break;
