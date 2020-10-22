@@ -656,9 +656,9 @@ public class Generator implements Comparable<Generator> {
      * @return
      */
     public static boolean verifyHit(BigInteger hit, BigInteger pocScore, Block previousBlock, int miningTime) {
-        if(isBootDirectlyMiningPhase(previousBlock.getHeight()+1)){
-            return true;
-        }
+//        if(isBootDirectlyMiningPhase(previousBlock.getHeight()+1)){
+//            return true;
+//        }
 
         int elapsedTime = miningTime - previousBlock.getTimestamp();
         if (elapsedTime <= 0) {
