@@ -37,8 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.conch.http.JSONResponses.MISSING_TRANSACTION;
-import static org.conch.http.JSONResponses.incorrect;
+import static org.conch.http.JSONResponses.*;
 import static org.conch.util.JSON.JsonWrite;
 import static org.conch.util.JSON.readJsonFile;
 
@@ -54,14 +53,14 @@ public final class BatchSendMoney extends CreateTransaction {
 
         TransferInfo() {}
     }
-
+    // default airdrop JSON fileName
     private static String defaulPathName = Conch.getStringProperty("sharder.airdrop.pathName");
-
-
+    // list of valid keys used for validation
     private static List<String> validKeys = Conch.getStringListProperty("sharder.airdrop.validKeys");
-
-    // TODO airdrop switch
-    // TODO dirdrop append Mode
+    // airdrop switch
+    private static final boolean enableAirdrop = Conch.getBooleanProperty("sharder.airdrop.enable");
+    // airdrop append Mode
+    private static final boolean isAppendMode = Conch.getBooleanProperty("sharder.airdrop.isAppendMode");
 
     private BatchSendMoney() {
         super(new APITag[] {APITag.ACCOUNTS, APITag.CREATE_TRANSACTION}, "pathName", "key");
@@ -78,11 +77,13 @@ public final class BatchSendMoney extends CreateTransaction {
 
     @Override
     protected JSONStreamAware processRequest(HttpServletRequest req) throws ConchException {
-        org.json.simple.JSONObject response = new org.json.simple.JSONObject();
 
+        org.json.simple.JSONObject response = new org.json.simple.JSONObject();
         String pathName = req.getParameter("pathName");
         String key = req.getParameter("key");
-
+        if (!enableAirdrop) {
+            return ACCESS_CLOSED;
+        }
         if (!verifyKey(key)) {
             throw new ParameterException(incorrect("key", String.format("key %s is incorrect", key)));
         }
@@ -107,6 +108,10 @@ public final class BatchSendMoney extends CreateTransaction {
         JSONArray failListOrigin = jobj.getJSONArray("failList");
         if (listOrigin == null) {
             return MISSING_TRANSACTION;
+        }
+        if (!isAppendMode) {
+            doneListOrigin = null;
+            failListOrigin = null;
         }
         List<TransferInfo> list = JSONObject.parseArray(listOrigin.toJSONString(), TransferInfo.class);
         // record existing lists, append pattern

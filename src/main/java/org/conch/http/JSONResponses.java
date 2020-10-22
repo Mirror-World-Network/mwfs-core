@@ -557,6 +557,14 @@ public final class JSONResponses {
         BIZ_JSON_IO_ERROR = JSON.prepare(response);
     }
 
+    public static final JSONStreamAware ACCESS_CLOSED;
+    static {
+        JSONObject response = new JSONObject();
+        response.put("errorCode", 6);
+        response.put("errorDescription", "The interface access is closed");
+        ACCESS_CLOSED = JSON.prepare(response);
+    }
+
     private JSONResponses() {} // never
 
 }
