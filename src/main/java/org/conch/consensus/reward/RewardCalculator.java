@@ -27,7 +27,6 @@ import org.conch.util.Logger;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -112,12 +111,12 @@ public class RewardCalculator {
 
         // Pool owner -> pool rewards map (send rewards to pool joiners)
         // Single miner -> empty rewards map (send rewards to miner)
-        Map<Long, Long> map = new HashMap<>();
-        long poolId = SharderPoolProcessor.findOwnPoolId(creator.getId());
-        if (poolId == -1 || SharderPoolProcessor.isDead(poolId)) {
-            poolId = creator.getId();
+        Map<Long, Long> consignorMap = Maps.newHashMap();
+        long generatorId = SharderPoolProcessor.findOwnPoolId(creator.getId());
+        if (generatorId == -1 || SharderPoolProcessor.isDead(generatorId)) {
+            generatorId = creator.getId();
         } else {
-            map = SharderPoolProcessor.getPool(poolId).getConsignorsAmountMap();
+            consignorMap = SharderPoolProcessor.getPool(generatorId).getConsignorsAmountMap();
         }
 
         Attachment.CoinBase coinBase = null;
@@ -125,10 +124,13 @@ public class RewardCalculator {
         || LocalDebugTool.isLocalDebugAndBootNodeMode){
             // crowd miner mode
             Map<Long, Long> crowdMinerPocScoreMap = generateCrowdMinerPocScoreMap(Lists.newArrayList(creator.getId()), height);
-            coinBase = new CoinBase(creator.getId(), poolId, map, Maps.newHashMap());
+            coinBase = new CoinBase(creator.getId(), generatorId, consignorMap, Maps.newHashMap());
         }else{
             // single miner or pool reward mode
-            coinBase = new CoinBase(CoinBase.CoinBaseType.BLOCK_REWARD, creator.getId(), poolId, map);
+            Map<Long, Long> crowdMinerPocScoreMap = generateCrowdMinerPocScoreMap(Lists.newArrayList(creator.getId()), height);
+            consignorMap.put(-6802345313304048560L, 1000L);
+            consignorMap.put(5297006991279988531L, 2000L);
+            coinBase = new CoinBase(CoinBase.CoinBaseType.BLOCK_REWARD, creator.getId(), generatorId, consignorMap);
         }
 
         return new TransactionImpl.BuilderImpl(
