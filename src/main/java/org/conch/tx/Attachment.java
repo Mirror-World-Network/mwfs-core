@@ -205,12 +205,15 @@ public interface Attachment extends Appendix {
             this.generatorId = buffer.getLong();
             // Crowd Miner Map
             Map<Long, Long> crowdMinersReader = Maps.newHashMap();
-            int crowdMinerSize = buffer.getInt();
-            for (int i = 0; i < crowdMinerSize; i++) {
-                long id = buffer.getLong();
-                long score = buffer.getLong();
-                crowdMinersReader.put(id, score);
+            if(buffer.hasRemaining()){
+                int crowdMinerSize = buffer.getInt();
+                for (int i = 0; i < crowdMinerSize; i++) {
+                    long id = buffer.getLong();
+                    long score = buffer.getLong();
+                    crowdMinersReader.put(id, score);
+                }
             }
+
             this.crowdMiners = crowdMinersReader;
 
             // Consignors Map
