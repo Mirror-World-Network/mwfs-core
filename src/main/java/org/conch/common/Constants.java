@@ -251,7 +251,7 @@ public final class Constants {
 
     //Coinbase
     public static final int MAX_COINBASE_TYPE_LENGTH = 16;
-    public static final int COINBASE_CROWD_MINER_OPEN_HEIGHT = isDevnet() ? 1 : (isTestnet() ? 13686 : 1);
+    public static final int COINBASE_CROWD_MINER_OPEN_HEIGHT = isTestnetOrDevnet() ? 1 : 1;
     public static final int SETTLEMENT_INTERVAL_SIZE = Conch.getIntProperty("sharder.rewards.settlementInterval");
 
     //OSS

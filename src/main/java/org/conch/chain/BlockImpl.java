@@ -638,14 +638,14 @@ public final class BlockImpl implements Block {
         }
 
         cumulativeDifficulty = previousBlock.cumulativeDifficulty.add(Convert.two64.divide(BigInteger.valueOf(baseTarget)));
-
-        BigInteger oneBlockDiff = BigInteger.ZERO;
-        if(TWENTY_YEARS_SECONDS > timestamp) {
-            oneBlockDiff = BigInteger.valueOf(TWENTY_YEARS_SECONDS - timestamp);
-        }else{
-            oneBlockDiff = BigInteger.valueOf(TWENTY_YEARS_SECONDS - (timestamp - TWENTY_YEARS_SECONDS));
-        }
-        cumulativeDifficulty = cumulativeDifficulty.add(oneBlockDiff);
+//      One block difficult
+//        BigInteger oneBlockDiff = BigInteger.ZERO;
+//        if(TWENTY_YEARS_SECONDS > timestamp) {
+//            oneBlockDiff = BigInteger.valueOf(TWENTY_YEARS_SECONDS - timestamp);
+//        }else{
+//            oneBlockDiff = BigInteger.valueOf(TWENTY_YEARS_SECONDS - (timestamp - TWENTY_YEARS_SECONDS));
+//        }
+//        cumulativeDifficulty = cumulativeDifficulty.add(oneBlockDiff);
     }
 
     @Override

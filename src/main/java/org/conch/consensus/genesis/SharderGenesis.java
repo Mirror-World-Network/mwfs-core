@@ -71,7 +71,7 @@ public class SharderGenesis {
     protected static final JSONObject genesisJsonObj = loadGenesisSettings();
     private static JSONObject loadGenesisSettings() {
         String pathName = Conch.getStringProperty("sharder.genesis.pathName");
-        if(StringUtils.isNotEmpty(pathName)) {
+        if(StringUtils.isEmpty(pathName)) {
             pathName = "conf/genesis.json";
         }
         String jsonStr = readJsonFile(pathName);
