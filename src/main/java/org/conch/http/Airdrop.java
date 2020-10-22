@@ -37,14 +37,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.conch.http.JSONResponses.MISSING_TRANSACTION;
-import static org.conch.http.JSONResponses.incorrect;
+import static org.conch.http.JSONResponses.*;
 import static org.conch.util.JSON.JsonWrite;
 import static org.conch.util.JSON.readJsonFile;
 
-public final class BatchSendMoney extends CreateTransaction {
+public final class Airdrop extends CreateTransaction {
 
-    static final BatchSendMoney instance = new BatchSendMoney();
+    static final Airdrop instance = new Airdrop();
     static class TransferInfo {
         public String recipient;
         public String amountNQT;
@@ -55,20 +54,29 @@ public final class BatchSendMoney extends CreateTransaction {
         TransferInfo() {}
     }
 
-    private static String defaulPathName = Conch.getStringProperty("sharder.airdrop.pathName");
+    /**
+     * default airdrop JSON fileName
+     */
+    private static final String DEFAULT_PATH_NAME = Conch.getStringProperty("sharder.airdrop.pathName");
+    /**
+     * list of valid keys used for validation
+     */
+    private static final List<String> VALID_KEYS = Conch.getStringListProperty("sharder.airdrop.validKeys");
+    /**
+     * airdrop switch
+     */
+    private static final boolean ENABLE_AIRDROP = Conch.getBooleanProperty("sharder.airdrop.enable");
+    /**
+     * airdrop append Mode
+     */
+    private static final boolean IS_APPEND_MODE = Conch.getBooleanProperty("sharder.airdrop.isAppendMode");
 
-
-    private static List<String> validKeys = Conch.getStringListProperty("sharder.airdrop.validKeys");
-
-    // TODO airdrop switch
-    // TODO dirdrop append Mode
-
-    private BatchSendMoney() {
+    private Airdrop() {
         super(new APITag[] {APITag.ACCOUNTS, APITag.CREATE_TRANSACTION}, "pathName", "key");
     }
 
     private boolean verifyKey(String key) {
-        for (String validKey : validKeys) {
+        for (String validKey : VALID_KEYS) {
             if (validKey.equalsIgnoreCase(key)) {
                 return true;
             }
@@ -78,17 +86,19 @@ public final class BatchSendMoney extends CreateTransaction {
 
     @Override
     protected JSONStreamAware processRequest(HttpServletRequest req) throws ConchException {
-        org.json.simple.JSONObject response = new org.json.simple.JSONObject();
 
+        org.json.simple.JSONObject response = new org.json.simple.JSONObject();
         String pathName = req.getParameter("pathName");
         String key = req.getParameter("key");
-
+        if (!ENABLE_AIRDROP) {
+            return ACCESS_CLOSED;
+        }
         if (!verifyKey(key)) {
             throw new ParameterException(incorrect("key", String.format("key %s is incorrect", key)));
         }
 
         // parse file
-        pathName = pathName==null?defaulPathName:pathName;
+        pathName = pathName==null? DEFAULT_PATH_NAME :pathName;
         String jsonStr = readJsonFile(pathName);
         JSONObject jobj = JSON.parseObject(jsonStr);
 
@@ -107,6 +117,10 @@ public final class BatchSendMoney extends CreateTransaction {
         JSONArray failListOrigin = jobj.getJSONArray("failList");
         if (listOrigin == null) {
             return MISSING_TRANSACTION;
+        }
+        if (!IS_APPEND_MODE) {
+            doneListOrigin = null;
+            failListOrigin = null;
         }
         List<TransferInfo> list = JSONObject.parseArray(listOrigin.toJSONString(), TransferInfo.class);
         // record existing lists, append pattern
