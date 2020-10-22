@@ -169,7 +169,7 @@ public interface Attachment extends Appendix {
     };
 
     class CoinBase extends AbstractAttachment {
-
+        private static final int MAX_COINBASE_TYPE_LENGTH = 20;
         public enum CoinBaseType {
             GENESIS,
             BLOCK_REWARD, // support miner and pool rewards distribution
@@ -199,7 +199,8 @@ public interface Attachment extends Appendix {
 
         public CoinBase(ByteBuffer buffer, byte transactionVersion) throws ConchException.NotValidException {
             super(buffer, transactionVersion);
-            this.coinBaseType = CoinBaseType.getType(Convert.readString(buffer,buffer.get(),Constants.MAX_COINBASE_TYPE_LENGTH));
+            String typeNameStr = Convert.readString(buffer, buffer.getInt(), MAX_COINBASE_TYPE_LENGTH);
+            this.coinBaseType = CoinBaseType.getType(typeNameStr);
             this.creator = buffer.getLong();
             this.generatorId = buffer.getLong();
             // Crowd Miner Map
@@ -266,7 +267,7 @@ public interface Attachment extends Appendix {
 
         @Override
         public int getMySize() {
-            int size = 2 + coinBaseType.name().getBytes().length
+            int size = 4 + coinBaseType.name().getBytes().length
                     + 8 + 8;
 
             // Crowd Miners
@@ -280,8 +281,9 @@ public interface Attachment extends Appendix {
 
         @Override
         public void putMyBytes(ByteBuffer buffer) {
-            buffer.put((byte) coinBaseType.name().length());
-            buffer.put(Convert.toBytes(coinBaseType.name()));
+            byte[] nameBytes = coinBaseType.name().getBytes();
+            buffer.putInt(nameBytes.length);
+            buffer.put(nameBytes);
             buffer.putLong(creator);
             buffer.putLong(generatorId);
             // Crowd Miner Rewards

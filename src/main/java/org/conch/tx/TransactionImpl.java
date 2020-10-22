@@ -21,7 +21,6 @@
 
 package org.conch.tx;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.conch.Conch;
 import org.conch.account.Account;
@@ -30,7 +29,6 @@ import org.conch.chain.*;
 import org.conch.common.ConchException;
 import org.conch.common.Constants;
 import org.conch.consensus.genesis.SharderGenesis;
-import org.conch.consensus.poc.tx.PocTxBody;
 import org.conch.consensus.reward.RewardCalculator;
 import org.conch.crypto.Crypto;
 import org.conch.db.DbKey;
@@ -668,7 +666,6 @@ final public class TransactionImpl implements Transaction {
                 buffer.put(getSenderPublicKey());
                 buffer.putLong(type.canHaveRecipient() ? recipientId : SharderGenesis.CREATOR_ID);
                 
-               
                 buffer.putLong(amountNQT);
                 buffer.putLong(feeNQT);
                 if (referencedTransactionFullHash != null) {
@@ -783,21 +780,8 @@ final public class TransactionImpl implements Transaction {
             if ((flags & position) != 0) {
                 builder.appendix(new Appendix.PrunableEncryptedMessage(buffer, version));
             }
-            // emergency fix for vicious tx at height 12222 of the Testnet
-            // TODO improve following logic
             if (buffer.hasRemaining()) {
-                if(builder.type.isType(TransactionType.TYPE_POC)){
-                    if(builder.attachment instanceof PocTxBody.PocNodeTypeV2) {
-                        PocTxBody.PocNodeTypeV2 nodeTypeV2 = (PocTxBody.PocNodeTypeV2) builder.attachment;
-                        if(StringUtils.isEmpty(nodeTypeV2.getIp()) 
-                        || nodeTypeV2.getType() == null) {
-                            Logger.logWarningMessage("It is a bad or vicious PocNodeType tx, it will be ignored in the execution of the PocProcessor. Don't throw a exception now");
-                        }
-                    }
-                }
-                else{
-                    throw new ConchException.NotValidException("Transaction bytes too long, " + buffer.remaining() + " extra bytes");
-                }
+                throw new ConchException.NotValidException("Transaction bytes too long, " + buffer.remaining() + " extra bytes");
             }
             return builder;
         } catch (ConchException.NotValidException|RuntimeException e) {
@@ -889,11 +873,7 @@ final public class TransactionImpl implements Transaction {
 
     public static TransactionImpl parseTransaction(JSONObject transactionData) throws ConchException.NotValidException {
         TransactionImpl transaction = newTransactionBuilder(transactionData).build();
-        if(RewardCalculator.isBlockCrowdRewardTx(transaction.getAttachment())){
-            if(RewardCalculator.temporaryCloseValidation) {
-                //FIXME ignore the signature validation (temporary code to handle block stuck) -2020.07.24
-            }
-        } else if (transaction.getSignature() != null && !transaction.checkSignature()) {
+        if (transaction.getSignature() != null && !transaction.checkSignature()) {
             throw new ConchException.NotValidException("Invalid transaction signature for transaction " + transaction.getJSONObject().toJSONString());
         }
         return transaction;
@@ -974,18 +954,19 @@ final public class TransactionImpl implements Transaction {
     }
 
     public boolean verifySignature() {
-        if(RewardCalculator.isBlockCrowdRewardTx(getAttachment())){
-            //FIXME ignore the signature validation (temporary code to handle block stuck) -2020.07.24
-            if(RewardCalculator.temporaryCloseValidation) {
-                return true;
-            }
-        }
         return checkSignature() && Account.setOrVerify(getSenderId(), getSenderPublicKey());
     }
 
     private volatile boolean hasValidSignature = false;
 
     private boolean checkSignature() {
+        if(RewardCalculator.isBlockCrowdRewardTx(getAttachment())){
+            //FIXME ignore the signature validation (temporary code to handle block stuck) -2020.07.24
+            if(RewardCalculator.temporaryCloseValidation) {
+                return true;
+            }
+        }
+
         if (!hasValidSignature) {
             hasValidSignature = signature != null && Crypto.verify(signature, zeroSignature(getBytes()), getSenderPublicKey(), true);
         }

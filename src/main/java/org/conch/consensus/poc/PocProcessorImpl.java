@@ -645,9 +645,6 @@ public class PocProcessorImpl implements PocProcessor {
         //@link: org.conch.chain.BlockchainProcessorImpl.autoExtensionAppend update the ext tag
         List<? extends Transaction> txs = block.getTransactions();
 
-        if(block.getHeight() == 13797) {
-            Logger.logDebugMessage("height 13797 start to processing");
-        }
         //just process poc tx
         for (Transaction tx : txs) {
             if (TransactionType.TYPE_POC  == tx.getType().getType()) {
