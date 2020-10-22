@@ -289,6 +289,7 @@ public interface Attachment extends Appendix {
             buffer.put(nameBytes);
             buffer.putLong(creator);
             buffer.putLong(generatorId);
+
             // Crowd Miner Rewards
             buffer.putInt(crowdMiners.size());
             if(crowdMiners.size() > 0){
