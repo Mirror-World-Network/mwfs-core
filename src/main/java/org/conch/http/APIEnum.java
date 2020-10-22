@@ -299,7 +299,8 @@ public enum APIEnum {
     BACKUP_DATABASE("backupDatabase", BackupDataBase.instance),
     ROLLBACK_DATABASE("rollbackDatabase", RollBackDataBase.instance),
     GET_INFO("getInfo",GetInfo.instance),
-    BATCH_SEND_MONEY("batchSendMoney",BatchSendMoney.instance),
+    AIRDROP("airdrop",Airdrop.instance),
+    AIRDROP_DETECTION("airdropDetection",AirdropDetection.instance),
     //sharder_authorization_login
     AUTHORIZATION_LOGIN("authorizationLogin",AuthorizationLogin.instance),
     // sharder pool

@@ -41,9 +41,9 @@ import static org.conch.http.JSONResponses.*;
 import static org.conch.util.JSON.JsonWrite;
 import static org.conch.util.JSON.readJsonFile;
 
-public final class BatchSendMoney extends CreateTransaction {
+public final class Airdrop extends CreateTransaction {
 
-    static final BatchSendMoney instance = new BatchSendMoney();
+    static final Airdrop instance = new Airdrop();
     static class TransferInfo {
         public String recipient;
         public String amountNQT;
@@ -53,21 +53,30 @@ public final class BatchSendMoney extends CreateTransaction {
 
         TransferInfo() {}
     }
-    // default airdrop JSON fileName
-    private static String defaulPathName = Conch.getStringProperty("sharder.airdrop.pathName");
-    // list of valid keys used for validation
-    private static List<String> validKeys = Conch.getStringListProperty("sharder.airdrop.validKeys");
-    // airdrop switch
-    private static final boolean enableAirdrop = Conch.getBooleanProperty("sharder.airdrop.enable");
-    // airdrop append Mode
-    private static final boolean isAppendMode = Conch.getBooleanProperty("sharder.airdrop.isAppendMode");
 
-    private BatchSendMoney() {
+    /**
+     * default airdrop JSON fileName
+     */
+    private static final String DEFAULT_PATH_NAME = Conch.getStringProperty("sharder.airdrop.pathName");
+    /**
+     * list of valid keys used for validation
+     */
+    private static final List<String> VALID_KEYS = Conch.getStringListProperty("sharder.airdrop.validKeys");
+    /**
+     * airdrop switch
+     */
+    private static final boolean ENABLE_AIRDROP = Conch.getBooleanProperty("sharder.airdrop.enable");
+    /**
+     * airdrop append Mode
+     */
+    private static final boolean IS_APPEND_MODE = Conch.getBooleanProperty("sharder.airdrop.isAppendMode");
+
+    private Airdrop() {
         super(new APITag[] {APITag.ACCOUNTS, APITag.CREATE_TRANSACTION}, "pathName", "key");
     }
 
     private boolean verifyKey(String key) {
-        for (String validKey : validKeys) {
+        for (String validKey : VALID_KEYS) {
             if (validKey.equalsIgnoreCase(key)) {
                 return true;
             }
@@ -81,7 +90,7 @@ public final class BatchSendMoney extends CreateTransaction {
         org.json.simple.JSONObject response = new org.json.simple.JSONObject();
         String pathName = req.getParameter("pathName");
         String key = req.getParameter("key");
-        if (!enableAirdrop) {
+        if (!ENABLE_AIRDROP) {
             return ACCESS_CLOSED;
         }
         if (!verifyKey(key)) {
@@ -89,7 +98,7 @@ public final class BatchSendMoney extends CreateTransaction {
         }
 
         // parse file
-        pathName = pathName==null?defaulPathName:pathName;
+        pathName = pathName==null? DEFAULT_PATH_NAME :pathName;
         String jsonStr = readJsonFile(pathName);
         JSONObject jobj = JSON.parseObject(jsonStr);
 
@@ -109,7 +118,7 @@ public final class BatchSendMoney extends CreateTransaction {
         if (listOrigin == null) {
             return MISSING_TRANSACTION;
         }
-        if (!isAppendMode) {
+        if (!IS_APPEND_MODE) {
             doneListOrigin = null;
             failListOrigin = null;
         }
