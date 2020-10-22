@@ -195,35 +195,40 @@ public interface Attachment extends Appendix {
         // account id : investment amount
         protected final Map<Long, Long> consignors;
         // miner's account id : poc score
-        protected Map<Long, Long> crowdMiners;
+        protected final Map<Long, Long> crowdMiners;
 
         public CoinBase(ByteBuffer buffer, byte transactionVersion) throws ConchException.NotValidException {
             super(buffer, transactionVersion);
             this.coinBaseType = CoinBaseType.getType(Convert.readString(buffer,buffer.get(),Constants.MAX_COINBASE_TYPE_LENGTH));
             this.creator = buffer.getLong();
             this.generatorId = buffer.getLong();
-            // Crowd Miner Rewards
+            // Crowd Miner Map
+            Map<Long, Long> crowdMinersReader = Maps.newHashMap();
             if(isType(CoinBaseType.CROWD_BLOCK_REWARD)){
-                Map<Long, Long> crowdMinersReader = Maps.newHashMap();
                 int crowdMinerSize = buffer.getInt();
-                for (int i = 0; i < crowdMinerSize; i++) {
-                    long id = buffer.getLong();
-                    long amount = buffer.getLong();
-                    crowdMinersReader.put(id, amount);
+                if(crowdMinerSize > 0){
+                    for (int i = 0; i < crowdMinerSize; i++) {
+                        long id = buffer.getLong();
+                        long amount = buffer.getLong();
+                        crowdMinersReader.put(id, amount);
+                    }
                 }
-                this.crowdMiners = crowdMinersReader;
             }
+            this.crowdMiners = crowdMinersReader;
 
-            Map<Long, Long> temp = new HashMap<>();
+            // Consignors Map
+            Map<Long, Long> consignorsReader = Maps.newHashMap();
             if (buffer.hasRemaining()) {
-                int size = buffer.remaining() / 16;
-                for (int i = 0; i < size; i++) {
-                    long id = buffer.getLong();
-                    long amount = buffer.getLong();
-                    temp.put(id, amount);
+                int size = buffer.getInt();
+                if(size > 0){
+                    for (int i = 0; i < size; i++) {
+                        long id = buffer.getLong();
+                        long amount = buffer.getLong();
+                        consignorsReader.put(id, amount);
+                    }
                 }
             }
-            consignors = temp;
+            this.consignors = consignorsReader;
         }
 
         public CoinBase(JSONObject attachmentData) {
@@ -235,6 +240,8 @@ public interface Attachment extends Appendix {
             // Crowd Miner Rewards
             if(isType(CoinBaseType.CROWD_BLOCK_REWARD)){
                 this.crowdMiners = jsonToMap((JSONObject) attachmentData.get("crowdMiners"));
+            }else{
+                this.crowdMiners = Maps.newHashMap();
             }
         }
 
@@ -246,7 +253,10 @@ public interface Attachment extends Appendix {
          * @param crowdMiners qualified miners at this height
          */
         public CoinBase(long creator, long generatorId, Map<Long, Long> consignors, Map<Long, Long> crowdMiners) {
-            this(CoinBaseType.CROWD_BLOCK_REWARD, creator, generatorId, consignors);
+            this.coinBaseType = CoinBaseType.CROWD_BLOCK_REWARD;
+            this.creator = creator;
+            this.generatorId = generatorId;
+            this.consignors = consignors;
             this.crowdMiners = crowdMiners;
         }
 
@@ -262,17 +272,28 @@ public interface Attachment extends Appendix {
             this.creator = creator;
             this.generatorId = generatorId;
             this.consignors = consignors;
+            this.crowdMiners = Maps.newHashMap();
         }
 
         @Override
         public int getMySize() {
             int size = 2 + coinBaseType.name().getBytes().length
-                    + 8 + 8
-                    + consignors.size() * 2 * 8;
+                    + 8 + 8;
 
-            // Crowd Miner Rewards
+            // Consignors
+            if(consignors.size() > 0){
+                size += 4 + consignors.size() * 2 * 8;
+            }else{
+                size += 4;
+            }
+
+            // Crowd Miners
             if(isType(CoinBaseType.CROWD_BLOCK_REWARD)){
-                size += 4 + crowdMiners.size() * 2 * 8;
+                if(crowdMiners.size() > 0){
+                    size += 4 + crowdMiners.size() * 2 * 8;
+                }else{
+                    size += 4;
+                }
             }
             return size;
         }
@@ -286,15 +307,21 @@ public interface Attachment extends Appendix {
             // Crowd Miner Rewards
             if(isType(CoinBaseType.CROWD_BLOCK_REWARD)){
                 buffer.putInt(crowdMiners.size());
-                for (Map.Entry<Long, Long> entry : crowdMiners.entrySet()) {
+                if(crowdMiners.size() > 0){
+                    for (Map.Entry<Long, Long> entry : crowdMiners.entrySet()) {
+                        buffer.putLong(entry.getKey());
+                        buffer.putLong(entry.getValue());
+                    }
+                }
+            }
+
+            // Pool Rewards
+            buffer.putInt(consignors.size());
+            if(consignors.size() > 0){
+                for (Map.Entry<Long, Long> entry : consignors.entrySet()) {
                     buffer.putLong(entry.getKey());
                     buffer.putLong(entry.getValue());
                 }
-            }
-            // Pool Rewards
-            for (Map.Entry<Long, Long> entry : consignors.entrySet()) {
-                buffer.putLong(entry.getKey());
-                buffer.putLong(entry.getValue());
             }
         }
 
