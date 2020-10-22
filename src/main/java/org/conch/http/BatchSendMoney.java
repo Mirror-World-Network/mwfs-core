@@ -34,31 +34,25 @@ import org.json.simple.JSONValue;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.conch.http.JSONResponses.MISSING_TRANSACTION;
 import static org.conch.http.JSONResponses.incorrect;
+import static org.conch.util.JSON.JsonWrite;
 import static org.conch.util.JSON.readJsonFile;
 
 public final class BatchSendMoney extends CreateTransaction {
 
     static final BatchSendMoney instance = new BatchSendMoney();
-    static class BatchTransfer {
+    static class TransferInfo {
         public String recipient;
         public String amountNQT;
         public String recipientPublicKey;
+        public String errorDescription; // create transaction failed to write to this value
+        public String transactionID; // create transaction succeed to write to this value
 
-        BatchTransfer() {}
-
-        @Override
-        public String toString() {
-            return "BatchTransfer{" +
-                    "recipient='" + recipient + '\'' +
-                    ", amountNQT='" + amountNQT + '\'' +
-                    ", recipientPublicKey='" + recipientPublicKey + '\'' +
-                    '}';
-        }
+        TransferInfo() {}
     }
 
     private static String defaulPathName = Conch.getStringProperty("sharder.airdrop.pathName");
@@ -66,9 +60,11 @@ public final class BatchSendMoney extends CreateTransaction {
 
     private static List<String> validKeys = Conch.getStringListProperty("sharder.airdrop.validKeys");
 
+    // TODO airdrop switch
+    // TODO dirdrop append Mode
 
     private BatchSendMoney() {
-        super(new APITag[] {APITag.ACCOUNTS, APITag.CREATE_TRANSACTION}, "pathAndFileName", "key");
+        super(new APITag[] {APITag.ACCOUNTS, APITag.CREATE_TRANSACTION}, "pathName", "key");
     }
 
     private boolean verifyKey(String key) {
@@ -84,70 +80,158 @@ public final class BatchSendMoney extends CreateTransaction {
     protected JSONStreamAware processRequest(HttpServletRequest req) throws ConchException {
         org.json.simple.JSONObject response = new org.json.simple.JSONObject();
 
-        String pathAndFileName = req.getParameter("pathAndFileName");
+        String pathName = req.getParameter("pathName");
         String key = req.getParameter("key");
-        String pathStr;
 
         if (!verifyKey(key)) {
             throw new ParameterException(incorrect("key", String.format("key %s is incorrect", key)));
         }
 
-        pathStr = pathAndFileName==null?defaulPathName:pathAndFileName;
         // parse file
-        String jsonStr = readJsonFile(pathStr);
+        pathName = pathName==null?defaulPathName:pathName;
+        String jsonStr = readJsonFile(pathName);
         JSONObject jobj = JSON.parseObject(jsonStr);
+
+        // read file error
+        if (jobj.get("error") != null) {
+            return JSONResponses.fileNotFound(pathName.split("/")[1] != null?pathName.split("/")[1]:pathName);
+        }
 
         Map<String, String[]> paramter = Maps.newHashMap();
         paramter.put("secretPhrase", new String[]{jobj.getString("secretPhrase")});
         paramter.put("feeNQT", new String[]{jobj.getString("feeNQT")});
         paramter.put("deadline", new String[]{jobj.getString("deadline")});
 
-        JSONArray list = jobj.getJSONArray("list");
-        List<BatchTransfer> transferList = JSONObject.parseArray(list.toJSONString(), BatchTransfer.class);
-        List<JSONStreamAware> transactionList = new ArrayList<>();
-        JSONArray failTransferArray = new JSONArray();
-        for (BatchTransfer batchTransfer : transferList) {
+        JSONArray listOrigin = jobj.getJSONArray("list");
+        JSONArray doneListOrigin = jobj.getJSONArray("doneList");
+        JSONArray failListOrigin = jobj.getJSONArray("failList");
+        if (listOrigin == null) {
+            return MISSING_TRANSACTION;
+        }
+        List<TransferInfo> list = JSONObject.parseArray(listOrigin.toJSONString(), TransferInfo.class);
+        // record existing lists, append pattern
+        List<TransferInfo> doneList = doneListOrigin == null?new ArrayList<>():JSONObject.parseArray(doneListOrigin.toJSONString(), TransferInfo.class);
+        List<TransferInfo> failList = failListOrigin == null?new ArrayList<>():JSONObject.parseArray(failListOrigin.toJSONString(), TransferInfo.class);
+        // record the lists that unhandled the exception
+        List<TransferInfo> pendingList = new ArrayList<>();
+
+        JSONArray transferSuccessList = new JSONArray();
+        JSONArray transferFailList = new JSONArray();
+        for (TransferInfo info : list) {
             org.json.simple.JSONObject jsonObject = new org.json.simple.JSONObject();
             try {
-                paramter.put("recipient", new String[]{batchTransfer.recipient});
-                paramter.put("recipientPublicKey", new String[]{batchTransfer.recipientPublicKey});
-                paramter.put("amountNQT", new String[]{batchTransfer.amountNQT});
+                paramter.put("recipient", new String[]{info.recipient});
+                paramter.put("recipientPublicKey", new String[]{info.recipientPublicKey});
+                paramter.put("amountNQT", new String[]{info.amountNQT});
+                paramter.put("transactionID", new String[]{info.transactionID});
+                paramter.put("errorDescription", new String[]{info.errorDescription});
+
                 BizParameterRequestWrapper reqWrapper = new BizParameterRequestWrapper(req, req.getParameterMap(), paramter);
                 Account account = ParameterParser.getSenderAccount(reqWrapper);
 
                 long recipient = ParameterParser.getAccountId(reqWrapper, "recipient", true);
                 long amountNQT = ParameterParser.getAmountNQT(reqWrapper);
+
                 JSONStreamAware transaction = createTransaction(reqWrapper, account, recipient, amountNQT);
-                if (null != transaction) {
-                    org.json.simple.JSONObject transactionJsonObject = (org.json.simple.JSONObject) transaction;
-                    if (transactionJsonObject.get("broadcasted").equals(true)) {
-                        // transaction was created successfully and broadcast
-                        // TODO remove non-essential attributes to simplify the return results
-                        transactionList.add(transaction);
-                    } else {
-                        jsonObject.put("transfer", JSON.toJSON(batchTransfer));
-                        jsonObject.put("errorResponse", transaction);
-                        failTransferArray.add(jsonObject);
-                    }
+                org.json.simple.JSONObject transactionJsonObject = (org.json.simple.JSONObject) transaction;
+                if (transactionJsonObject.get("broadcasted") != null && transactionJsonObject.get("broadcasted").equals(true)) {
+                    // transaction was created successfully and broadcast
+                    transferSuccessList.add(transaction);
+                    // write info to the doneList
+                    info.transactionID = (String) transactionJsonObject.get("transaction");
+                    doneList.add(info);
                 } else {
-                    jsonObject.put("transfer", JSON.toJSON(batchTransfer));
+                    jsonObject.put("transfer", JSON.toJSON(info));
                     jsonObject.put("errorResponse", transaction);
-                    failTransferArray.add(jsonObject);
+                    transferFailList.add(jsonObject);
+                    // write info to failList
+                    info.errorDescription = (String) transactionJsonObject.get("errorDescription");
+                    failList.add(info);
                 }
+
             }catch (ParameterException e) {
-                jsonObject.put("transfer", JSON.toJSON(batchTransfer));
                 org.json.simple.JSONObject errorResponse = (org.json.simple.JSONObject) JSONValue.parse(org.conch.util.JSON.toString(e.getErrorResponse()));
+
+                jsonObject.put("transfer", JSON.toJSON(info));
                 jsonObject.put("errorResponse", errorResponse);
-                failTransferArray.add(jsonObject);
+                transferFailList.add(jsonObject);
+                info.errorDescription = (String) errorResponse.get("errorDescription");
+                failList.add(info);
             }catch (ConchException e) {
                 e.printStackTrace();
-            } finally {
+
+                jsonObject.put("transfer", JSON.toJSON(info));
+                jsonObject.put("errorResponse", e.getMessage());
+                transferFailList.add(jsonObject);
+
+                info.errorDescription = e.getMessage();
+                pendingList.add(info);
+            }catch (Exception e) {
+                // catch all exception, ensure that processing does not break
+                e.printStackTrace();
+
+                jsonObject.put("transfer", JSON.toJSON(info));
+                jsonObject.put("errorResponse", e.getMessage());
+                transferFailList.add(jsonObject);
+
+                info.errorDescription = e.getMessage();
+                pendingList.add(info);
             }
         }
-        response.put("transferSuccessList", transactionList);
-        response.put("transferFailList", failTransferArray);
+        JSONStreamAware write = writeToJSON(doneList, failList, pendingList, jobj, pathName);
+        if (write != null) {
+            response.put("writeError", JSONValue.parse(org.conch.util.JSON.toString(write)));
+        }
+        response.put("transferSuccessList", transferSuccessList);
+        response.put("transferFailList", transferFailList);
         response.put("transferTotalCount", list.size());
-        response.put("transferSuccessCount", transactionList.size());
+        response.put("transferSuccessCount", transferSuccessList.size());
+
         return response;
+    }
+
+    /**
+     * write the return result to the specified JSON file, containing：
+     *  1. doneList: (createTransaction success)
+     *      public String recipient;
+     *      public String amountNQT;
+     *      public String recipientPublicKey;
+     *      public String transactionID;
+     *  2. failList: (createTransaction fail)
+     *      public String recipient;
+     *      public String amountNQT;
+     *      public String recipientPublicKey;
+     *      public String errorDescription;
+     *  3. list: (exception not handled)
+     *      public String recipient;
+     *      public String amountNQT;
+     *      public String recipientPublicKey;
+     *  4. basic information：
+     *      "secretPhrase": "***",
+     *      "feeNQT": "0",
+     *      "deadline": "1440",
+     *
+     */
+    private JSONStreamAware writeToJSON(List<TransferInfo> doneList, List<TransferInfo> failList, List<TransferInfo> pendingList, JSONObject jobj, String pathName) {
+        org.json.simple.JSONObject jsonObject = new org.json.simple.JSONObject();
+
+        jsonObject.put("secretPhrase", jobj.getString("secretPhrase"));
+        jsonObject.put("feeNQT", jobj.getString("feeNQT"));
+        jsonObject.put("deadline", jobj.getString("deadline"));
+
+        jsonObject.put("doneList", JSON.toJSON(doneList));
+        jsonObject.put("failList", JSON.toJSON(failList));
+        jsonObject.put("list", JSON.toJSON(pendingList));
+
+        // write to json file
+        String jsonWrite = JsonWrite(jsonObject, pathName);
+        JSONObject jsonObjectWrite = JSON.parseObject(jsonWrite);
+
+        // read file error
+        if (jsonObjectWrite != null && jsonObjectWrite.get("error") != null) {
+            return JSONResponses.writeFileFail(pathName.split("/")[1] != null?pathName.split("/")[1]:pathName);
+        } else {
+            return null;
+        }
     }
 }
