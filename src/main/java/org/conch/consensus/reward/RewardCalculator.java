@@ -498,9 +498,9 @@ public class RewardCalculator {
         }
 
         if(!stageTwo){
-            Logger.logDebugMessage("[Height%d-StageOne] Add mining rewards to account's unconfirmed balance and freeze it. \n[DEBUG] Mining Reward Detail Format: txid | address: distribution amount\n%s%s\n", tx.getHeight(), details, tail);
+            Logger.logDebugMessage("[Height%d-StageOne] Add mining rewards to account's unconfirmed balance and freeze it. \n[DEBUG] Mining Reward Detail Format { txid | address: distribution amount }\n%s%s\n", tx.getHeight(), details, tail);
         }else {
-            Logger.logDebugMessage("[Height%d-StageTwo] Unfreeze mining rewards and add it in mined amount. \n[DEBUG] Mining Reward Detail Format: txid | address: distribution amount\n%s%s\n", tx.getHeight(), details, tail);
+            Logger.logDebugMessage("[Height%d-StageTwo] Unfreeze mining rewards and add it in mined amount. \n[DEBUG] Mining Reward Detail Format { txid | address: distribution amount }\n%s%s\n", tx.getHeight(), details, tail);
         }
 
         long miningRewardProcessingMS = System.currentTimeMillis() - miningCalStartMS;
