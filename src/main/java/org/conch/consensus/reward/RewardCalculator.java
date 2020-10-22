@@ -125,7 +125,7 @@ public class RewardCalculator {
         || LocalDebugTool.isLocalDebugAndBootNodeMode){
             // crowd miner mode
             Map<Long, Long> crowdMinerPocScoreMap = generateCrowdMinerPocScoreMap(Lists.newArrayList(creator.getId()), height);
-            coinBase = new CoinBase(creator.getId(), poolId, map, crowdMinerPocScoreMap);
+            coinBase = new CoinBase(creator.getId(), poolId, map, Maps.newHashMap());
         }else{
             // single miner or pool reward mode
             coinBase = new CoinBase(CoinBase.CoinBaseType.BLOCK_REWARD, creator.getId(), poolId, map);
