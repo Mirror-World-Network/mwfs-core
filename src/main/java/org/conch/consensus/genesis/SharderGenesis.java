@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.conch.Conch;
 import org.conch.account.Account;
@@ -70,6 +71,9 @@ public class SharderGenesis {
     protected static final JSONObject genesisJsonObj = loadGenesisSettings();
     private static JSONObject loadGenesisSettings() {
         String pathName = Conch.getStringProperty("sharder.genesis.pathName");
+        if(StringUtils.isEmpty(pathName)) {
+            pathName = "conf/genesis.json";
+        }
         String jsonStr = readJsonFile(pathName);
         return JSON.parseObject(jsonStr);
     }

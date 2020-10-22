@@ -3,11 +3,9 @@ package org.conch.consensus.poc;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.conch.Conch;
 import org.conch.account.Account;
 import org.conch.common.Constants;
 import org.conch.consensus.genesis.SharderGenesis;
-import org.conch.consensus.poc.db.PocDb;
 import org.conch.consensus.poc.tx.PocTxBody;
 import org.conch.consensus.reward.RewardCalculator;
 import org.conch.mint.pool.SharderPoolProcessor;
@@ -160,29 +158,6 @@ public class PocScore implements Serializable {
     public PocScore setTotal(Long totalScore){
         this.total = BigInteger.valueOf(totalScore != null ? totalScore : 0);
         return this;
-    }
-
-    /**
-     * temporary to compatible the
-     * @return
-     */
-    public BigInteger reCalTotalForCompatibility(boolean lastTry){
-        BigInteger score = ssScore.add(nodeTypeScore).add(serverScore).add(hardwareScore).add(networkScore).add(performanceScore).add(onlineRateScore)
-                .add(blockMissScore).add(bcScore);
-        if(lastTry){
-            total = score.multiply(BigInteger.valueOf(1000));
-        }else{
-            total = score.multiply(parseAndGetScoreMagnification(this.height));
-        }
-
-        // update with current height
-        PocScore updateScore = new PocScore();
-        updateScore.synFrom(this);
-        updateScore.total = total;
-        updateScore.height = Conch.getHeight();
-        PocDb.saveOrUpdateScore(updateScore);
-
-        return total;
     }
 
     public BigInteger total() {

@@ -12,7 +12,6 @@ import org.conch.chain.BlockDb;
 import org.conch.common.Constants;
 import org.conch.consensus.poc.PocHolder;
 import org.conch.consensus.poc.PocScore;
-import org.conch.db.Db;
 import org.conch.mint.pool.PoolRule;
 import org.conch.mint.pool.SharderPoolProcessor;
 import org.conch.peer.CertifiedPeer;
@@ -40,11 +39,14 @@ import java.util.Map;
 public class RewardCalculator {
 
     /**
-     * Reward definition, amount is the reward amount
+     * Reward definition
+     * NOTE: Mining Reward = Block Reward - Crowd Miner Reward
      */
-    public enum RewardDef {
-        MINT(1333),
-        CROWD_MINERS(667);
+    private enum RewardDef {
+        BLOCK_REWARD(1333 * Constants.ONE_SS),
+        CROWD_MINERS_REWARD(667 * Constants.ONE_SS),
+        STABLE_PHASE_BLOCK_REWARD(2L),
+        STABLE_PHASE_CROWD_MINERS_REWARD(1L);
 
         private final long amount;
 
@@ -73,20 +75,24 @@ public class RewardCalculator {
                 turn = Conch.getBlockchain().getHeight() / HALVE_COUNT;
             }
             double rate = Math.pow(0.5d, turn);
-            return (long)(Constants.ONE_SS * RewardDef.MINT.getAmount() * rate);
+            return (long)(RewardDef.BLOCK_REWARD.getAmount() * rate);
         }
 
         // No block rewards in the miner joining phase
         if(height <= NETWORK_STABLE_PHASE) {
-            return 1L;
+            return RewardDef.STABLE_PHASE_BLOCK_REWARD.getAmount();
         }
-        return RewardDef.MINT.getAmount() * Constants.ONE_SS;
+        return RewardDef.BLOCK_REWARD.getAmount();
     }
 
     public static long crowdMinerReward(int height){
         if(height >= Constants.COINBASE_CROWD_MINER_OPEN_HEIGHT
         || LocalDebugTool.isLocalDebugAndBootNodeMode){
-            return RewardDef.CROWD_MINERS.getAmount() * Constants.ONE_SS;
+            if(height <= NETWORK_STABLE_PHASE) {
+                return RewardDef.STABLE_PHASE_CROWD_MINERS_REWARD.getAmount();
+            }else{
+                return RewardDef.CROWD_MINERS_REWARD.getAmount();
+            }
         }
         return 0L;
     }
@@ -196,7 +202,7 @@ public class RewardCalculator {
      */
     private static void checkAndSettleCrowdMinerRewards(Transaction tx) {
         try {
-            Db.db.beginTransaction();
+//            Db.db.beginTransaction();
 
             int settlementHeight = tx.getHeight();
             if(settlementHeight <= 0) {
@@ -262,12 +268,12 @@ public class RewardCalculator {
             String tail = "[DEBUG] ----------------------------\n[DEBUG] Total count: " + (crowdMinerRewardMap.size());
             Logger.logDebugMessage("[%d-StageTwo%s] Unfreeze crowdMiners rewards and add it in mined amount. \n[DEBUG] CrowdMiner Reward Detail Format: txid | address: distribution amount\n%s%s\n", settlementHeight, "", details, tail);
 
-            Db.db.commitTransaction();
+//            Db.db.commitTransaction();
         } catch (Exception e) {
-            Db.db.rollbackTransaction();
+//            Db.db.rollbackTransaction();
             Logger.logErrorMessage(String.format("setCrowdMinerReward occur error", e));
         }finally {
-            Db.db.endTransaction();
+//            Db.db.endTransaction();
         }
     }
 
@@ -458,7 +464,7 @@ public class RewardCalculator {
         Map<Long, Long> crowdMiners = Maps.newHashMap();
         if(coinBase.isType(Attachment.CoinBase.CoinBaseType.CROWD_BLOCK_REWARD)) {
             crowdMiners = coinBase.getCrowdMiners();
-            Logger.logDebugMessage("[Rewards-%d-Stage%s] Distribute crowd miner's rewards[crowd miner size=%d] at height %d", tx.getHeight(), stage, crowdMiners.size(), Conch.getHeight());
+            Logger.logDebugMessage("[Height%d-Rewards-Stage%s] Distribute crowd miner's rewards[crowd miner size=%d] at height %d", tx.getHeight(), stage, crowdMiners.size(), Conch.getHeight());
 
             checkAndSettleCrowdMinerRewards(tx);
 
@@ -470,7 +476,7 @@ public class RewardCalculator {
         long miningCalStartMS = System.currentTimeMillis();
         // Mining Reward (include Pool mode)
         Map<Long, Long> consignors = coinBase.getConsignors();
-        Logger.logDebugMessage("[Rewards-%d-Stage%s] Distribute block mining's rewards[ mining joiner size=%d] at height %d. " +
+        Logger.logDebugMessage("[Height%d-Rewards-Stage%s] Distribute block mining's rewards[ mining joiner size=%d] at height %d. " +
                 "Joiner size = 0 means solo miner mode, all block mined rewards will distribute to miner[%s]; " +
                 "Joiner size > 0 means pool mining mode, block mined rewards will distribute under the pool rules.",
                 tx.getHeight(), stage, consignors.size(), Conch.getHeight(), minerAccount.getRsAddress());
@@ -492,9 +498,9 @@ public class RewardCalculator {
         }
 
         if(!stageTwo){
-            Logger.logDebugMessage("[%d-StageOne] Add mining rewards to account's unconfirmed balance and freeze it. \n[DEBUG] Mining Reward Detail Format: txid | address: distribution amount\n%s%s\n", tx.getHeight(), details, tail);
+            Logger.logDebugMessage("[Height%d-StageOne] Add mining rewards to account's unconfirmed balance and freeze it. \n[DEBUG] Mining Reward Detail Format: txid | address: distribution amount\n%s%s\n", tx.getHeight(), details, tail);
         }else {
-            Logger.logDebugMessage("[%d-StageTwo] Unfreeze mining rewards and add it in mined amount. \n[DEBUG] Mining Reward Detail Format: txid | address: distribution amount\n%s%s\n", tx.getHeight(), details, tail);
+            Logger.logDebugMessage("[Height%d-StageTwo] Unfreeze mining rewards and add it in mined amount. \n[DEBUG] Mining Reward Detail Format: txid | address: distribution amount\n%s%s\n", tx.getHeight(), details, tail);
         }
 
         long miningRewardProcessingMS = System.currentTimeMillis() - miningCalStartMS;
@@ -504,13 +510,13 @@ public class RewardCalculator {
         String feederAddress = feeder != null ? feeder.getAnnouncedAddress() : "AddressUndefined";
         String feederHost = feeder != null ? feeder.getHost() : "HostUndefined";
         if(Logger.isLevel(Logger.Level.INFO)) {
-            Logger.logInfoMessage("[Rewards-%d-Stage%s] Distribution detail[crowd miner size=%d, mining joiner size=%d, processing used time≈%dS(%d MS)] at current height %d(%s mined at %s) -> height %d of feeder %s[%s]\n",
+            Logger.logInfoMessage("[Height%d-Rewards-Stage%s] Distribution detail[crowd miner size=%d, mining joiner size=%d, processing used time≈%dS(%d MS)] at current height %d(%s mined at %s) -> height %d of feeder %s[%s]\n",
                     tx.getHeight(), stage, crowdMiners.size(), miningJoinerCount
                     , totalUsedMs / 1000, totalUsedMs
                     , Conch.getHeight(), minerAccount.getRsAddress(), Convert.dateFromEpochTime(tx.getBlockTimestamp())
                     , Conch.getBlockchainProcessor().getLastBlockchainFeederHeight(), feederAddress, feederHost);
         }else {
-            Logger.logDebugMessage("[Rewards-%d-Stage%s] Distribution used time[crowd miners≈%dS(%d MS), mining joiners≈%dS(%d MS)], reward distribution detail[crowd miner size=%d, mining joiner size=%d] at height %d(%s mined at %s) -> height %d of feeder %s[%s]\n",
+            Logger.logDebugMessage("[Height%d-Rewards-Stage%s] Distribution used time[crowd miners≈%dS(%d MS), mining joiners≈%dS(%d MS)], reward distribution detail[crowd miner size=%d, mining joiner size=%d] at height %d(%s mined at %s) -> height %d of feeder %s[%s]\n",
                     tx.getHeight(), stage
                     , crowdRewardProcessingMS / 1000, crowdRewardProcessingMS
                     , miningRewardProcessingMS / 1000, miningRewardProcessingMS

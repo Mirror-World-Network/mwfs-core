@@ -987,9 +987,7 @@ final public class TransactionImpl implements Transaction {
 
     private boolean checkSignature() {
         if (!hasValidSignature) {
-            //[NQT]
-//            hasValidSignature = signature != null && Crypto.verify(signature, zeroSignature(getBytes()), getSenderPublicKey(), useNQT());
-            hasValidSignature = signature != null && Crypto.verify(signature, zeroSignature(getBytes()), getSenderPublicKey(),true);
+            hasValidSignature = signature != null && Crypto.verify(signature, zeroSignature(getBytes()), getSenderPublicKey(), true);
         }
         return hasValidSignature;
     }
@@ -1011,8 +1009,8 @@ final public class TransactionImpl implements Transaction {
 //    private int signatureOffset() {
 //        return 1 + 1 + 4 + 2 + 32 + 8 + (useNQT() ? 8 + 8 + 32 : 4 + 4 + 8);
 //    }
-    private int signatureOffset() { 
-        return 1 + 1 + 4 + 2 + 32 + 8 + (8 + 8 + 32 );
+    private int signatureOffset() {
+        return 1 + 1 + 4 + 2 + 32 + 8 + (8 + 8 + 32);
     }
 
 //    private boolean useNQT() {

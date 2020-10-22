@@ -51,6 +51,7 @@ public final class BlockImpl implements Block {
     private final int version;
     private final int timestamp;
     private final long previousBlockId;
+    private boolean hasRewardDistribution;
     private volatile byte[] generatorPublicKey;
     private final byte[] previousBlockHash;
     private final long totalAmountNQT;
@@ -164,6 +165,11 @@ public final class BlockImpl implements Block {
         return extensionJson.getObject(extensionEnum.name,clazz);
     }
 
+    @Override
+    public boolean getHasRewardDistribution() {
+        return hasRewardDistribution;
+    }
+
 
     public BlockImpl(int version, int timestamp, long previousBlockId, long totalAmountNQT, long totalFeeNQT, int payloadLength, byte[] payloadHash,
               byte[] generatorPublicKey, byte[] generationSignature, byte[] previousBlockHash, List<TransactionImpl> transactions, String secretPhrase) {
@@ -209,10 +215,11 @@ public final class BlockImpl implements Block {
     public BlockImpl(int version, int timestamp, long previousBlockId, long totalAmountNQT, long totalFeeNQT, int payloadLength,
               byte[] payloadHash, long generatorId, byte[] generationSignature, byte[] blockSignature,
               byte[] previousBlockHash, BigInteger cumulativeDifficulty, long baseTarget, long nextBlockId, int height, long id, byte[] extension,
-              List<TransactionImpl> blockTransactions) {
+              List<TransactionImpl> blockTransactions,boolean hasRewardDistribution) {
         this(version, timestamp, previousBlockId, totalAmountNQT, totalFeeNQT, payloadLength, payloadHash,
                 generatorId, generationSignature, blockSignature, previousBlockHash,cumulativeDifficulty,baseTarget,nextBlockId,height,id,blockTransactions);
         this.extension = extension;
+        this.hasRewardDistribution = hasRewardDistribution;
     }
 
     //just for genesis block
@@ -497,7 +504,7 @@ public final class BlockImpl implements Block {
             BigInteger pocScore = pocScoreObj.total();
             if (!pocScoreObj.qualifiedMiner()
             && !Generator.isBootDirectlyMiningPhase(currentMiningHeight)) {
-                Logger.logWarningMessage(creator.getRsAddress() + " poc score is less than 0 in this block calculation generation signature verification");
+                Logger.logWarningMessage(creator.getRsAddress() + " poc score is less than 0 in signature verification");
                 return false;
             }
 
@@ -506,24 +513,19 @@ public final class BlockImpl implements Block {
             digest.update(previousBlock.generationSignature);
             generationSignatureHash = digest.digest(getGeneratorPublicKey());
             if (!Arrays.equals(generationSignature, generationSignatureHash)) {
-                Logger.logWarningMessage("current calculate generation signature of previous block is not same with previous block's generation signature");
+                Logger.logWarningMessage("Generation signature of previous block is not same with previous block's generation signature");
                 return false;
             }
 
-            BigInteger hit = new BigInteger(1, new byte[]{generationSignatureHash[7], generationSignatureHash[6], generationSignatureHash[5], generationSignatureHash[4], generationSignatureHash[3], generationSignatureHash[2], generationSignatureHash[1], generationSignatureHash[0]});
+            BigInteger hit = new BigInteger(1, new byte[]{generationSignatureHash[7], generationSignatureHash[6],
+                    generationSignatureHash[5], generationSignatureHash[4], generationSignatureHash[3],
+                    generationSignatureHash[2], generationSignatureHash[1], generationSignatureHash[0]});
             boolean validHit = Generator.verifyHit(hit, pocScore, previousBlock, timestamp);
-            // first try
-            if(!validHit) {
-                validHit = Generator.verifyHit(hit, pocScoreObj.reCalTotalForCompatibility(false), previousBlock, timestamp);
-            }
-            // last try
-            if(!validHit) {
-                validHit = Generator.verifyHit(hit, pocScoreObj.reCalTotalForCompatibility(true), previousBlock, timestamp);
-            }
 
             boolean isIgnoreBlock = CheckSumValidator.isKnownIgnoreBlock(this.id, this.getBlockSignature());
             if(isIgnoreBlock) {
-                Logger.logWarningMessage("Known ignore block[id=%d, height=%d] in %s, skip validation", this.getId(), currentMiningHeight, Constants.getNetwork().getName());
+                Logger.logWarningMessage("Known ignore block[id=%d, height=%d] in %s, skip validation",
+                        this.getId(), currentMiningHeight, Constants.getNetwork().getName());
             }
 
             if(LocalDebugTool.isCheckPocAccount(creator.getId())) {
@@ -593,6 +595,7 @@ public final class BlockImpl implements Block {
         }
     }
 
+    private static final long TWENTY_YEARS_SECONDS = 20 * 365 * 24 * 60 * 60;
     private void calculateBaseTarget(BlockImpl previousBlock) {
         long prevBaseTarget = previousBlock.baseTarget;
         if (previousBlock.getHeight() <= Constants.SHUFFLING_BLOCK_HEIGHT) {
@@ -633,7 +636,16 @@ public final class BlockImpl implements Block {
         } else {
             baseTarget = prevBaseTarget;
         }
+
         cumulativeDifficulty = previousBlock.cumulativeDifficulty.add(Convert.two64.divide(BigInteger.valueOf(baseTarget)));
+//      One block difficult
+//        BigInteger oneBlockDiff = BigInteger.ZERO;
+//        if(TWENTY_YEARS_SECONDS > timestamp) {
+//            oneBlockDiff = BigInteger.valueOf(TWENTY_YEARS_SECONDS - timestamp);
+//        }else{
+//            oneBlockDiff = BigInteger.valueOf(TWENTY_YEARS_SECONDS - (timestamp - TWENTY_YEARS_SECONDS));
+//        }
+//        cumulativeDifficulty = cumulativeDifficulty.add(oneBlockDiff);
     }
 
     @Override
