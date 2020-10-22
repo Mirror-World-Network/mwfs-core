@@ -204,28 +204,22 @@ public interface Attachment extends Appendix {
             this.generatorId = buffer.getLong();
             // Crowd Miner Map
             Map<Long, Long> crowdMinersReader = Maps.newHashMap();
-            if(isType(CoinBaseType.CROWD_BLOCK_REWARD)){
-                int crowdMinerSize = buffer.getInt();
-                if(crowdMinerSize > 0){
-                    for (int i = 0; i < crowdMinerSize; i++) {
-                        long id = buffer.getLong();
-                        long amount = buffer.getLong();
-                        crowdMinersReader.put(id, amount);
-                    }
-                }
+            int crowdMinerSize = buffer.getInt();
+            for (int i = 0; i < crowdMinerSize; i++) {
+                long id = buffer.getLong();
+                long score = buffer.getLong();
+                crowdMinersReader.put(id, score);
             }
             this.crowdMiners = crowdMinersReader;
 
             // Consignors Map
             Map<Long, Long> consignorsReader = Maps.newHashMap();
             if (buffer.hasRemaining()) {
-                int size = buffer.getInt();
-                if(size > 0){
-                    for (int i = 0; i < size; i++) {
-                        long id = buffer.getLong();
-                        long amount = buffer.getLong();
-                        consignorsReader.put(id, amount);
-                    }
+                int consignorSize = buffer.getInt();
+                for (int i = 0; i < consignorSize; i++) {
+                    long id = buffer.getLong();
+                    long amount = buffer.getLong();
+                    consignorsReader.put(id, amount);
                 }
             }
             this.consignors = consignorsReader;
@@ -237,12 +231,7 @@ public interface Attachment extends Appendix {
             this.creator = (Long) attachmentData.get("creator");
             this.generatorId = (Long) attachmentData.get("generatorId");
             this.consignors = jsonToMap((JSONObject) attachmentData.get("consignors"));
-            // Crowd Miner Rewards
-            if(isType(CoinBaseType.CROWD_BLOCK_REWARD)){
-                this.crowdMiners = jsonToMap((JSONObject) attachmentData.get("crowdMiners"));
-            }else{
-                this.crowdMiners = Maps.newHashMap();
-            }
+            this.crowdMiners = jsonToMap((JSONObject) attachmentData.get("crowdMiners"));
         }
 
         /**
@@ -280,21 +269,12 @@ public interface Attachment extends Appendix {
             int size = 2 + coinBaseType.name().getBytes().length
                     + 8 + 8;
 
-            // Consignors
-            if(consignors.size() > 0){
-                size += 4 + consignors.size() * 2 * 8;
-            }else{
-                size += 4;
-            }
-
             // Crowd Miners
-            if(isType(CoinBaseType.CROWD_BLOCK_REWARD)){
-                if(crowdMiners.size() > 0){
-                    size += 4 + crowdMiners.size() * 2 * 8;
-                }else{
-                    size += 4;
-                }
-            }
+            size += 4 + crowdMiners.size() * 2 * 8;
+
+            // Consignors
+            size += 4 + consignors.size() * 2 * 8;
+
             return size;
         }
 
@@ -305,13 +285,11 @@ public interface Attachment extends Appendix {
             buffer.putLong(creator);
             buffer.putLong(generatorId);
             // Crowd Miner Rewards
-            if(isType(CoinBaseType.CROWD_BLOCK_REWARD)){
-                buffer.putInt(crowdMiners.size());
-                if(crowdMiners.size() > 0){
-                    for (Map.Entry<Long, Long> entry : crowdMiners.entrySet()) {
-                        buffer.putLong(entry.getKey());
-                        buffer.putLong(entry.getValue());
-                    }
+            buffer.putInt(crowdMiners.size());
+            if(crowdMiners.size() > 0){
+                for (Map.Entry<Long, Long> entry : crowdMiners.entrySet()) {
+                    buffer.putLong(entry.getKey());
+                    buffer.putLong(entry.getValue());
                 }
             }
 
@@ -331,10 +309,7 @@ public interface Attachment extends Appendix {
             attachment.put("creator", creator);
             attachment.put("generatorId", generatorId);
             attachment.put("consignors", mapToJson(consignors));
-            // Crowd Miner Rewards
-            if(isType(CoinBaseType.CROWD_BLOCK_REWARD)){
-                attachment.put("crowdMiners", mapToJson(crowdMiners));
-            }
+            attachment.put("crowdMiners", mapToJson(crowdMiners));
         }
 
         @Override
@@ -395,10 +370,6 @@ public interface Attachment extends Appendix {
         }
     }
 
-
-//    class CrowdCoinBase extends CoinBase {
-//
-//    }
 
     final class BurnDeal extends AbstractAttachment {
 
