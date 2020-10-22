@@ -942,7 +942,7 @@ public class Generator implements Comparable<Generator> {
             || isDirectlyMiningPhase){
             Logger.logInfoMessage("[BootNode] Current blockchain was %s, use the current system time %s to replace the original generation time %s."
             , phaseStr, Convert.dateFromEpochTime(currentTime), Convert.dateFromEpochTime(miningTime));
-            miningTime = currentTime;
+            miningTime = currentTime - Constants.MINING_DELAY;
         }
         
         while (true) {
