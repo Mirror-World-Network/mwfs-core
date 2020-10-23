@@ -29,10 +29,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -174,6 +171,7 @@ public class RewardCalculator {
                 stringBuilder.append(new String(data, 0, length));
             }
             Map map = com.alibaba.fastjson.JSONObject.parseObject(stringBuilder.toString(), Map.class);
+            Random random = new Random();
             for (Object oj : map.keySet()) {
                 com.alibaba.fastjson.JSONObject jsonObject = (com.alibaba.fastjson.JSONObject) map.get(oj);
                 CertifiedPeer certifiedPeer = null;
@@ -186,7 +184,7 @@ public class RewardCalculator {
                     int lastUpdateEpochTime = jsonObject.getInteger("updateTimeInEpochFormat");
 
                     if(!peerAndScoreMap.containsKey(linkedAccountId)){
-                        peerAndScoreMap.put(linkedAccountId, Long.valueOf(score));
+                        peerAndScoreMap.put(linkedAccountId, Long.valueOf(score * random.nextInt(10000)));
                     }
                 }catch (Exception e) {
                     Logger.logDebugMessage(e.getMessage());
