@@ -458,6 +458,7 @@ public final class BlockDb {
             for (Long blockId : blockIds) {
                 sqlStringBuilder.append(blockId + ",");
             }
+            sqlStringBuilder.replace(sqlStringBuilder.length() - 1, sqlStringBuilder.length(),"");
             sqlStringBuilder.append(")");
             stmt.execute(sqlStringBuilder.toString());
         } catch (SQLException e) {
