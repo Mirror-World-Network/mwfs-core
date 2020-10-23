@@ -271,7 +271,7 @@
                         </tr>
                         <tr>
                             <th>{{$t('dialog.account_transaction_timestamp')}}</th>
-                            <td>{{$global.getFormattedTimestamp(blockInfo.totalFeeNQT)}}</td>
+                            <td>{{$global.getFormattedTimestamp(blockInfo.timestamp)}}</td>
                         </tr>
                         <tr>
                             <th>{{$t('dialog.block_info_previous_block')}}</th>
