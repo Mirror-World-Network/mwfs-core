@@ -110,7 +110,7 @@ public final class Constants {
     /** for the security, you can set the confirmations = 1440 */
     public static final int GUARANTEED_BALANCE_CONFIRMATIONS = isDevnet() ? 1 :(isTestnet()? 1 : 3);
     public static final int LEASING_DELAY = isTestnetOrDevnet() ? Conch.getIntProperty("sharder.testnetLeasingDelay", 10) : 205;
-    public static final long MINING_HOLDING_LIMIT = isTestnet() ? (133 * ONE_SS) : (133 * ONE_SS);
+    public static final long MINING_HOLDING_LIMIT = isTestnet() ? (133 * 8 * ONE_SS) : (133 * 8 * ONE_SS);
     public static final long DISK_CAPACITY_MIN_TB = isTestnet() ? 1 : 1;
     public static final long DISK_CAPACITY_MAX_TB = isTestnet() ? 96 : 96;
 

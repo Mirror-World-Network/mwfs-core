@@ -150,7 +150,7 @@ public class Generator implements Comparable<Generator> {
             return true;
         }
 
-            // wait till Conch initialized finished
+        // wait till Conch initialized finished
         if(!Conch.isInitialized()) {
             if(Logger.printNow(Logger.Generator_isMintHeightReached)) {
                 Logger.logDebugMessage("Don't start mining till client is initialized...");
@@ -463,8 +463,10 @@ public class Generator implements Comparable<Generator> {
         if(minerAccount == null) {
             if(Logger.printNow(Logger.Generator_startMining)
                 || Logger.isLevel(Logger.Level.DEBUG)) {
-                Logger.logWarningMessage("Current miner[addr=%s, id=%d] can't start auto mining or mint block when it's a new account at this height %d. " +
-                        "Please CREATE tx by yourself or RECEIVE tx from other declared accounts", minerRs, minerId, height);
+                Logger.logWarningMessage("Current miner[addr=%s, id=%d] can't start auto mining or mint block " +
+                        "when it's a new account at this height %d. " +
+                        "Please CREATE tx by yourself or RECEIVE tx from other declared accounts",
+                        minerRs, minerId, height);
             }
             return false;
         }
@@ -472,9 +474,9 @@ public class Generator implements Comparable<Generator> {
         if(isBlackedMiner(minerId)) {
             if(Logger.printNow(Logger.Generator_startMining)
                 || Logger.isLevel(Logger.Level.DEBUG)) {
-                Logger.logWarningMessage("Invalid miner [addr=%s, id=%d] can't start auto mining or mint block when it's in the black list! ",
-                        minerRs, minerId,
-                        Conch.getHeight());
+                Logger.logWarningMessage("Invalid miner [addr=%s, id=%d] can't start auto mining or mint block " +
+                        "when it's in the black list! ",
+                        minerRs, minerId,Conch.getHeight());
             }
             return false;
         }
@@ -484,8 +486,8 @@ public class Generator implements Comparable<Generator> {
         if(!isCertifiedPeer) {
             if(Logger.printNow(Logger.Generator_startMining)
                 || Logger.isLevel(Logger.Level.DEBUG)) {
-                Logger.logWarningMessage("Invalid miner %s(it didn't linked to a certified peer before the height %d) can't start auto mining or mint block. " +
-                                "Maybe it didn't create a PocNodeTypeTx statement. please INIT or RESET the client firstly! ",
+                Logger.logWarningMessage("Invalid miner %s(it didn't linked to a certified peer before the height %d) " +
+                                "can't start auto mining or mint block. Maybe it didn't create a PocNodeTypeTx statement. please INIT or RESET the client firstly! ",
                         minerRs,
                         Conch.getHeight());
             }
