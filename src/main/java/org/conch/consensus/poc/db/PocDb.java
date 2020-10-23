@@ -663,17 +663,19 @@ public class PocDb  {
     }
 
     private static final String PEER_CONFIG_PATH = "./conf/crowd_miner.json";
-    public static Map<Long,CertifiedPeer> listAllPeers() {
-        Logger.logInfoMessage("List all certified peers from DB at height %d", Conch.getHeight());
+    public static final boolean EXIST_PEER_CONFIG = containPeerConfig();
 
+    private static boolean containPeerConfig(){
         File file = new File(PEER_CONFIG_PATH);
-        if(file.exists()){
-           return readFromConfigFile();
-        }
-        return certifiedPeerTable.listAll();
+        return file.exists();
     }
 
-    public static Map<Long,CertifiedPeer> readFromConfigFile() {
+    public static Map<Long,CertifiedPeer> listAllPeers() {
+        Logger.logInfoMessage("List all certified peers from DB at height %d", Conch.getHeight());
+        return EXIST_PEER_CONFIG ? readFromConfigFile() : certifiedPeerTable.listAll();
+    }
+
+    private static Map<Long,CertifiedPeer> readFromConfigFile() {
         Logger.logInfoMessage("List all certified peers from config file");
         Map<Long,CertifiedPeer> peerMap = Maps.newHashMap();
         File file = new File(PEER_CONFIG_PATH);

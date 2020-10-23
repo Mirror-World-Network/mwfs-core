@@ -380,8 +380,9 @@ public class PocProcessorImpl implements PocProcessor {
 
     @Override
     public boolean processDelayedPocTxs(int height) {
-
-        if (!Conch.reachLastKnownBlock()) return false;
+        if (!Conch.reachLastKnownBlock()) {
+            return false;
+        }
 
         // delayed poc txs 
         List<Long> delayedPocTxs = PocHolder.delayPocTxs(height);
@@ -412,7 +413,7 @@ public class PocProcessorImpl implements PocProcessor {
 
     @Override
     public Map<Long, CertifiedPeer> getCertifiedPeers(){
-        return PocHolder.inst.certifiedPeers;
+        return PocDb.EXIST_PEER_CONFIG ? PocDb.listAllPeers() : PocHolder.inst.certifiedPeers;
     }
 
     @Override

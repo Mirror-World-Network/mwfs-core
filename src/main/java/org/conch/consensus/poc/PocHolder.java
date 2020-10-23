@@ -60,10 +60,8 @@ public class PocHolder implements Serializable {
         synchronized (inst.certifiedPeers) {
             inst.certifiedPeers.clear();
         }
-        
         return true;
     }
-
 
     public static CertifiedPeer getBoundPeer(long accountId, int height) {
         if(height == -1 || accountId == -1) {
@@ -76,8 +74,11 @@ public class PocHolder implements Serializable {
         
         return certifiedPeer;
     }
+
     public static CertifiedPeer getBoundPeer(String host, int height) {
-        if(height == -1 || StringUtils.isEmpty(host)) return null;
+        if(height == -1 || StringUtils.isEmpty(host)) {
+            return null;
+        }
         
         CertifiedPeer certifiedPeer = null;
         Collection<CertifiedPeer> peers = inst.certifiedPeers.values();
@@ -101,7 +102,7 @@ public class PocHolder implements Serializable {
     }
 
     /**
-     * add or update certified peer and bind account
+     * Add or update certified peer and bind account
      * 3 callers: PocHolder, PoC tx processor, Hub syn thread in Peers
      * 
      * @param type peer type
@@ -113,7 +114,8 @@ public class PocHolder implements Serializable {
         try{
             newPeer.check();
         }catch(ConchException.NotValidException e){
-            Logger.logWarningMessage("failed to add or update a certified peer caused by [%s], Peer is %s", e.getMessage(), newPeer.toString());
+            Logger.logWarningMessage("failed to add or update a certified peer caused by [%s], Peer is %s",
+                    e.getMessage(), newPeer.toString());
             return;
         }
 
