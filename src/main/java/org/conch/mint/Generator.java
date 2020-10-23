@@ -677,7 +677,7 @@ public class Generator implements Comparable<Generator> {
                 return false;
             }
         }else if(elapsedTime < Constants.getBlockGapSeconds()){
-            Logger.logDebugMessage("Verify hit failed caused by this generator's elapsed time[%d] is in the block gap[%d]",
+            Logger.logDebugMessage("Verify hit failed caused by this generator's elapsed time[%d] < block gap[%d]",
                     elapsedTime, Constants.getBlockGapSeconds());
             return false;
         }

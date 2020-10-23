@@ -27,6 +27,7 @@ import org.conch.util.Logger;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -111,7 +112,7 @@ public class RewardCalculator {
 
         // Pool owner -> pool rewards map (send rewards to pool joiners)
         // Single miner -> empty rewards map (send rewards to miner)
-        Map<Long, Long> consignorMap = Maps.newHashMap();
+        HashMap<Long, Long> consignorMap = Maps.newHashMap();
         long generatorId = SharderPoolProcessor.findOwnPoolId(creator.getId());
         if (generatorId == -1 || SharderPoolProcessor.isDead(generatorId)) {
             generatorId = creator.getId();
@@ -125,7 +126,7 @@ public class RewardCalculator {
             // crowd miner mode
             consignorMap.put(-6802345313304048560L, 1000L);
             consignorMap.put(5297006991279988531L, 2000L);
-            Map<Long, Long> crowdMinerPocScoreMap = generateCrowdMinerPocScoreMap(Lists.newArrayList(creator.getId()), height);
+            HashMap<Long, Long> crowdMinerPocScoreMap = generateCrowdMinerPocScoreMap(Lists.newArrayList(creator.getId()), height);
             coinBase = new CoinBase(creator.getId(), generatorId, consignorMap, crowdMinerPocScoreMap);
         }else{
             // single miner or pool reward mode
@@ -150,8 +151,8 @@ public class RewardCalculator {
      * @return map: miner's account id : poc score
      */
     private static long QUALIFIED_CROWD_MINER_HOLDING_AMOUNT_MIN = 32*133L; // 1T-133MW
-    private static Map<Long, Long> generateCrowdMinerPocScoreMap(List<Long> exceptAccounts, int height){
-        Map<Long, Long> crowdMinerPocScoreMap = Maps.newHashMap();
+    private static HashMap<Long, Long> generateCrowdMinerPocScoreMap(List<Long> exceptAccounts, int height){
+        HashMap<Long, Long> crowdMinerPocScoreMap = Maps.newHashMap();
         // read the qualified miner list
         Map<Long, CertifiedPeer>  certifiedPeers = Conch.getPocProcessor().getCertifiedPeers();
         if(certifiedPeers == null || certifiedPeers.size() == 0) {

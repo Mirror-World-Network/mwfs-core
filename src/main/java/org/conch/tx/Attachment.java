@@ -43,7 +43,10 @@ import org.conch.vote.VoteWeighting;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.util.*;
@@ -194,9 +197,9 @@ public interface Attachment extends Appendix {
         //pool id or account id
         protected final long generatorId;
         // account id : investment amount
-        protected Map<Long, Long> consignors;
+        protected HashMap<Long, Long> consignors;
         // miner's account id : poc score
-        protected Map<Long, Long> crowdMiners;
+        protected HashMap<Long, Long> crowdMiners;
 
         public CoinBase(ByteBuffer buffer, byte transactionVersion) throws ConchException.NotValidException {
             super(buffer, transactionVersion);
@@ -207,7 +210,7 @@ public interface Attachment extends Appendix {
             // Crowd Miner Map
             if(buffer.hasRemaining()){
                 String crowdMinerJson = Convert.readString(buffer, buffer.getInt(), (Integer.MAX_VALUE / 3 - 1));
-                crowdMiners = JSON.parseObject(crowdMinerJson, Map.class);
+                crowdMiners = JSON.parseObject(crowdMinerJson, HashMap.class);
             }
 //            Map<Long, Long> crowdMinersReader = Maps.newHashMap();
 //            if(buffer.hasRemaining()){
@@ -223,7 +226,7 @@ public interface Attachment extends Appendix {
             // Consignors Map
             if(buffer.hasRemaining()){
                 String consignorJson = Convert.readString(buffer, buffer.getInt(), (Integer.MAX_VALUE / 3 - 1));
-                consignors = JSON.parseObject(consignorJson, Map.class);
+                consignors = JSON.parseObject(consignorJson, HashMap.class);
             }
 //            Map<Long, Long> consignorsReader = Maps.newHashMap();
 //            if (buffer.hasRemaining()) {
@@ -242,8 +245,8 @@ public interface Attachment extends Appendix {
             this.coinBaseType = CoinBaseType.getType((String) attachmentData.get("coinBaseType"));
             this.creator = (Long) attachmentData.get("creator");
             this.generatorId = (Long) attachmentData.get("generatorId");
-            this.consignors = jsonToMap((JSONObject) attachmentData.get("consignors"));
-            this.crowdMiners = jsonToMap((JSONObject) attachmentData.get("crowdMiners"));
+            this.consignors = JSON.parseObject((String) attachmentData.get("consignors"), HashMap.class);
+            this.crowdMiners = JSON.parseObject((String) attachmentData.get("crowdMiners"), HashMap.class);
         }
 
         /**
@@ -253,7 +256,7 @@ public interface Attachment extends Appendix {
          * @param consignors pool joiner's map contains joiner id and reward amount
          * @param crowdMiners qualified miners at this height
          */
-        public CoinBase(long creator, long generatorId, Map<Long, Long> consignors, Map<Long, Long> crowdMiners) {
+        public CoinBase(long creator, long generatorId, HashMap<Long, Long> consignors, HashMap<Long, Long> crowdMiners) {
             this.coinBaseType = CoinBaseType.CROWD_BLOCK_REWARD;
             this.creator = creator;
             this.generatorId = generatorId;
@@ -268,7 +271,7 @@ public interface Attachment extends Appendix {
          * @param generatorId value is the pool id/ creator id when type is Block Reward; value is the recipient id when type is Genesis.
          * @param consignors pool joiner's map contains joiner id and reward amount
          */
-        public CoinBase(CoinBaseType coinBaseType, long creator, long generatorId, Map<Long, Long> consignors) {
+        public CoinBase(CoinBaseType coinBaseType, long creator, long generatorId, HashMap<Long, Long> consignors) {
             this.coinBaseType = coinBaseType;
             this.creator = creator;
             this.generatorId = generatorId;
@@ -349,11 +352,11 @@ public interface Attachment extends Appendix {
             return coinBaseType;
         }
 
-        public Map<Long, Long> getConsignors() {
+        public HashMap<Long, Long> getConsignors() {
             return consignors;
         }
 
-        public Map<Long, Long> getCrowdMiners() {
+        public HashMap<Long, Long> getCrowdMiners() {
             return crowdMiners;
         }
 
@@ -363,34 +366,6 @@ public interface Attachment extends Appendix {
 
         public long getCreator() {
             return creator;
-        }
-
-        private JSONObject mapToJson(Map<Long, Long> map) {
-            if (map.isEmpty()) {
-                return new JSONObject();
-            } else {
-                JSONObject jsonObject = new JSONObject();
-                for (Long key : map.keySet()) {
-                    jsonObject.put(key, map.get(key));
-                }
-                return jsonObject;
-            }
-        }
-
-        private Map<Long, Long> jsonToMap(JSONObject jsonObject) {
-            if (jsonObject.isEmpty()) {
-                return new HashMap<>();
-            } else {
-                Map<Long, Long> map = new HashMap<>();
-                for (Object key : jsonObject.keySet()) {
-                    if (key instanceof String) {
-                        map.put(Long.parseLong((String) key), (Long) jsonObject.get(key));
-                    } else {
-                        map.put((Long) key, (Long) jsonObject.get(key));
-                    }
-                }
-                return map;
-            }
         }
 
         public boolean isType(CoinBaseType type){

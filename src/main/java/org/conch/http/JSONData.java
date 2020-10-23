@@ -52,6 +52,7 @@ import org.json.simple.JSONObject;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -1020,9 +1021,9 @@ public final class JSONData {
 
                 if(coinBase.isType(Attachment.CoinBase.CoinBaseType.CROWD_BLOCK_REWARD)
                 && coinBase.getCrowdMiners().size() > 0){
-                    Map<Long, Long> crowdMiners = coinBase.getCrowdMiners();
+                    HashMap<Long, Long> crowdMiners = coinBase.getCrowdMiners();
                     Account minerAccount = Account.getAccount(coinBase.getCreator());
-                    attachmentJSON.put("crowdMiners",RewardCalculator.calCrowdMinerReward(minerAccount, tx, crowdMiners));
+                    attachmentJSON.put("crowdMiners", RewardCalculator.calCrowdMinerReward(minerAccount, tx, crowdMiners));
                 }
 
                 if( coinBase.getConsignors().size() > 0){

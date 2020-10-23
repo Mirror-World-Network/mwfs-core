@@ -796,8 +796,8 @@ public class SharderPoolProcessor implements Serializable {
         return jsonObject;
     }
 
-    public Map<Long, Long> getConsignorsAmountMap() {
-        Map<Long, Long> map = new HashMap<>();
+    public HashMap<Long, Long> getConsignorsAmountMap() {
+        HashMap<Long, Long> map = Maps.newHashMap();
         for (Consignor consignor : consignors.values()) {
             map.put(consignor.getId(), consignor.getAmount());
         }
