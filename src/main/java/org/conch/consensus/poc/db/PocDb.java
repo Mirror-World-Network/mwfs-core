@@ -1,6 +1,5 @@
 package org.conch.consensus.poc.db;
 
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.conch.Conch;
@@ -21,9 +20,6 @@ import org.conch.tx.TransactionType;
 import org.conch.util.Convert;
 import org.conch.util.Logger;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -662,67 +658,9 @@ public class PocDb  {
          pocScoreTable.reGenerateAllScores();
     }
 
-    private static final String PEER_CONFIG_PATH = "./conf/crowd_miner.json";
-    public static final boolean EXIST_PEER_CONFIG = containPeerConfig();
-
-    private static boolean containPeerConfig(){
-        File file = new File(PEER_CONFIG_PATH);
-        return file.exists();
-    }
-
     public static Map<Long,CertifiedPeer> listAllPeers() {
         Logger.logInfoMessage("List all certified peers from DB at height %d", Conch.getHeight());
-        return EXIST_PEER_CONFIG ? readFromConfigFile() : certifiedPeerTable.listAll();
-    }
-
-    private static Map<Long,CertifiedPeer> readFromConfigFile() {
-        Logger.logInfoMessage("List all certified peers from config file");
-        Map<Long,CertifiedPeer> peerMap = Maps.newHashMap();
-        File file = new File(PEER_CONFIG_PATH);
-        if(!file.exists()) {
-            return peerMap;
-        }
-
-        FileReader fr = null;
-        try {
-            fr = new FileReader(file);
-            char[] data = new char[23];
-            int length = 0;
-            StringBuilder stringBuilder = new StringBuilder();
-            while((length = fr.read(data))>0){
-                stringBuilder.append(new String(data, 0, length));
-            }
-            Map map = JSONObject.parseObject(stringBuilder.toString(), Map.class);
-            for (Object oj : map.keySet()) {
-                JSONObject jsonObject = (JSONObject) map.get(oj);
-                CertifiedPeer certifiedPeer = null;
-                try{
-                    String host = jsonObject.getString("host");
-                    Long linkedAccountId= jsonObject.getLong("boundAccountId");
-                    Peer.Type type = Peer.Type.getByCode(jsonObject.getInteger("typeCode"));
-                    int height = jsonObject.getInteger("height");
-                    int lastUpdateEpochTime = jsonObject.getInteger("updateTimeInEpochFormat");
-                    certifiedPeer = new CertifiedPeer(type, host, linkedAccountId, Convert.fromEpochTime(lastUpdateEpochTime));
-                    certifiedPeer.setHeight(height);
-                }catch (Exception e) {
-                    Logger.logDebugMessage(e.getMessage());
-                    continue;
-                }
-                peerMap.put((Long) oj, certifiedPeer);
-            }
-            fr.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (fr != null) {
-                try {
-                    fr.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return peerMap;
+        return certifiedPeerTable.listAll();
     }
 
     public static void saveOrUpdatePeer(CertifiedPeer certifiedPeer) {

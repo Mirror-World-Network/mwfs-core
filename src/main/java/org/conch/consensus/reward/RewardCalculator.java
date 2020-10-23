@@ -25,6 +25,9 @@ import org.conch.util.Convert;
 import org.conch.util.LocalDebugTool;
 import org.conch.util.Logger;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -141,6 +144,69 @@ public class RewardCalculator {
                 coinBase);
     }
 
+    /***
+     *
+     */
+    private static final String CROWD_MINER_CONFIG_PATH = "./conf/crowd_miner.json";
+    public static final boolean EXIST_CROWD_MINER_CONFIG = containPeerConfig();
+    private static HashMap<Long, Long> localPeerAndScoreMap = null;
+
+    private static boolean containPeerConfig(){
+        File file = new File(CROWD_MINER_CONFIG_PATH);
+        return file.exists();
+    }
+
+    private static HashMap<Long,Long> readFromConfigFile() {
+        Logger.logInfoMessage("List all peer and score pairs from config file");
+        HashMap<Long,Long> peerAndScoreMap = Maps.newHashMap();
+        File file = new File(CROWD_MINER_CONFIG_PATH);
+        if(!file.exists()) {
+            return peerAndScoreMap;
+        }
+
+        FileReader fr = null;
+        try {
+            fr = new FileReader(file);
+            char[] data = new char[23];
+            int length = 0;
+            StringBuilder stringBuilder = new StringBuilder();
+            while((length = fr.read(data))>0){
+                stringBuilder.append(new String(data, 0, length));
+            }
+            Map map = com.alibaba.fastjson.JSONObject.parseObject(stringBuilder.toString(), Map.class);
+            for (Object oj : map.keySet()) {
+                com.alibaba.fastjson.JSONObject jsonObject = (com.alibaba.fastjson.JSONObject) map.get(oj);
+                CertifiedPeer certifiedPeer = null;
+                try{
+                    String host = jsonObject.getString("host");
+                    Long linkedAccountId= jsonObject.getLong("boundAccountId");
+                    Peer.Type type = Peer.Type.getByCode(jsonObject.getInteger("typeCode"));
+                    // use the height as the score
+                    int score = jsonObject.getInteger("height");
+                    int lastUpdateEpochTime = jsonObject.getInteger("updateTimeInEpochFormat");
+
+                    if(!peerAndScoreMap.containsKey(linkedAccountId)){
+                        peerAndScoreMap.put(linkedAccountId, Long.valueOf(score));
+                    }
+                }catch (Exception e) {
+                    Logger.logDebugMessage(e.getMessage());
+                    continue;
+                }
+            }
+            fr.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (fr != null) {
+                try {
+                    fr.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return peerAndScoreMap;
+    }
 
     /**
      * read the current qualified miners and calculate the reward distribution according to poc score rate:
@@ -152,6 +218,13 @@ public class RewardCalculator {
      */
     private static long QUALIFIED_CROWD_MINER_HOLDING_AMOUNT_MIN = 32*133L; // 1T-133MW
     private static HashMap<Long, Long> generateCrowdMinerPocScoreMap(List<Long> exceptAccounts, int height){
+        if(EXIST_CROWD_MINER_CONFIG) {
+            if(localPeerAndScoreMap == null || localPeerAndScoreMap.size() == 0) {
+                localPeerAndScoreMap = readFromConfigFile();
+            }
+            return localPeerAndScoreMap;
+        }
+
         HashMap<Long, Long> crowdMinerPocScoreMap = Maps.newHashMap();
         // read the qualified miner list
         Map<Long, CertifiedPeer>  certifiedPeers = Conch.getPocProcessor().getCertifiedPeers();
@@ -547,14 +620,18 @@ public class RewardCalculator {
     }
 
     public static boolean isBlockCrowdRewardTx(Attachment attachment) {
-        if(!(attachment instanceof Attachment.CoinBase)) return false;
+        if(!(attachment instanceof Attachment.CoinBase)) {
+            return false;
+        }
 
         Attachment.CoinBase coinbaseBody = (Attachment.CoinBase) attachment;
         return coinbaseBody.isType(Attachment.CoinBase.CoinBaseType.CROWD_BLOCK_REWARD);
     }
 
     private static Attachment.CoinBase parseToCoinBase(Attachment attachment){
-        if(!(attachment instanceof Attachment.CoinBase)) return null;
+        if(!(attachment instanceof Attachment.CoinBase)) {
+            return null;
+        }
         return (Attachment.CoinBase) attachment;
     }
 
