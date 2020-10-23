@@ -22,6 +22,7 @@
 package org.conch.tx;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.google.common.collect.Maps;
 import jdk.nashorn.internal.ir.debug.ObjectSizeCalculator;
 import org.conch.Conch;
@@ -207,37 +208,18 @@ public interface Attachment extends Appendix {
             this.coinBaseType = CoinBaseType.getType(typeNameStr);
             this.creator = buffer.getLong();
             this.generatorId = buffer.getLong();
+
             // Crowd Miner Map
             if(buffer.hasRemaining()){
                 String crowdMinerJson = Convert.readString(buffer, buffer.getInt(), (Integer.MAX_VALUE / 3 - 1));
-                crowdMiners = JSON.parseObject(crowdMinerJson, HashMap.class);
+                crowdMiners = JSON.parseObject(crowdMinerJson, new TypeReference<HashMap<Long, Long>>() {});
             }
-//            Map<Long, Long> crowdMinersReader = Maps.newHashMap();
-//            if(buffer.hasRemaining()){
-//                int crowdMinerSize = buffer.getInt();
-//                for (int i = 0; i < crowdMinerSize; i++) {
-//                    long id = buffer.getLong();
-//                    long score = buffer.getLong();
-//                    crowdMinersReader.put(id, score);
-//                }
-//            }
-//            this.crowdMiners = crowdMinersReader;
 
             // Consignors Map
             if(buffer.hasRemaining()){
                 String consignorJson = Convert.readString(buffer, buffer.getInt(), (Integer.MAX_VALUE / 3 - 1));
-                consignors = JSON.parseObject(consignorJson, HashMap.class);
+                consignors = JSON.parseObject(consignorJson, new TypeReference<HashMap<Long, Long>>(){});
             }
-//            Map<Long, Long> consignorsReader = Maps.newHashMap();
-//            if (buffer.hasRemaining()) {
-//                int consignorSize = buffer.getInt();
-//                for (int i = 0; i < consignorSize; i++) {
-//                    long id = buffer.getLong();
-//                    long amount = buffer.getLong();
-//                    consignorsReader.put(id, amount);
-//                }
-//            }
-//            this.consignors = consignorsReader;
         }
 
         public CoinBase(JSONObject attachmentData) {
@@ -311,27 +293,12 @@ public interface Attachment extends Appendix {
                 buffer.put(crowdMinerBytes);
             }
 
-//            buffer.putInt(crowdMiners.size());
-//            if(crowdMiners.size() > 0){
-//                for (Map.Entry<Long, Long> entry : crowdMiners.entrySet()) {
-//                    buffer.putLong(entry.getKey());
-//                    buffer.putLong(entry.getValue());
-//                }
-//            }
-
             // Pool Rewards
             byte[] consignorBytes = JSON.toJSONBytes(consignors);
             buffer.putInt(consignorBytes.length);
             if(consignorBytes.length > 0){
                 buffer.put(consignorBytes);
             }
-//            buffer.putInt(consignors.size());
-//            if(consignors.size() > 0){
-//                for (Map.Entry<Long, Long> entry : consignors.entrySet()) {
-//                    buffer.putLong(entry.getKey());
-//                    buffer.putLong(entry.getValue());
-//                }
-//            }
         }
 
         @Override

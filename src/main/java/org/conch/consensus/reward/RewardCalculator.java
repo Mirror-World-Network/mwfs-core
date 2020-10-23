@@ -273,7 +273,7 @@ public class RewardCalculator {
 //            Db.db.commitTransaction();
         } catch (Exception e) {
 //            Db.db.rollbackTransaction();
-            Logger.logErrorMessage(String.format("setCrowdMinerReward occur error", e));
+            Logger.logErrorMessage("setCrowdMinerReward occur error", e);
         }finally {
 //            Db.db.endTransaction();
         }
