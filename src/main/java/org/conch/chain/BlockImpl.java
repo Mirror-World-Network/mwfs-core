@@ -227,7 +227,8 @@ public final class BlockImpl implements Block {
                      byte[] generatorPublicKey, byte[] generationSignature, byte[] blockSignature, byte[] previousBlockHash, List<TransactionImpl> transactions){
         BlockImpl block = new BlockImpl(version,  timestamp,  previousBlockId,  totalAmountNQT,  totalFeeNQT,  payloadLength, payloadHash,
                 generatorPublicKey, generationSignature, blockSignature, previousBlockHash, transactions);
-        block.id= blockId;
+        block.id = blockId;
+        block.hasRewardDistribution = true;
         return block;
     }
 

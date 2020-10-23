@@ -281,7 +281,9 @@ public class RewardCalculator {
 
     private static Transaction getCoinBase(List<TransactionImpl> blockTransactions) {
         for (Transaction transaction : blockTransactions) {
-            if(isBlockRewardTx(transaction.getAttachment())) return transaction;
+            if(isBlockRewardTx(transaction.getAttachment())) {
+                return transaction;
+            }
         }
         return null;
     }
