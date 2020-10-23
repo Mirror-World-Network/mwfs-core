@@ -23,6 +23,7 @@ conf/sharder.properties
 conf/local-debug.properties
 conf/genesis.json
 conf/airdrop.json
+conf/crowdminer.json
 
 DestroyForgePool
 ForgePools
