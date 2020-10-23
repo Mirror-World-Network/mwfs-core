@@ -416,7 +416,7 @@ public final class BlockDb {
      * @return
      */
     public static boolean reachRewardSettlementHeight(int height) {
-        try (Connection con = Db.db.getConnection()) {
+        /*try (Connection con = Db.db.getConnection()) {
             PreparedStatement pstmt = con.prepareStatement("SELECT count(id) num FROM block WHERE HAS_REWARD_DISTRIBUTION = false AND HEIGHT <= " + height);
 
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -427,7 +427,8 @@ public final class BlockDb {
             }
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
-        }
+        }*/
+        return (height % Constants.SETTLEMENT_INTERVAL_SIZE) == 0;
     }
 
     /**
