@@ -27,6 +27,16 @@
                             </span>
                             <span>{{$t('account.transfer')}}</span>
                         </button>
+                        <button class="common_btn imgBtn writeBtn" @click="openBatchTransferDialog" v-if="openAirdrop">
+                            <span class="icon">
+                                <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 174.62 174.83">
+                                    <path
+                                            d="M25.2,105.9a75.08,75.08,0,0,1,138-47.3L80.5,141.3a6,6,0,0,0-1.3,6.7,6.28,6.28,0,0,0,5.7,3.7l34.6-.7a6.12,6.12,0,0,0,6-6.2,6,6,0,0,0-1.9-4.4,6.21,6.21,0,0,0-4.3-1.6l-19.5.4,75.4-75.4a6.2,6.2,0,0,0,1-7.3A87,87,0,0,0,33,43.2,86.52,86.52,0,0,0,13.1,107a91.17,91.17,0,0,0,3.3,17.3,5.7,5.7,0,0,0,3,3.6,6.15,6.15,0,0,0,4.6.5,5.86,5.86,0,0,0,3.6-2.9,6.15,6.15,0,0,0,.5-4.6A76.49,76.49,0,0,1,25.2,105.9ZM187,91.3a6.13,6.13,0,0,0-6.6-5.5,6.06,6.06,0,0,0-5.5,6.6A75.26,75.26,0,0,1,106.8,174,76.18,76.18,0,0,1,43,148.1L126.1,65a6.11,6.11,0,0,0,1.2-6.9,6.2,6.2,0,0,0-6.1-3.5L86.4,57.7a6.12,6.12,0,0,0,1.1,12.2l18.1-1.6L30.4,143.4a6.09,6.09,0,0,0-.5,8,89.05,89.05,0,0,0,70.4,35.1c2.5,0,5.1-.1,7.6-0.3A87.56,87.56,0,0,0,187,91.3Z"
+                                            transform="translate(-12.73 -11.67)"></path>
+                                </svg>
+                            </span>
+                            <span>{{$t('transfer.batch_transfer')}}</span>
+                        </button>
                         <button class="common_btn imgBtn writeBtn" v-if="whetherShowSendMsgBtn()" @click="openSendMessageDialog">
                             <span class="icon">
                                 <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 171.43 137.08">
@@ -528,8 +538,44 @@
                 </div>
             </div>
         </div>
+        <!-- view transfer account dialog -->
+        <div class="modal" id="batch_transfer_accounts_modal" v-show="batchTranferAccountsDialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button class="close" @click="closeDialog"></button>
+                        <h4 class="modal-title">{{$t('transfer.batch_transfer_title')}}</h4>
+                    </div>
+                    <div class="modal-body modal-message">
+                        <el-form>
+                            <el-form-item :label="$t('sendMessage.json_file')">
+                                <el-input :placeholder="$t('sendMessage.json_file_tip')" class="input-with-select"
+                                          v-model="batch_transfer.fileName" :readonly="true">
+                                    <el-button slot="append" v-if="parsefile === null">{{$t('sendMessage.browse')}}
+                                    </el-button>
+                                    <el-button slot="append" @click="delParseFile" v-else>{{$t('sendMessage.delete')}}
+                                    </el-button>
+                                </el-input>
+                                <input id="parseFile" ref="parseFile" type="file" accept="application/json" @change="parseFileChange" v-if="parsefile === null"/>
+                            </el-form-item>
+                            <el-form-item :label="$t('transfer.secret_key')" v-if="!secretPhrase">
+                                <el-input v-model="batch_transfer.password" type="password"></el-input>
+                            </el-form-item>
+                            <el-form-item :label="$t('transfer.airdrop_secret_key')">
+                                <el-input v-model="batch_transfer.airdropSecretKey" type="password"></el-input>
+                            </el-form-item>
+                        </el-form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" v-loading="batch_transfer.executing" class="btn common_btn writeBtn" @click="sendBatchTransferInfo">
+                            {{$t('transfer.transfer_send')}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- view client init setting dialog -->
-        <div class="modal_hubSetting" id="hub_init_setting" v-show="hubInitDialog">
+            <div class="modal_hubSetting" id="hub_init_setting" v-show="hubInitDialog">
             <div class="modal-header" @click="displaySerialNo('initial')">
                 <h4 class="modal-title">
                     <span>{{ $t('login.init_hub') }}</span>
@@ -961,6 +1007,7 @@
                 onChainDialog:false,
                 joinNetDialog:false,
                 tranferAccountsDialog: false,
+                batchTranferAccountsDialog: false,
                 hubSettingDialog: false,
                 hubInitDialog: false,
                 useNATServiceDialog: false,
@@ -1019,6 +1066,7 @@
                 },
                 file: null,
                 storagefile: null,
+                parsefile: null,
                 onchainfile:null,
                 transfer: {
                     receiver: "CDW-____-____-____-_____",
@@ -1032,6 +1080,18 @@
                     hasPublicKey: false,
                     publicKey: "",
                     errorCode: false
+                },
+                batch_transfer: {
+                    airdropSecretKey: '',
+                    executing: false,
+                    fileName: "",
+                    isFile: false,
+                    number: 0,
+                    password: "",
+                    hasPublicKey: false,
+                    publicKey: "",
+                    errorCode: false,
+                    jsonData: {}
                 },
                 hubsetting: {
                     registerSiteAccount:false,
@@ -2296,6 +2356,41 @@
                 // });
 
             },
+            sendBatchMoney(formData) {
+                let config = {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                };
+                const _this = this;
+                return new Promise((resolve, reject) => {
+                    this.$http.post('/sharder?requestType=airdrop', formData, config).then(function (res) {
+                        resolve(res.data);
+                    }).catch(function (err) {
+                        console.log(err);
+                    });
+                });
+            },
+            sendBatchTransferInfo: function () {
+                const _this = this;
+                _this.batch_transfer.executing = true;
+                let formData = new FormData();
+
+                formData.append("json", _this.batch_transfer.jsonData.toString());
+                formData.append("key", _this.batch_transfer.airdropSecretKey);
+
+                _this.sendBatchMoney(formData).then(res => {
+                    if (typeof res.errorDescription === 'undefined') {
+                        console.log(res);
+                        _this.$message.success(_this.$t('transfer.batch_transfer_success'));
+                        _this.closeDialog();
+
+                    } else {
+                        _this.$message.error(res.errorDescription);
+                    }
+                    _this.transfer.executing = false;
+                });
+            },
             sendTransferInfo: function () {
                 const _this = this;
                 _this.transfer.executing = true;
@@ -2533,6 +2628,14 @@
                 this.tranferAccountsDialog = true;
                 this.transfer.executing = false;
             },
+            openBatchTransferDialog: function () {
+                if (SSO.downloadingBlockchain) {
+                    return this.$message.warning(this.$t("account.synchronization_block"));
+                }
+                this.$store.state.mask = true;
+                this.batchTranferAccountsDialog = true;
+                this.transfer.executing = false;
+            },
             openHubSettingDialog: function () {
                 const _this = this;
                 _this.getLatestHubVersion();
@@ -2692,6 +2795,7 @@
                 this.accountSecret="";
                 this.mortgageFee = 0;
                 this.tranferAccountsDialog = false;
+                this.batchTranferAccountsDialog = false;
                 this.hubSettingDialog = false;
                 this.hubInitDialog = false;
                 this.tradingInfoDialog = false;
@@ -2713,6 +2817,7 @@
                 _this.messageForm.fee = 1;
                 _this.file = null;
                 _this.storagefile = null;
+                _this.parsefile = null;
                 _this.transfer.receiver = "CDW-____-____-____-_____";
                 _this.transfer.number = 0;
                 _this.transfer.fee = 1;
@@ -2791,6 +2896,13 @@
                 _this.storagefile = null;
                 _this.messageForm.isFile = false;
             },
+            delParseFile: function () {
+                const _this = this;
+                $('#parseFile').val("");
+                _this.batch_transfer.fileName = "";
+                _this.parsefile = null;
+                _this.batch_transfer.isFile = false;
+            },
             delOnChainFile:function(){
                 const _this = this;
                 $('#onChainFile').val("");
@@ -2816,13 +2928,47 @@
                 _this.messageForm.fileName = e.target.files[0].name;
                 _this.storagefile = document.getElementById("storageFile").files[0];
                 console.log(_this.storagefile);
-                if (_this.storagefile.size > 1024 * 1024 * 10) {
+                if (_this.storagefile.size > 1024 * 1024 * 5) {
                     _this.delStorageFile();
                     _this.$message.error(_this.$t('notification.file_exceeds_max_limit'));
                     return;
                 }
                 _this.messageForm.isFile = true;
                 _this.messageForm.message = "";
+            },
+            parseFileChange: function (e) {
+                const _this = this;
+                _this.batch_transfer.fileName = e.target.files[0].name;
+                _this.parsefile = document.getElementById("parseFile").files[0];
+                console.log(_this.parsefile);
+                if (_this.parsefile.type != "application/json") {
+                    _this.$message.error(_this.$t('notification.unsupported_file_type'));
+                    return;
+                }
+                if (_this.parsefile.size > 1024 * 1024 * 5) {
+                    _this.delParseFile();
+                    _this.$message.error(_this.$t('notification.file_exceeds_max_limit'));
+                    return;
+                }
+                _this.batch_transfer.isFile = true;
+                _this.batch_transfer.message = "";
+                _this.readFile(_this.parsefile);
+            },
+            readFile: function (file) {
+                let _this = this;
+                let reader = new FileReader()
+                if (typeof FileReader === 'undefined') {
+                    _this.$message.error(_this.$t('notification.unsupported_file_type'));
+                    return;
+                }
+                reader.readAsText(file, 'utf-8');
+                reader.onload = function () {
+                    _this.fileContent = this.result;
+                }
+                _this.batch_transfer.jsonData = JSON.parse(_this.fileContent);
+
+                console.log(_this.batch_transfer);
+
             },
             onChainFileChange:function(e){
                 const _this = this;
@@ -3080,6 +3226,11 @@
         computed: {
             getLang: function () {
                 return this.$store.state.currentLang;
+            },
+            openAirdrop: function () {
+                let isOpenAirdrop = this.$global.isOpenAirdrop;
+                console.log("openAirdrop", isOpenAirdrop);
+                return (isOpenAirdrop == undefined || isOpenAirdrop == null) ? false : isOpenAirdrop;
             }
         },
         watch: {
@@ -3188,6 +3339,9 @@
                 _this.validationReceiver("messageForm");
             });
             $('#tranfer_receiver').on("blur", function () {
+                _this.validationReceiver("transfer");
+            });
+            $('#batch_tranfer_receiver').on("blur", function () {
                 _this.validationReceiver("transfer");
             });
             window.onbeforeunload = function (e) {

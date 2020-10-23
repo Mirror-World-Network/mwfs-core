@@ -174,6 +174,8 @@ const cn = {
         'secret_key': "秘钥",
         'send_message': "发送",
         "upload_file":"上传",
+        'json_file': "JSON文件",
+        'json_file_tip': "请选择JSON文件",
     },
     joinNet:{
         'join':'加入',
@@ -196,6 +198,10 @@ const cn = {
         'message_tip': "请输入信息内容",
         'secret_key': "秘钥",
         'transfer_send': "发送",
+        'batch_transfer_title': "批量转账",
+        'airdrop_secret_key': "空投密钥",
+        'batch_transfer': "空投",
+        'batch_transfer_success': "批量创建交易成功"
     },
     account_info: {
         'account_information': "账户详情",
@@ -960,6 +966,7 @@ const cn = {
         'clipboard_success': "已复制到剪切板",
         'modify_success': "修改成功",
         'clipboard_error': "复制失败",
+        'unsupported_file_type': "不支持的文件类型",
         'file_exceeds_max_limit': "文件最大支持5M",
         'account_is_self': "这是您的账户",
         'unknown_account': "接收者帐户是未知帐户，意味着它没有转入或转出的交易记录。您可以通过提供接收者的公钥来增加安全性。",

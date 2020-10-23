@@ -173,6 +173,8 @@ const en = {
         'secret_key': "Mnemonic Phrase",
         'send_message': "Send Message",
         "upload_file":"Upload",
+        'json_file': "JSON File",
+        'json_file_tip': "Please select JSON file",
     },
     joinNet:{
         'join':'Join',
@@ -195,6 +197,10 @@ const en = {
         'message_tip': "Please enter your message",
         'secret_key': "Mnemonic Phrase",
         'transfer_send': "Transfer",
+        'batch_transfer_title': "Air-Drop",
+        'airdrop_secret_key': "Airdrop secret key",
+        'batch_transfer': "Air-Drop",
+        'batch_transfer_success': "Batch created transaction successfully"
     },
     account_info: {
         'account_information': "Account Details",
@@ -959,6 +965,7 @@ const en = {
         'clipboard_success': "Successfully copied to the clipboard",
         'modify_success': "Modified Successfully",
         'clipboard_error': "Copy Failed",
+        'unsupported_file_type': "Unsupported file type",
         'file_exceeds_max_limit': "File cannot exceed 5 mb",
         'account_is_self': "This is your account",
         'unknown_account': "The recipient account is an unknown account, this may imply the recipient do not have any incoming or outgoing transaction records. You can increase security by providing the recipient's public key.",
