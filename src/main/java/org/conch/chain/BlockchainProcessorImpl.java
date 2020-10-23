@@ -326,14 +326,14 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             connectedPublicPeers = Peers.getPublicPeers(Peer.State.CONNECTED, true);
             int connectedSize = connectedPublicPeers.size();
             if (!Generator.isBootNode
-                    && connectedSize < limitConnectedSize) {
+                && connectedSize < limitConnectedSize) {
                 if (Logger.printNow(Logger.BlockchainProcessor_downloadPeer_sizeCheck)) {
                     Logger.logInfoMessage("No enough connected peers[limit size=" + (limitConnectedSize) + ",current connected size=" + connectedSize + "], break syn blocks...");
 //                    Logger.logDebugMessage("Current peers => " + Arrays.toString(connectedPublicPeers.toArray()));
                 }
 
                 if (System.currentTimeMillis() - lastDownloadMS > MAX_DOWNLOAD_TIME) {
-                    Peers.checkOrConnectBootNodeRandom();
+                    Peers.checkOrReConnectAllPeers();
                 }
                 return;
             }
@@ -1788,7 +1788,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 validatePhasedTransactions(previousLastBlock.getHeight(), validPhasedTransactions, invalidPhasedTransactions, duplicates);
                 validateTransactions(block, previousLastBlock, curTime, duplicates);
 
-                block.setPrevious(previousLastBlock);
+                block.calAndSetByPreviousBlock(previousLastBlock);
                 blockListeners.notify(block, Event.BEFORE_BLOCK_ACCEPT);
                 TransactionProcessorImpl.getInstance().requeueAllUnconfirmedTransactions();
                 addBlock(block);

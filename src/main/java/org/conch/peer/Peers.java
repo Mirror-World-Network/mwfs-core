@@ -1743,7 +1743,8 @@ public final class Peers {
         List<Peer> connectedNodes = Lists.newArrayList();
         for(String nodeHost : Constants.bootNodesHost){
             Peer bootNode = Peers.getPeer(nodeHost, true);
-            if(bootNode != null && Peer.State.CONNECTED != bootNode.getState()) {
+//            if(bootNode != null && Peer.State.CONNECTED != bootNode.getState()) {
+            if(bootNode != null) {
                 connectPeer(bootNode);
             }
             connectedNodes.add(bootNode);
@@ -1753,7 +1754,7 @@ public final class Peers {
 
     public static void checkOrReConnectAllPeers(){
         for (Peer peer : peers.values()) {
-            if (Peer.State.CONNECTED != peer.getState()) {
+            if(peer != null) {
                 connectPeer(peer);
             }
         }

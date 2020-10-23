@@ -118,8 +118,9 @@ final class PeerImpl implements Peer {
     }
 
     void setState(State state) {
-        if (state != State.CONNECTED)
+        if (state != State.CONNECTED) {
             webSocket.close();
+        }
         if (this.state == state) {
             return;
         }
@@ -745,9 +746,6 @@ final class PeerImpl implements Peer {
                 } else if (!isBlacklisted()) {
                     blacklist("Old version: " + version);
                 }
-//                // update the peer ref RS account when connected
-//                Conch.getPocProcessor().updateBoundPeer(getAddress(), Account.rsAccountToId(bindRsAccount));
-                
             } else {
                 //Logger.logDebugMessage("Failed to connect to peer " + peerAddress);
                 setState(State.NON_CONNECTED);

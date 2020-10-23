@@ -571,7 +571,12 @@ public final class BlockImpl implements Block {
         generatorAccount.addMintedBalance(totalFeeNQT - totalBackFees);
     }
 
-    public void setPrevious(BlockImpl block) {
+    /**
+     * calculate the difficult of current block
+     * set height and tx list
+     * @param block
+     */
+    public void calAndSetByPreviousBlock(BlockImpl block) {
         if (block != null) {
             if (block.getId() != getPreviousBlockId()) {
                 // shouldn't happen as previous id is already verified, but just in case
@@ -596,7 +601,7 @@ public final class BlockImpl implements Block {
         }
     }
 
-    private static final long TWENTY_YEARS_SECONDS = 20 * 365 * 24 * 60 * 60;
+    private static final long TWENTY_YEARS_SECONDS = 10 * 365 * 24 * 60 * 60;
     private void calculateBaseTarget(BlockImpl previousBlock) {
         long prevBaseTarget = previousBlock.baseTarget;
         if (previousBlock.getHeight() <= Constants.SHUFFLING_BLOCK_HEIGHT) {
@@ -639,14 +644,20 @@ public final class BlockImpl implements Block {
         }
 
         cumulativeDifficulty = previousBlock.cumulativeDifficulty.add(Convert.two64.divide(BigInteger.valueOf(baseTarget)));
-//      One block difficult
-//        BigInteger oneBlockDiff = BigInteger.ZERO;
-//        if(TWENTY_YEARS_SECONDS > timestamp) {
-//            oneBlockDiff = BigInteger.valueOf(TWENTY_YEARS_SECONDS - timestamp);
-//        }else{
-//            oneBlockDiff = BigInteger.valueOf(TWENTY_YEARS_SECONDS - (timestamp - TWENTY_YEARS_SECONDS));
-//        }
-//        cumulativeDifficulty = cumulativeDifficulty.add(oneBlockDiff);
+        // One block difficult
+        BigInteger oneBlockDiff = BigInteger.ZERO;
+        if(TWENTY_YEARS_SECONDS > timestamp) {
+            oneBlockDiff = BigInteger.valueOf(TWENTY_YEARS_SECONDS - timestamp);
+        }else{
+            oneBlockDiff = BigInteger.ZERO;
+//            if(timestamp
+//            > cumulativeDifficulty.intValue()) {
+//                oneBlockDiff =  BigInteger.valueOf(-1 * timestamp - TWENTY_YEARS_SECONDS);
+//            }else{
+//                oneBlockDiff = BigInteger.valueOf(-1 * timestamp);
+//            }
+        }
+        cumulativeDifficulty = cumulativeDifficulty.add(oneBlockDiff);
     }
 
     @Override

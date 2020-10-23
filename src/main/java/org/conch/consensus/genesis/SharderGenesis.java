@@ -207,7 +207,7 @@ public class SharderGenesis {
                         SharderGenesis.GENESIS_BLOCK_SIGNATURE,
                         null,
                         transactions);
-        genesisBlock.setPrevious(null);
+        genesisBlock.calAndSetByPreviousBlock(null);
 
         return genesisBlock;
     }

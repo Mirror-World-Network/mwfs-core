@@ -227,8 +227,8 @@ public interface Attachment extends Appendix {
             this.coinBaseType = CoinBaseType.getType((String) attachmentData.get("coinBaseType"));
             this.creator = (Long) attachmentData.get("creator");
             this.generatorId = (Long) attachmentData.get("generatorId");
-            this.consignors = JSON.parseObject((String) attachmentData.get("consignors"), HashMap.class);
-            this.crowdMiners = JSON.parseObject((String) attachmentData.get("crowdMiners"), HashMap.class);
+            this.consignors = JSON.parseObject((String) attachmentData.get("consignors"), new TypeReference<HashMap<Long, Long>>() {});
+            this.crowdMiners = JSON.parseObject((String) attachmentData.get("crowdMiners"),new TypeReference<HashMap<Long, Long>>() {});
         }
 
         /**
