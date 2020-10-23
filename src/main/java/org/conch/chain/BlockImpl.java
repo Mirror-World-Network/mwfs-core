@@ -51,7 +51,7 @@ public final class BlockImpl implements Block {
     private final int version;
     private final int timestamp;
     private final long previousBlockId;
-    private boolean hasRewardDistribution;
+    private boolean hasRewardDistribution = false;
     private volatile byte[] generatorPublicKey;
     private final byte[] previousBlockHash;
     private final long totalAmountNQT;
