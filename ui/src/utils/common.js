@@ -973,5 +973,16 @@ export default {
     getRewardRate(rule, num) {
         let level = (rule.level) || (rule.level1 ? rule.level1 : rule.level0);
         return new BigNumber(level.forgepool.reward.max).multipliedBy("100").toFixed(num || 2) + "%";
-    }
+    },
+    /**
+     * 字符串反转义方法
+     * @param str
+     * @returns {*}
+     */
+    escape2Html(str) {
+        let arrEntities = {'lt': '<', 'gt': '>', 'nbsp': ' ', 'amp': '&', 'quot': '"'};
+        return str.replace(/&(lt|gt|nbsp|amp|quot);/ig,function(all,t){
+        return arrEntities[t];
+    });
+}
 };

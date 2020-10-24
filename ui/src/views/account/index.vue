@@ -361,7 +361,7 @@
                         </el-form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn common_btn writeBtn" @click="sendMessageInfo">
+                        <button type="button" v-loading="messageForm.executing" class="btn common_btn writeBtn" @click="sendMessageInfo">
                             {{$t('sendMessage.send_message')}}
                         </button>
                     </div>
@@ -1055,6 +1055,7 @@
                     errorCode: false,
                     receiver: "CDW-____-____-____-_____",
                     message: "",
+                    executing: false,
                     isEncrypted: false,
                     hasPublicKey: false,
                     isFile: false,
@@ -2246,6 +2247,7 @@
             },
             sendMessageInfo: function () {
                 const _this = this;
+                _this.messageForm.executing = true;
                 let options = {};
                 let encrypted = {};
                 let formData = new FormData();
@@ -2255,21 +2257,25 @@
                     _this.messageForm.receiver === "CDW" ||
                     _this.messageForm.receiver === "") {
                     _this.$message.warning(_this.$t('notification.sendmessage_null_account'));
+                    _this.messageForm.executing = false;
                     return;
                 }
                 const pattern = /CDW-([A-Z0-9]{4}-){3}[A-Z0-9]{5}/;
                 if (!_this.messageForm.receiver.toUpperCase().match(pattern)) {
                     _this.$message.warning(_this.$t('notification.sendmessage_account_error_format'));
+                    _this.messageForm.executing = false;
                     return;
                 }
                 if (_this.messageForm.hasPublicKey) {
                     if (_this.messageForm.publicKey === "") {
                         _this.$message.warning(_this.$t('notification.transfer_null_public_key'));
+                        _this.messageForm.executing = false;
                         return;
                     }
                 }
                 if (!(_this.messageForm.password || _this.secretPhrase)) {
                     _this.$message.warning(_this.$t('notification.transfer_null_secret_key'));
+                    _this.messageForm.executing = false;
                     return;
                 }
                 formData.append("recipient", _this.messageForm.receiver);
@@ -2320,40 +2326,61 @@
                         });
                     }
                 }
+                _this.messageForm.executing = false;
             },
             sendMessage: function (formData) {
                 const _this = this;
-                SSO.sendMessage(formData, _this);
-                // return new Promise(function (resolve, reject) {
-                //     let config = {
-                //         headers: {
-                //             'Content-Type': 'multipart/form-data'
-                //         }
-                //     };
-                //     _this.$http.post('/sharder?requestType=sendMessage', formData, config).then(res => {
-                //
-                //         if (typeof res.data.errorDescription === 'undefined') {
-                //             if (res.data.broadcasted) {
-                //                 _this.$message.success(_this.$t('notification.sendmessage_success'));
-                //                 resolve(res.data);
-                //                 _this.closeDialog();
-                //                 _this.$global.setUnconfirmedTransactions(_this, SSO.account).then(res => {
-                //                     _this.$store.commit("setUnconfirmedNotificationsList", res.data);
-                //                 });
-                //             } else {
-                //                 console.log(res.data);
-                //                 _this.messageForm.fee = res.data.transactionJSON.feeNQT / 100000000;
-                //                 resolve(res.data);
-                //             }
-                //         } else {
-                //             _this.$message.error(res.data.errorDescription);
-                //             resolve(res.data);
-                //         }
-                //     }).catch(err => {
-                //         reject(err);
-                //         console.log(err);
-                //     });
-                // });
+                SSO.sendMessage(formData, function (res) {
+                    console.log("res", res);
+                    if (typeof res.errorDescription === 'undefined') {
+                        if (res.broadcasted) {
+                            _this.$message.success(_this.$t('notification.transfer_success'));
+                            _this.closeDialog();
+                            _this.$global.setUnconfirmedTransactions(_this, SSO.account).then(res => {
+                                _this.$store.commit("setUnconfirmedNotificationsList", res);
+                            });
+                        } else {
+                            console.log(res);
+                            _this.transfer.fee = res.transactionJSON.feeNQT / 100000000;
+                        }
+                    } else {
+                        if (res.errorDescription.indexOf("$.t") != -1) {
+                            _this.$message.error(_this.$global.escape2Html(_this.$t(res.errorDescription.slice(3))));
+                        } else {
+                            _this.$message.error(_this.$global.escape2Html(res.errorDescription));
+                        }
+                    }
+                });
+                /*return new Promise(function (resolve, reject) {
+                    let config = {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    };
+                    _this.$http.post('/sharder?requestType=sendMessage', formData, config).then(res => {
+
+                        if (typeof res.data.errorDescription === 'undefined') {
+                            if (res.data.broadcasted) {
+                                _this.$message.success(_this.$t('notification.sendmessage_success'));
+                                resolve(res.data);
+                                _this.closeDialog();
+                                _this.$global.setUnconfirmedTransactions(_this, SSO.account).then(res => {
+                                    _this.$store.commit("setUnconfirmedNotificationsList", res.data);
+                                });
+                            } else {
+                                console.log(res.data);
+                                _this.messageForm.fee = res.data.transactionJSON.feeNQT / 100000000;
+                                resolve(res.data);
+                            }
+                        } else {
+                            _this.$message.error(res.data.errorDescription);
+                            resolve(res.data);
+                        }
+                    }).catch(err => {
+                        reject(err);
+                        console.log(err);
+                    });
+                });*/
 
             },
             sendBatchMoney(formData) {
@@ -2402,35 +2429,42 @@
                     _this.transfer.receiver === "CDW" ||
                     _this.transfer.receiver === "") {
                     _this.$message.warning(_this.$t('notification.sendmessage_null_account'));
+                    _this.transfer.executing = false;
                     return;
                 }
                 const pattern = /CDW-([A-Z0-9]{4}-){3}[A-Z0-9]{5}/;
                 if (!_this.transfer.receiver.toUpperCase().match(pattern)) {
                     _this.$message.warning(_this.$t('notification.sendmessage_account_error_format'));
+                    _this.transfer.executing = false;
                     return;
                 }
                 if (_this.transfer.publicKey === "") {
                     _this.$message.warning(_this.$t('notification.sendmessage_null_account_public'));
+                    _this.transfer.executing = false;
                     return;
                 }
                 if (_this.transfer.number === 0) {
                     _this.$message.warning(_this.$t('notification.transfer_amount_error'));
+                    _this.transfer.executing = false;
                     return;
                 }
                 _this.getAccount(_this.accountInfo.accountRS).then(res => {
                     if (typeof res.errorDescription === 'undefined') {
                         if (res.errorDescription === "Unknown account") {
                             _this.$message.warning(_this.$t('notification.new_account_warning'));
+                            _this.transfer.executing = false;
                             return;
                         }
                     }
                     _this.accountInfo = res;
                     if (_this.transfer.number > _this.accountInfo.effectiveBalanceNQT / 100000000) {
                         _this.$message.warning(_this.$t('notification.transfer_balance_insufficient'));
+                        _this.transfer.executing = false;
                         return;
                     }
                     if (!(_this.secretPhrase || _this.transfer.password)) {
                         _this.$message.warning(_this.$t('notification.transfer_null_secret_key'));
+                        _this.transfer.executing = false;
                         return;
                     }
                     formData.append("recipient", _this.transfer.receiver);
@@ -2467,38 +2501,58 @@
             },
             sendTransfer: function (formData) {
                 const _this = this;
-                SSO.sendMoney(formData, _this);
+                SSO.sendMoney(formData, function (res) {
+                    console.log("res", res);
+                    if (typeof res.errorDescription === 'undefined') {
+                        if (res.broadcasted) {
+                            _this.$message.success(_this.$t('notification.transfer_success'));
+                            _this.closeDialog();
+                            _this.$global.setUnconfirmedTransactions(_this, SSO.account).then(res => {
+                                _this.$store.commit("setUnconfirmedNotificationsList", res);
+                            });
+                        } else {
+                            console.log(res);
+                            _this.transfer.fee = res.transactionJSON.feeNQT / 100000000;
+                        }
+                    } else {
+                        if (res.errorDescription.indexOf("$.t") != -1) {
+                            _this.$message.error(_this.$global.escape2Html(_this.$t(res.errorDescription.slice(3))));
+                        } else {
+                            _this.$message.error(_this.$global.escape2Html(res.errorDescription));
+                        }
+                    }
+                });
 
-                // return new Promise(function (resolve, reject) {
-                //     let config = {
-                //         headers: {
-                //             'Content-Type': 'multipart/form-data'
-                //         }
-                //     };
-                //     _this.$http.post('/sharder?requestType=sendMoney', formData, config).then(res => {
-                //         if (typeof res.data.errorDescription === 'undefined') {
-                //             if (res.data.broadcasted) {
-                //                 _this.$message.success(_this.$t('notification.transfer_success'));
-                //                 resolve(res.data);
-                //                 _this.closeDialog();
-                //                 _this.$global.setUnconfirmedTransactions(_this, SSO.account).then(res => {
-                //                     _this.$store.commit("setUnconfirmedNotificationsList", res.data);
-                //                 });
-                //             } else {
-                //                 console.log(res.data);
-                //                 _this.transfer.fee = res.data.transactionJSON.feeNQT / 100000000;
-                //                 resolve(res.data);
-                //             }
-                //         } else {
-                //             _this.$message.error(res.data.errorDescription);
-                //             resolve(res.data);
-                //         }
-                //     }).catch(err => {
-                //         reject(err);
-                //         console.log(err);
-                //     });
-                //
-                // });
+                /*return new Promise(function (resolve, reject) {
+                    let config = {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    };
+                    _this.$http.post('/sharder?requestType=sendMoney', formData, config).then(res => {
+                        if (typeof res.data.errorDescription === 'undefined') {
+                            if (res.data.broadcasted) {
+                                _this.$message.success(_this.$t('notification.transfer_success'));
+                                resolve(res.data);
+                                _this.closeDialog();
+                                _this.$global.setUnconfirmedTransactions(_this, SSO.account).then(res => {
+                                    _this.$store.commit("setUnconfirmedNotificationsList", res.data);
+                                });
+                            } else {
+                                console.log(res.data);
+                                _this.transfer.fee = res.data.transactionJSON.feeNQT / 100000000;
+                                resolve(res.data);
+                            }
+                        } else {
+                            _this.$message.error(res.data.errorDescription);
+                            resolve(res.data);
+                        }
+                    }).catch(err => {
+                        reject(err);
+                        console.log(err);
+                    });
+
+                });*/
             },
             getAccountTransactionList: function () {
                 const _this = this;
