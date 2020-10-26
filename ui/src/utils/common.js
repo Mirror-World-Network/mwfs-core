@@ -20,9 +20,9 @@ export default {
     placeholder: "--",
     unit: " MW",
     poolPledgeAmount: 10000000000000, // pledge amount of pool creator
-    optHeight: {join: 0,quit: 0, destroy: 0, create: 0},
+    optHeight: {join: 0, quit: 0, destroy: 0, create: 0},
     isOpenAirdrop: false,
-    sendVerifyCode(url,username, fun) {
+    sendVerifyCode(url, username, fun) {
 
         $.ajax({
             url: url,
@@ -46,7 +46,7 @@ export default {
         });
     },
 
-    registerSharderSite(url,data,fun){
+    registerSharderSite(url, data, fun) {
         $.ajax({
             url: url,
             type: 'POST',
@@ -66,7 +66,7 @@ export default {
         });
     },
 
-    ajaxGetPicVCode(url,fun){
+    ajaxGetPicVCode(url, fun) {
         $.ajax({
             url: url,
             type: 'POST',
@@ -614,11 +614,11 @@ export default {
      */
     longUnsigned(num) {
 
-        if(typeof(num) == 'number' && num > 0) return num;
+        if (typeof (num) == 'number' && num > 0) return num;
 
-        if(typeof(num) == 'string') {
+        if (typeof (num) == 'string') {
             num = new BigInteger(num)
-            if(num > 0) return num.toString();
+            if (num > 0) return num.toString();
         }
 
         num = new BigInteger(num).abs();
@@ -662,15 +662,15 @@ export default {
         let _this = this.$vue;
         let myChart = _this.$echarts.init(dom);
 
-        function parseData (coordinatesMap) {
-            if(undefined == coordinatesMap || null == coordinatesMap) return;
+        function parseData(coordinatesMap) {
+            if (undefined == coordinatesMap || null == coordinatesMap) return;
 
             let mapData = [];
             for (let i of Object.keys(coordinatesMap)) {
                 if (coordinatesMap[i]["X"] !== "" && coordinatesMap[i]["X"] !== "0"
                     && coordinatesMap[i]["Y"] !== "" && coordinatesMap[i]["Y"] !== "0"
                     && !isNaN(coordinatesMap[i]["X"]) && !isNaN(coordinatesMap[i]["Y"])) {
-                    let locationArray = [coordinatesMap[i]["Y"],coordinatesMap[i]["X"]];
+                    let locationArray = [coordinatesMap[i]["Y"], coordinatesMap[i]["X"]];
                     mapData.push({
                         name: i,
                         value: locationArray
@@ -784,7 +784,7 @@ export default {
             } else if (t.subtype === 2) {
                 return this.$vue.$t("transaction.transaction_type_pool_join");
             } else if (t.subtype === 3) {
-                if(t.senderRS === SSO.accountRS && t.recipientRS !== SSO.accountRS){
+                if (t.senderRS === SSO.accountRS && t.recipientRS !== SSO.accountRS) {
                     return this.$vue.$t("transaction.transaction_type_pool_quit_not_myself");
                 }
                 return this.$vue.$t("transaction.transaction_type_pool_quit");
@@ -835,9 +835,9 @@ export default {
         let isQuitPoolTx = (t.type === 8 && t.subtype === 3) ? true : false;
 
         let amountNQT = t.amountNQT;
-        if(isJoinPoolTx || isQuitPoolTx){
+        if (isJoinPoolTx || isQuitPoolTx) {
             amountNQT = t.attachment.amount
-        }else if(isCreatePoolTx || isDestroyPoolTx){
+        } else if (isCreatePoolTx || isDestroyPoolTx) {
             amountNQT = _this.poolPledgeAmount;
         }
 
@@ -845,9 +845,9 @@ export default {
 
         if (isJoinPoolTx || isCreatePoolTx) {
             return -amountNQT + this.unit
-        } else if (isQuitPoolTx || isDestroyPoolTx){
+        } else if (isQuitPoolTx || isDestroyPoolTx) {
             return "+" + amountNQT + this.unit
-        }else if (amountNQT <= 0) {
+        } else if (amountNQT <= 0) {
             return this.placeholder
         } else if (t.type === 18) {
             return amountNQT + this.unit
@@ -882,7 +882,7 @@ export default {
      * @param t
      */
     getSenderOrRecipient(t) {
-        if(t.type === 12){
+        if (t.type === 12) {
             return "System"
         } else if (t.type === 9 && this.$vue.$store.state.account === t.recipientRS) {
             return t.senderRS
@@ -973,5 +973,53 @@ export default {
     getRewardRate(rule, num) {
         let level = (rule.level) || (rule.level1 ? rule.level1 : rule.level0);
         return new BigNumber(level.forgepool.reward.max).multipliedBy("100").toFixed(num || 2) + "%";
-    }
+    },
+    /**
+     * 字符串反转义方法
+     * @param str
+     * @returns {*}
+     */
+    escape2Html(str) {
+        let arrEntities = {'lt': '<', 'gt': '>', 'nbsp': ' ', 'amp': '&', 'quot': '"'};
+        return str.replace(/&(lt|gt|nbsp|amp|quot);/ig, function (all, t) {
+            return arrEntities[t];
+        });
+    },
+    /**
+     * 下载文件方法
+     * @param content
+     * @param filename
+     */
+    funDownload(content, filename) {
+        var eleLink = document.createElement('a');
+        eleLink.download = filename;
+        eleLink.style.display = 'none';
+        // 字符内容转变成blob地址
+        var blob = new Blob([content]);
+        eleLink.href = URL.createObjectURL(blob);
+        // 触发点击
+        document.body.appendChild(eleLink);
+        eleLink.click();
+        // 然后移除
+        document.body.removeChild(eleLink);
+    },
+    /**
+     * 读取文件内容方法
+     * @param file
+     * @returns {Promise}
+     */
+    readFile(file) {
+        let _this = this;
+        return new Promise(function (resolve, reject) {
+            let reader = new FileReader();
+            if (typeof FileReader === 'undefined') {
+                _this.$message.error(_this.$t('notification.unsupported_file_type'));
+                return;
+            }
+            reader.readAsText(file, 'utf-8');
+            reader.onload = function () {
+                resolve(reader.result)
+            }
+        })
+    },
 };

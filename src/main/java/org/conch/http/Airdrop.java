@@ -44,14 +44,56 @@ import static org.conch.util.JSON.readJsonFile;
 public final class Airdrop extends CreateTransaction {
 
     static final Airdrop instance = new Airdrop();
-    static class TransferInfo {
-        public String recipient;
-        public String amountNQT;
-        public String recipientPublicKey;
-        public String errorDescription; // create transaction failed to write to this value
-        public String transactionID; // create transaction succeed to write to this value
 
-        TransferInfo() {}
+    static class TransferInfo {
+        private String recipient;
+        private String amountNQT;
+        private String recipientPublicKey;
+        private String errorDescription; // create transaction failed to write to this value
+        private String transactionID; // create transaction succeed to write to this value
+
+        TransferInfo() {
+        }
+
+        public String getRecipient() {
+            return recipient;
+        }
+
+        public void setRecipient(String recipient) {
+            this.recipient = recipient;
+        }
+
+        public String getAmountNQT() {
+            return amountNQT;
+        }
+
+        public void setAmountNQT(String amountNQT) {
+            this.amountNQT = amountNQT;
+        }
+
+        public String getRecipientPublicKey() {
+            return recipientPublicKey;
+        }
+
+        public void setRecipientPublicKey(String recipientPublicKey) {
+            this.recipientPublicKey = recipientPublicKey;
+        }
+
+        public String getErrorDescription() {
+            return errorDescription;
+        }
+
+        public void setErrorDescription(String errorDescription) {
+            this.errorDescription = errorDescription;
+        }
+
+        public String getTransactionID() {
+            return transactionID;
+        }
+
+        public void setTransactionID(String transactionID) {
+            this.transactionID = transactionID;
+        }
     }
 
     /**
@@ -72,7 +114,7 @@ public final class Airdrop extends CreateTransaction {
     private static final boolean IS_APPEND_MODE = Conch.getBooleanProperty("sharder.airdrop.isAppendMode");
 
     private Airdrop() {
-        super(new APITag[] {APITag.ACCOUNTS, APITag.CREATE_TRANSACTION}, "pathName", "key");
+        super(new APITag[]{APITag.ACCOUNTS, APITag.CREATE_TRANSACTION}, "pathName", "key", "jsonString");
     }
 
     private boolean verifyKey(String key) {
@@ -90,6 +132,7 @@ public final class Airdrop extends CreateTransaction {
         org.json.simple.JSONObject response = new org.json.simple.JSONObject();
         String pathName = req.getParameter("pathName");
         String key = req.getParameter("key");
+        String jsonString = req.getParameter("jsonString");
         if (!ENABLE_AIRDROP) {
             return ACCESS_CLOSED;
         }
@@ -97,24 +140,30 @@ public final class Airdrop extends CreateTransaction {
             throw new ParameterException(incorrect("key", String.format("key %s is incorrect", key)));
         }
 
-        // parse file
-        pathName = pathName==null? DEFAULT_PATH_NAME :pathName;
-        String jsonStr = readJsonFile(pathName);
-        JSONObject jobj = JSON.parseObject(jsonStr);
+        JSONObject parseObject;
 
-        // read file error
-        if (jobj.get("error") != null) {
-            return JSONResponses.fileNotFound(pathName.split("/")[1] != null?pathName.split("/")[1]:pathName);
+        if (jsonString != null) {
+            // parse jsonString
+            parseObject = JSON.parseObject(jsonString);
+        } else {
+            // parse file
+            pathName = pathName == null ? DEFAULT_PATH_NAME : pathName;
+            String jsonStr = readJsonFile(pathName);
+            parseObject = JSON.parseObject(jsonStr);
+            // read file error
+            if (parseObject.get("error") != null) {
+                return JSONResponses.fileNotFound(pathName.split("/")[1] != null ? pathName.split("/")[1] : pathName);
+            }
         }
 
         Map<String, String[]> paramter = Maps.newHashMap();
-        paramter.put("secretPhrase", new String[]{jobj.getString("secretPhrase")});
-        paramter.put("feeNQT", new String[]{jobj.getString("feeNQT")});
-        paramter.put("deadline", new String[]{jobj.getString("deadline")});
+        paramter.put("secretPhrase", new String[]{parseObject.getString("secretPhrase")});
+        paramter.put("feeNQT", new String[]{parseObject.getString("feeNQT")});
+        paramter.put("deadline", new String[]{parseObject.getString("deadline")});
 
-        JSONArray listOrigin = jobj.getJSONArray("list");
-        JSONArray doneListOrigin = jobj.getJSONArray("doneList");
-        JSONArray failListOrigin = jobj.getJSONArray("failList");
+        JSONArray listOrigin = parseObject.getJSONArray("list");
+        JSONArray doneListOrigin = parseObject.getJSONArray("doneList");
+        JSONArray failListOrigin = parseObject.getJSONArray("failList");
         if (listOrigin == null) {
             return MISSING_TRANSACTION;
         }
@@ -124,8 +173,8 @@ public final class Airdrop extends CreateTransaction {
         }
         List<TransferInfo> list = JSONObject.parseArray(listOrigin.toJSONString(), TransferInfo.class);
         // record existing lists, append pattern
-        List<TransferInfo> doneList = doneListOrigin == null?new ArrayList<>():JSONObject.parseArray(doneListOrigin.toJSONString(), TransferInfo.class);
-        List<TransferInfo> failList = failListOrigin == null?new ArrayList<>():JSONObject.parseArray(failListOrigin.toJSONString(), TransferInfo.class);
+        List<TransferInfo> doneList = doneListOrigin == null ? new ArrayList<>() : JSONObject.parseArray(doneListOrigin.toJSONString(), TransferInfo.class);
+        List<TransferInfo> failList = failListOrigin == null ? new ArrayList<>() : JSONObject.parseArray(failListOrigin.toJSONString(), TransferInfo.class);
         // record the lists that unhandled the exception
         List<TransferInfo> pendingList = new ArrayList<>();
 
@@ -134,11 +183,11 @@ public final class Airdrop extends CreateTransaction {
         for (TransferInfo info : list) {
             org.json.simple.JSONObject jsonObject = new org.json.simple.JSONObject();
             try {
-                paramter.put("recipient", new String[]{info.recipient});
-                paramter.put("recipientPublicKey", new String[]{info.recipientPublicKey});
-                paramter.put("amountNQT", new String[]{info.amountNQT});
-                paramter.put("transactionID", new String[]{info.transactionID});
-                paramter.put("errorDescription", new String[]{info.errorDescription});
+                paramter.put("recipient", new String[]{info.getRecipient()});
+                paramter.put("recipientPublicKey", new String[]{info.getRecipientPublicKey()});
+                paramter.put("amountNQT", new String[]{info.getAmountNQT()});
+                paramter.put("transactionID", new String[]{info.getTransactionID()});
+                paramter.put("errorDescription", new String[]{info.getErrorDescription()});
 
                 BizParameterRequestWrapper reqWrapper = new BizParameterRequestWrapper(req, req.getParameterMap(), paramter);
                 Account account = ParameterParser.getSenderAccount(reqWrapper);
@@ -149,53 +198,63 @@ public final class Airdrop extends CreateTransaction {
                 JSONStreamAware transaction = createTransaction(reqWrapper, account, recipient, amountNQT);
                 org.json.simple.JSONObject transactionJsonObject = (org.json.simple.JSONObject) transaction;
                 if (transactionJsonObject.get("broadcasted") != null && transactionJsonObject.get("broadcasted").equals(true)) {
-                    // transaction was created successfully and broadcast
-                    transferSuccessList.add(transaction);
                     // write info to the doneList
-                    info.transactionID = (String) transactionJsonObject.get("transaction");
+                    info.setTransactionID((String) transactionJsonObject.get("transaction"));
                     doneList.add(info);
+                    jsonObject.put("transactionInfo", transaction);
+                    jsonObject.put("transferInfo", JSON.toJSON(info));
+                    // transaction was created successfully and broadcast
+                    transferSuccessList.add(jsonObject);
                 } else {
-                    jsonObject.put("transfer", JSON.toJSON(info));
-                    jsonObject.put("errorResponse", transaction);
-                    transferFailList.add(jsonObject);
                     // write info to failList
-                    info.errorDescription = (String) transactionJsonObject.get("errorDescription");
+                    info.setErrorDescription((String) transactionJsonObject.get("errorDescription"));
                     failList.add(info);
+                    transferFailList.add(JSON.toJSON(info));
                 }
 
-            }catch (ParameterException e) {
-                org.json.simple.JSONObject errorResponse = (org.json.simple.JSONObject) JSONValue.parse(org.conch.util.JSON.toString(e.getErrorResponse()));
-
-                jsonObject.put("transfer", JSON.toJSON(info));
-                jsonObject.put("errorResponse", errorResponse);
-                transferFailList.add(jsonObject);
-                info.errorDescription = (String) errorResponse.get("errorDescription");
-                failList.add(info);
-            }catch (ConchException e) {
+            } catch (ParameterException e) {
                 e.printStackTrace();
 
-                jsonObject.put("transfer", JSON.toJSON(info));
-                jsonObject.put("errorResponse", e.getMessage());
-                transferFailList.add(jsonObject);
+                org.json.simple.JSONObject errorResponse = (org.json.simple.JSONObject) JSONValue.parse(org.conch.util.JSON.toString(e.getErrorResponse()));
+                info.setErrorDescription((String) errorResponse.get("errorDescription"));
+                failList.add(info);
+                transferFailList.add(JSON.toJSON(info));
+            } catch (ConchException e) {
+                e.printStackTrace();
 
-                info.errorDescription = e.getMessage();
+                info.setErrorDescription(e.getMessage());
                 pendingList.add(info);
-            }catch (Exception e) {
+                transferFailList.add(JSON.toJSON(info));
+            } catch (Exception e) {
                 // catch all exception, ensure that processing does not break
                 e.printStackTrace();
 
-                jsonObject.put("transfer", JSON.toJSON(info));
-                jsonObject.put("errorResponse", e.getMessage());
-                transferFailList.add(jsonObject);
-
-                info.errorDescription = e.getMessage();
+                info.setErrorDescription(e.getMessage());
                 pendingList.add(info);
+                transferFailList.add(JSON.toJSON(info));
+
+
             }
         }
-        JSONStreamAware write = writeToJSON(doneList, failList, pendingList, jobj, pathName);
-        if (write != null) {
-            response.put("writeError", JSONValue.parse(org.conch.util.JSON.toString(write)));
+        org.json.simple.JSONObject jsonObject = new org.json.simple.JSONObject();
+
+        jsonObject.put("secretPhrase", parseObject.getString("secretPhrase"));
+        jsonObject.put("feeNQT", parseObject.getString("feeNQT"));
+        jsonObject.put("deadline", parseObject.getString("deadline"));
+
+        jsonObject.put("doneList", JSON.toJSON(doneList));
+        jsonObject.put("failList", JSON.toJSON(failList));
+        jsonObject.put("list", JSON.toJSON(pendingList));
+
+        if (jsonString != null) {
+            response.put("jsonResult", jsonObject);
+        } else {
+            JSONStreamAware write = writeToFile(jsonObject, pathName);
+            if (write != null) {
+                response.put("writeToFileError", write);
+            }
         }
+
         response.put("transferSuccessList", transferSuccessList);
         response.put("transferFailList", transferFailList);
         response.put("transferTotalCount", list.size());
@@ -206,46 +265,35 @@ public final class Airdrop extends CreateTransaction {
 
     /**
      * write the return result to the specified JSON file, containing：
-     *  1. doneList: (createTransaction success)
-     *      public String recipient;
-     *      public String amountNQT;
-     *      public String recipientPublicKey;
-     *      public String transactionID;
-     *  2. failList: (createTransaction fail)
-     *      public String recipient;
-     *      public String amountNQT;
-     *      public String recipientPublicKey;
-     *      public String errorDescription;
-     *  3. list: (exception not handled)
-     *      public String recipient;
-     *      public String amountNQT;
-     *      public String recipientPublicKey;
-     *  4. basic information：
-     *      "secretPhrase": "***",
-     *      "feeNQT": "0",
-     *      "deadline": "1440",
-     *
+     * 1. doneList: (createTransaction success)
+     * public String recipient;
+     * public String amountNQT;
+     * public String recipientPublicKey;
+     * public String transactionID;
+     * 2. failList: (createTransaction fail)
+     * public String recipient;
+     * public String amountNQT;
+     * public String recipientPublicKey;
+     * public String errorDescription;
+     * 3. list: (exception not handled)
+     * public String recipient;
+     * public String amountNQT;
+     * public String recipientPublicKey;
+     * 4. basic information：
+     * "secretPhrase": "***",
+     * "feeNQT": "0",
+     * "deadline": "1440",
      */
-    private JSONStreamAware writeToJSON(List<TransferInfo> doneList, List<TransferInfo> failList, List<TransferInfo> pendingList, JSONObject jobj, String pathName) {
-        org.json.simple.JSONObject jsonObject = new org.json.simple.JSONObject();
-
-        jsonObject.put("secretPhrase", jobj.getString("secretPhrase"));
-        jsonObject.put("feeNQT", jobj.getString("feeNQT"));
-        jsonObject.put("deadline", jobj.getString("deadline"));
-
-        jsonObject.put("doneList", JSON.toJSON(doneList));
-        jsonObject.put("failList", JSON.toJSON(failList));
-        jsonObject.put("list", JSON.toJSON(pendingList));
-
+    public static JSONStreamAware writeToFile(org.json.simple.JSONObject jsonObject, String pathName) {
         // write to json file
         String jsonWrite = JsonWrite(jsonObject, pathName);
         JSONObject jsonObjectWrite = JSON.parseObject(jsonWrite);
-
         // read file error
         if (jsonObjectWrite != null && jsonObjectWrite.get("error") != null) {
-            return JSONResponses.writeFileFail(pathName.split("/")[1] != null?pathName.split("/")[1]:pathName);
-        } else {
-            return null;
+            return JSONResponses.writeFileFail(pathName.split("/")[1] != null ? pathName.split("/")[1] : pathName);
         }
+        return null;
     }
+
+
 }
