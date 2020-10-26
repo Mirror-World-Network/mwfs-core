@@ -25,6 +25,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.StringUtils;
 import org.conch.Conch;
 import org.conch.common.ConchException;
 import org.conch.http.biz.BizParameterRequestWrapper;
@@ -38,12 +39,50 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.conch.http.Airdrop.writeToFile;
 import static org.conch.http.JSONResponses.*;
 import static org.conch.util.JSON.readJsonFile;
 
 public final class AirdropDetection extends CreateTransaction {
 
     static final AirdropDetection instance = new AirdropDetection();
+
+    static class DetectionTransferInfo extends Airdrop.TransferInfo {
+        private String blockId;
+        private Integer blockHeight;
+        private Integer confirmCount;
+
+        DetectionTransferInfo(Airdrop.TransferInfo transferInfo) {
+            this.setTransactionID(transferInfo.getTransactionID());
+            this.setRecipientPublicKey(transferInfo.getRecipientPublicKey());
+            this.setRecipient(transferInfo.getRecipient());
+            this.setAmountNQT(transferInfo.getAmountNQT());
+        }
+
+        public String getBlockId() {
+            return blockId;
+        }
+
+        public void setBlockId(String blockId) {
+            this.blockId = blockId;
+        }
+
+        public Integer getBlockHeight() {
+            return blockHeight;
+        }
+
+        public void setBlockHeight(Integer blockHeight) {
+            this.blockHeight = blockHeight;
+        }
+
+        public Integer getConfirmCount() {
+            return confirmCount;
+        }
+
+        public void setConfirmCount(Integer confirmCount) {
+            this.confirmCount = confirmCount;
+        }
+    }
 
     /**
      *  default airdrop JSON fileName
@@ -59,7 +98,7 @@ public final class AirdropDetection extends CreateTransaction {
     private static final boolean ENABLE_AIRDROP = Conch.getBooleanProperty("sharder.airdrop.enable");
 
     private AirdropDetection() {
-        super(new APITag[]{APITag.ACCOUNTS, APITag.CREATE_TRANSACTION}, "pathAndFileName", "key");
+        super(new APITag[]{APITag.ACCOUNTS, APITag.CREATE_TRANSACTION}, "pathAndFileName", "key", "jsonString");
     }
 
     private boolean verifyKey(String key) {
@@ -76,6 +115,7 @@ public final class AirdropDetection extends CreateTransaction {
         org.json.simple.JSONObject response = new org.json.simple.JSONObject();
         String pathName = req.getParameter("pathName");
         String key = req.getParameter("key");
+        String jsonString = req.getParameter("jsonString");
         if (!ENABLE_AIRDROP) {
             return ACCESS_CLOSED;
         }
@@ -83,27 +123,36 @@ public final class AirdropDetection extends CreateTransaction {
             throw new ParameterException(incorrect("key", String.format("key %s is incorrect", key)));
         }
 
-        // parse file
-        pathName = pathName == null ? DEFAULT_PATH_NAME : pathName;
-        String jsonStr = readJsonFile(pathName);
-        JSONObject jobj = JSON.parseObject(jsonStr);
+        JSONObject parseObject;
 
-        // read file error
-        if (jobj.get("error") != null) {
-            return JSONResponses.fileNotFound(pathName.split("/")[1] != null ? pathName.split("/")[1] : pathName);
+        if (jsonString != null) {
+            // parse jsonString
+            parseObject = JSON.parseObject(jsonString);
+        } else {
+            // parse file
+            pathName = pathName == null ? DEFAULT_PATH_NAME : pathName;
+            String jsonStr = readJsonFile(pathName);
+            parseObject = JSON.parseObject(jsonStr);
+            // read file error
+            if (parseObject.get("error") != null) {
+                return JSONResponses.fileNotFound(pathName.split("/")[1] != null ? pathName.split("/")[1] : pathName);
+            }
         }
-
-        JSONArray doneListOrigin = jobj.getJSONArray("doneList");
+        
+        JSONArray doneListOrigin = parseObject.getJSONArray("doneList");
         List<Airdrop.TransferInfo> doneList = doneListOrigin == null ? new ArrayList<>() : JSONObject.parseArray(doneListOrigin.toJSONString(), Airdrop.TransferInfo.class);
         if (doneList.isEmpty()) {
             return MISSING_TRANSACTION;
         }
         JSONArray detectionResponse = new JSONArray();
+        JSONArray confirmedList = new JSONArray();
+        ArrayList<Airdrop.TransferInfo> doneListAfter = new ArrayList<>();
         for (Airdrop.TransferInfo info : doneList) {
+            DetectionTransferInfo detectionTransferInfo = new DetectionTransferInfo(info);
             org.json.simple.JSONObject jsonObject = new org.json.simple.JSONObject();
             Map<String, String[]> paramter = Maps.newHashMap();
-            paramter.put("transactionID", new String[]{info.transactionID});
-            jsonObject.put("transactionID", info.transactionID);
+            paramter.put("transactionID", new String[]{info.getTransactionID()});
+            jsonObject.put("transactionID", info.getTransactionID());
             BizParameterRequestWrapper reqWrapper = new BizParameterRequestWrapper(req, req.getParameterMap(), paramter);
 
             String transactionIdString = Convert.emptyToNull(reqWrapper.getParameter("transactionID"));
@@ -128,14 +177,42 @@ public final class AirdropDetection extends CreateTransaction {
                 } else {
                     jsonObject.put("unconfirmedTransaction", JSONData.unconfirmedTransaction(transaction));
                 }
+                doneListAfter.add(info);
             } else {
-                jsonObject.put("confirmedTransaction", JSONData.transaction(transaction, includePhasingResult));
+                org.json.simple.JSONObject transactionJson = JSONData.transaction(transaction, includePhasingResult);
+                jsonObject.put("confirmedTransaction", transactionJson);
+                // Add relevant information to detectionTransferInfo class
+                detectionTransferInfo.setBlockId((String) transactionJson.get("block"));
+                detectionTransferInfo.setBlockHeight((Integer) transactionJson.get("height"));
+                detectionTransferInfo.setConfirmCount((Integer) transactionJson.get("confirmations"));
+                confirmedList.add(JSON.toJSON(detectionTransferInfo));
             }
             detectionResponse.add(jsonObject);
         }
 
+        org.json.simple.JSONObject jsonObject = new org.json.simple.JSONObject();
+
+        jsonObject.put("secretPhrase", parseObject.getString("secretPhrase"));
+        jsonObject.put("feeNQT", parseObject.getString("feeNQT"));
+        jsonObject.put("deadline", parseObject.getString("deadline"));
+
+        jsonObject.put("doneList", JSON.toJSON(doneListAfter));
+        jsonObject.put("failList", parseObject.getJSONArray("failList"));
+        jsonObject.put("list", parseObject.getJSONArray("list"));
+        jsonObject.put("confirmedList", JSON.toJSON(confirmedList));
+
+        if (StringUtils.isNotEmpty(jsonString)) {
+            response.put("jsonResult", jsonObject);
+        } else {
+            JSONStreamAware write = writeToFile(jsonObject, pathName);
+            if (write != null) {
+                response.put("writeToFileError", write);
+            }
+        }
+
         response.put("detectionCount", detectionResponse.size());
         response.put("detectionResponse", detectionResponse);
+
         return response;
     }
 }

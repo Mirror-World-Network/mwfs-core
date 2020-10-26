@@ -46,13 +46,53 @@ public final class Airdrop extends CreateTransaction {
     static final Airdrop instance = new Airdrop();
 
     static class TransferInfo {
-        public String recipient;
-        public String amountNQT;
-        public String recipientPublicKey;
-        public String errorDescription; // create transaction failed to write to this value
-        public String transactionID; // create transaction succeed to write to this value
+        private String recipient;
+        private String amountNQT;
+        private String recipientPublicKey;
+        private String errorDescription; // create transaction failed to write to this value
+        private String transactionID; // create transaction succeed to write to this value
 
         TransferInfo() {
+        }
+
+        public String getRecipient() {
+            return recipient;
+        }
+
+        public void setRecipient(String recipient) {
+            this.recipient = recipient;
+        }
+
+        public String getAmountNQT() {
+            return amountNQT;
+        }
+
+        public void setAmountNQT(String amountNQT) {
+            this.amountNQT = amountNQT;
+        }
+
+        public String getRecipientPublicKey() {
+            return recipientPublicKey;
+        }
+
+        public void setRecipientPublicKey(String recipientPublicKey) {
+            this.recipientPublicKey = recipientPublicKey;
+        }
+
+        public String getErrorDescription() {
+            return errorDescription;
+        }
+
+        public void setErrorDescription(String errorDescription) {
+            this.errorDescription = errorDescription;
+        }
+
+        public String getTransactionID() {
+            return transactionID;
+        }
+
+        public void setTransactionID(String transactionID) {
+            this.transactionID = transactionID;
         }
     }
 
@@ -143,11 +183,11 @@ public final class Airdrop extends CreateTransaction {
         for (TransferInfo info : list) {
             org.json.simple.JSONObject jsonObject = new org.json.simple.JSONObject();
             try {
-                paramter.put("recipient", new String[]{info.recipient});
-                paramter.put("recipientPublicKey", new String[]{info.recipientPublicKey});
-                paramter.put("amountNQT", new String[]{info.amountNQT});
-                paramter.put("transactionID", new String[]{info.transactionID});
-                paramter.put("errorDescription", new String[]{info.errorDescription});
+                paramter.put("recipient", new String[]{info.getRecipient()});
+                paramter.put("recipientPublicKey", new String[]{info.getRecipientPublicKey()});
+                paramter.put("amountNQT", new String[]{info.getAmountNQT()});
+                paramter.put("transactionID", new String[]{info.getTransactionID()});
+                paramter.put("errorDescription", new String[]{info.getErrorDescription()});
 
                 BizParameterRequestWrapper reqWrapper = new BizParameterRequestWrapper(req, req.getParameterMap(), paramter);
                 Account account = ParameterParser.getSenderAccount(reqWrapper);
@@ -159,7 +199,7 @@ public final class Airdrop extends CreateTransaction {
                 org.json.simple.JSONObject transactionJsonObject = (org.json.simple.JSONObject) transaction;
                 if (transactionJsonObject.get("broadcasted") != null && transactionJsonObject.get("broadcasted").equals(true)) {
                     // write info to the doneList
-                    info.transactionID = (String) transactionJsonObject.get("transaction");
+                    info.setTransactionID((String) transactionJsonObject.get("transaction"));
                     doneList.add(info);
                     jsonObject.put("transactionInfo", transaction);
                     jsonObject.put("transferInfo", JSON.toJSON(info));
@@ -167,7 +207,7 @@ public final class Airdrop extends CreateTransaction {
                     transferSuccessList.add(jsonObject);
                 } else {
                     // write info to failList
-                    info.errorDescription = (String) transactionJsonObject.get("errorDescription");
+                    info.setErrorDescription((String) transactionJsonObject.get("errorDescription"));
                     failList.add(info);
                     transferFailList.add(JSON.toJSON(info));
                 }
@@ -176,20 +216,20 @@ public final class Airdrop extends CreateTransaction {
                 e.printStackTrace();
 
                 org.json.simple.JSONObject errorResponse = (org.json.simple.JSONObject) JSONValue.parse(org.conch.util.JSON.toString(e.getErrorResponse()));
-                info.errorDescription = (String) errorResponse.get("errorDescription");
+                info.setErrorDescription((String) errorResponse.get("errorDescription"));
                 failList.add(info);
                 transferFailList.add(JSON.toJSON(info));
             } catch (ConchException e) {
                 e.printStackTrace();
 
-                info.errorDescription = e.getMessage();
+                info.setErrorDescription(e.getMessage());
                 pendingList.add(info);
                 transferFailList.add(JSON.toJSON(info));
             } catch (Exception e) {
                 // catch all exception, ensure that processing does not break
                 e.printStackTrace();
 
-                info.errorDescription = e.getMessage();
+                info.setErrorDescription(e.getMessage());
                 pendingList.add(info);
                 transferFailList.add(JSON.toJSON(info));
 
@@ -244,7 +284,7 @@ public final class Airdrop extends CreateTransaction {
      * "feeNQT": "0",
      * "deadline": "1440",
      */
-    private JSONStreamAware writeToFile(org.json.simple.JSONObject jsonObject, String pathName) {
+    public static JSONStreamAware writeToFile(org.json.simple.JSONObject jsonObject, String pathName) {
         // write to json file
         String jsonWrite = JsonWrite(jsonObject, pathName);
         JSONObject jsonObjectWrite = JSON.parseObject(jsonWrite);
