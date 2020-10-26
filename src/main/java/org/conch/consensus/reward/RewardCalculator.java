@@ -335,7 +335,12 @@ public class RewardCalculator {
             }
             String details = "";
             for (Long accountId : crowdMinerRewardMap.keySet()) {
-                details += updateBalance(Account.getAccount(accountId), tx, crowdMinerRewardMap.get(accountId));
+                Account account = Account.getAccount(accountId);
+                if (account == null) {
+                    Logger.logDebugMessage("crowdMiner account %d not exist", accountId);
+                    continue;
+                }
+                details += updateBalance(account, tx, crowdMinerRewardMap.get(accountId));
             }
             BlockDb.updateDistributionState(blockIds);
             String tail = "[DEBUG] ----------------------------\n[DEBUG] Total count: " + (crowdMinerRewardMap.size());
