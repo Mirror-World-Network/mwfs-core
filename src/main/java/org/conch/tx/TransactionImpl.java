@@ -859,17 +859,22 @@ final public class TransactionImpl implements Transaction {
 
     public String toPrintString(){
         JSONObject json =  getJSONObject();
+        // check and remove overlong 'crowdMiners & consignors'
         if(json.containsKey("attachment")){
             JSONObject attachmentJson = (JSONObject) json.get("attachment");
             if(attachmentJson.containsKey("crowdMiners")){
                 HashMap<Long, Long> map = JSON.parseObject((String) attachmentJson.get("crowdMiners"), new TypeReference<HashMap<Long, Long>>() {});
-                attachmentJson.put("crowdMinerSize", map.size());
-                attachmentJson.remove("crowdMiners");
+                if(map != null && map.size() > 50){
+                    attachmentJson.put("crowdMinerSize", map.size());
+                    attachmentJson.remove("crowdMiners");
+                }
             }
             if(attachmentJson.containsKey("consignors")){
                 HashMap<Long, Long> map = JSON.parseObject((String) attachmentJson.get("consignors"), new TypeReference<HashMap<Long, Long>>() {});
-                attachmentJson.put("consignorSize", map.size());
-                attachmentJson.remove("consignors");
+                if(map != null && map.size() > 50){
+                    attachmentJson.put("consignorSize", map.size());
+                    attachmentJson.remove("consignors");
+                }
             }
             json.put("attachment", attachmentJson);
         }

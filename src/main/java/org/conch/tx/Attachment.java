@@ -213,12 +213,16 @@ public interface Attachment extends Appendix {
             if(buffer.hasRemaining()){
                 String crowdMinerJson = Convert.readString(buffer, buffer.getInt(), (Integer.MAX_VALUE / 3 - 1));
                 crowdMiners = JSON.parseObject(crowdMinerJson, new TypeReference<HashMap<Long, Long>>() {});
+            }else {
+                crowdMiners = Maps.newHashMap();
             }
 
             // Consignors Map
             if(buffer.hasRemaining()){
                 String consignorJson = Convert.readString(buffer, buffer.getInt(), (Integer.MAX_VALUE / 3 - 1));
                 consignors = JSON.parseObject(consignorJson, new TypeReference<HashMap<Long, Long>>(){});
+            }else {
+                consignors = Maps.newHashMap();
             }
         }
 
@@ -228,7 +232,7 @@ public interface Attachment extends Appendix {
             this.creator = (Long) attachmentData.get("creator");
             this.generatorId = (Long) attachmentData.get("generatorId");
             this.consignors = JSON.parseObject((String) attachmentData.get("consignors"), new TypeReference<HashMap<Long, Long>>() {});
-            this.crowdMiners = JSON.parseObject((String) attachmentData.get("crowdMiners"),new TypeReference<HashMap<Long, Long>>() {});
+            this.crowdMiners = JSON.parseObject((String) attachmentData.get("crowdMiners"), new TypeReference<HashMap<Long, Long>>() {});
         }
 
         /**
