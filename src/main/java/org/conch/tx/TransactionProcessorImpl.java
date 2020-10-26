@@ -620,7 +620,7 @@ public final class TransactionProcessorImpl implements TransactionProcessor {
                 oldNonBroadcastedTransactions = getAllUnconfirmedTransactions();
                 for (UnconfirmedTransaction unconfirmedTransaction : oldNonBroadcastedTransactions) {
                     if (unconfirmedTransaction.getTransaction().isUnconfirmedDuplicate(unconfirmedDuplicates)) {
-                        Logger.logDebugMessage("Skipping duplicate unconfirmed transaction " + unconfirmedTransaction.getTransaction().getJSONObject().toString());
+                        Logger.logDebugMessage("Skipping duplicate unconfirmed transaction " + unconfirmedTransaction.getTransaction().toPrintString());
                     } else if (enableTransactionRebroadcasting) {
                         broadcastedTransactions.add(unconfirmedTransaction.getTransaction());
                     }

@@ -124,8 +124,6 @@ public class RewardCalculator {
         if(height >= Constants.COINBASE_CROWD_MINER_OPEN_HEIGHT
         || LocalDebugTool.isLocalDebugAndBootNodeMode){
             // crowd miner mode
-//            consignorMap.put(-6802345313304048560L, 1000L);
-//            consignorMap.put(5297006991279988531L, 2000L);
             HashMap<Long, Long> crowdMinerPocScoreMap = generateCrowdMinerPocScoreMap(Lists.newArrayList(creator.getId()), height);
             coinBase = new CoinBase(creator.getId(), generatorId, consignorMap, crowdMinerPocScoreMap);
         }else{

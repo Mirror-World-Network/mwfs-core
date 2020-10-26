@@ -21,6 +21,8 @@
 
 package org.conch.tx;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.conch.Conch;
 import org.conch.account.Account;
@@ -853,6 +855,25 @@ final public class TransactionImpl implements Transaction {
         }
         json.put("version", version);
         return json;
+    }
+
+    public String toPrintString(){
+        JSONObject json =  getJSONObject();
+        if(json.containsKey("attachment")){
+            JSONObject attachmentJson = (JSONObject) json.get("attachment");
+            if(attachmentJson.containsKey("crowdMiners")){
+                HashMap<Long, Long> map = JSON.parseObject((String) attachmentJson.get("crowdMiners"), new TypeReference<HashMap<Long, Long>>() {});
+                attachmentJson.put("crowdMinerSize", map.size());
+                attachmentJson.remove("crowdMiners");
+            }
+            if(attachmentJson.containsKey("consignors")){
+                HashMap<Long, Long> map = JSON.parseObject((String) attachmentJson.get("consignors"), new TypeReference<HashMap<Long, Long>>() {});
+                attachmentJson.put("consignorSize", map.size());
+                attachmentJson.remove("consignors");
+            }
+            json.put("attachment", attachmentJson);
+        }
+        return json.toJSONString();
     }
 
     @Override

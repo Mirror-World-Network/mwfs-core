@@ -1519,7 +1519,7 @@ public interface Appendix {
                 try {
                     release(transaction);
                 } catch (RuntimeException e) {
-                    Logger.logErrorMessage("Failed to release phased transaction " + transaction.getJSONObject().toJSONString(), e);
+                    Logger.logErrorMessage("Failed to release phased transaction " + transaction.toPrintString(), e);
                     reject(transaction);
                 }
             } else {
@@ -1537,7 +1537,7 @@ public interface Appendix {
                         poll.finish(result);
                         Logger.logDebugMessage("Early finish of transaction " + transaction.getStringId() + " at height " + Conch.getBlockchain().getHeight());
                     } catch (RuntimeException e) {
-                        Logger.logErrorMessage("Failed to release phased transaction " + transaction.getJSONObject().toJSONString(), e);
+                        Logger.logErrorMessage("Failed to release phased transaction " + transaction.toPrintString(), e);
                     }
                 } else {
                     Logger.logDebugMessage("At height " + Conch.getBlockchain().getHeight() + " phased transaction " + transaction.getStringId()

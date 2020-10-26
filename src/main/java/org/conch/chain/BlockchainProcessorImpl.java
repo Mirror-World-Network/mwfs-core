@@ -2075,7 +2075,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                         transaction.apply();
                     } catch (Account.DoubleSpendingException e) {
                         if (CheckSumValidator.isDoubleSpendingIgnoreTx(transaction)) {
-                            Logger.logWarningMessage("Ignore the double spending tx => " + transaction.getJSONObject().toJSONString());
+                            Logger.logWarningMessage("Ignore the double spending tx => " + transaction.toPrintString());
                             Logger.logErrorMessage("Ignore the double spending tx", e);
                         } else {
                             throw e;
@@ -2578,7 +2578,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             PocScore generatorScore = Conch.getPocProcessor().calPocScore(creator, previousBlock.getHeight());
             Logger.logInfoMessage("Miner[id=%d, RS=%s, PoC=%d] generated block %d at height %d timestamp %s block reward[crowd miner count=%d] fee %f",
                     creator.getId(), creator.getRsAddress(), generatorScore.total(),
-                    block.getId(), block.getHeight(), Convert.dateFromEpochTime(block.getTimestamp()),RewardCalculator.crowdMinerCount(coinBaseTx.getAttachment()),
+                    block.getId(), block.getHeight(), Convert.dateFromEpochTime(block.getTimestamp()), RewardCalculator.crowdMinerCount(coinBaseTx.getAttachment()),
                     (float) block.getTotalFeeNQT() / Constants.ONE_SS);
             Peers.checkAndUpdateBlockchainState(null);
         } catch (TransactionNotAcceptedException e) {
@@ -2760,11 +2760,11 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                                         byte[] transactionBytes = transaction.bytes();
                                         if (!Arrays.equals(transactionBytes, TransactionImpl.newTransactionBuilder(transactionBytes).build().bytes())) {
                                             throw new ConchException.NotValidException(
-                                                    "Transaction bytes cannot be parsed back to the same transaction: " + transaction.getJSONObject().toJSONString());
+                                                    "Transaction bytes cannot be parsed back to the same transaction: " + transaction.toPrintString());
                                         }
                                         JSONObject transactionJSON = (JSONObject) JSONValue.parse(transaction.getJSONObject().toJSONString());
                                         if (!Arrays.equals(transactionBytes, TransactionImpl.newTransactionBuilder(transactionJSON).build().bytes())) {
-                                            throw new ConchException.NotValidException("Transaction JSON cannot be parsed back to the same transaction: " + transaction.getJSONObject().toJSONString());
+                                            throw new ConchException.NotValidException("Transaction JSON cannot be parsed back to the same transaction: " + transaction.toPrintString());
                                         }
                                     }
                                 }
