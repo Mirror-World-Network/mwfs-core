@@ -197,10 +197,15 @@ const en = {
         'message_tip': "Please enter your message",
         'secret_key': "Mnemonic Phrase",
         'transfer_send': "Transfer",
+        'batch_transfer_send': "Airdrop Transfer",
+        'batch_transfer_detection': "Airdrop Detection",
         'batch_transfer_title': "Air-Drop",
         'airdrop_secret_key': "Airdrop secret key",
+        'airdrop_secret_key_not_found': "Airdrop secret key not found",
         'batch_transfer': "Air-Drop",
-        'batch_transfer_success': "Batch created transaction successfully"
+        'batch_transfer_success': "The airdrop request has been successfully sent",
+        'detection_transfer_success': "The detection request was successfully sent",
+        'airdrop_description': "On success, write the return result to airdrop.json and download it"
     },
     account_info: {
         'account_information': "Account Details",

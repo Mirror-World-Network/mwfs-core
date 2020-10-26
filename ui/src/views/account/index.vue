@@ -594,13 +594,26 @@
                             <el-form-item :label="$t('transfer.airdrop_secret_key')">
                                 <el-input v-model="batch_transfer.airdropSecretKey" type="password"></el-input>
                             </el-form-item>
+                            <el-form-item>
+                                <el-row>
+                                    <el-col :span="24"><span>{{ $t('transfer.airdrop_description') }}</span></el-col>
+                                </el-row>
+                            </el-form-item>
                         </el-form>
                     </div>
                     <div class="modal-footer">
                         <button type="button" v-loading="batch_transfer.executing" class="btn common_btn writeBtn"
                                 @click="sendBatchTransferInfo">
-                            {{ $t('transfer.transfer_send') }}
+                            {{ $t('transfer.batch_transfer_send') }}
                         </button>
+                        <el-row>
+                            <el-col :span="24"><div style="text-align: center; margin: 5px auto">or</div></el-col>
+                        </el-row>
+                        <button type="button" v-loading="batch_transfer.executingAnother" class="btn common_btn writeBtn"
+                                @click="detectionBatchTransferInfo">
+                            {{ $t('transfer.batch_transfer_detection') }}
+                        </button>
+
                     </div>
                 </div>
             </div>
@@ -1134,6 +1147,7 @@ export default {
             batch_transfer: {
                 airdropSecretKey: '',
                 executing: false,
+                executingAnother: false,
                 fileName: "",
                 isFile: false,
                 number: 0,
@@ -2444,24 +2458,85 @@ export default {
                 });
             });
         },
+        detectionBatchMoney(formData) {
+            let config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            };
+            const _this = this;
+
+            return new Promise((resolve, reject) => {
+                this.$http.post('/sharder?requestType=airdropDetection', formData, config).then(function (res) {
+                    resolve(res.data);
+                }).catch(function (err) {
+                    console.log(err);
+                });
+            });
+        },
         sendBatchTransferInfo: function () {
             const _this = this;
+
+            if (_this.batch_transfer.fileName === "") {
+                _this.$message.warning(_this.$t('sso.error_no_file_chosen'));
+                return;
+            }
+            if (_this.batch_transfer.airdropSecretKey === "") {
+                _this.$message.warning(_this.$t('sso.error_passphrase_required'));
+                return;
+            }
+            let secretPhrase = JSON.parse(_this.batch_transfer.jsonData).secretPhrase;
+            if (!secretPhrase) {
+                _this.$message.warning(_this.$t('transfer.airdrop_secret_key_not_found'));
+                return;
+            }
             _this.batch_transfer.executing = true;
             let formData = new FormData();
 
             formData.append("jsonString", _this.batch_transfer.jsonData);
             formData.append("key", _this.batch_transfer.airdropSecretKey);
 
+
             _this.sendBatchMoney(formData).then(res => {
                 if (typeof res.errorDescription === 'undefined') {
-                    console.log(res);
-                    // TODO res.jsonResult 写入文件
+                    console.log("res", res);
+                    // res.jsonResult write to JSON file
+                    _this.$global.funDownload(JSON.stringify(res.jsonResult), "airdrop.json");
                     _this.$message.success(_this.$t('transfer.batch_transfer_success'));
                     _this.closeDialog();
                 } else {
                     _this.$message.error(res.errorDescription);
                 }
-                _this.transfer.executing = false;
+                _this.batch_transfer.executing = false;
+            });
+        },
+        detectionBatchTransferInfo: function () {
+            const _this = this;
+            if (_this.batch_transfer.fileName === "") {
+                _this.$message.warning(_this.$t('sso.error_no_file_chosen'));
+                return;
+            }
+            if (_this.batch_transfer.airdropSecretKey === "") {
+                _this.$message.warning(_this.$t('sso.error_passphrase_required'));
+                return;
+            }
+            _this.batch_transfer.executingAnother = true;
+            let formData = new FormData();
+
+            formData.append("jsonString", _this.batch_transfer.jsonData);
+            formData.append("key", _this.batch_transfer.airdropSecretKey);
+
+            _this.detectionBatchMoney(formData).then(res => {
+                if (typeof res.errorDescription === 'undefined') {
+                    console.log("res", res);
+                    // res.jsonResult write to JSON file
+                    _this.$global.funDownload(JSON.stringify(res.jsonResult), "airdrop.json");
+                    _this.$message.success(_this.$t('transfer.detection_transfer_success'));
+                    _this.closeDialog();
+                } else {
+                    _this.$message.error(res.errorDescription);
+                }
+                _this.batch_transfer.executingAnother = false;
             });
         },
         sendTransferInfo: function () {
@@ -2735,6 +2810,7 @@ export default {
             this.$store.state.mask = true;
             this.batchTranferAccountsDialog = true;
             this.batch_transfer.executing = false;
+            this.batch_transfer.executingAnother = false;
         },
         openHubSettingDialog: function () {
             const _this = this;
@@ -3051,24 +3127,10 @@ export default {
             }
             _this.batch_transfer.isFile = true;
             _this.batch_transfer.message = "";
-            _this.readFile(_this.parsefile).then(res => _this.batch_transfer.jsonData = res);
+            _this.$global.readFile(_this.parsefile).then(res => _this.batch_transfer.jsonData = res);
             console.log("_this.batch_transfer", _this.batch_transfer);
         },
-        readFile: function (file) {
-            let _this = this;
-            return new Promise(function (resolve, reject) {
-                let reader = new FileReader();
-                if (typeof FileReader === 'undefined') {
-                    _this.$message.error(_this.$t('notification.unsupported_file_type'));
-                    return;
-                }
-                reader.readAsText(file, 'utf-8');
-                reader.onload = function () {
-                    resolve(reader.result)
-                }
-            })
 
-        },
         onChainFileChange: function (e) {
             const _this = this;
             _this.messageForm.fileName = e.target.files[0].name;

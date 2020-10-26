@@ -198,10 +198,15 @@ const cn = {
         'message_tip': "请输入信息内容",
         'secret_key': "秘钥",
         'transfer_send': "发送",
+        'batch_transfer_send': "发送空投",
+        'batch_transfer_detection': "检测空投",
         'batch_transfer_title': "批量转账",
         'airdrop_secret_key': "空投密钥",
+        'airdrop_secret_key_not_found': "空投密钥为空",
         'batch_transfer': "空投",
-        'batch_transfer_success': "批量创建交易成功"
+        'batch_transfer_success': "空投请求发送成功",
+        'detection_transfer_success': "检测请求发送成功",
+        'airdrop_description': "成功后将返回结果写入 airdrop.json 并下载"
     },
     account_info: {
         'account_information': "账户详情",
