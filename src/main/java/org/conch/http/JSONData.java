@@ -571,6 +571,7 @@ public final class JSONData {
         json.put("blockchainState", peer.getBlockchainState());
         json.put("peerLoad", peer.getPeerLoad().toJson());
         json.putAll(peer.getBlockSummary());
+        json.put("cosUpdateTime", peer.getCosUpdateTime());
         return json;
     }
 
