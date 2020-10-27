@@ -288,9 +288,15 @@ public class RewardCalculator {
 
             // Settlement
             Map<Long,Long> crowdMinerRewardMap = Maps.newHashMap();
-            List<Long> blockIds = new ArrayList<>();
-            List<? extends Block> rewardDistributionTransactionList = BlockDb.getSettlementBlocks(settlementHeight);
-            for (Block block : rewardDistributionTransactionList) {
+            List<Long> blockIds = Lists.newArrayList();
+            List<? extends Block> rewardDistributionTxs = BlockDb.getSettlementBlocks(settlementHeight);
+            if(rewardDistributionTxs == null || rewardDistributionTxs.size() == 0){
+                Logger.logDebugMessage("No crowd rewards txs need be settlement at current height %d, " +
+                        "maybe these txs be distributed at settlement height %d already.", Conch.getHeight(), settlementHeight);
+                return;
+            }
+
+            for (Block block : rewardDistributionTxs) {
                 List<TransactionImpl> blockTransactions = TransactionDb.findBlockTransactions(block.getId());
                 Transaction rewardTx = getCoinBase(blockTransactions);
                 if (null == rewardTx) {
@@ -597,7 +603,7 @@ public class RewardCalculator {
                     , Conch.getHeight(), minerAccount.getRsAddress(), Convert.dateFromEpochTime(tx.getBlockTimestamp())
                     , Conch.getBlockchainProcessor().getLastBlockchainFeederHeight(), feederAddress, feederHost);
         }else {
-            Logger.logInfoMessage("[Height%d-Rewards-Stage%s] Distribution used time[crowd miners≈%dS, mining joiners≈%dS, total used time≈%dS], detail[crowd miner size=%d, mining joiner size=%d] at height %d(%s mined at %s)\n",
+            Logger.logInfoMessage("[Height%d-Rewards-Stage%s] Distribution used time[crowd miners≈%dS, mining joiners≈%dS, total used time≈%dS], rewards[crowd miner size=%d, mining joiner size=%d] at height %d(%s mined at %s)\n",
                     tx.getHeight(), stage
                     , crowdRewardProcessingMS / 1000, miningRewardProcessingMS / 1000, totalUsedMs / 1000
                     , crowdMiners.size(), miningJoinerCount

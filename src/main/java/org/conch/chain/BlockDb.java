@@ -453,9 +453,10 @@ public final class BlockDb {
     }
 
     public static void updateDistributionState(List<Long> blockIds) {
-        if(blockIds != null && blockIds.size() > 0) {
-            Logger.logDebugMessage("Update the HAS_REWARD_DISTRIBUTION of blocks to true ", Arrays.toString(blockIds.toArray()));
+        if(blockIds == null || blockIds.size()== 0) {
+            return;
         }
+        Logger.logDebugMessage("Update the HAS_REWARD_DISTRIBUTION of blocks to true ", Arrays.toString(blockIds.toArray()));
 
         try (Connection con = Db.db.getConnection()) {
             Statement stmt = con.createStatement();
