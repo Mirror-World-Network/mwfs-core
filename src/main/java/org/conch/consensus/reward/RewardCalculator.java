@@ -583,24 +583,22 @@ public class RewardCalculator {
 
         long miningRewardProcessingMS = System.currentTimeMillis() - miningCalStartMS;
         long totalUsedMs = System.currentTimeMillis() - rewardCalStartMS;
-
         Peer feeder = Conch.getBlockchainProcessor().getLastBlockchainFeeder();
-        String feederAddress = feeder != null ? feeder.getAnnouncedAddress() : "AddressUndefined";
-        String feederHost = feeder != null ? feeder.getHost() : "HostUndefined";
-        if(Logger.isLevel(Logger.Level.INFO)) {
-            Logger.logInfoMessage("[Height%d-Rewards-Stage%s] Distribution detail[crowd miner size=%d, mining joiner size=%d, processing used time≈%dS(%d MS)] at current height %d(%s mined at %s) -> height %d of feeder %s[%s]\n",
-                    tx.getHeight(), stage, crowdMiners.size(), miningJoinerCount
-                    , totalUsedMs / 1000, totalUsedMs
-                    , Conch.getHeight(), minerAccount.getRsAddress(), Convert.dateFromEpochTime(tx.getBlockTimestamp())
-                    , Conch.getBlockchainProcessor().getLastBlockchainFeederHeight(), feederAddress, feederHost);
-        }else {
-            Logger.logDebugMessage("[Height%d-Rewards-Stage%s] Distribution used time[crowd miners≈%dS(%d MS), mining joiners≈%dS(%d MS)], reward distribution detail[crowd miner size=%d, mining joiner size=%d] at height %d(%s mined at %s) -> height %d of feeder %s[%s]\n",
+        if(feeder != null) {
+            String feederAddress = feeder != null ? feeder.getAnnouncedAddress() : "UndefinedAddress";
+            String feederHost = feeder != null ? feeder.getHost() : "UndefinedHost";
+            Logger.logInfoMessage("[Height%d-Rewards-Stage%s] Distribution used time[crowd miners≈%dS, mining joiners≈%dS, total used time≈%dS], detail[crowd miner size=%d, mining joiner size=%d] at height %d(%s mined at %s) -> height %d of feeder %s[%s]\n",
                     tx.getHeight(), stage
-                    , crowdRewardProcessingMS / 1000, crowdRewardProcessingMS
-                    , miningRewardProcessingMS / 1000, miningRewardProcessingMS
+                    , crowdRewardProcessingMS / 1000, miningRewardProcessingMS / 1000, totalUsedMs / 1000
                     , crowdMiners.size(), miningJoinerCount
                     , Conch.getHeight(), minerAccount.getRsAddress(), Convert.dateFromEpochTime(tx.getBlockTimestamp())
                     , Conch.getBlockchainProcessor().getLastBlockchainFeederHeight(), feederAddress, feederHost);
+        }else {
+            Logger.logInfoMessage("[Height%d-Rewards-Stage%s] Distribution used time[crowd miners≈%dS, mining joiners≈%dS, total used time≈%dS], detail[crowd miner size=%d, mining joiner size=%d] at height %d(%s mined at %s)\n",
+                    tx.getHeight(), stage
+                    , crowdRewardProcessingMS / 1000, miningRewardProcessingMS / 1000, totalUsedMs / 1000
+                    , crowdMiners.size(), miningJoinerCount
+                    , Conch.getHeight(), minerAccount.getRsAddress(), Convert.dateFromEpochTime(tx.getBlockTimestamp()));
         }
         return tx.getAmountNQT();
     }
