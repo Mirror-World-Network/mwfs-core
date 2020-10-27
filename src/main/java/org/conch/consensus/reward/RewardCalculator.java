@@ -332,10 +332,11 @@ public class RewardCalculator {
                 blockIds.add(block.getId());
             }
             String details = "";
+            String notExistAccounts = "";
             for (Long accountId : crowdMinerRewardMap.keySet()) {
-                Account account = Account.getAccount(accountId);
+                Account account = Account.addOrGetAccount(accountId);
                 if (account == null) {
-                    Logger.logDebugMessage("crowdMiner account %d not exist", accountId);
+                    notExistAccounts += accountId + ",";
                     continue;
                 }
                 details += updateBalance(account, tx, crowdMinerRewardMap.get(accountId));
@@ -343,7 +344,9 @@ public class RewardCalculator {
             BlockDb.updateDistributionState(blockIds);
             String tail = "[DEBUG] ----------------------------\n[DEBUG] Total count: " + (crowdMinerRewardMap.size());
             Logger.logDebugMessage("[%d-StageTwo%s] Unfreeze crowdMiners rewards and add it in mined amount. \n[DEBUG] CrowdMiner Reward Detail Format: txid | address: distribution amount\n%s%s\n", settlementHeight, "", details, tail);
-
+            if(notExistAccounts.length() > 0) {
+                Logger.logDebugMessage("Not exist crowd miners can't distribute the rewards [%s]", settlementHeight, "", details, tail);
+            }
 //            Db.db.commitTransaction();
         } catch (Exception e) {
 //            Db.db.rollbackTransaction();
