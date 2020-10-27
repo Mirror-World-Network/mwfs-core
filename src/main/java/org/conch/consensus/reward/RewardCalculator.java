@@ -274,7 +274,7 @@ public class RewardCalculator {
     private static void checkAndSettleCrowdMinerRewards(Transaction tx) {
         try {
 //            Db.db.beginTransaction();
-
+            Conch.getBlockchain().updateLock();
             int settlementHeight = tx.getHeight();
             if(settlementHeight <= 0) {
                 Logger.logWarningMessage("Can't finish the crowd miner rewards settlement when height %d <= 0. Break and wait next turn.", settlementHeight);
@@ -358,6 +358,7 @@ public class RewardCalculator {
 //            Db.db.rollbackTransaction();
             Logger.logErrorMessage("setCrowdMinerReward occur error", e);
         }finally {
+            Conch.getBlockchain().updateUnlock();
 //            Db.db.endTransaction();
         }
     }
@@ -498,21 +499,29 @@ public class RewardCalculator {
      * @param stageTwo
      */
     private static String updateBalanceAndFrozeIt(Account account, Transaction tx, long amount, boolean stageTwo){
-        if(!stageTwo) {
-            account.addBalanceAddUnconfirmed(AccountLedger.LedgerEvent.BLOCK_GENERATED, tx.getId(), amount);
-            account.addFrozen(AccountLedger.LedgerEvent.BLOCK_GENERATED, tx.getId(), amount);
-        }else{
-            if(Constants.isTestnet() && account.getFrozenBalanceNQT() <= 0) {
-                account.addFrozen(AccountLedger.LedgerEvent.BLOCK_GENERATED, tx.getId(), account.getFrozenBalanceNQT());
-            }else if(Constants.isTestnet() && account.getFrozenBalanceNQT() <= amount){
-                account.addFrozen(AccountLedger.LedgerEvent.BLOCK_GENERATED, tx.getId(), -account.getFrozenBalanceNQT());
-            }else{
-                account.addFrozen(AccountLedger.LedgerEvent.BLOCK_GENERATED, tx.getId(), -amount);
+        try {
+            Conch.getBlockchain().updateLock();
+            if (!stageTwo) {
+                account.addBalanceAddUnconfirmed(AccountLedger.LedgerEvent.BLOCK_GENERATED, tx.getId(), amount);
+                account.addFrozen(AccountLedger.LedgerEvent.BLOCK_GENERATED, tx.getId(), amount);
+            } else {
+                if (Constants.isTestnet() && account.getFrozenBalanceNQT() <= 0) {
+                    account.addFrozen(AccountLedger.LedgerEvent.BLOCK_GENERATED, tx.getId(), account.getFrozenBalanceNQT());
+                } else if (Constants.isTestnet() && account.getFrozenBalanceNQT() <= amount) {
+                    account.addFrozen(AccountLedger.LedgerEvent.BLOCK_GENERATED, tx.getId(), -account.getFrozenBalanceNQT());
+                } else {
+                    account.addFrozen(AccountLedger.LedgerEvent.BLOCK_GENERATED, tx.getId(), -amount);
+                }
+                account.addMintedBalance(amount);
+                account.pocChanged();
             }
-            account.addMintedBalance(amount);
-            account.pocChanged();
+            return String.format("[DEBUG] txid/%d | %s: %d\n", tx.getId(), account.getRsAddress(), amount);
+        } catch (Exception e) {
+            Logger.logErrorMessage("updateBalanceAndFrozeIt occur error", e);
+            return "";
+        }finally {
+            Conch.getBlockchain().updateUnlock();
         }
-        return  String.format("[DEBUG] txid/%d | %s: %d\n", tx.getId(), account.getRsAddress(), amount);
     }
 
     /**
