@@ -453,6 +453,10 @@ public final class BlockDb {
     }
 
     public static void updateDistributionState(List<Long> blockIds) {
+        if (blockIds.size() <= 0) {
+            Logger.logDebugMessage("no block need update distribution state");
+            return;
+        }
         try (Connection con = Db.db.getConnection()) {
             Statement stmt = con.createStatement();
             StringBuilder sqlStringBuilder = new StringBuilder();
