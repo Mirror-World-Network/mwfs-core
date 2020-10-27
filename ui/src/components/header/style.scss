@@ -574,7 +574,14 @@
     .icon-box {
         display: flex;
         height: 38px;
+        justify-content: center;
+    }
+
+    .title {
+        display: flex;
+        height: 38px;
         align-items: center;
+        justify-content: center;
     }
 
     .main-content .container #account_transaction .modal-header {
