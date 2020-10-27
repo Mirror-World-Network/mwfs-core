@@ -193,7 +193,7 @@ public class Generator implements Comparable<Generator> {
         boolean hitMatched = verifyHit(linkedGenerator.hit, linkedGenerator.pocScore, lastBlock, miningTime);
         long secondsSinceLastBlock = Conch.getEpochTime() - Conch.getBlockchain().getLastBlockTimestamp();
         long minutesSinceLastBlock = secondsSinceLastBlock/60;
-        boolean isObsoleteTime =  (secondsSinceLastBlock - Constants.getBlockGapSeconds()) > (60 * OBSOLETE_DELAY);
+        boolean isObsoleteTime =  (secondsSinceLastBlock - Constants.GAP_SECONDS) > (60 * OBSOLETE_DELAY);
         boolean stuckOnBootNode = Conch.getBlockchainProcessor().isObsolete() && isObsoleteTime && isBootNode;
         if(!Conch.getBlockchainProcessor().isUpToDate()) {
             String nodeType = isBootNode ? "Boot" : "Normal";
@@ -302,7 +302,7 @@ public class Generator implements Comparable<Generator> {
                             || sortedMiners.size() == 0) {
                             lastBlockId = lastBlock.getId();
                             // drop current last block, and use the previous block as the last block
-                            boolean lastBlockGeneratedInGap = lastBlock.getTimestamp() > (Conch.getEpochTime() - Constants.getBlockGapSeconds());
+                            boolean lastBlockGeneratedInGap = lastBlock.getTimestamp() > (Conch.getEpochTime() - Constants.GAP_SECONDS);
                             if (lastBlockGeneratedInGap
                                 && !isBootNode) {
                                 Block previousBlock = Conch.getBlockchain().getBlock(lastBlock.getPreviousBlockId());
@@ -678,21 +678,21 @@ public class Generator implements Comparable<Generator> {
                         "when the elapsed time[%d] <=0", elapsedTime);
                 return false;
             }
-        }else if(elapsedTime < Constants.getBlockGapSeconds()){
+        }else if(elapsedTime < Constants.GAP_SECONDS){
             Logger.logDebugMessage("Verify hit failed caused by this generator's elapsed time[%d] < block gap[%d]",
-                    elapsedTime, Constants.getBlockGapSeconds());
+                    elapsedTime, Constants.GAP_SECONDS);
             return false;
         }
         
         BigInteger effectiveBaseTarget = BigInteger.valueOf(previousBlock.getBaseTarget()).multiply(pocScore);
-        int ratio = elapsedTime - Constants.getBlockGapSeconds() - 1;
+        int ratio = elapsedTime - Constants.GAP_SECONDS - 1;
         if(ratio <= 0) {
             ratio = 1;
         }
         BigInteger prevTarget = effectiveBaseTarget.multiply(BigInteger.valueOf(ratio));
         BigInteger target = prevTarget.add(effectiveBaseTarget);
         // check the elapsed time(in second) after previous block generated
-        boolean elapsed = elapsedTime > Constants.getBlockGapSeconds();
+        boolean elapsed = elapsedTime > Constants.GAP_SECONDS;
 
         // 3 right situations: a) last hit < current hit < current target, b) this block is elapsed, c) in offline mode
         boolean validHit = hit.compareTo(target) < 0 && (hit.compareTo(prevTarget) >= 0 || elapsed || Constants.isOffline);
@@ -737,7 +737,7 @@ public class Generator implements Comparable<Generator> {
      * @return
      */
     public static long getHitTime(BigInteger pocScore, BigInteger hit, Block block) {
-        return block.getTimestamp() + hit.divide(BigInteger.valueOf(block.getBaseTarget()).multiply(pocScore)).longValue() + Constants.getBlockGapSeconds();
+        return block.getTimestamp() + hit.divide(BigInteger.valueOf(block.getBaseTarget()).multiply(pocScore)).longValue() + Constants.GAP_SECONDS;
     }
 
 
@@ -983,7 +983,7 @@ public class Generator implements Comparable<Generator> {
 
     private static Long calActiveGeneratorCount(){
         // 1 month
-        return 30L * (60L*60L*24L / (long)Constants.getBlockGapSeconds());
+        return 30L * (60L*60L*24L / (long)Constants.GAP_SECONDS);
     }
 
     /**

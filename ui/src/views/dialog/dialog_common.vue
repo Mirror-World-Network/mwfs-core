@@ -302,9 +302,8 @@
                         <p class="testnet-tips">{{$t('dialog.block_reward_distribution_mining')}}: {{$global.getAmountFormat(coinBaseTx.attachment.blockMiningRewardAmount)}}</p>
                     </div>
                     <div v-else-if="(rewardTabs === 'crowdMinerRewards') && containCrowdRewardTxs()">
-                        <p class="testnet-tips">{{$t('dialog.block_reward_distribution_crowd')}}: {{$global.getAmountFormat(coinBaseTx.attachment.crowdMinerRewardAmount)}}</p>
+                        <p class="testnet-tips">{{$t('dialog.block_reward_distribution_crowd')}}: {{$global.getAmountFormat(coinBaseTx.attachment.crowdMinerRewardAmount)}} / {{coinBaseTx.attachment.crowdMiners.length}} {{$t('dialog.block_reward_miners')}}</p>
                     </div>
-
 
                     <!-- mining rewards(include pool mode) distribution table -->
                     <table v-if="(rewardTabs === 'miningRewards')" class="table">
@@ -328,6 +327,8 @@
                             </template>
                         </tr>
                         <tr v-else>
+<!--                            <td class="linker pc-table" >{{coinBaseTx.sender}}</td>-->
+<!--                            <td class="linker mobile-td compact-style" >{{coinBaseTx.senderRS}}</td>-->
                             <td class="linker pc-table" >{{blockInfo.generator}}</td>
                             <td class="linker mobile-td compact-style" >{{blockInfo.generatorRS}}</td>
                             <td class="mobile-td compact-style">--</td>
@@ -706,6 +707,8 @@
 
                 if(_this.coinBaseTx !== ''
                 && _this.coinBaseTx.attachment.crowdMiners
+                && _this.coinBaseTx.attachment.crowdMiners !== '{}'
+                && _this.coinBaseTx.attachment.crowdMiners !== '[]'
                 && _this.coinBaseTx.attachment.crowdMiners.length > 0){
                 return true;
                 }
@@ -717,10 +720,11 @@
 
                 if(_this.coinBaseTx !== ''
                 && _this.coinBaseTx.attachment.consignors
+                && _this.coinBaseTx.attachment.consignors !== '{}'
+                && _this.coinBaseTx.attachment.consignors !== '[]'
                 && _this.coinBaseTx.attachment.consignors.length > 0){
                     return true;
                 }
-
                 return false;
             },
 

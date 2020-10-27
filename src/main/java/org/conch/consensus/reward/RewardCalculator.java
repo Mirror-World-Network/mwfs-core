@@ -288,9 +288,15 @@ public class RewardCalculator {
 
             // Settlement
             Map<Long,Long> crowdMinerRewardMap = Maps.newHashMap();
-            List<Long> blockIds = new ArrayList<>();
-            List<? extends Block> rewardDistributionTransactionList = BlockDb.getSettlementBlocks(settlementHeight);
-            for (Block block : rewardDistributionTransactionList) {
+            List<Long> blockIds = Lists.newArrayList();
+            List<? extends Block> rewardDistributionTxs = BlockDb.getSettlementBlocks(settlementHeight);
+            if(rewardDistributionTxs == null || rewardDistributionTxs.size() == 0){
+                Logger.logDebugMessage("No crowd rewards txs need be settlement at current height %d, " +
+                        "maybe these txs be distributed at settlement height %d already.", Conch.getHeight(), settlementHeight);
+                return;
+            }
+
+            for (Block block : rewardDistributionTxs) {
                 List<TransactionImpl> blockTransactions = TransactionDb.findBlockTransactions(block.getId());
                 Transaction rewardTx = getCoinBase(blockTransactions);
                 if (null == rewardTx) {
@@ -332,10 +338,11 @@ public class RewardCalculator {
                 blockIds.add(block.getId());
             }
             String details = "";
+            String notExistAccounts = "";
             for (Long accountId : crowdMinerRewardMap.keySet()) {
-                Account account = Account.getAccount(accountId);
+                Account account = Account.addOrGetAccount(accountId);
                 if (account == null) {
-                    Logger.logDebugMessage("crowdMiner account %d not exist", accountId);
+                    notExistAccounts += accountId + ",";
                     continue;
                 }
                 details += updateBalance(account, tx, crowdMinerRewardMap.get(accountId));
@@ -343,7 +350,9 @@ public class RewardCalculator {
             BlockDb.updateDistributionState(blockIds);
             String tail = "[DEBUG] ----------------------------\n[DEBUG] Total count: " + (crowdMinerRewardMap.size());
             Logger.logDebugMessage("[%d-StageTwo%s] Unfreeze crowdMiners rewards and add it in mined amount. \n[DEBUG] CrowdMiner Reward Detail Format: txid | address: distribution amount\n%s%s\n", settlementHeight, "", details, tail);
-
+            if(notExistAccounts.length() > 0) {
+                Logger.logDebugMessage("Not exist crowd miners can't distribute the rewards [%s]", settlementHeight, "", details, tail);
+            }
 //            Db.db.commitTransaction();
         } catch (Exception e) {
 //            Db.db.rollbackTransaction();
@@ -583,24 +592,22 @@ public class RewardCalculator {
 
         long miningRewardProcessingMS = System.currentTimeMillis() - miningCalStartMS;
         long totalUsedMs = System.currentTimeMillis() - rewardCalStartMS;
-
         Peer feeder = Conch.getBlockchainProcessor().getLastBlockchainFeeder();
-        String feederAddress = feeder != null ? feeder.getAnnouncedAddress() : "AddressUndefined";
-        String feederHost = feeder != null ? feeder.getHost() : "HostUndefined";
-        if(Logger.isLevel(Logger.Level.INFO)) {
-            Logger.logInfoMessage("[Height%d-Rewards-Stage%s] Distribution detail[crowd miner size=%d, mining joiner size=%d, processing used time≈%dS(%d MS)] at current height %d(%s mined at %s) -> height %d of feeder %s[%s]\n",
-                    tx.getHeight(), stage, crowdMiners.size(), miningJoinerCount
-                    , totalUsedMs / 1000, totalUsedMs
-                    , Conch.getHeight(), minerAccount.getRsAddress(), Convert.dateFromEpochTime(tx.getBlockTimestamp())
-                    , Conch.getBlockchainProcessor().getLastBlockchainFeederHeight(), feederAddress, feederHost);
-        }else {
-            Logger.logDebugMessage("[Height%d-Rewards-Stage%s] Distribution used time[crowd miners≈%dS(%d MS), mining joiners≈%dS(%d MS)], reward distribution detail[crowd miner size=%d, mining joiner size=%d] at height %d(%s mined at %s) -> height %d of feeder %s[%s]\n",
+        if(feeder != null) {
+            String feederAddress = feeder != null ? feeder.getAnnouncedAddress() : "UndefinedAddress";
+            String feederHost = feeder != null ? feeder.getHost() : "UndefinedHost";
+            Logger.logInfoMessage("[Height%d-Rewards-Stage%s] Distribution used time[crowd miners≈%dS, mining joiners≈%dS, total used time≈%dS], detail[crowd miner size=%d, mining joiner size=%d] at height %d(%s mined at %s) -> height %d of feeder %s[%s]\n",
                     tx.getHeight(), stage
-                    , crowdRewardProcessingMS / 1000, crowdRewardProcessingMS
-                    , miningRewardProcessingMS / 1000, miningRewardProcessingMS
+                    , crowdRewardProcessingMS / 1000, miningRewardProcessingMS / 1000, totalUsedMs / 1000
                     , crowdMiners.size(), miningJoinerCount
                     , Conch.getHeight(), minerAccount.getRsAddress(), Convert.dateFromEpochTime(tx.getBlockTimestamp())
                     , Conch.getBlockchainProcessor().getLastBlockchainFeederHeight(), feederAddress, feederHost);
+        }else {
+            Logger.logInfoMessage("[Height%d-Rewards-Stage%s] Distribution used time[crowd miners≈%dS, mining joiners≈%dS, total used time≈%dS], rewards[crowd miner size=%d, mining joiner size=%d] at height %d(%s mined at %s)\n",
+                    tx.getHeight(), stage
+                    , crowdRewardProcessingMS / 1000, miningRewardProcessingMS / 1000, totalUsedMs / 1000
+                    , crowdMiners.size(), miningJoinerCount
+                    , Conch.getHeight(), minerAccount.getRsAddress(), Convert.dateFromEpochTime(tx.getBlockTimestamp()));
         }
         return tx.getAmountNQT();
     }
