@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
@@ -228,7 +227,7 @@ public class PocProcessorImpl implements PocProcessor {
             balanceChangeMapProcessing(block.getHeight());
             instance.pocSeriesTxProcess(block);
             reCalculateWhenExceedPocAlgoChangeHeight(block.getHeight());
-            syncHistoryData();
+            syncHistoryData(block.getHeight());
         }, BlockchainProcessor.Event.AFTER_BLOCK_ACCEPT);
 
         // balance changed event
@@ -249,31 +248,31 @@ public class PocProcessorImpl implements PocProcessor {
 //        instance.loadFromDisk();
     }
 
-    private static boolean reachSyncHeight(String tableName) {
-        Connection con = null;
-        try {
-            con = Db.db.getConnection();
-            PreparedStatement pstmtSelectWork = con.prepareStatement("SELECT max(HEIGHT) height FROM " + tableName);
-            PreparedStatement pstmtSelectHistory = con.prepareStatement("SELECT max(HEIGHT) height FROM " + tableName + "_history");
+//    private static boolean reachSyncHeight(String tableName) {
+//        Connection con = null;
+//        try {
+//            con = Db.db.getConnection();
+//            PreparedStatement pstmtSelectWork = con.prepareStatement("SELECT max(HEIGHT) height FROM " + tableName);
+//            PreparedStatement pstmtSelectHistory = con.prepareStatement("SELECT max(HEIGHT) height FROM " + tableName + "_history");
+//
+//            ResultSet workRs = pstmtSelectWork.executeQuery();
+//            ResultSet historyRs = pstmtSelectHistory.executeQuery();
+//            if (workRs.next() && historyRs.next() ) {
+//                int workHeight = workRs.getInt("height");
+//                int historyHeight = historyRs.getInt("height");
+//                return (workHeight - historyHeight > Constants.SYNC_WORK_BLOCK_NUM) && Boolean.valueOf(Constants.SYNC_BUTTON);
+//            }
+//        } catch (Exception e) {
+//            Logger.logDebugMessage(e.getMessage());
+//            return false;
+//        }finally {
+//            DbUtils.close(con);
+//
+//        }
+//        return false;
+//    }
 
-            ResultSet workRs = pstmtSelectWork.executeQuery();
-            ResultSet historyRs = pstmtSelectHistory.executeQuery();
-            if (workRs.next() && historyRs.next() ) {
-                int workHeight = workRs.getInt("height");
-                int historyHeight = historyRs.getInt("height");
-                return (workHeight - historyHeight > Constants.SYNC_WORK_BLOCK_NUM) && Boolean.valueOf(Constants.SYNC_BUTTON);
-            }
-        } catch (Exception e) {
-            Logger.logDebugMessage(e.getMessage());
-            return false;
-        }finally {
-            DbUtils.close(con);
-
-        }
-        return false;
-    }
-
-    private static void syncHistoryData(){
+    private static void syncHistoryData(int height){
         if (!Boolean.valueOf(Constants.SYNC_BUTTON)) {
             return;
         }
@@ -282,7 +281,14 @@ public class PocProcessorImpl implements PocProcessor {
             Logger.logDebugMessage("Dont't sync cache and history tables till client is initialized...");
             return;
         }
-        if (reachSyncHeight("ACCOUNT")) {
+        boolean reachSyncHeight = height % Constants.SYNC_BLOCK_NUM == 0;
+        if(!reachSyncHeight){
+            Logger.logDebugMessage("Dont't sync cache and history tables till height exceed" +
+                    "[current height=%d, sync step=%d]", height, Constants.SYNC_BLOCK_NUM);
+            return;
+        }
+
+//        if (reachSyncHeight("ACCOUNT")) {
             try {
                 Conch.getBlockchain().updateLock();
                 long t1 = System.currentTimeMillis();
@@ -299,9 +305,10 @@ public class PocProcessorImpl implements PocProcessor {
                 Db.db.endTransaction();
                 Conch.getBlockchain().updateUnlock();
             }
-        }
+//        }
 
-        if (reachSyncHeight("ACCOUNT_GUARANTEED_BALANCE")) {
+
+//        if (reachSyncHeight("ACCOUNT_GUARANTEED_BALANCE")) {
             try {
                 Conch.getBlockchain().updateLock();
                 long t1 = System.currentTimeMillis();
@@ -318,9 +325,9 @@ public class PocProcessorImpl implements PocProcessor {
                 Db.db.endTransaction();
                 Conch.getBlockchain().updateUnlock();
             }
-        }
+//        }
 
-        if (reachSyncHeight("ACCOUNT_POC_SCORE")) {
+//        if (reachSyncHeight("ACCOUNT_POC_SCORE")) {
             try {
                 Conch.getBlockchain().updateLock();
                 long t1 = System.currentTimeMillis();
@@ -337,9 +344,9 @@ public class PocProcessorImpl implements PocProcessor {
                 Db.db.endTransaction();
                 Conch.getBlockchain().updateUnlock();
             }
-        }
+//        }
 
-        if (reachSyncHeight("ACCOUNT_LEDGER")) {
+//        if (reachSyncHeight("ACCOUNT_LEDGER")) {
             try {
                 Conch.getBlockchain().updateLock();
                 long t1 = System.currentTimeMillis();
@@ -356,7 +363,7 @@ public class PocProcessorImpl implements PocProcessor {
                 Db.db.endTransaction();
                 Conch.getBlockchain().updateUnlock();
             }
-        }
+//        }
     }
 
     /**
