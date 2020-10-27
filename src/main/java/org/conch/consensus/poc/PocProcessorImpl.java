@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
@@ -227,6 +228,7 @@ public class PocProcessorImpl implements PocProcessor {
             balanceChangeMapProcessing(block.getHeight());
             instance.pocSeriesTxProcess(block);
             reCalculateWhenExceedPocAlgoChangeHeight(block.getHeight());
+            syncHistoryData();
         }, BlockchainProcessor.Event.AFTER_BLOCK_ACCEPT);
 
         // balance changed event
@@ -247,6 +249,116 @@ public class PocProcessorImpl implements PocProcessor {
 //        instance.loadFromDisk();
     }
 
+    private static boolean reachSyncHeight(String tableName) {
+        Connection con = null;
+        try {
+            con = Db.db.getConnection();
+            PreparedStatement pstmtSelectWork = con.prepareStatement("SELECT max(HEIGHT) height FROM " + tableName);
+            PreparedStatement pstmtSelectHistory = con.prepareStatement("SELECT max(HEIGHT) height FROM " + tableName + "_history");
+
+            ResultSet workRs = pstmtSelectWork.executeQuery();
+            ResultSet historyRs = pstmtSelectHistory.executeQuery();
+            if (workRs.next() && historyRs.next() ) {
+                int workHeight = workRs.getInt("height");
+                int historyHeight = historyRs.getInt("height");
+                return (workHeight - historyHeight > Constants.SYNC_WORK_BLOCK_NUM) && Boolean.valueOf(Constants.SYNC_BUTTON);
+            }
+        } catch (Exception e) {
+            Logger.logDebugMessage(e.getMessage());
+            return false;
+        }finally {
+            DbUtils.close(con);
+
+        }
+        return false;
+    }
+
+    private static void syncHistoryData(){
+        if (!Boolean.valueOf(Constants.SYNC_BUTTON)) {
+            return;
+        }
+
+        if(!Conch.isInitialized()){
+            Logger.logDebugMessage("Dont't sync cache and history tables till client is initialized...");
+            return;
+        }
+        if (reachSyncHeight("ACCOUNT")) {
+            try {
+                Conch.getBlockchain().updateLock();
+                long t1 = System.currentTimeMillis();
+                Db.db.beginTransaction();
+                Account.syncAccountTable("ACCOUNT","ACCOUNT_CACHE",Constants.SYNC_WORK_BLOCK_NUM);
+                Account.syncAccountTable("ACCOUNT_CACHE","ACCOUNT_HISTORY",Constants.SYNC_CACHE_BLOCK_NUM);
+                Db.db.commitTransaction();
+                long t2 = System.currentTimeMillis();
+                Logger.logDebugMessage("Sync ACCOUNT and ACCOUNT_CACHE tables used %d S", (t2 - t1)/1000);
+            } catch (Exception e) {
+                Logger.logWarningMessage("Sync ACCOUNT and ACCOUNT_CACHE tables occur error %s, rollback and wait for next", e.getMessage());
+                Db.db.rollbackTransaction();
+            }finally {
+                Db.db.endTransaction();
+                Conch.getBlockchain().updateUnlock();
+            }
+        }
+
+        if (reachSyncHeight("ACCOUNT_GUARANTEED_BALANCE")) {
+            try {
+                Conch.getBlockchain().updateLock();
+                long t1 = System.currentTimeMillis();
+                Db.db.beginTransaction();
+                Account.syncAccountGuaranteedBalanceTable("ACCOUNT_GUARANTEED_BALANCE","ACCOUNT_GUARANTEED_BALANCE_CACHE",Constants.SYNC_WORK_BLOCK_NUM);
+                Account.syncAccountGuaranteedBalanceTable("ACCOUNT_GUARANTEED_BALANCE_CACHE","ACCOUNT_GUARANTEED_BALANCE_HISTORY",Constants.SYNC_CACHE_BLOCK_NUM);
+                Db.db.commitTransaction();
+                long t2 = System.currentTimeMillis();
+                Logger.logDebugMessage("sync ACCOUNT_GUARANTEED_BALANCE and ACCOUNT_GUARANTEED_BALANCE_CACHE tables used %d S", (t2 - t1)/1000);
+            } catch (Exception e) {
+                Logger.logWarningMessage("Sync ACCOUNT_GUARANTEED_BALANCE and ACCOUNT_GUARANTEED_BALANCE_CACHE tables occur error %s, rollback and wait for next", e.getMessage());
+                Db.db.rollbackTransaction();
+            }finally {
+                Db.db.endTransaction();
+                Conch.getBlockchain().updateUnlock();
+            }
+        }
+
+        if (reachSyncHeight("ACCOUNT_POC_SCORE")) {
+            try {
+                Conch.getBlockchain().updateLock();
+                long t1 = System.currentTimeMillis();
+                Db.db.beginTransaction();
+                Account.syncAccountPocScoreTable("ACCOUNT_POC_SCORE", "ACCOUNT_POC_SCORE_CACHE", Constants.SYNC_WORK_BLOCK_NUM);
+                Account.syncAccountPocScoreTable("ACCOUNT_POC_SCORE_CACHE", "ACCOUNT_POC_SCORE_HISTORY", Constants.SYNC_CACHE_BLOCK_NUM);
+                Db.db.commitTransaction();
+                long t2 = System.currentTimeMillis();
+                Logger.logDebugMessage("Sync ACCOUNT_POC_SCORE and ACCOUNT_POC_SCORE_CACHE tables used %d S", (t2 - t1)/1000);
+            } catch (Exception e) {
+                Logger.logWarningMessage("Sync ACCOUNT_POC_SCORE and ACCOUNT_POC_SCORE_CACHE tables occur error %s, rollback and wait for next", e.getMessage());
+                Db.db.rollbackTransaction();
+            }finally {
+                Db.db.endTransaction();
+                Conch.getBlockchain().updateUnlock();
+            }
+        }
+
+        if (reachSyncHeight("ACCOUNT_LEDGER")) {
+            try {
+                Conch.getBlockchain().updateLock();
+                long t1 = System.currentTimeMillis();
+                Db.db.beginTransaction();
+                Account.syncAccountLedgerTable("ACCOUNT_LEDGER","ACCOUNT_LEDGER_CACHE",Constants.SYNC_WORK_BLOCK_NUM);
+                Account.syncAccountLedgerTable("ACCOUNT_LEDGER_CACHE","ACCOUNT_LEDGER_HISTORY",Constants.SYNC_CACHE_BLOCK_NUM);
+                Db.db.commitTransaction();
+                long t2 = System.currentTimeMillis();
+                Logger.logDebugMessage("Sync ACCOUNT_LEDGER and ACCOUNT_LEDGER_CACHE tables used %d S", (t2 - t1)/1000);
+            } catch (Exception e) {
+                Logger.logWarningMessage("Sync ACCOUNT_LEDGER and ACCOUNT_LEDGER_CACHE tables occur error %s, rollback and wait for next", e.getMessage());
+                Db.db.rollbackTransaction();
+            }finally {
+                Db.db.endTransaction();
+                Conch.getBlockchain().updateUnlock();
+            }
+        }
+    }
+
     /**
      * put the account balance change event into map
      * @param height
@@ -254,7 +366,9 @@ public class PocProcessorImpl implements PocProcessor {
      * @param event
      */
     static void putInBalanceChangedAccount(int height, Account account, Account.Event event) {
-        if (account == null || account.getId() == -1 || event == null) return;
+        if (account == null || account.getId() == -1 || event == null) {
+            return;
+        }
         long accountId = account.getId();
 
         // check current height when event is BALANCE changed

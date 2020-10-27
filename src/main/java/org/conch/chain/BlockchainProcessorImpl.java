@@ -204,115 +204,6 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
 
     };
 
-    private final Runnable syncToCacheAndHistoryTables = new Runnable() {
-        @Override
-        public void run() {
-            if(!Conch.isInitialized()){
-                Logger.logDebugMessage("Dont't sync cache and history tables till client is initialized...");
-                return;
-            }
-            if (reachSyncHeight("ACCOUNT")) {
-                try {
-                    Conch.getBlockchain().updateLock();
-                    long t1 = System.currentTimeMillis();
-                    Db.db.beginTransaction();
-                    Account.syncAccountTable("ACCOUNT","ACCOUNT_CACHE",Constants.SYNC_WORK_BLOCK_NUM);
-                    Account.syncAccountTable("ACCOUNT_CACHE","ACCOUNT_HISTORY",Constants.SYNC_CACHE_BLOCK_NUM);
-                    Db.db.commitTransaction();
-                    long t2 = System.currentTimeMillis();
-                    Logger.logDebugMessage("Sync ACCOUNT and ACCOUNT_CACHE tables used %d S", (t2 - t1)/1000);
-                } catch (Exception e) {
-                    Logger.logWarningMessage("Sync ACCOUNT and ACCOUNT_CACHE tables occur error %s, rollback and wait for next", e.getMessage());
-                    Db.db.rollbackTransaction();
-                }finally {
-                    Db.db.endTransaction();
-                    Conch.getBlockchain().updateUnlock();
-                }
-            }
-
-            if (reachSyncHeight("ACCOUNT_GUARANTEED_BALANCE")) {
-                try {
-                    Conch.getBlockchain().updateLock();
-                    long t1 = System.currentTimeMillis();
-                    Db.db.beginTransaction();
-                    Account.syncAccountGuaranteedBalanceTable("ACCOUNT_GUARANTEED_BALANCE","ACCOUNT_GUARANTEED_BALANCE_CACHE",Constants.SYNC_WORK_BLOCK_NUM);
-                    Account.syncAccountGuaranteedBalanceTable("ACCOUNT_GUARANTEED_BALANCE_CACHE","ACCOUNT_GUARANTEED_BALANCE_HISTORY",Constants.SYNC_CACHE_BLOCK_NUM);
-                    Db.db.commitTransaction();
-                    long t2 = System.currentTimeMillis();
-                    Logger.logDebugMessage("sync ACCOUNT_GUARANTEED_BALANCE and ACCOUNT_GUARANTEED_BALANCE_CACHE tables used %d S", (t2 - t1)/1000);
-                } catch (Exception e) {
-                    Logger.logWarningMessage("Sync ACCOUNT_GUARANTEED_BALANCE and ACCOUNT_GUARANTEED_BALANCE_CACHE tables occur error %s, rollback and wait for next", e.getMessage());
-                    Db.db.rollbackTransaction();
-                }finally {
-                    Db.db.endTransaction();
-                    Conch.getBlockchain().updateUnlock();
-                }
-            }
-
-            if (reachSyncHeight("ACCOUNT_POC_SCORE")) {
-                try {
-                    Conch.getBlockchain().updateLock();
-                    long t1 = System.currentTimeMillis();
-                    Db.db.beginTransaction();
-                    Account.syncAccountPocScoreTable("ACCOUNT_POC_SCORE", "ACCOUNT_POC_SCORE_CACHE", Constants.SYNC_WORK_BLOCK_NUM);
-                    Account.syncAccountPocScoreTable("ACCOUNT_POC_SCORE_CACHE", "ACCOUNT_POC_SCORE_HISTORY", Constants.SYNC_CACHE_BLOCK_NUM);
-                    Db.db.commitTransaction();
-                    long t2 = System.currentTimeMillis();
-                    Logger.logDebugMessage("Sync ACCOUNT_POC_SCORE and ACCOUNT_POC_SCORE_CACHE tables used %d S", (t2 - t1)/1000);
-                } catch (Exception e) {
-                    Logger.logWarningMessage("Sync ACCOUNT_POC_SCORE and ACCOUNT_POC_SCORE_CACHE tables occur error %s, rollback and wait for next", e.getMessage());
-                    Db.db.rollbackTransaction();
-                }finally {
-                    Db.db.endTransaction();
-                    Conch.getBlockchain().updateUnlock();
-                }
-            }
-
-            if (reachSyncHeight("ACCOUNT_LEDGER")) {
-                try {
-                    Conch.getBlockchain().updateLock();
-                    long t1 = System.currentTimeMillis();
-                    Db.db.beginTransaction();
-                    Account.syncAccountLedgerTable("ACCOUNT_LEDGER","ACCOUNT_LEDGER_CACHE",Constants.SYNC_WORK_BLOCK_NUM);
-                    Account.syncAccountLedgerTable("ACCOUNT_LEDGER_CACHE","ACCOUNT_LEDGER_HISTORY",Constants.SYNC_CACHE_BLOCK_NUM);
-                    Db.db.commitTransaction();
-                    long t2 = System.currentTimeMillis();
-                    Logger.logDebugMessage("Sync ACCOUNT_LEDGER and ACCOUNT_LEDGER_CACHE tables used %d S", (t2 - t1)/1000);
-                } catch (Exception e) {
-                    Logger.logWarningMessage("Sync ACCOUNT_LEDGER and ACCOUNT_LEDGER_CACHE tables occur error %s, rollback and wait for next", e.getMessage());
-                    Db.db.rollbackTransaction();
-                }finally {
-                    Db.db.endTransaction();
-                    Conch.getBlockchain().updateUnlock();
-                }
-            }
-        }
-    };
-
-    private boolean reachSyncHeight(String tableName) {
-        Connection con = null;
-        try {
-            con = Db.db.getConnection();
-            PreparedStatement pstmtSelectWork = con.prepareStatement("SELECT max(HEIGHT) height FROM " + tableName);
-            PreparedStatement pstmtSelectHistory = con.prepareStatement("SELECT max(HEIGHT) height FROM " + tableName + "_history");
-
-            ResultSet workRs = pstmtSelectWork.executeQuery();
-            ResultSet historyRs = pstmtSelectHistory.executeQuery();
-            if (workRs.next() && historyRs.next() ) {
-                int workHeight = workRs.getInt("height");
-                int historyHeight = historyRs.getInt("height");
-                return (workHeight - historyHeight > Constants.SYNC_WORK_BLOCK_NUM) && Boolean.valueOf(Constants.SYNC_BUTTON);
-            }
-        } catch (Exception e) {
-            Logger.logDebugMessage(e.getMessage());
-            return false;
-        }finally {
-            DbUtils.close(con);
-
-        }
-        return false;
-    }
-
     /**
      * Synchronize blocks from the feeder peer
      *
@@ -1414,9 +1305,6 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             Logger.logInfoMessage("Current node mode[light client=%s, offline=%s]", Constants.isLightClient, Constants.isOffline);
             Logger.logInfoMessage("Create a thread 'GetMoreBlocks' to sync the blocks from other peers.....");
             ThreadPool.scheduleThread("GetMoreBlocks", getMoreBlocksThread, 1);
-        }
-        if (Boolean.valueOf(Constants.SYNC_BUTTON)) {
-            ThreadPool.scheduleThread("syncToCacheAndHistoryTables", syncToCacheAndHistoryTables, Constants.SYNC_TIME, TimeUnit.SECONDS);
         }
     }
 
@@ -2576,7 +2464,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             pushBlock(block);
             blockListeners.notify(block, Event.BLOCK_GENERATED);
             PocScore generatorScore = Conch.getPocProcessor().calPocScore(creator, previousBlock.getHeight());
-            Logger.logInfoMessage("Miner[id=%d, RS=%s, PoC=%d] generated block[id=%d, timestamp=%s, crowd miner size=%d] at height %d fee %f",
+            Logger.logInfoMessage("[Mint]Miner[id=%d, RS=%s, PoC=%d] generated block[id=%d, timestamp=%s, crowd miner size=%d] at height %d fee %f",
                     creator.getId(), creator.getRsAddress(), generatorScore.total(),
                     block.getId(), Convert.dateFromEpochTime(block.getTimestamp()), RewardCalculator.crowdMinerCount(coinBaseTx.getAttachment()),
                     block.getHeight(), (float) block.getTotalFeeNQT() / Constants.ONE_SS);
