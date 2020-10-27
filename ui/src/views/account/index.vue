@@ -1178,6 +1178,7 @@ export default {
                 settingSerialClickCount: 0,
                 natSerialClickCount: 0,
                 executing: false,
+                airdropAccount: ''
             },
             unconfirmedTransactionsList: [],
             blockchainState: this.$global.blockchainState,
@@ -1409,6 +1410,7 @@ export default {
                 sharderPwd: [{required: true, message: this.$t('rules.mustRequired')}],
                 sharderAccount: [{required: true, message: this.$t('rules.mustRequired')}],
             },
+            airdropFlag: false
         };
     },
     created() {
@@ -1425,22 +1427,23 @@ export default {
             _this.accountInfo.frozenBalanceNQT = res.frozenBalanceNQT;
             _this.accountInfo.guaranteedBalanceNQT = res.guaranteedBalanceNQT;
             _this.accountInfo.unconfirmedBalanceNQT = res.unconfirmedBalanceNQT;
-            _this.accountInfo.pocScore = res.pocScore.total;
+            if (res.pocScore != null) {
+                _this.accountInfo.pocScore = res.pocScore.total;
+                _this.pocScoreDetail[0].bcScore = res.pocScore.bcScore;
+                _this.pocScoreDetail[0].blockMissScore = res.pocScore.blockMissScore;
+                _this.pocScoreDetail[0].effectiveBalance = res.pocScore.effectiveBalance;
+                _this.pocScoreDetail[0].hardwareScore = res.pocScore.hardwareScore;
+                _this.pocScoreDetail[0].height = res.pocScore.height;
+                _this.pocScoreDetail[0].networkScore = res.pocScore.networkScore;
+                _this.pocScoreDetail[0].nodeTypeScore = res.pocScore.nodeTypeScore;
+                _this.pocScoreDetail[0].onlineRateScore = res.pocScore.onlineRateScore;
+                _this.pocScoreDetail[0].performanceScore = res.pocScore.performanceScore;
+                _this.pocScoreDetail[0].serverScore = res.pocScore.serverScore;
+                _this.pocScoreDetail[0].ssScore = res.pocScore.ssScore;
+                _this.pocScoreDetail[0].nodeType = res.nodeType;
+                _this.pocScoreDetail[0].pocScoreTotal = res.pocScore.total;
+            }
             _this.accountInfo.name = res.name;
-
-            _this.pocScoreDetail[0].bcScore = res.pocScore.bcScore;
-            _this.pocScoreDetail[0].blockMissScore = res.pocScore.blockMissScore;
-            _this.pocScoreDetail[0].effectiveBalance = res.pocScore.effectiveBalance;
-            _this.pocScoreDetail[0].hardwareScore = res.pocScore.hardwareScore;
-            _this.pocScoreDetail[0].height = res.pocScore.height;
-            _this.pocScoreDetail[0].networkScore = res.pocScore.networkScore;
-            _this.pocScoreDetail[0].nodeTypeScore = res.pocScore.nodeTypeScore;
-            _this.pocScoreDetail[0].onlineRateScore = res.pocScore.onlineRateScore;
-            _this.pocScoreDetail[0].performanceScore = res.pocScore.performanceScore;
-            _this.pocScoreDetail[0].serverScore = res.pocScore.serverScore;
-            _this.pocScoreDetail[0].ssScore = res.pocScore.ssScore;
-            _this.pocScoreDetail[0].nodeType = res.nodeType;
-            _this.pocScoreDetail[0].pocScoreTotal = res.pocScore.total;
             _this.pocScoreDetail[0].nodeTime = res.declaredTime;
         });
         _this.getAccountTransactionList();
@@ -1456,6 +1459,7 @@ export default {
             _this.hubsetting.port = res["sharder.NATServicePort"];
             _this.hubsetting.clientSecretkey = res["sharder.NATClientKey"];
             _this.hubsetting.publicAddress = res["sharder.myAddress"];
+            _this.hubsetting.airdropAccount = res["sharder.airdrop.account"];
             //_this.hubsetting.SS_Address = res["sharder.HubBindAddress"];
         });
         // _this.getLatestHubVersion();
@@ -3391,7 +3395,19 @@ export default {
         openAirdrop: function () {
             let isOpenAirdrop = this.$global.isOpenAirdrop;
             console.log("openAirdrop", isOpenAirdrop);
-            return (isOpenAirdrop == undefined || isOpenAirdrop == null) ? false : isOpenAirdrop;
+            if (!this.airdropFlag) {
+                let airdropAccount = [];
+                if (this.hubsetting.airdropAccount) {
+                    airdropAccount = this.hubsetting.airdropAccount.split(";");
+                }
+                airdropAccount.forEach(ele => {
+                    if (ele === this.accountInfo.accountRS) {
+                        this.airdropFlag = true;
+                    }
+                })
+                console.log("airdropAccount", airdropAccount);
+            }
+            return (isOpenAirdrop == undefined || isOpenAirdrop == null) ? false : isOpenAirdrop && this.airdropFlag;
         }
     },
     watch: {
