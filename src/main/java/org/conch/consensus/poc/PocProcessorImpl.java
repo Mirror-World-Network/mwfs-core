@@ -73,7 +73,7 @@ public class PocProcessorImpl implements PocProcessor {
      * the potential logic is: received Account.Event.BALANCE firstly, then received Event.AFTER_BLOCK_ACCEPT
      * @param height
      */
-    private static synchronized void balanceChangeMapProcessing(int height){
+    private synchronized void balanceChangeMapProcessing(int height){
         boolean someAccountBalanceChanged = balanceChangedMap.containsKey(height) && balanceChangedMap.get(height).size() > 0;
         if (someAccountBalanceChanged) {
             for (Account account : balanceChangedMap.get(height).values()) {
@@ -114,7 +114,7 @@ public class PocProcessorImpl implements PocProcessor {
     // Force to use the new algo. to calculate: correct the 0 score
     // and not limited hardware score at Constants.POC_MW_POC_SCORE_CHANGE_HEIGHT
     public static boolean FORCE_RE_CALCULATE = false;
-    private static synchronized void reCalculateWhenExceedPocAlgoChangeHeight(int height){
+    private synchronized void reCalculateWhenExceedPocAlgoChangeHeight(int height){
         if(Constants.POC_SCORE_CHANGE_HEIGHT == -1){
 //            Logger.logDebugMessage("Constants.POC_SCORE_CHANGE_HEIGHT is -1, don't force to re-calculate the poc score");
            return;
@@ -224,10 +224,10 @@ public class PocProcessorImpl implements PocProcessor {
         // new block accepted
         Conch.getBlockchainProcessor().addListener((Block block) -> {
             // balance hold score re-calculate
-            balanceChangeMapProcessing(block.getHeight());
+            instance.balanceChangeMapProcessing(block.getHeight());
             instance.pocSeriesTxProcess(block);
-            reCalculateWhenExceedPocAlgoChangeHeight(block.getHeight());
-            syncHistoryData(block.getHeight());
+            instance.reCalculateWhenExceedPocAlgoChangeHeight(block.getHeight());
+            instance.syncHistoryData(block.getHeight());
         }, BlockchainProcessor.Event.AFTER_BLOCK_ACCEPT);
 
         // balance changed event
@@ -272,16 +272,12 @@ public class PocProcessorImpl implements PocProcessor {
 //        return false;
 //    }
 
-    private static void syncHistoryData(int height){
+    private void syncHistoryData(int height){
         if (!Boolean.valueOf(Constants.SYNC_BUTTON)) {
             return;
         }
 
-        if(!Conch.isInitialized()){
-            Logger.logDebugMessage("Dont't sync cache and history tables till client is initialized...");
-            return;
-        }
-        boolean reachSyncHeight = height % Constants.SYNC_BLOCK_NUM == 0;
+        boolean reachSyncHeight = height > 0 && height % Constants.SYNC_BLOCK_NUM == 0;
         if(!reachSyncHeight){
             Logger.logDebugMessage("Dont't sync cache and history tables till height exceed" +
                     "[current height=%d, sync step=%d]", height, Constants.SYNC_BLOCK_NUM);
@@ -426,7 +422,7 @@ public class PocProcessorImpl implements PocProcessor {
         boolean success = false;
         if (PocTxWrapper.SUBTYPE_POC_WEIGHT_TABLE == tx.getType().getSubtype()) {
             PocTxBody.PocWeightTable weightTable = (PocTxBody.PocWeightTable) tx.getAttachment();
-            PocCalculator.inst.setCurWeightTable(weightTable, tx.getHeight());
+            PocCalculator.setCurWeightTable(weightTable, tx.getHeight());
             success = true;
         } else {
             if (PocTxWrapper.SUBTYPE_POC_NODE_TYPE == tx.getType().getSubtype()) {
