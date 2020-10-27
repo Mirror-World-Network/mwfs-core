@@ -930,6 +930,7 @@ const en = {
         'block_info_all_block_detail': "Block Details",
         'block_reward_distribution_detail': "Reward Distribution",
         'block_reward_distribution_crowd': "Crowd Rewards",
+        'block_reward_miners': "Miners",
         'block_reward_distribution_mining': "Mining Rewards",
         'block_info_previous_block_hash': "Previous Block Hash",
         'block_info_payload_length': "Payload Length",

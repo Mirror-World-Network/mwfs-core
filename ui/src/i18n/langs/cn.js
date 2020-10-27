@@ -931,6 +931,7 @@ const cn = {
         'block_info_all_block_detail': "区块详情",
         'block_reward_distribution_detail': "奖励分配",
         'block_reward_distribution_crowd': "合格矿工奖励",
+        'block_reward_miners': "矿工",
         'block_reward_distribution_mining': "出块奖励",
         'block_info_previous_block_hash': "上一个区块哈希",
         'block_info_payload_length': "载荷长度",
