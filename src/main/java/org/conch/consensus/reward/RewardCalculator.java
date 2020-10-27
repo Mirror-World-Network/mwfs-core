@@ -593,7 +593,7 @@ public class RewardCalculator {
         long miningRewardProcessingMS = System.currentTimeMillis() - miningCalStartMS;
         long totalUsedMs = System.currentTimeMillis() - rewardCalStartMS;
         Peer feeder = Conch.getBlockchainProcessor().getLastBlockchainFeeder();
-        if(feeder != null) {
+        if(feeder != null &&  Conch.getBlockchainProcessor().isDownloading()) {
             String feederAddress = feeder != null ? feeder.getAnnouncedAddress() : "UndefinedAddress";
             String feederHost = feeder != null ? feeder.getHost() : "UndefinedHost";
             Logger.logInfoMessage("[Height%d-Rewards-Stage%s] Distribution used time[crowd miners≈%dS, mining joiners≈%dS, total used time≈%dS], detail[crowd miner size=%d, mining joiner size=%d] at height %d(%s mined at %s) -> height %d of feeder %s[%s]\n",

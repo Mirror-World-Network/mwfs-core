@@ -1234,13 +1234,19 @@ public final class Conch {
     static final String UPDATE_DATE_FORMAT_SHORT = "yyyy-MM-dd HH:mm";
 
     private static Date _convertUpdateDate(String dateStr) throws ParseException {
-        if(StringUtils.isEmpty(dateStr)) return null;
+        if(StringUtils.isEmpty(dateStr)) {
+            return null;
+        }
 
         // short date format 'yyyyy-MM-dd HH:mm'
-        if(dateStr.length() == 16) return DateUtils.parseDate(dateStr,UPDATE_DATE_FORMAT_SHORT);
+        if(dateStr.length() == 16) {
+            return DateUtils.parseDate(dateStr,UPDATE_DATE_FORMAT_SHORT);
+        }
 
         // long date format 'yyyyy-MM-dd HH:mm:ss'
-        if(dateStr.length() == 19) return DateUtils.parseDate(dateStr,UPDATE_DATE_FORMAT);
+        if(dateStr.length() == 19) {
+            return DateUtils.parseDate(dateStr,UPDATE_DATE_FORMAT);
+        }
 
         return null;
     }

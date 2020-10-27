@@ -259,7 +259,6 @@ public final class Constants {
     public static final int SYNC_BLOCK_NUM = Conch.getIntProperty("sharder.syncblocknum");
     public static final int SYNC_CACHE_BLOCK_NUM = Conch.getIntProperty("sharder.sync.cacheblocknum");
     public static final int SYNC_WORK_BLOCK_NUM = Conch.getIntProperty("sharder.sync.workblocknum");
-    public static final int SYNC_TIME = Conch.getIntProperty("sharder.sync.time");
     public static final String SYNC_BUTTON = Conch.getStringProperty("sharder.sync.button");
     public static final String HISTORY_RECORD_MODE = Conch.getStringProperty("sharder.historyRecordMode", "update");
     public static final Boolean HISTORY_RECORD_CLEAR = Conch.getBooleanProperty("sharder.historyRecordClear", true);
