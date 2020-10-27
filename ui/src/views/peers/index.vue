@@ -77,7 +77,7 @@
                   <td>{{formatByte(peer.downloadedVolume)}}</td>
                   <td>{{formatByte(peer.uploadedVolume)}}</td>
                   <td>
-                    <span class="patch">{{peer.application}}&nbsp;{{peer.version}}</span>
+                    <span class="patch">{{peer.application}}&nbsp;{{peer.version}} {{peer.cosUpdateTimeSubstring}}</span>
                   </td>
                   <td>{{peer.platform}}</td>
                   <td class="linker service">
@@ -205,7 +205,7 @@
         <table class="table">
           <tbody>
             <tr>
-              <th>Blockchain State</th>
+              <th>{{$t('peers.blockchain_state')}}</th>
               <td>{{peerInfo.blockchainState}}</td>
               <th>{{$t('peers.communication_port')}}</th>
               <td>{{peerInfo.port}}</td>
@@ -220,7 +220,7 @@
             </tr>
             <tr>
               <th>{{$t('peers.version')}}</th>
-              <td>{{peerInfo.application}} {{peerInfo.version}}</td>
+              <td>{{peerInfo.application}} {{peerInfo.version}} {{peerInfo.cosUpdateTime}}</td>
               <th>Peer Load</th>
               <td v-if="peerInfo.peerLoad">{{peerInfo.peerLoad.load}}</td>
               <td v-else></td>
@@ -228,7 +228,7 @@
             <tr>
               <th>{{$t('peers.platform')}}</th>
               <td>{{peerInfo.platform}}</td>
-              <th>Last Connection Attempt</th>
+              <th>{{$t('peers.last_connection_attempt')}}</th>
               <td>{{$global.myFormatTime(peerInfo.lastConnectAttempt,'YMDHMS',true)}}</td>
             </tr>
             <tr>
@@ -252,7 +252,7 @@
               <td>{{formatByte(peerInfo.downloadedVolume)}}</td>
             </tr>
             <tr>
-              <th>Api Port</th>
+              <th>{{$t('peers.port')}}</th>
               <td>{{peerInfo.apiPort}}</td>
               <th>{{$t('peers.upload')}}</th>
               <td>{{formatByte(peerInfo.uploadedVolume)}}</td>
@@ -312,6 +312,11 @@
             init: function (peersList) {
                 const _this = this;
                 _this.peersList = peersList;
+                _this.peersList.forEach(ele => {
+                    if (ele.cosUpdateTime) {
+                        ele.cosUpdateTimeSubstring = ele.cosUpdateTime.substring(0,10);
+                    }
+                });
                 _this.totalSize = peersList.length;
                 _this.getPeersInfo(peersList);
                 _this.activeHubCount = 0;
@@ -350,6 +355,7 @@
                 _this.$http.post(window.api.simulatedPositioningUrl).then(res => {
                     if (res.data){
                         _this.peersList = _this.peersList.concat(res.data);
+
                         _this.totalSize = _this.peersList.length;
                     }
                 }).catch(err => {

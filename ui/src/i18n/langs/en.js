@@ -336,7 +336,9 @@ const en = {
         'status': "Status",
         'shared_address': "Share Address",
         'published_address': "Published Address",
-
+        'blockchain_state': "Blockchain State",
+        'port': "Api Port",
+        'last_connection_attempt': "Last Connection Attempt"
     },
     mining: {
         attribute: {
