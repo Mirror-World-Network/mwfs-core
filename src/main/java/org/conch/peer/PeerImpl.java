@@ -135,10 +135,12 @@ final class PeerImpl implements Peer {
         }
     }
 
+    @Override
     public Type getType(){
         return this.type == null ? Type.NORMAL : this.type;
     }
 
+    @Override
     public void setType(Type type){
         this.type = type;
     }
@@ -249,6 +251,7 @@ final class PeerImpl implements Peer {
         }
     }
 
+    @Override
     public int getApiSSLPort() {
         return apiSSLPort;
     }
@@ -975,10 +978,12 @@ final class PeerImpl implements Peer {
         return uri;
     }
 
+    @Override
     public PeerLoad getPeerLoad() {
         return peerLoad;
     }
     
+    @Override
     public JSONObject getBlockSummary() {
         return blockSummaryJson;
     }
