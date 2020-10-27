@@ -39,8 +39,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.conch.http.Airdrop.writeToFile;
 import static org.conch.http.JSONResponses.*;
+import static org.conch.util.JSON.JsonWrite;
 import static org.conch.util.JSON.readJsonFile;
 
 public final class AirdropDetection extends CreateTransaction {
@@ -133,10 +133,6 @@ public final class AirdropDetection extends CreateTransaction {
             pathName = pathName == null ? DEFAULT_PATH_NAME : pathName;
             String jsonStr = readJsonFile(pathName);
             parseObject = JSON.parseObject(jsonStr);
-            // read file error
-            if (parseObject.get("error") != null) {
-                return JSONResponses.fileNotFound(pathName.split("/")[1] != null ? pathName.split("/")[1] : pathName);
-            }
         }
         
         JSONArray doneListOrigin = parseObject.getJSONArray("doneList");
@@ -204,9 +200,10 @@ public final class AirdropDetection extends CreateTransaction {
         if (StringUtils.isNotEmpty(jsonString)) {
             response.put("jsonResult", jsonObject);
         } else {
-            JSONStreamAware write = writeToFile(jsonObject, pathName);
-            if (write != null) {
-                response.put("writeToFileError", write);
+            try {
+                JsonWrite(jsonObject, pathName);
+            } catch (Exception e) {
+                response.put("writeToFileError", e.getMessage());
             }
         }
 

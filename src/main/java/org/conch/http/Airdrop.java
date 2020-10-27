@@ -150,10 +150,6 @@ public final class Airdrop extends CreateTransaction {
             pathName = pathName == null ? DEFAULT_PATH_NAME : pathName;
             String jsonStr = readJsonFile(pathName);
             parseObject = JSON.parseObject(jsonStr);
-            // read file error
-            if (parseObject.get("error") != null) {
-                return JSONResponses.fileNotFound(pathName.split("/")[1] != null ? pathName.split("/")[1] : pathName);
-            }
         }
 
         Map<String, String[]> paramter = Maps.newHashMap();
@@ -249,9 +245,10 @@ public final class Airdrop extends CreateTransaction {
         if (jsonString != null) {
             response.put("jsonResult", jsonObject);
         } else {
-            JSONStreamAware write = writeToFile(jsonObject, pathName);
-            if (write != null) {
-                response.put("writeToFileError", write);
+            try {
+                JsonWrite(jsonObject, pathName);
+            } catch (Exception e) {
+                response.put("writeToFileError", e.getMessage());
             }
         }
 
@@ -262,38 +259,4 @@ public final class Airdrop extends CreateTransaction {
 
         return response;
     }
-
-    /**
-     * write the return result to the specified JSON file, containing：
-     * 1. doneList: (createTransaction success)
-     * public String recipient;
-     * public String amountNQT;
-     * public String recipientPublicKey;
-     * public String transactionID;
-     * 2. failList: (createTransaction fail)
-     * public String recipient;
-     * public String amountNQT;
-     * public String recipientPublicKey;
-     * public String errorDescription;
-     * 3. list: (exception not handled)
-     * public String recipient;
-     * public String amountNQT;
-     * public String recipientPublicKey;
-     * 4. basic information：
-     * "secretPhrase": "***",
-     * "feeNQT": "0",
-     * "deadline": "1440",
-     */
-    public static JSONStreamAware writeToFile(org.json.simple.JSONObject jsonObject, String pathName) {
-        // write to json file
-        String jsonWrite = JsonWrite(jsonObject, pathName);
-        JSONObject jsonObjectWrite = JSON.parseObject(jsonWrite);
-        // read file error
-        if (jsonObjectWrite != null && jsonObjectWrite.get("error") != null) {
-            return JSONResponses.writeFileFail(pathName.split("/")[1] != null ? pathName.split("/")[1] : pathName);
-        }
-        return null;
-    }
-
-
 }

@@ -294,11 +294,8 @@ public final class JSON {
         } catch (IOException e) {
             e.printStackTrace();
             Logger.logInfoMessage("Cannot read file " + fileName + " error " + e.getMessage());
-            JSONObject response = new JSONObject();
-            response.put("error", "file_not_found");
-            response.put("file", fileName);
-            response.put("folder", Conch.getUserHomeDir());
-            return JSON.toJSONString(response);
+
+            throw new IllegalArgumentException(String.format("Error loading file %s", fileName));
         }
     }
 
@@ -307,7 +304,7 @@ public final class JSON {
      * @param jsonObject
      * @param fileName
      */
-    public static String JsonWrite(JSONObject jsonObject, String fileName){
+    public static void JsonWrite(JSONObject jsonObject, String fileName){
 
         try {
             OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(fileName),"UTF-8");
@@ -320,15 +317,11 @@ public final class JSON {
             osw.flush();
             // close the output stream
             osw.close();
-            return null;
         } catch (IOException e) {
             e.printStackTrace();
             Logger.logInfoMessage("Cannot write to file " + fileName + " error " + e.getMessage());
-            JSONObject response = new JSONObject();
-            response.put("error", "write_error");
-            response.put("file", fileName);
-            response.put("folder", Conch.getUserHomeDir());
-            return JSON.toJSONString(response);
+
+            throw new IllegalArgumentException(String.format("Error write to file %s", fileName));
         }
     }
 }
