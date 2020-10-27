@@ -1810,7 +1810,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         }
 
         // broadcast block to other peers
-        if (block.getTimestamp() >= (curTime - Constants.getBlockGapSeconds())) {
+        if (block.getTimestamp() >= (curTime - Constants.GAP_SECONDS)) {
             Peers.sendToSomePeers(block);
         }
 

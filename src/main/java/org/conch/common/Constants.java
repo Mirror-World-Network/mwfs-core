@@ -26,7 +26,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.conch.Conch;
 import org.conch.env.RuntimeEnvironment;
 import org.conch.peer.Peer;
-import org.conch.util.LocalDebugTool;
 
 import java.util.*;
 
@@ -358,23 +357,22 @@ public final class Constants {
         return Network.valueOfIgnoreCase(Network.class,NetworkDef);
     }
     
-    //default gap of mainnet & testnet is 7 min
-    private static final int blockGapInProperties = isDevnet() ?  Conch.getIntProperty("sharder.devnetBlockGap") : 
-            ( isTestnet() ? Conch.getIntProperty("sharder.testnetBlockGap", 10) : Conch.getIntProperty("sharder.blockGap", 10));
-
+    private static final String gapMinutes = isDevnet() ?  Conch.getStringProperty("sharder.devnetBlockGap") :
+            ( isTestnet() ? Conch.getStringProperty("sharder.testnetBlockGap") : Conch.getStringProperty("sharder.blockGap"));
+    public static final int GAP_SECONDS = getBlockGapSeconds();
     /**
      * interval between two block generation, the min is 1min
      * @return generation gap in seconds
      */
-    public static int getBlockGapSeconds(){
-        int gap = blockGapInProperties > 1 ? blockGapInProperties : 1;
+    private static int getBlockGapSeconds(){
+        Double gapMin = Double.valueOf(gapMinutes);
+        Double gapSeconds = gapMin * 60;
 
-        // debug in the local offline mode
-        if(LocalDebugTool.isLocalDebugAndBootNodeMode) {
-            return Constants.isOffline ? 10 : (gap*60);
+        if(gapSeconds <= 0){
+            gapSeconds = 10d;
         }
 
-        return gap*60; 
+        return gapSeconds.intValue();
     }
 
     /**
