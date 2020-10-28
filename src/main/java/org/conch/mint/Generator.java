@@ -650,6 +650,16 @@ public class Generator implements Comparable<Generator> {
         Generator.delayTime = delay;
     }
 
+
+    private static void reCalculateScore(int currentTime, int miningTime, Block previousBlock){
+        if(currentTime >= miningTime
+                && currentTime >= (previousBlock.getTimestamp() + Constants.GAP_SECONDS)
+                && linkedGenerator != null) {
+            Logger.logDebugMessage("Set last block again to re-calculate the miner[%s]'s poc score to avoid stuck",
+                    linkedGenerator.rsAddress);
+            linkedGenerator.setLastBlock(previousBlock);
+        }
+    }
     /**
      * check the generate turn
      * @param hit
@@ -678,18 +688,13 @@ public class Generator implements Comparable<Generator> {
             }else {
                 Logger.logDebugMessage("Verify hit failed caused by this generator missing the mining turn " +
                         "when the elapsed time[%d] <=0", elapsedTime);
+                reCalculateScore(currentTime, miningTime, previousBlock);
                 return false;
             }
         }else if(elapsedTime < Constants.GAP_SECONDS){
             Logger.logDebugMessage("Verify hit failed caused by this generator's elapsed time[%d] < block gap[%d]",
                     elapsedTime, Constants.GAP_SECONDS);
-            if(currentTime >= miningTime
-            && currentTime >= (previousBlock.getTimestamp() + Constants.GAP_SECONDS)
-            && linkedGenerator != null) {
-                Logger.logDebugMessage("Set last block again to re-calculate the miner[%s]'s poc score to avoid stuck",
-                        linkedGenerator.rsAddress, elapsedTime);
-                linkedGenerator.setLastBlock(previousBlock);
-            }
+            reCalculateScore(currentTime, miningTime, previousBlock);
             return false;
         }
         
