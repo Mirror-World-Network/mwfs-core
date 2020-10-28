@@ -213,7 +213,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         try {
             long startTime = System.currentTimeMillis();
             int limitConnectedSize = Math.min(1, defaultNumberOfForkConfirmations);
-            Peers.checkOrConnectAllBootNodes();
+            List<Peer> bootNodes = Peers.checkOrConnectAllBootNodes();
             connectedPublicPeers = Peers.getPublicPeers(Peer.State.CONNECTED, true);
             int connectedSize = connectedPublicPeers.size();
             if (!Generator.isBootNode
@@ -233,10 +233,16 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             final Peer peer = Peers.getWeightedPeer(connectedPublicPeers);
             if (peer == null
                 && Logger.printNow(Logger.BlockchainProcessor_downloadPeer_getWeightedPeer)) {
+                String bootNodesDetail = "";
+                for(Peer bootPeer : bootNodes){
+                    bootNodesDetail += String.format("[DEBUG] %s[%s] state is %s, blockchain state is %s\n",
+                            bootPeer.getAnnouncedAddress(), bootPeer.getHost(), bootPeer.getState(), bootPeer.getBlockchainState());
+                }
+
                 Logger.logDebugMessage("Can't find a weighted peer to sync the blocks:  " +
                         "a) current peer's version '%s' is larger than other peers. " +
-                        "b) can't connect to boot nodes or other peers which have the public IP.  Wait for next turn.",
-                        Conch.getVersionWithBuild());
+                        "b) can't connect to boot nodes or other peers which have the public IP. And boot nodes detail is: \n%s",
+                        Conch.getVersionWithBuild(), bootNodesDetail);
                 return;
             }
 
@@ -2095,7 +2101,6 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 for (DerivedDbTable table : derivedTables) {
                     table.rollback(commonBlock.getHeight());
                 }
-//                SharderPoolProcessor.rollback(commonBlock.getHeight());
                 Conch.getPocProcessor().rollbackTo(commonBlock.getHeight());
 
                 Db.db.clearCache();

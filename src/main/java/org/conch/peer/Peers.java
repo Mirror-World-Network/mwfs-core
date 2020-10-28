@@ -1732,7 +1732,12 @@ public final class Peers {
     }
     
     public static Peer checkOrConnectBootNodeRandom(){
-        Peer bootNode = Peers.getPeer(Constants.getBootNodeRandom(), true);
+        String host = Constants.getBootNodeRandom();
+        Peer bootNode = Peers.getPeer(host, true);
+        if(bootNode == null) {
+            bootNode = Peers.findOrCreatePeer(host, false, true);
+        }
+
         if(bootNode != null && Peer.State.CONNECTED != bootNode.getState()) {
             connectPeer(bootNode);
         }
@@ -1743,11 +1748,14 @@ public final class Peers {
         List<Peer> connectedNodes = Lists.newArrayList();
         for(String nodeHost : Constants.bootNodesHost){
             Peer bootNode = Peers.getPeer(nodeHost, true);
-//            if(bootNode != null && Peer.State.CONNECTED != bootNode.getState()) {
+            if(bootNode == null) {
+                bootNode = Peers.findOrCreatePeer(nodeHost, false, true);
+            }
+
             if(bootNode != null) {
                 connectPeer(bootNode);
+                connectedNodes.add(bootNode);
             }
-            connectedNodes.add(bootNode);
         }
         return connectedNodes;
     }
