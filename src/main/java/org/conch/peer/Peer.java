@@ -218,6 +218,8 @@ public interface Peer extends Comparable<Peer> {
 
     boolean providesServices(long services);
 
+    String getCosUpdateTime();
+
     boolean isUseNATService();
 
     String getHost();

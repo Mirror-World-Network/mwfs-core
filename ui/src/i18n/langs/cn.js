@@ -336,7 +336,9 @@ const cn = {
         'status': "状态",
         'shared_address': "共享地址",
         'published_address': "公布的地址",
-
+        'blockchain_state': "区块链状态",
+        'port': "端口",
+        'last_connection_attempt': "上一次连接请求"
     },
     mining: {
         attribute: {

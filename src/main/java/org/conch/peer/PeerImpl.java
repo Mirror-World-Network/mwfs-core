@@ -79,6 +79,7 @@ final class PeerImpl implements Peer {
     private volatile Type type;
     private volatile PeerLoad peerLoad;
     private volatile JSONObject blockSummaryJson = new JSONObject();
+    private volatile String cosUpdateTime;
     
 
     PeerImpl(String host, String announcedAddress) {
@@ -96,6 +97,15 @@ final class PeerImpl implements Peer {
         this.apiServerIdleTimeout = API.apiServerIdleTimeout;
         this.blockchainState = BlockchainState.UP_TO_DATE;
         this.peerLoad = new PeerLoad(this.host, this.port, 0);
+    }
+
+    @Override
+    public String getCosUpdateTime() {
+        return cosUpdateTime;
+    }
+
+    public void setCosUpdateTime(String cosUpdateTime) {
+        this.cosUpdateTime = cosUpdateTime;
     }
 
     @Override
@@ -135,10 +145,12 @@ final class PeerImpl implements Peer {
         }
     }
 
+    @Override
     public Type getType(){
         return this.type == null ? Type.NORMAL : this.type;
     }
 
+    @Override
     public void setType(Type type){
         this.type = type;
     }
@@ -249,6 +261,7 @@ final class PeerImpl implements Peer {
         }
     }
 
+    @Override
     public int getApiSSLPort() {
         return apiSSLPort;
     }
@@ -698,6 +711,11 @@ final class PeerImpl implements Peer {
                 long origServices = services;
                 parseJSONObject(response);
 
+                String cosUpdateTime = Convert.emptyToNull((String) response.get("cosUpdateTime"));
+                if (StringUtils.isNotEmpty(cosUpdateTime)) {
+                    setCosUpdateTime(cosUpdateTime);
+                }
+
                 if (!Peers.ignorePeerAnnouncedAddress) {
                     String newAnnouncedAddress = Convert.emptyToNull((String) response.get("announcedAddress"));
                     if (newAnnouncedAddress != null) {
@@ -975,10 +993,12 @@ final class PeerImpl implements Peer {
         return uri;
     }
 
+    @Override
     public PeerLoad getPeerLoad() {
         return peerLoad;
     }
     
+    @Override
     public JSONObject getBlockSummary() {
         return blockSummaryJson;
     }
