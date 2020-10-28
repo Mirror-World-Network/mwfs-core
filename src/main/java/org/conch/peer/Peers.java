@@ -1738,14 +1738,17 @@ public final class Peers {
     public static Peer checkOrConnectBootNodeRandom(){
         String host = Constants.getBootNodeRandom();
         Peer bootNode = Peers.getPeer(host, true);
+        boolean countReached = randomConnectCount++ == BOOT_NODE_CHECK_COUNT;
         if(bootNode == null
-        && randomConnectCount++ == BOOT_NODE_CHECK_COUNT) {
+        && countReached) {
             bootNode = Peers.findOrCreatePeer(host, false, true);
             randomConnectCount = 0;
         }
 
-        if(bootNode != null && Peer.State.CONNECTED != bootNode.getState()) {
-            connectPeer(bootNode);
+        if(bootNode != null) {
+            if(countReached || Peer.State.CONNECTED != bootNode.getState()){
+                connectPeer(bootNode);
+            }
         }
         return bootNode;
     }
@@ -1755,15 +1758,18 @@ public final class Peers {
         List<Peer> connectedNodes = Lists.newArrayList();
         for(String nodeHost : Constants.bootNodesHost){
             Peer bootNode = Peers.getPeer(nodeHost, true);
+            boolean countReached = connectCount++ == BOOT_NODE_CHECK_COUNT;
             if(bootNode == null
-            && connectCount++ == BOOT_NODE_CHECK_COUNT) {
+            && countReached) {
                 bootNode = Peers.findOrCreatePeer(nodeHost, false, true);
                 connectCount = 0;
             }
 
             if(bootNode != null) {
-                connectPeer(bootNode);
-                connectedNodes.add(bootNode);
+                if(countReached || Peer.State.CONNECTED != bootNode.getState()){
+                    connectPeer(bootNode);
+                    connectedNodes.add(bootNode);
+                }
             }
         }
         return connectedNodes;
