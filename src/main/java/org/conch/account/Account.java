@@ -487,7 +487,10 @@ public final class Account {
 
         @Override
         public void trim(int height) {
-//            _trim("account",height);
+            if(Constants.SYNC_BUTTON) {
+               return;
+            }
+            _trim("account",height);
         }
 
         @Override
@@ -714,6 +717,9 @@ public final class Account {
 
         @Override
         public void trim(int height) {
+            if(Constants.SYNC_BUTTON) {
+                return;
+            }
             _trim("account_guaranteed_balance", height, false);
         }
 
@@ -1398,7 +1404,7 @@ public final class Account {
         try {
             Conch.getBlockchain().readLock();
             long effectiveBalanceNQT = getLessorsGuaranteedBalanceNQT(height);
-            if (activeLesseeId == 0 || Boolean.valueOf(Constants.SYNC_BUTTON)) {
+            if (activeLesseeId == 0 || Constants.SYNC_BUTTON) {
                 effectiveBalanceNQT += getGuaranteedBalanceNQT(Constants.GUARANTEED_BALANCE_CONFIRMATIONS, height);
             }
             return  effectiveBalanceNQT;

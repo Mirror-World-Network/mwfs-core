@@ -124,8 +124,13 @@ public class AccountLedger {
          */
         @Override
         public void trim(int height) {
-            if (trimKeep <= 0) return;
+            if(Constants.SYNC_BUTTON){
+                return;
+            }
 
+            if (trimKeep <= 0) {
+                return;
+            }
             int trimHeight = Math.max(height - trimKeep, 0);
             _trim("account_ledger", trimHeight, false);
         }

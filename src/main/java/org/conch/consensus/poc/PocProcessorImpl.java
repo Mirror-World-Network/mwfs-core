@@ -273,7 +273,7 @@ public class PocProcessorImpl implements PocProcessor {
 //    }
 
     private void syncHistoryData(int height){
-        if (!Boolean.valueOf(Constants.SYNC_BUTTON)) {
+        if (!Constants.SYNC_BUTTON) {
             return;
         }
 

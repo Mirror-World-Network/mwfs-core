@@ -323,6 +323,9 @@ public class PocDb  {
          */
         @Override
         public void trim(int height) {
+            if(Constants.SYNC_BUTTON) {
+                return;
+            }
             _trim("account_poc_score", height);
         }
     }
@@ -576,6 +579,9 @@ public class PocDb  {
          */
         @Override
         public void trim(int height) {
+            if(Constants.SYNC_BUTTON) {
+                return;
+            }
             _trim("certified_peer", height);
         }
     }
