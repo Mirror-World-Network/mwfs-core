@@ -193,22 +193,23 @@ public class Generator implements Comparable<Generator> {
         boolean hitMatched = verifyHit(linkedGenerator.hit, linkedGenerator.pocScore, lastBlock, miningTime);
         long secondsSinceLastBlock = Conch.getEpochTime() - Conch.getBlockchain().getLastBlockTimestamp();
         long minutesSinceLastBlock = secondsSinceLastBlock/60;
-        boolean isObsoleteTime =  (secondsSinceLastBlock - Constants.GAP_SECONDS) > (60 * OBSOLETE_DELAY);
-        boolean stuckOnBootNode = Conch.getBlockchainProcessor().isObsolete() && isObsoleteTime && isBootNode;
+//        boolean isObsoleteTime =  (secondsSinceLastBlock - Constants.GAP_SECONDS) > (60 * OBSOLETE_DELAY);
+//        boolean stuckOnBootNode = Conch.getBlockchainProcessor().isObsolete() && isObsoleteTime && isBootNode;
         if(!Conch.getBlockchainProcessor().isUpToDate()) {
             String nodeType = isBootNode ? "Boot" : "Normal";
             if (hitMatched) {
                 Logger.logInfoMessage("Current node is %s node and blockchain state[%s] isn't " +
                                 "UP_TO_DATE[sinceLastBlock=%d minutes, triggerDelay=%d minutes], " +
-                                " still mining when the miner[%s]' hit is matched at height %d",
+                                "still mining when the miner[%s]' hit is matched at height %d, its mining time is %s",
                         nodeType, Peers.getMyBlockchainStateName(), minutesSinceLastBlock, OBSOLETE_DELAY,
-                        linkedGenerator.rsAddress, lastBlock.getHeight());
+                        linkedGenerator.rsAddress, lastBlock.getHeight(),
+                        Convert.dateFromEpochTime(linkedGenerator.hitTime));
             } else {
                 if (Logger.printNow(Logger.Generator_isBlockStuckOnBootNode)) {
                     Logger.logInfoMessage("Current node is %s node and blockchain state[%s] isn't " +
-                                    "UP_TO_DATE[sinceLastBlock=%d minutes, triggerDelay=%d minutes], " +
-                                    "but boot node miner[%s]'s hit didn't matched at height %d, its mining time is %s",
-                            nodeType, Peers.getMyBlockchainStateName(), minutesSinceLastBlock, OBSOLETE_DELAY,
+                                    "UP_TO_DATE[sinceLastBlock=%d minutes], " +
+                                    "but miner[%s]'s hit didn't matched at height %d, its mining time is %s",
+                            nodeType, Peers.getMyBlockchainStateName(), minutesSinceLastBlock,
                             linkedGenerator.rsAddress, lastBlock.getHeight(),
                             Convert.dateFromEpochTime(linkedGenerator.hitTime));
                 }
@@ -661,12 +662,13 @@ public class Generator implements Comparable<Generator> {
 //        if(isBootDirectlyMiningPhase(previousBlock.getHeight()+1)){
 //            return true;
 //        }
-
+        int currentTime = Conch.getEpochTime();
         int elapsedTime = miningTime - previousBlock.getTimestamp();
         if (elapsedTime <= 0) {
             if(Generator.isBootNode) {
                 if(linkedGenerator != null) {
-                    Logger.logDebugMessage("Set last block to re-cal the miner[%s]'s poc score and continue to validate the hit when the Boot Node's elapsed time[%d] <=0 " +
+                    Logger.logDebugMessage("Set last block again to re-calculate the miner[%s]'s poc score " +
+                            "and continue to validate the hit when the Boot Node's elapsed time[%d] <=0 " +
                             "and stuck on the boot node", linkedGenerator.rsAddress, elapsedTime);
                     linkedGenerator.setLastBlock(previousBlock);
                     elapsedTime = linkedGenerator.getTimestamp(Conch.getEpochTime()-delayTime) - previousBlock.getTimestamp();
@@ -681,6 +683,13 @@ public class Generator implements Comparable<Generator> {
         }else if(elapsedTime < Constants.GAP_SECONDS){
             Logger.logDebugMessage("Verify hit failed caused by this generator's elapsed time[%d] < block gap[%d]",
                     elapsedTime, Constants.GAP_SECONDS);
+            if(currentTime >= miningTime
+            && currentTime >= (previousBlock.getTimestamp() + Constants.GAP_SECONDS)
+            && linkedGenerator != null) {
+                Logger.logDebugMessage("Set last block again to re-calculate the miner[%s]'s poc score to avoid stuck",
+                        linkedGenerator.rsAddress, elapsedTime);
+                linkedGenerator.setLastBlock(previousBlock);
+            }
             return false;
         }
         
