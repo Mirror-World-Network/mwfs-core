@@ -129,7 +129,9 @@
                                 <th class="pc-table">{{$t('network.block_has_distribution_reward')}}</th>
                                 <th class="w200 ">{{$t('network.block_list_generator')}}</th>
                                 <th class="pc-table">{{$t('network.block_list_operating')}}</th>
-                                <th class="mobile"></th>
+                                <th class="mobile title">
+                                    <span>{{$t('network.block_has_distribution_reward')}}</span>
+                                </th>
                             </tr>
                             </thead>
                             <tbody v-loading="loading">
@@ -149,7 +151,9 @@
                                 <td class="linker" @click="openAccountInfo(block.generatorRS)">{{block.generatorRS | generatorRSFilter}}</td>
                                 <td class="linker pc-table" @click="openBlockInfo(block.height)">{{$t('network.view_details')}}</td>
                                 <td class="mobile icon-box">
-                                    <i class="el-icon-arrow-right"></i>
+                                    <span v-if="block.hasRewardDistribution"><i class="el-icon-check" style="font-size: 15px;color: green"></i></span>
+                                    <span v-if="!block.hasRewardDistribution"><i class="el-icon-minus" style="color: red"></i></span>
+                                    <!--<i class="el-icon-arrow-right"></i>-->
                                 </td>
                             </tr>
                             </tbody>
