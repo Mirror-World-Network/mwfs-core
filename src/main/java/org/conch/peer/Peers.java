@@ -1730,12 +1730,18 @@ public final class Peers {
     public static boolean isOpenService(Peer.Service service) {
         return myServices.contains(service);
     }
-    
+
+    private final static int  BOOT_NODE_CHECK_COUNT = 10 * 60;
+    private static int connectCount = 0;
+    private static int randomConnectCount = 0;
+
     public static Peer checkOrConnectBootNodeRandom(){
         String host = Constants.getBootNodeRandom();
         Peer bootNode = Peers.getPeer(host, true);
-        if(bootNode == null) {
+        if(bootNode == null
+        && randomConnectCount++ == BOOT_NODE_CHECK_COUNT) {
             bootNode = Peers.findOrCreatePeer(host, false, true);
+            randomConnectCount = 0;
         }
 
         if(bootNode != null && Peer.State.CONNECTED != bootNode.getState()) {
@@ -1744,12 +1750,15 @@ public final class Peers {
         return bootNode;
     }
 
+
     public static List<Peer> checkOrConnectAllBootNodes(){
         List<Peer> connectedNodes = Lists.newArrayList();
         for(String nodeHost : Constants.bootNodesHost){
             Peer bootNode = Peers.getPeer(nodeHost, true);
-            if(bootNode == null) {
+            if(bootNode == null
+            && connectCount++ == BOOT_NODE_CHECK_COUNT) {
                 bootNode = Peers.findOrCreatePeer(nodeHost, false, true);
+                connectCount = 0;
             }
 
             if(bootNode != null) {
