@@ -652,9 +652,9 @@ public class Generator implements Comparable<Generator> {
 
 
     private static void reCalculateScore(int currentTime, int miningTime, Block previousBlock){
-        if(currentTime >= miningTime
-                && currentTime >= (previousBlock.getTimestamp() + Constants.GAP_SECONDS)
-                && linkedGenerator != null) {
+        if(currentTime > miningTime
+            && currentTime > (previousBlock.getTimestamp() + Constants.GAP_SECONDS * 2)
+            && linkedGenerator != null) {
             Logger.logDebugMessage("Set last block again to re-calculate the miner[%s]'s poc score to avoid stuck",
                     linkedGenerator.rsAddress);
             linkedGenerator.setLastBlock(previousBlock);
