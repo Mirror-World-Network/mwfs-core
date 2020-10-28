@@ -498,7 +498,6 @@ public class RewardCalculator {
      */
     private static String updateBalanceAndFrozeIt(Account account, Transaction tx, long amount, boolean stageTwo){
         try {
-            Conch.getBlockchain().updateLock();
             if (!stageTwo) {
                 account.addBalanceAddUnconfirmed(AccountLedger.LedgerEvent.BLOCK_GENERATED, tx.getId(), amount);
                 account.addFrozen(AccountLedger.LedgerEvent.BLOCK_GENERATED, tx.getId(), amount);
@@ -517,8 +516,6 @@ public class RewardCalculator {
         } catch (Exception e) {
             Logger.logErrorMessage("updateBalanceAndFrozeIt occur error", e);
             return "";
-        }finally {
-            Conch.getBlockchain().updateUnlock();
         }
     }
 
