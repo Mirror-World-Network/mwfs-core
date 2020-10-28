@@ -274,7 +274,6 @@ public class RewardCalculator {
     private static void checkAndSettleCrowdMinerRewards(Transaction tx) {
         try {
 //            Db.db.beginTransaction();
-            Conch.getBlockchain().updateLock();
             int settlementHeight = tx.getHeight();
             if(settlementHeight <= 0) {
                 Logger.logWarningMessage("Can't finish the crowd miner rewards settlement when height %d <= 0. Break and wait next turn.", settlementHeight);
@@ -358,7 +357,6 @@ public class RewardCalculator {
 //            Db.db.rollbackTransaction();
             Logger.logErrorMessage("setCrowdMinerReward occur error", e);
         }finally {
-            Conch.getBlockchain().updateUnlock();
 //            Db.db.endTransaction();
         }
     }
