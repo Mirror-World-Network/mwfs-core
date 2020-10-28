@@ -1905,7 +1905,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     "Total amount or fee don't match transaction totals", block);
         }
 
-        if(!RewardCalculator.temporaryCloseValidation) {
+        if(!RewardCalculator.closeValidationForCrowdCoinbaseTx) {
             if (!Arrays.equals(digest.digest(), block.getPayloadHash())) {
                 throw new BlockNotAcceptedException("Payload hash doesn't match", block);
             }

@@ -987,8 +987,7 @@ final public class TransactionImpl implements Transaction {
 
     private boolean checkSignature() {
         if(RewardCalculator.isBlockCrowdRewardTx(getAttachment())){
-            //FIXME ignore the signature validation (temporary code to handle block stuck) -2020.07.24
-            if(RewardCalculator.temporaryCloseValidation) {
+            if(RewardCalculator.closeValidationForCrowdCoinbaseTx) {
                 return true;
             }
         }

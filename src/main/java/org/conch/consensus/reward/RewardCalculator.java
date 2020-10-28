@@ -667,8 +667,7 @@ public class RewardCalculator {
         return false;
     }
 
-    //FIXME ignore the signature validation (temporary code to handle block stuck) -2020.07.24
-    //      Reopen validation in the 2020.10.14 when relaunch the Testnet
-    public static boolean temporaryCloseValidation = false;
+    // temporary switch
+    public static boolean closeValidationForCrowdCoinbaseTx = false;
 
 }
