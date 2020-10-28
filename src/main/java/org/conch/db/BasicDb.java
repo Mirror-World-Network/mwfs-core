@@ -216,18 +216,17 @@ public class BasicDb {
                     for (StackTraceElement ele : Thread.currentThread().getStackTrace()) {
                         stacksDetails += "[DEBUG] stack in getPooledConnection=> " + ele.getClassName() + "$" + ele.getMethodName() + "$" + ele.getFileName() + "#" + ele.getLineNumber() + "\n";
                     }
-                    Logger.logDebugMessage(stacks);
                     if(debugDetail) {
+                        Logger.logDebugMessage(stacks);
                         Logger.logDebugMessage(stacksDetails);
                     }
                 }
             }
 
-
             if (maxActiveConnections >= predefinedMaxDbConnections) {
                 checkAndRestart();
             }
-            
+
         } catch(Exception e){
             Logger.logErrorMessage("can't get connection from pool caused by " + e.getMessage());
             checkAndRestart();
