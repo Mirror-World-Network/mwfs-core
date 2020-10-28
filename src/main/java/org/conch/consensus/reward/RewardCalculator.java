@@ -600,18 +600,18 @@ public class RewardCalculator {
         if(feeder != null &&  Conch.getBlockchainProcessor().isDownloading()) {
             String feederAddress = feeder != null ? feeder.getAnnouncedAddress() : "UndefinedAddress";
             String feederHost = feeder != null ? feeder.getHost() : "UndefinedHost";
-            Logger.logInfoMessage("[Height%d-Rewards-Stage%s] Distribution used time[crowd miners≈%dS, mining joiners≈%dS, total used time≈%dS], detail[crowd miner size=%d, mining joiner size=%d] at height %d(%s mined at %s) -> height %d of feeder %s[%s]\n",
+            Logger.logInfoMessage("[Height %d-Rewards-Stage%s] Distribute rewards of block(%s mined at %s) used time[crowd miners≈%dS, mining joiners≈%dS, total used time≈%dS], rewards[crowd miner size=%d, mining joiner size=%d] at current height %d -> height %d of feeder %s[%s]\n",
                     tx.getHeight(), stage
+                    , minerAccount.getRsAddress(), Convert.dateFromEpochTime(tx.getBlockTimestamp())
                     , crowdRewardProcessingMS / 1000, miningRewardProcessingMS / 1000, totalUsedMs / 1000
-                    , crowdMiners.size(), miningJoinerCount
-                    , Conch.getHeight(), minerAccount.getRsAddress(), Convert.dateFromEpochTime(tx.getBlockTimestamp())
+                    , crowdMiners.size(), miningJoinerCount, Conch.getHeight()
                     , Conch.getBlockchainProcessor().getLastBlockchainFeederHeight(), feederAddress, feederHost);
         }else {
-            Logger.logInfoMessage("[Height%d-Rewards-Stage%s] Distribution used time[crowd miners≈%dS, mining joiners≈%dS, total used time≈%dS], rewards[crowd miner size=%d, mining joiner size=%d] at height %d(%s mined at %s)\n",
+            Logger.logInfoMessage("[Height %d-Rewards-Stage%s] Distribute rewards of block(%s mined at %s) used time[crowd miners≈%dS, mining joiners≈%dS, total used time≈%dS], rewards[crowd miner size=%d, mining joiner size=%d] at current height %d\n",
                     tx.getHeight(), stage
+                    , minerAccount.getRsAddress(), Convert.dateFromEpochTime(tx.getBlockTimestamp())
                     , crowdRewardProcessingMS / 1000, miningRewardProcessingMS / 1000, totalUsedMs / 1000
-                    , crowdMiners.size(), miningJoinerCount
-                    , Conch.getHeight(), minerAccount.getRsAddress(), Convert.dateFromEpochTime(tx.getBlockTimestamp()));
+                    , crowdMiners.size(), miningJoinerCount, Conch.getHeight());
         }
         return tx.getAmountNQT();
     }

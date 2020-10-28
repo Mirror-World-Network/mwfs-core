@@ -2464,8 +2464,8 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             pushBlock(block);
             blockListeners.notify(block, Event.BLOCK_GENERATED);
             PocScore generatorScore = Conch.getPocProcessor().calPocScore(creator, previousBlock.getHeight());
-            Logger.logInfoMessage("[Mint]Miner[id=%d, RS=%s, PoC=%d] generated block[id=%d, timestamp=%s, crowd miner size=%d] at height %d fee %f",
-                    creator.getId(), creator.getRsAddress(), generatorScore.total(),
+            Logger.logInfoMessage("[Mint-%d] Miner[id=%d, RS=%s, PoC=%d] generated block[id=%d, timestamp=%s, crowd miner size=%d] at height %d fee %f",
+                    block.getHeight(), creator.getId(), creator.getRsAddress(), generatorScore.total(),
                     block.getId(), Convert.dateFromEpochTime(block.getTimestamp()), RewardCalculator.crowdMinerCount(coinBaseTx.getAttachment()),
                     block.getHeight(), (float) block.getTotalFeeNQT() / Constants.ONE_SS);
             Peers.checkAndUpdateBlockchainState(null);
