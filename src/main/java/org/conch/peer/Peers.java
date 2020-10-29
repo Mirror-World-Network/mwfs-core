@@ -1238,9 +1238,7 @@ public final class Peers {
         if (oldPeer != null) {
             String oldAnnouncedAddress = oldPeer.getAnnouncedAddress();
             if (oldAnnouncedAddress != null && !oldAnnouncedAddress.equals(newAnnouncedAddress)) {
-                if(Logger.printNow(Peers.class.getName())) {
-                    Logger.logDebugMessage("Removing old announced address " + oldAnnouncedAddress + " for peer " + oldPeer.getHost());
-                }
+                Logger.logDebugMessage("Removing old announced address " + oldAnnouncedAddress + " for peer " + oldPeer.getHost());
                 selfAnnouncedAddresses.remove(oldAnnouncedAddress);
             }
         }
@@ -1248,10 +1246,8 @@ public final class Peers {
         if (newAnnouncedAddress != null) {
             String oldHost = selfAnnouncedAddresses.put(newAnnouncedAddress, peer.getHost());
             if (oldHost != null && !peer.getHost().equals(oldHost)) {
-                if(Logger.printNow(Peers.class.getName(), 200)){
-                    Logger.logDebugMessage("Announced address " + newAnnouncedAddress + " now maps to peer " + peer.getHost()
-                            + ", removing old peer " + oldHost);
-                }
+                Logger.logDebugMessage("Announced address " + newAnnouncedAddress + " now maps to peer " + peer.getHost()
+                        + ", removing old peer " + oldHost);
                 oldPeer = peers.remove(oldHost);
                 if (oldPeer != null) {
                     Peers.notifyListeners(oldPeer, Event.REMOVE);
@@ -1747,13 +1743,15 @@ public final class Peers {
         boolean needConnectNow = randomConnectCount++ % 100 == 0;
         if(bootNode == null) {
             bootNode = Peers.findOrCreatePeer(host, false, true);
-            randomConnectCount = 0;
+            needConnectNow = true;
+        }else if(StringUtils.isEmpty(bootNode.getAnnouncedAddress())){
+            needConnectNow = true;
         }
 
-        if(bootNode != null
-            && needConnectNow
-            && Peer.State.CONNECTED != bootNode.getState()){
-            connectPeer(bootNode);
+        if(bootNode != null){
+            if (needConnectNow || Peer.State.CONNECTED != bootNode.getState()){
+                connectPeer(bootNode);
+            }
         }
         return bootNode;
     }
@@ -1767,10 +1765,12 @@ public final class Peers {
             if(bootNode == null) {
                 bootNode = Peers.findOrCreatePeer(nodeHost, false, true);
                 needConnectNow = true;
+            }else if(StringUtils.isEmpty(bootNode.getAnnouncedAddress())){
+                needConnectNow = true;
             }
 
             if(bootNode != null) {
-                if(needConnectNow && Peer.State.CONNECTED != bootNode.getState()){
+                if(needConnectNow || Peer.State.CONNECTED != bootNode.getState()){
                     Logger.logDebugMessage("Re-connect boot node %s[%s] when its state is %s",
                             bootNode.getAnnouncedAddress(), bootNode.getHost(), bootNode.getState());
                     connectPeer(bootNode);
