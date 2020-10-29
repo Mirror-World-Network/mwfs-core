@@ -1738,17 +1738,14 @@ public final class Peers {
         return myServices.contains(service);
     }
 
-    private final static int  BOOT_NODE_CHECK_COUNT = 10 * 60;
     private static int connectCount = 0;
     private static int randomConnectCount = 0;
 
     public static Peer checkOrConnectBootNodeRandom(){
         String host = Constants.getBootNodeRandom();
         Peer bootNode = Peers.getPeer(host, true);
-        boolean needRecreate = randomConnectCount++ >= BOOT_NODE_CHECK_COUNT;
-        boolean needConnectNow = connectCount++ % 100 == 0;
-        if(bootNode == null
-        && needRecreate) {
+        boolean needConnectNow = randomConnectCount++ % 100 == 0;
+        if(bootNode == null) {
             bootNode = Peers.findOrCreatePeer(host, false, true);
             randomConnectCount = 0;
         }
@@ -1766,12 +1763,10 @@ public final class Peers {
         List<Peer> connectedNodes = Lists.newArrayList();
         for(String nodeHost : Constants.bootNodesHost){
             Peer bootNode = Peers.getPeer(nodeHost, true);
-            boolean needRecreate = connectCount++ >= BOOT_NODE_CHECK_COUNT;
             boolean needConnectNow = connectCount++ % 100 == 0;
-            if(bootNode == null
-            && needRecreate) {
+            if(bootNode == null) {
                 bootNode = Peers.findOrCreatePeer(nodeHost, false, true);
-                connectCount = 0;
+                needConnectNow = true;
             }
 
             if(bootNode != null) {
