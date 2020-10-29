@@ -1771,6 +1771,8 @@ public final class Peers {
                             bootNode.getAnnouncedAddress(), bootNode.getHost(), bootNode.getState());
                     connectPeer(bootNode);
                     connectedNodes.add(bootNode);
+                }else if(Peer.State.CONNECTED == bootNode.getState()){
+                    connectedNodes.add(bootNode);
                 }
             }
         }
