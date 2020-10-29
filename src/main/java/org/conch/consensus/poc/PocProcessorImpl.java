@@ -521,7 +521,7 @@ public class PocProcessorImpl implements PocProcessor {
         return file.exists();
     }
 
-    private static Map<Long,CertifiedPeer> readFromConfigFile() {
+    private synchronized static Map<Long,CertifiedPeer> readFromConfigFile() {
         Logger.logInfoMessage("List all certified peers from config file");
         Map<Long,CertifiedPeer> peerMap = Maps.newHashMap();
         File file = new File(PEER_CONFIG_PATH);
