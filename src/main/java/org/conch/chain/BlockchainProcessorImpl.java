@@ -2113,8 +2113,10 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 Logger.logErrorMessage("Error popping off to " + commonBlock.getHeight() + ", " + e.toString());
                 Db.db.rollbackTransaction();
                 BlockImpl lastBlock = BlockDb.findLastBlock();
-                blockchain.setLastBlock(lastBlock);
-                popOffTo(lastBlock);
+                if(commonBlock.getId() != lastBlock.getId()) {
+                    blockchain.setLastBlock(lastBlock);
+                    popOffTo(lastBlock);
+                }
                 throw e;
             }
             return poppedOffBlocks;

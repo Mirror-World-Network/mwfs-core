@@ -137,7 +137,7 @@ public class AccountLedger {
 
         @Override
         public void rollback(int height) {
-            rollbackAndPush("account_ledger", height, true);
+            super.rollback(height);
         }
     }
     private static final AccountLedgerTable accountLedgerTable = new AccountLedgerTable();

@@ -495,7 +495,7 @@ public final class Account {
 
         @Override
         public void rollback(int height) {
-            rollbackAndPush("account", height, true);
+            super.rollback(height);
         }
     };
 
@@ -516,17 +516,16 @@ public final class Account {
             if(Constants.SYNC_BUTTON) {
                 return;
             }
-            _trim("account_cache",height);
+            _trim("account_cache", height, false);
         }
 
         @Override
         public void rollback(int height) {
-            rollbackAndPush("account_cache", height, true);
+            super.rollback(height);
         }
 
         @Override
-        public void truncate() {
-        }
+        public void truncate() {}
 
     };
 
@@ -547,12 +546,12 @@ public final class Account {
             if(Constants.SYNC_BUTTON) {
                 return;
             }
-            _trim("account_history",height);
+            _trim("account_history", height, false);
         }
 
         @Override
         public void rollback(int height) {
-            rollbackAndPush("account_history", height, true);
+            super.rollback(height);
         }
 
         @Override
@@ -737,9 +736,9 @@ public final class Account {
 
         @Override
         public void rollback(int height) {
-            rollbackAndPush("account_guaranteed_balance", height, false);
-            rollbackAndPush("account_guaranteed_balance_cache", height, false);
-            rollbackAndPush("account_guaranteed_balance_history", height, false);
+            _rollback(height, "account_guaranteed_balance",
+                    "account_guaranteed_balance_cache",
+                    "account_guaranteed_balance_history");
         }
     };
 

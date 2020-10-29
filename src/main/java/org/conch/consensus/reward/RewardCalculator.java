@@ -12,6 +12,7 @@ import org.conch.chain.BlockDb;
 import org.conch.common.Constants;
 import org.conch.consensus.poc.PocHolder;
 import org.conch.consensus.poc.PocScore;
+import org.conch.db.Db;
 import org.conch.mint.pool.PoolRule;
 import org.conch.mint.pool.SharderPoolProcessor;
 import org.conch.peer.CertifiedPeer;
@@ -274,6 +275,9 @@ public class RewardCalculator {
      * @param tx coinbase tx of block at the settlement height
      */
     private static boolean checkAndSettleCrowdMinerRewards(Transaction tx) {
+        if (!Db.db.isInTransaction()) {
+            throw new IllegalStateException("RewardCalculator#checkAndSettleCrowdMinerRewards method should in a transaction, open the tx before call this method");
+        }
         try {
             int settlementHeight = tx.getHeight();
             if(settlementHeight <= 0) {
