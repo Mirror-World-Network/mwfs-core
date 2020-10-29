@@ -1739,43 +1739,44 @@ public final class Peers {
 
     public static Peer checkOrConnectBootNodeRandom(){
         String host = Constants.getBootNodeRandom();
-        Peer bootNode = Peers.getPeer(host, true);
+        Peer randomPeer = Peers.getPeer(host, true);
         boolean needConnectNow = randomConnectCount++ % 100 == 0;
-        if(bootNode == null) {
-            bootNode = Peers.findOrCreatePeer(host, false, true);
+        if(randomPeer == null) {
+            randomPeer = Peers.findOrCreatePeer(host, false, true);
             needConnectNow = true;
-        }else if(StringUtils.isEmpty(bootNode.getAnnouncedAddress())){
+        }else if(StringUtils.isEmpty(randomPeer.getAnnouncedAddress())){
             needConnectNow = true;
         }
 
-        if(bootNode != null){
-            if (needConnectNow || Peer.State.CONNECTED != bootNode.getState()){
-                connectPeer(bootNode);
+        if(randomPeer != null){
+            if (needConnectNow || Peer.State.CONNECTED != randomPeer.getState()){
+                connectPeer(randomPeer);
             }
         }
-        return bootNode;
+        return randomPeer;
     }
 
 
     public static List<Peer> checkOrConnectAllBootNodes(){
         List<Peer> connectedNodes = Lists.newArrayList();
         for(String nodeHost : Constants.bootNodesHost){
-            Peer bootNode = Peers.getPeer(nodeHost, true);
+            Peer peer = Peers.getPeer(nodeHost, true);
             boolean needConnectNow = connectCount++ % 100 == 0;
-            if(bootNode == null) {
-                bootNode = Peers.findOrCreatePeer(nodeHost, false, true);
+            if(peer == null) {
+                peer = Peers.findOrCreatePeer(nodeHost, false, true);
+                Peers.addPeer(peer);
                 needConnectNow = true;
-            }else if(StringUtils.isEmpty(bootNode.getAnnouncedAddress())){
+            }else if(StringUtils.isEmpty(peer.getAnnouncedAddress())){
                 needConnectNow = true;
             }
 
-            if(bootNode != null) {
-                if(needConnectNow || Peer.State.CONNECTED != bootNode.getState()){
+            if(peer != null) {
+                if(needConnectNow || Peer.State.CONNECTED != peer.getState()){
                     Logger.logDebugMessage("Re-connect boot node %s[%s] when its state is %s",
-                            bootNode.getAnnouncedAddress(), bootNode.getHost(), bootNode.getState());
-                    connectPeer(bootNode);
+                            peer.getAnnouncedAddress(), peer.getHost(), peer.getState());
+                    connectPeer(peer);
                 }
-                connectedNodes.add(bootNode);
+                connectedNodes.add(peer);
             }
         }
         return connectedNodes;
