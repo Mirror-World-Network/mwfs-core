@@ -1738,48 +1738,40 @@ public final class Peers {
     private static int randomConnectCount = 0;
 
     public static Peer checkOrConnectBootNodeRandom(){
-        String host = Constants.getBootNodeRandom();
-        Peer randomPeer = Peers.getPeer(host, true);
         boolean needConnectNow = randomConnectCount++ % 100 == 0;
-        if(randomPeer == null) {
-            randomPeer = Peers.findOrCreatePeer(host, false, true);
-            needConnectNow = true;
-        }else if(StringUtils.isEmpty(randomPeer.getAnnouncedAddress())){
-            needConnectNow = true;
-        }
-
-        if(randomPeer != null){
-            if (needConnectNow || Peer.State.CONNECTED != randomPeer.getState()){
-                connectPeer(randomPeer);
-            }
-        }
-        return randomPeer;
+        return _connectToPeer(Constants.getBootNodeRandom(), needConnectNow);
     }
-
 
     public static List<Peer> checkOrConnectAllBootNodes(){
         List<Peer> connectedNodes = Lists.newArrayList();
         for(String nodeHost : Constants.bootNodesHost){
-            Peer peer = Peers.getPeer(nodeHost, true);
             boolean needConnectNow = connectCount++ % 100 == 0;
-            if(peer == null) {
-                peer = Peers.findOrCreatePeer(nodeHost, false, true);
-                Peers.addPeer(peer);
-                needConnectNow = true;
-            }else if(StringUtils.isEmpty(peer.getAnnouncedAddress())){
-                needConnectNow = true;
-            }
-
+            Peer peer = _connectToPeer(nodeHost, needConnectNow);
             if(peer != null) {
-                if(needConnectNow || Peer.State.CONNECTED != peer.getState()){
-                    Logger.logDebugMessage("Re-connect boot node %s[%s] when its state is %s",
-                            peer.getAnnouncedAddress(), peer.getHost(), peer.getState());
-                    connectPeer(peer);
-                }
                 connectedNodes.add(peer);
             }
         }
         return connectedNodes;
+    }
+
+    private static Peer _connectToPeer(String nodeHost, boolean needConnectNow){
+        Peer peer = Peers.getPeer(nodeHost, true);
+        if(peer == null) {
+            peer = Peers.findOrCreatePeer(nodeHost, false, true);
+            Peers.addPeer(peer);
+            needConnectNow = true;
+        }else if(StringUtils.isEmpty(peer.getAnnouncedAddress())){
+            needConnectNow = true;
+        }
+
+        if(peer != null) {
+            if(needConnectNow || Peer.State.CONNECTED != peer.getState()){
+                Logger.logDebugMessage("Re-connect boot node %s[%s] when its state is %s",
+                        peer.getAnnouncedAddress(), peer.getHost(), peer.getState());
+                connectPeer(peer);
+            }
+        }
+        return peer;
     }
 
     public static void checkOrReConnectAllPeers(){
