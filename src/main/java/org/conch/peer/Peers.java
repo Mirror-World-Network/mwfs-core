@@ -1234,6 +1234,10 @@ public final class Peers {
     }
     
     static void setAnnouncedAddress(PeerImpl peer, String newAnnouncedAddress) {
+        if(StringUtils.isEmpty(newAnnouncedAddress)) {
+            return;
+        }
+
         Peer oldPeer = peers.get(peer.getHost());
         if (oldPeer != null) {
             String oldAnnouncedAddress = oldPeer.getAnnouncedAddress();
@@ -1243,7 +1247,7 @@ public final class Peers {
             }
         }
         
-        if (newAnnouncedAddress != null) {
+        if (StringUtils.isNotEmpty(newAnnouncedAddress)) {
             String oldHost = selfAnnouncedAddresses.put(newAnnouncedAddress, peer.getHost());
             if (oldHost != null && !peer.getHost().equals(oldHost)) {
                 Logger.logDebugMessage("Announced address " + newAnnouncedAddress + " now maps to peer " + peer.getHost()
@@ -1758,8 +1762,10 @@ public final class Peers {
         Peer peer = Peers.getPeer(nodeHost, true);
         if(peer == null) {
             peer = Peers.findOrCreatePeer(nodeHost, false, true);
-            Peers.addPeer(peer);
-            needConnectNow = true;
+            if(peer != null) {
+                Peers.addPeer(peer);
+                needConnectNow = true;
+            }
         }else if(StringUtils.isEmpty(peer.getAnnouncedAddress())){
             needConnectNow = true;
         }
