@@ -1745,17 +1745,18 @@ public final class Peers {
     public static Peer checkOrConnectBootNodeRandom(){
         String host = Constants.getBootNodeRandom();
         Peer bootNode = Peers.getPeer(host, true);
-        boolean countReached = randomConnectCount++ >= BOOT_NODE_CHECK_COUNT;
+        boolean needRecreate = randomConnectCount++ >= BOOT_NODE_CHECK_COUNT;
+        boolean needConnectNow = connectCount++ % 100 == 0;
         if(bootNode == null
-        && countReached) {
+        && needRecreate) {
             bootNode = Peers.findOrCreatePeer(host, false, true);
             randomConnectCount = 0;
         }
 
-        if(bootNode != null) {
-            if(countReached || Peer.State.CONNECTED != bootNode.getState()){
-                connectPeer(bootNode);
-            }
+        if(bootNode != null
+            && needConnectNow
+            && Peer.State.CONNECTED != bootNode.getState()){
+            connectPeer(bootNode);
         }
         return bootNode;
     }
@@ -1765,16 +1766,16 @@ public final class Peers {
         List<Peer> connectedNodes = Lists.newArrayList();
         for(String nodeHost : Constants.bootNodesHost){
             Peer bootNode = Peers.getPeer(nodeHost, true);
-            boolean countReached = connectCount++ >= BOOT_NODE_CHECK_COUNT;
+            boolean needRecreate = connectCount++ >= BOOT_NODE_CHECK_COUNT;
+            boolean needConnectNow = connectCount++ % 100 == 0;
             if(bootNode == null
-            && countReached) {
+            && needRecreate) {
                 bootNode = Peers.findOrCreatePeer(nodeHost, false, true);
                 connectCount = 0;
             }
 
             if(bootNode != null) {
-//                if(countReached && Peer.State.CONNECTED != bootNode.getState()){
-                if(Peer.State.CONNECTED != bootNode.getState()){
+                if(needConnectNow && Peer.State.CONNECTED != bootNode.getState()){
                     Logger.logDebugMessage("Re-connect boot node %s[%s] when its state is %s",
                             bootNode.getAnnouncedAddress(), bootNode.getHost(), bootNode.getState());
                     connectPeer(bootNode);
