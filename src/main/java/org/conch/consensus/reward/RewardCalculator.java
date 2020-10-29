@@ -269,20 +269,21 @@ public class RewardCalculator {
      * Settle all un-settlement blocks before this height
      * Combine changes of the same account from these blocks
      *
+     * NOTE: db transaction should be open by outside caller
+     *
      * @param tx coinbase tx of block at the settlement height
      */
-    private static void checkAndSettleCrowdMinerRewards(Transaction tx) {
+    private static boolean checkAndSettleCrowdMinerRewards(Transaction tx) {
         try {
-//            Db.db.beginTransaction();
             int settlementHeight = tx.getHeight();
             if(settlementHeight <= 0) {
                 Logger.logWarningMessage("Can't finish the crowd miner rewards settlement when height %d <= 0. Break and wait next turn.", settlementHeight);
-                return;
+                return false;
             }
 
             if(!BlockDb.reachRewardSettlementHeight(settlementHeight)){
                 Logger.logDebugMessage("Current height %d not reach the crowd miner rewards settlement height. Break and wait next turn.", settlementHeight);
-                return;
+                return false;
             }
 
             // Settlement
@@ -292,7 +293,7 @@ public class RewardCalculator {
             if(rewardDistributionTxs == null || rewardDistributionTxs.size() == 0){
                 Logger.logDebugMessage("No crowd rewards txs need be settlement at current height %d, " +
                         "maybe these txs be distributed at settlement height %d already.", Conch.getHeight(), settlementHeight);
-                return;
+                return false;
             }
 
             for (Block block : rewardDistributionTxs) {
@@ -352,13 +353,10 @@ public class RewardCalculator {
             if(notExistAccounts.length() > 0) {
                 Logger.logDebugMessage("Not exist crowd miners can't distribute the rewards [%s]", settlementHeight, "", details, tail);
             }
-//            Db.db.commitTransaction();
         } catch (Exception e) {
-//            Db.db.rollbackTransaction();
             Logger.logErrorMessage("setCrowdMinerReward occur error", e);
-        }finally {
-//            Db.db.endTransaction();
         }
+        return true;
     }
 
     private static Transaction getCoinBase(List<TransactionImpl> blockTransactions) {
@@ -553,11 +551,12 @@ public class RewardCalculator {
         // Crowd Miner Reward
         long miningRewards =  tx.getAmountNQT();
         Map<Long, Long> crowdMiners = Maps.newHashMap();
+        boolean crowdRewardsDistributed = false;
         if(coinBase.isType(Attachment.CoinBase.CoinBaseType.CROWD_BLOCK_REWARD)) {
             crowdMiners = coinBase.getCrowdMiners();
             Logger.logDebugMessage("[Height%d-Rewards-Stage%s] Distribute crowd miner's rewards[crowd miner size=%d] at height %d", tx.getHeight(), stage, crowdMiners.size(), Conch.getHeight());
 
-            checkAndSettleCrowdMinerRewards(tx);
+            crowdRewardsDistributed = checkAndSettleCrowdMinerRewards(tx);
 
             if(crowdMiners.size() > 0){
                 miningRewards = tx.getAmountNQT() - crowdMinerReward(tx.getHeight());
@@ -597,18 +596,19 @@ public class RewardCalculator {
         long miningRewardProcessingMS = System.currentTimeMillis() - miningCalStartMS;
         long totalUsedMs = System.currentTimeMillis() - rewardCalStartMS;
         Peer feeder = Conch.getBlockchainProcessor().getLastBlockchainFeeder();
+        String crowdInfo = crowdRewardsDistributed ? "-IncludeCrowdSettlement" : "";
         if(feeder != null &&  Conch.getBlockchainProcessor().isDownloading()) {
             String feederAddress = feeder != null ? feeder.getAnnouncedAddress() : "UndefinedAddress";
             String feederHost = feeder != null ? feeder.getHost() : "UndefinedHost";
-            Logger.logInfoMessage("[Height %d-Rewards-Stage%s] Distribute rewards of block(%s mined at %s) used time[crowd miners≈%dS, mining joiners≈%dS, total used time≈%dS], rewards[crowd miner size=%d, mining joiner size=%d] at current height %d -> height %d of feeder %s[%s]\n",
-                    tx.getHeight(), stage
+            Logger.logInfoMessage("[Height %d-Stage%s%s] Distribute rewards of block(%s mined at %s) used time[crowd miners≈%dS, mining joiners≈%dS, total used time≈%dS], rewards[crowd miner size=%d, mining joiner size=%d] at current height %d -> height %d of feeder %s[%s]\n",
+                    tx.getHeight(), stage, crowdInfo
                     , minerAccount.getRsAddress(), Convert.dateFromEpochTime(tx.getBlockTimestamp())
                     , crowdRewardProcessingMS / 1000, miningRewardProcessingMS / 1000, totalUsedMs / 1000
                     , crowdMiners.size(), miningJoinerCount, Conch.getHeight()
                     , Conch.getBlockchainProcessor().getLastBlockchainFeederHeight(), feederAddress, feederHost);
         }else {
-            Logger.logInfoMessage("[Height %d-Rewards-Stage%s] Distribute rewards of block(%s mined at %s) used time[crowd miners≈%dS, mining joiners≈%dS, total used time≈%dS], rewards[crowd miner size=%d, mining joiner size=%d] at current height %d\n",
-                    tx.getHeight(), stage
+            Logger.logInfoMessage("[Height %d-Stage%s%s] Distribute rewards of block(%s mined at %s) used time[crowd miners≈%dS, mining joiners≈%dS, total used time≈%dS], rewards[crowd miner size=%d, mining joiner size=%d] at current height %d\n",
+                    tx.getHeight(), stage, crowdInfo
                     , minerAccount.getRsAddress(), Convert.dateFromEpochTime(tx.getBlockTimestamp())
                     , crowdRewardProcessingMS / 1000, miningRewardProcessingMS / 1000, totalUsedMs / 1000
                     , crowdMiners.size(), miningJoinerCount, Conch.getHeight());
