@@ -78,9 +78,15 @@ public class ClientUpgradeTool {
     private static long lastFetchTime = -1;
     
     private static boolean fetchLastPackageNow(){
-        if(lastCosVerObj == null) return true;
-        if(lastFetchTime == -1) return true;
-        if(System.currentTimeMillis() - lastFetchTime > FETCH_INTERVAL_MS) return true;
+        if(lastCosVerObj == null) {
+            return true;
+        }
+        if(lastFetchTime == -1) {
+            return true;
+        }
+        if(System.currentTimeMillis() - lastFetchTime > FETCH_INTERVAL_MS) {
+            return true;
+        }
         
         return false;
     }
@@ -118,7 +124,7 @@ public class ClientUpgradeTool {
 
     public static volatile boolean forceDownloadFromOSS = false;
     private static volatile boolean restoring = false;
-    private static final long FETCH_DB_ARCHIVE_INTERVAL_MS = 30*60*1000L;
+    private static final long FETCH_DB_ARCHIVE_INTERVAL_MS = 12*60*60*1000L;
     // default value is 5 days
     private static final long DOWNLOAD_DB_ARCHIVE_INTERVAL_MS = 5*(24*60*60*1000L);
     private static volatile JSONObject lastDbArchiveObj = null;
@@ -126,9 +132,15 @@ public class ClientUpgradeTool {
     private static long lastDownloadDbArchiveTime = -1;
 
     private static boolean fetchLastDbArchiveNow(){
-        if(lastDbArchive == null) return true;
-        if(lastDbArchiveObj == null) return true;
-        if(lastDbArchiveFetchTime == -1) return true;
+        if(lastDbArchive == null) {
+            return true;
+        }
+        if(lastDbArchiveObj == null) {
+            return true;
+        }
+        if(lastDbArchiveFetchTime == -1) {
+            return true;
+        }
        
         if(System.currentTimeMillis() - lastDbArchiveFetchTime > FETCH_DB_ARCHIVE_INTERVAL_MS) return true;
 
