@@ -330,14 +330,18 @@ public final class Conch {
 //    }
     public static boolean matchMyAddress(String host){
         try{
-            if(StringUtils.isEmpty(host)) return false;
+            if(StringUtils.isEmpty(host)) {
+                return false;
+            }
 
             if(Conch.useNATService) {
                 return myAddress.equalsIgnoreCase(host);
             }
 
             if(IpUtil.isDomain(host)) {
-                if(myAddress.equalsIgnoreCase(host)) return true;
+                if(myAddress.equalsIgnoreCase(host)) {
+                    return true;
+                }
                 return IpUtil.getHost(myAddress).equalsIgnoreCase(IpUtil.getHost(host));
             } 
         } catch(Exception e){

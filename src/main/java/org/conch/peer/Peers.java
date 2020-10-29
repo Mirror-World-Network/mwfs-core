@@ -1750,6 +1750,10 @@ public final class Peers {
         List<Peer> connectedNodes = Lists.newArrayList();
         for(String nodeHost : Constants.bootNodesHost){
             boolean needConnectNow = connectCount++ % 100 == 0;
+            if(Conch.matchMyAddress(nodeHost)){
+                continue;
+            }
+
             Peer peer = _connectToPeer(nodeHost);
             if(peer != null) {
                 connectedNodes.add(peer);
