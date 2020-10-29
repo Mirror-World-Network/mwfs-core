@@ -4,6 +4,7 @@
     client.accountInfo = {};
     global.SSO = global.client;
 
+    require("./util/sso.remote.nodes");
     require("./util/sso.console");
     require("./util/sso.constants");
     require("./util/sso");
@@ -36,4 +37,6 @@
     global.extensions = require("./util/extensions");
     global.util = require("./util/sso.util");
     global.async = require("async");
+    // open apiproxy
+    global.SSO.state.apiProxy = global.isOpenApiProxy;
 })();
