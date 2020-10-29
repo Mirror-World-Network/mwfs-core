@@ -1743,14 +1743,14 @@ public final class Peers {
 
     public static Peer checkOrConnectBootNodeRandom(){
         boolean needConnectNow = randomConnectCount++ % 100 == 0;
-        return _connectToPeer(Constants.getBootNodeRandom(), needConnectNow);
+        return _connectToPeer(Constants.getBootNodeRandom());
     }
 
     public static List<Peer> checkOrConnectAllBootNodes(){
         List<Peer> connectedNodes = Lists.newArrayList();
         for(String nodeHost : Constants.bootNodesHost){
             boolean needConnectNow = connectCount++ % 100 == 0;
-            Peer peer = _connectToPeer(nodeHost, needConnectNow);
+            Peer peer = _connectToPeer(nodeHost);
             if(peer != null) {
                 connectedNodes.add(peer);
             }
@@ -1758,7 +1758,8 @@ public final class Peers {
         return connectedNodes;
     }
 
-    private static Peer _connectToPeer(String nodeHost, boolean needConnectNow){
+    private static Peer _connectToPeer(String nodeHost){
+        boolean needConnectNow = false;
         Peer peer = Peers.getPeer(nodeHost, true);
         if(peer == null) {
             peer = Peers.findOrCreatePeer(nodeHost, false, true);
@@ -1766,7 +1767,8 @@ public final class Peers {
                 Peers.addPeer(peer);
                 needConnectNow = true;
             }
-        }else if(StringUtils.isEmpty(peer.getAnnouncedAddress())){
+        }else if(StringUtils.isEmpty(peer.getAnnouncedAddress())
+        || StringUtils.isEmpty(peer.getHost())){
             needConnectNow = true;
         }
 
