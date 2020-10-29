@@ -236,7 +236,8 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 String bootNodesDetail = "";
                 for(Peer bootPeer : bootNodes){
                     bootNodesDetail += String.format("[DEBUG] %s[%s] state is %s, blockchain state is %s\n",
-                            bootPeer.getAnnouncedAddress(), bootPeer.getHost(), bootPeer.getState(), bootPeer.getBlockchainState());
+                            bootPeer.getAnnouncedAddress(), bootPeer.getHost(),
+                            bootPeer.getState(), bootPeer.getBlockchainState());
                 }
 
                 Logger.logDebugMessage("Can't find a weighted peer to sync the blocks:\n" +

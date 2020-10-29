@@ -1770,10 +1770,8 @@ public final class Peers {
                     Logger.logDebugMessage("Re-connect boot node %s[%s] when its state is %s",
                             bootNode.getAnnouncedAddress(), bootNode.getHost(), bootNode.getState());
                     connectPeer(bootNode);
-                    connectedNodes.add(bootNode);
-                }else if(Peer.State.CONNECTED == bootNode.getState()){
-                    connectedNodes.add(bootNode);
                 }
+                connectedNodes.add(bootNode);
             }
         }
         return connectedNodes;
