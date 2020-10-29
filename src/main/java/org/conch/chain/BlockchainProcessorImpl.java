@@ -239,9 +239,10 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                             bootPeer.getAnnouncedAddress(), bootPeer.getHost(), bootPeer.getState(), bootPeer.getBlockchainState());
                 }
 
-                Logger.logDebugMessage("Can't find a weighted peer to sync the blocks:  " +
-                        "a) current peer's version '%s' is larger than other peers. " +
-                        "b) can't connect to boot nodes or other peers which have the public IP. And boot nodes detail is: \n%s",
+                Logger.logDebugMessage("Can't find a weighted peer to sync the blocks:\n" +
+                        "[DEBUG] a) current peer's version '%s' is larger than other peers.\n" +
+                        "[DEBUG] b) can't connect to boot nodes or other peers which have the public IP.\n" +
+                        "[DEBUG] Boot nodes detail is: \n%s",
                         Conch.getVersionWithBuild(), bootNodesDetail);
                 return;
             }
