@@ -186,7 +186,9 @@ public abstract class DerivedDbTable {
         }
         try (Connection con = Db.db.getConnection()) {
             String idColumn;
-            if ("ACCOUNT".equalsIgnoreCase(tableName)) {
+            if ("ACCOUNT".equalsIgnoreCase(tableName)
+            || "ACCOUNT_CACHE".equalsIgnoreCase(tableName)
+            || "ACCOUNT_HISTORY".equalsIgnoreCase(tableName)) {
                 idColumn = "ID";
             } else {
                 idColumn = "ACCOUNT_ID";
