@@ -1409,8 +1409,11 @@ public final class Peers {
             long weight = (peer.getWeight() == 0) ? 1 : peer.getWeight();
             totalWeight += weight;
             // return boot node directly
-            if(Constants.isValidBootNode(peer)
-             && countAndCheck(peer)) {
+//            if(Constants.isValidBootNode(peer)
+//             && countAndCheck(peer)) {
+//                return peer;
+//            }
+            if(countAndCheck(peer)) {
                 return peer;
             }
         }
@@ -1425,10 +1428,14 @@ public final class Peers {
         long hit = ThreadLocalRandom.current().nextLong(totalWeight);
         for (Peer peer : selectedPeers) {
             long weight = (peer.getWeight() == 0) ? 1 : peer.getWeight();
-            if ((hit -= weight) < 0) {
-                if(countAndCheck(peer)) {
-                    return peer;
-                }
+            boolean rightVersion = Conch.versionCompare(peer.getVersion()) <= 0;
+            if ((hit -= weight) < 0
+            && rightVersion) {
+//                if(countAndCheck(peer)) {
+//                    return peer;
+//                }
+
+                return peer;
             }
         }
         return null;

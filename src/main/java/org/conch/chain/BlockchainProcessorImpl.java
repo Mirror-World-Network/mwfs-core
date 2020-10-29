@@ -220,7 +220,6 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 && connectedSize < limitConnectedSize) {
                 if (Logger.printNow(Logger.BlockchainProcessor_downloadPeer_sizeCheck)) {
                     Logger.logInfoMessage("No enough connected peers[limit size=" + (limitConnectedSize) + ",current connected size=" + connectedSize + "], break syn blocks...");
-//                    Logger.logDebugMessage("Current peers => " + Arrays.toString(connectedPublicPeers.toArray()));
                 }
 
                 if (System.currentTimeMillis() - lastDownloadMS > MAX_DOWNLOAD_TIME) {
@@ -244,7 +243,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                         "[DEBUG] a) current peer's version '%s' is larger than other peers.\n" +
                         "[DEBUG] b) can't connect to boot nodes or other peers which have the public IP.\n" +
                         "[DEBUG] Boot nodes detail is: \n" +
-                        "[DEBUG] ----------------------------\n" + "%s",
+                        "[DEBUG] >>>>>>>>>>>>>>>>>>>>>>>>>>>>\n" + "%s",
                         Conch.getVersionWithBuild(), bootNodesDetail);
                 return;
             }
@@ -306,17 +305,6 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 isDownloading = true;
                 return;
             }
-
-//            boolean isBootNode = Constants.bootNodeHost.equalsIgnoreCase(Conch.getMyAddress());
-//            if(!isBootNode
-//                && Constants.isTestnet() 
-//                && !isDownloading
-//                && lastBootNodeHeight != -1
-//                && (lastBlockchainFeederHeight - lastBootNodeHeight) > 12){
-//                Logger.logDebugMessage("Don't synchronize the blocks from feeder %s[%s], because the BootNode's height is %d but the feeder's height is %d",
-//                        lastBlockchainFeeder.getAnnouncedAddress() ,lastBlockchainFeeder.getHost(), lastBootNodeHeight, lastBlockchainFeederHeight);
-//                return;
-//            }
 
             int heightDiffCount = lastBlockchainFeederHeight - commonBlock.getHeight();
             // fetch the db archive and restart
