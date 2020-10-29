@@ -242,7 +242,8 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 Logger.logDebugMessage("Can't find a weighted peer to sync the blocks:\n" +
                         "[DEBUG] a) current peer's version '%s' is larger than other peers.\n" +
                         "[DEBUG] b) can't connect to boot nodes or other peers which have the public IP.\n" +
-                        "[DEBUG] Boot nodes detail is: \n%s",
+                        "[DEBUG] Boot nodes detail is: \n" +
+                        "[DEBUG] ----------------------------\n" + "%s",
                         Conch.getVersionWithBuild(), bootNodesDetail);
                 return;
             }
