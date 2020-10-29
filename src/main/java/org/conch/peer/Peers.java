@@ -1738,7 +1738,7 @@ public final class Peers {
     public static Peer checkOrConnectBootNodeRandom(){
         String host = Constants.getBootNodeRandom();
         Peer bootNode = Peers.getPeer(host, true);
-        boolean countReached = randomConnectCount++ == BOOT_NODE_CHECK_COUNT;
+        boolean countReached = randomConnectCount++ >= BOOT_NODE_CHECK_COUNT;
         if(bootNode == null
         && countReached) {
             bootNode = Peers.findOrCreatePeer(host, false, true);
@@ -1758,7 +1758,7 @@ public final class Peers {
         List<Peer> connectedNodes = Lists.newArrayList();
         for(String nodeHost : Constants.bootNodesHost){
             Peer bootNode = Peers.getPeer(nodeHost, true);
-            boolean countReached = connectCount++ == BOOT_NODE_CHECK_COUNT;
+            boolean countReached = connectCount++ >= BOOT_NODE_CHECK_COUNT;
             if(bootNode == null
             && countReached) {
                 bootNode = Peers.findOrCreatePeer(nodeHost, false, true);
@@ -1766,7 +1766,8 @@ public final class Peers {
             }
 
             if(bootNode != null) {
-                if(countReached && Peer.State.CONNECTED != bootNode.getState()){
+//                if(countReached && Peer.State.CONNECTED != bootNode.getState()){
+                if(Peer.State.CONNECTED != bootNode.getState()){
                     Logger.logDebugMessage("Re-connect boot node %s[%s] when its state is %s",
                             bootNode.getAnnouncedAddress(), bootNode.getHost(), bootNode.getState());
                     connectPeer(bootNode);
