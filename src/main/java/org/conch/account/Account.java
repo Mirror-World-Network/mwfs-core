@@ -513,10 +513,15 @@ public final class Account {
 
         @Override
         public void trim(int height) {
+            if(Constants.SYNC_BUTTON) {
+                return;
+            }
+            _trim("account_cache",height);
         }
 
         @Override
         public void rollback(int height) {
+            rollbackAndPush("account_cache", height, true);
         }
 
         @Override
@@ -539,10 +544,15 @@ public final class Account {
 
         @Override
         public void trim(int height) {
+            if(Constants.SYNC_BUTTON) {
+                return;
+            }
+            _trim("account_history",height);
         }
 
         @Override
         public void rollback(int height) {
+            rollbackAndPush("account_history", height, true);
         }
 
         @Override
@@ -721,11 +731,15 @@ public final class Account {
                 return;
             }
             _trim("account_guaranteed_balance", height, false);
+            _trim("account_guaranteed_balance_cache", height, false);
+            _trim("account_guaranteed_balance_history", height, false);
         }
 
         @Override
         public void rollback(int height) {
             rollbackAndPush("account_guaranteed_balance", height, false);
+            rollbackAndPush("account_guaranteed_balance_cache", height, false);
+            rollbackAndPush("account_guaranteed_balance_history", height, false);
         }
     };
 
@@ -2647,9 +2661,7 @@ public final class Account {
 
         try (Connection con = Db.db.beginTransaction()){
             Statement stmt = con.createStatement();
-            Logger.logMessage("[HistoryRecords] Truncate tables [ACCOUNT_LEDGER_HISTORY, ACCOUNT_LEDGER_CACHE, ACCOUNT_LEDGER]");
-            stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_LEDGER_HISTORY");
-            stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_LEDGER_CACHE");
+            Logger.logMessage("[HistoryRecords] Truncate tables [ACCOUNT_LEDGER]");
             stmt.executeUpdate("TRUNCATE TABLE ACCOUNT_LEDGER");
 
 //            Logger.logMessage("[HistoryRecords] Truncate tables [ACCOUNT_POC_SCORE_HISTORY,]");

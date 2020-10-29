@@ -641,10 +641,6 @@ public class ConchDbVersion extends DbVersion {
 
                     "alter table ACCOUNT_GUARANTEED_BALANCE rename to ACCOUNT_GUARANTEED_BALANCE_HISTORY;\n" +
 
-                    "alter table ACCOUNT_LEDGER rename to ACCOUNT_LEDGER_HISTORY;\n" +
-                    "alter index ACCOUNT_LEDGER_ID_IDX rename to ACCOUNT_LEDGER_HISTORY_ID_IDX;\n" +
-                    "alter index ACCOUNT_LEDGER_HEIGHT_IDX rename to ACCOUNT_LEDGER_HISTORY_HEIGHT_IDX;\n" +
-
                     "alter table ACCOUNT_POC_SCORE rename to ACCOUNT_POC_SCORE_HISTORY;\n" +
                     "alter index ACCOUNT_HEIGHT_IDX rename to ACCOUNT_POC_SCORE_HISTORY_HEIGHT_IDX;\n" +
 
@@ -697,40 +693,6 @@ public class ConchDbVersion extends DbVersion {
                     "    primary key (DB_ID)\n" +
                     ");\n" +
 
-                    "create table IF NOT EXISTS ACCOUNT_LEDGER_CACHE\n" +
-                    "(\n" +
-                    "    DB_ID        BIGINT auto_increment,\n" +
-                    "    ACCOUNT_ID   BIGINT               not null,\n" +
-                    "    EVENT_TYPE   TINYINT              not null,\n" +
-                    "    EVENT_ID     BIGINT               not null,\n" +
-                    "    HOLDING_TYPE TINYINT              not null,\n" +
-                    "    HOLDING_ID   BIGINT,\n" +
-                    "    CHANGE       BIGINT               not null,\n" +
-                    "    BALANCE      BIGINT               not null,\n" +
-                    "    BLOCK_ID     BIGINT               not null,\n" +
-                    "    HEIGHT       INT                  not null,\n" +
-                    "    TIMESTAMP    INT                  not null,\n" +
-                    "    LATEST       BOOLEAN default TRUE not null,\n" +
-                    "    primary key (DB_ID)\n" +
-                    ");\n" +
-
-                    "create table IF NOT EXISTS ACCOUNT_LEDGER\n" +
-                    "(\n" +
-                    "    DB_ID        BIGINT auto_increment,\n" +
-                    "    ACCOUNT_ID   BIGINT               not null,\n" +
-                    "    EVENT_TYPE   TINYINT              not null,\n" +
-                    "    EVENT_ID     BIGINT               not null,\n" +
-                    "    HOLDING_TYPE TINYINT              not null,\n" +
-                    "    HOLDING_ID   BIGINT,\n" +
-                    "    CHANGE       BIGINT               not null,\n" +
-                    "    BALANCE      BIGINT               not null,\n" +
-                    "    BLOCK_ID     BIGINT               not null,\n" +
-                    "    HEIGHT       INT                  not null,\n" +
-                    "    TIMESTAMP    INT                  not null,\n" +
-                    "    LATEST       BOOLEAN default TRUE not null,\n" +
-                    "    primary key (DB_ID)\n" +
-                    ");\n" +
-
                     "create table IF NOT EXISTS ACCOUNT_POC_SCORE_CACHE\n" +
                     "(\n" +
                     "    DB_ID      BIGINT auto_increment,\n" +
@@ -764,9 +726,6 @@ public class ConchDbVersion extends DbVersion {
 
                     "create unique index IF NOT EXISTS ACCOUNT_GUARANTEED_BALANCE_ID_HEIGHT_IDX on ACCOUNT_GUARANTEED_BALANCE (ACCOUNT_ID asc, HEIGHT desc);\n" +
                     "create index IF NOT EXISTS ACCOUNT_GUARANTEED_BALANCE_HEIGHT_IDX on ACCOUNT_GUARANTEED_BALANCE (HEIGHT);\n" +
-
-                    "create index IF NOT EXISTS ACCOUNT_LEDGER_CACHE_ID_IDX on ACCOUNT_LEDGER_CACHE (ACCOUNT_ID, DB_ID);\n" +
-                    "create index IF NOT EXISTS ACCOUNT_LEDGER_CACHE_HEIGHT_IDX on ACCOUNT_LEDGER_CACHE (HEIGHT);\n" +
 
                     "create index IF NOT EXISTS ACCOUNT_LEDGER_ID_IDX on ACCOUNT_LEDGER (ACCOUNT_ID, DB_ID);\n" +
                     "create index IF NOT EXISTS ACCOUNT_LEDGER_HEIGHT_IDX on ACCOUNT_LEDGER (HEIGHT);\n" +

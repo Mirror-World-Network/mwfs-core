@@ -314,6 +314,8 @@ public class PocDb  {
         @Override
         public void rollback(int height) {
             rollbackAndPush("account_poc_score", height, true);
+            rollbackAndPush("account_poc_score_cache", height, true);
+            rollbackAndPush("account_poc_score_history", height, true);
         }
 
         /**
@@ -327,6 +329,8 @@ public class PocDb  {
                 return;
             }
             _trim("account_poc_score", height);
+            _trim("account_poc_score_cache", height);
+            _trim("account_poc_score_history", height);
         }
     }
     private static final PocScoreTable pocScoreTable = new PocScoreTable();
