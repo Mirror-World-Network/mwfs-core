@@ -1766,7 +1766,7 @@ public final class Peers {
             }
 
             if(bootNode != null) {
-                if(countReached || Peer.State.CONNECTED != bootNode.getState()){
+                if(countReached && Peer.State.CONNECTED != bootNode.getState()){
                     Logger.logDebugMessage("Re-connect boot node %s[%s] when its state is %s",
                             bootNode.getAnnouncedAddress(), bootNode.getHost(), bootNode.getState());
                     connectPeer(bootNode);
