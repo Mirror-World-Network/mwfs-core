@@ -302,7 +302,7 @@
                         <p class="testnet-tips">{{$t('dialog.block_reward_distribution_mining')}}: {{$global.getAmountFormat(coinBaseTx.attachment.blockMiningRewardAmount)}}</p>
                     </div>
                     <div v-else-if="(rewardTabs === 'crowdMinerRewards') && containCrowdRewardTxs()">
-                        <p class="testnet-tips">{{$t('dialog.block_reward_distribution_crowd')}}: {{$global.getAmountFormat(coinBaseTx.attachment.crowdMinerRewardAmount)}} / {{coinBaseTx.attachment.crowdMiners.length}} {{$t('dialog.block_reward_miners')}}</p>
+                        <p class="testnet-tips">{{$t('dialog.block_reward_distribution_crowd')}}: {{$global.getAmountFormat(coinBaseTx.attachment.crowdMinerRewardAmount)}} / {{coinBaseTx.attachment.crowdMiners.length}} {{$t('dialog.block_reward_miners')}} - <span v-if="blockInfo.hasRewardDistribution" style="color: #00ff99">{{$t('network.crowd_miner_reward_success')}}</span><span v-if="!blockInfo.hasRewardDistribution" style="color: red">{{$t('network.crowd_miner_reward_fail')}}</span></p>
                     </div>
 
                     <!-- mining rewards(include pool mode) distribution table -->
