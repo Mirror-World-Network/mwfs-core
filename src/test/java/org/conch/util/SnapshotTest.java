@@ -224,7 +224,7 @@ public class SnapshotTest {
     }
 
     private static void writeToAirdropFile(String transferJson, String filename) {
-        JSONObject jsonObject = new JSONObject();
+        org.json.simple.JSONObject jsonObject = new org.json.simple.JSONObject();
         JSONArray jsonArray = JSON.parseArray(transferJson);
         jsonObject.put("list", jsonArray);
         jsonObject.put("secretPhrase", "");
