@@ -330,6 +330,10 @@ public final class Conch {
 //    }
     public static boolean matchMyAddress(String host){
         try{
+            if(StringUtils.isEmpty(myAddress)){
+                return false;
+            }
+
             if(StringUtils.isEmpty(host)) {
                 return false;
             }
