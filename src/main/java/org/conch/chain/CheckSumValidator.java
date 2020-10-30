@@ -144,13 +144,13 @@ public class CheckSumValidator {
     
     static Map<Integer, Map<Long, PocTxBody.PocNodeTypeV2>> pocNodeTypeTxsMap = Maps.newHashMap();
     
-    public static final int CHECK_INTERVAL_IN_MINUTES = Conch.getIntProperty("sharder.knownBlockCheckInterval", 30);
+    public static final int CHECK_INTERVAL_IN_MINUTES = Conch.getIntProperty("sharder.knownBlockCheckInterval", 60);
 
     private static final Runnable updateKnownIgnoreBlocksThread = () -> {
         try {
             updateKnownIgnoreBlocks();
         }catch (Exception e) {
-            Logger.logMessage("Error updateKnownIgnoreBlocksThread", e);
+            Logger.logMessage("Error updateKnownIgnoreBlocksThread, wait for next turn.", e);
         }catch (Throwable t) {
             Logger.logErrorMessage("CRITICAL ERROR. PLEASE REPORT TO THE DEVELOPERS.\n" + t.toString());
             t.printStackTrace();
@@ -166,7 +166,9 @@ public class CheckSumValidator {
                 + "]"
         );
 
-        if(defaultIgnoreBlocks.size() <= 0) return defaultMap;
+        if(defaultIgnoreBlocks.size() <= 0) {
+            return defaultMap;
+        }
 
         for(int i = 0; i < defaultIgnoreBlocks.size(); i++) {
             JSONObject ignoreBlock = defaultIgnoreBlocks.getJSONObject(i);
@@ -180,7 +182,9 @@ public class CheckSumValidator {
     }
 
     public static boolean isKnownIgnoreBlock(long blockId, byte[] blockSignature){
-        if(!ignoreBlockMap.containsKey(blockId)) return false;
+        if(!ignoreBlockMap.containsKey(blockId)) {
+            return false;
+        }
 
         // checksum compare
         JSONObject ignoreBlock = ignoreBlockMap.get(blockId);
@@ -248,7 +252,9 @@ public class CheckSumValidator {
     
     private static boolean updateSingle(JSONObject object){
         try{
-            if(closeIgnore) return true;
+            if(closeIgnore) {
+                return true;
+            }
             
             try{
                 if(object.containsKey("id") && object.getLong("id") != -1L) {
@@ -378,7 +384,9 @@ public class CheckSumValidator {
         String url = UrlManager.KNOWN_IGNORE_BLOCKS;
         try {
             response = RestfulHttpClient.getClient(url).get().request();
-            if(response == null) return;
+            if(response == null) {
+                return;
+            }
             
             String content = response.getContent();
             String totalIgnoreBlocks = "\n\r";
@@ -413,14 +421,18 @@ public class CheckSumValidator {
                 SharderPoolProcessor.removePools(knownDirtyPoolTxs);
             }
             
-            if(!synIgnoreBlock) synIgnoreBlock = true;
+            if(!synIgnoreBlock) {
+                synIgnoreBlock = true;
+            }
         } catch (IOException e) {
            Logger.logErrorMessage("Can't get known ignore blocks from " + url + " caused by " + e.getMessage());
         }
     }
     
     public static JSONObject generateIgnoreBlock(long id, byte[] checksum, String network){
-        if(StringUtils.isEmpty(network)) network = "testnet";
+        if(StringUtils.isEmpty(network)) {
+            network = "testnet";
+        }
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("id",id);
