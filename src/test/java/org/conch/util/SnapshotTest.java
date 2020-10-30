@@ -1,8 +1,11 @@
 package org.conch.util;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.StringUtils;
 import org.conch.Conch;
 import org.conch.account.Account;
 import org.conch.chain.BlockchainImpl;
@@ -15,6 +18,7 @@ import org.conch.tx.Transaction;
 import org.conch.tx.TransactionImpl;
 import org.conch.tx.TransactionType;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -30,8 +34,9 @@ public class SnapshotTest {
 
     public static void main(String[] args) {
 //        ssAmountSnapshot();
-        pocTxsSnapshot();
+//        pocTxsSnapshot();
 //        ssPaymentTxsSnapshot();
+        amountAirdropBySnapshot();
     }
     
     private static int startHeight = 270;
@@ -147,7 +152,90 @@ public class SnapshotTest {
             DbUtils.close(con);
         }
     }
-    
+
+    static void amountAirdropBySnapshot(){
+        Db.init();
+        Connection con = null;
+        String path = "batch";
+        String filenamePrefix = "batch/airdrop";
+        File file = new File(path);
+        if(!file.exists()) {
+            file.mkdir();
+        }
+        int count = 0;
+        int batchUnit = 2000;
+        try {
+            con = Db.db.getConnection();
+            PreparedStatement pstmt = con.prepareStatement("SELECT * FROM ACCOUNT WHERE LATEST=TRUE ORDER BY HEIGHT ASC");
+            ResultSet rs = pstmt.executeQuery();
+            JSONObject amountJson = new JSONObject();
+            amountJson.put("totalBalance" , 0L);
+            amountJson.put("totalMined" , 0L);
+            amountJson.put("totalFrozen" , 0L);
+            amountJson.put("totalUnconfirmed" , 0L);
+            String transferJsonStr = "";
+            while(rs.next()){
+                count++;
+                /*if (count > 108) {
+                    break;
+                }*/
+                long accountId = rs.getLong("ID");
+                long balance = rs.getLong("BALANCE");
+                long unconfirmedBalance = rs.getLong("UNCONFIRMED_BALANCE");
+                long minedBalance = rs.getLong("FORGED_BALANCE");
+                long frozenBlance = rs.getLong("FROZEN_BALANCE");
+                byte[] publicKey = Account.getPublicKey(accountId);
+                String publicKeyStr = Convert.toHexString(publicKey);
+                amountJson.put("totalBalance" , amountJson.getLongValue("totalBalance") + (balance / Constants.ONE_SS));
+                amountJson.put("totalMined" , amountJson.getLongValue("totalMined") + (minedBalance/ Constants.ONE_SS));
+                amountJson.put("totalFrozen" , amountJson.getLongValue("totalFrozen") + (frozenBlance/ Constants.ONE_SS));
+                amountJson.put("totalUnconfirmed" , amountJson.getLongValue("totalUnconfirmed") + (unconfirmedBalance/ Constants.ONE_SS));
+
+                transferJsonStr += "{"
+                        + "\"recipientPublicKey\":\"" + publicKeyStr + "\""
+                        + ",\"recipientRS\":\"" + Account.rsAccount(accountId) + "\""
+                        + ",\"amountNQT\":\"" + balance + "\""
+                        + "},\n";
+
+                if (batchUnit == 0) {
+                    System.out.println("batchUnit can`t equal zero\n");
+                }
+                if (count % batchUnit == 0) {
+                    String filename;
+                    filename = filenamePrefix + "_" + count + ".json";
+                    transferJsonStr = "[" + transferJsonStr + "]";
+                    writeToAirdropFile(transferJsonStr, filename);
+                    transferJsonStr = "";
+                }
+
+            }
+            if (StringUtils.isNotEmpty(transferJsonStr)) {
+                // extra is stored in the file
+                transferJsonStr = "[" + transferJsonStr + "]";
+                writeToAirdropFile(transferJsonStr, filenamePrefix + "_" + count + ".json");
+            }
+            System.out.println("Total count is " + count + "\n\r");
+            System.out.println("Total balance is " + amountJson.toString() );
+        } catch (SQLException e) {
+            throw new RuntimeException(e.toString(), e);
+        } finally {
+            DbUtils.close(con);
+        }
+    }
+
+    private static void writeToAirdropFile(String transferJson, String filename) {
+        JSONObject jsonObject = new JSONObject();
+        JSONArray jsonArray = JSON.parseArray(transferJson);
+        jsonObject.put("list", jsonArray);
+        jsonObject.put("secretPhrase", "");
+        jsonObject.put("feeNQT", "0");
+        jsonObject.put("deadline", "1440");
+
+        org.conch.util.JSON.JsonWrite(jsonObject, filename);
+        System.out.println(String.format("write to file %s succeed", filename));
+
+    }
+
     private static Set<String> ignoreReciepects = Sets.newHashSet("CDW-L9V5-6FNQ-NJKX-8UNH9");
     static void ssPaymentTxsSnapshot(){
         Db.init();
