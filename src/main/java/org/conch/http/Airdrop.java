@@ -46,7 +46,7 @@ public final class Airdrop extends CreateTransaction {
     static final Airdrop instance = new Airdrop();
 
     static class TransferInfo {
-        private String recipient;
+        private String recipientRS;
         private String amountNQT;
         private String recipientPublicKey;
         private String errorDescription; // create transaction failed to write to this value
@@ -55,12 +55,12 @@ public final class Airdrop extends CreateTransaction {
         TransferInfo() {
         }
 
-        public String getRecipient() {
-            return recipient;
+        public String getRecipientRS() {
+            return recipientRS;
         }
 
-        public void setRecipient(String recipient) {
-            this.recipient = recipient;
+        public void setRecipientRS(String recipientRS) {
+            this.recipientRS = recipientRS;
         }
 
         public String getAmountNQT() {
@@ -179,7 +179,7 @@ public final class Airdrop extends CreateTransaction {
         for (TransferInfo info : list) {
             org.json.simple.JSONObject jsonObject = new org.json.simple.JSONObject();
             try {
-                paramter.put("recipient", new String[]{info.getRecipient()});
+                paramter.put("recipientRS", new String[]{info.getRecipientRS()});
                 paramter.put("recipientPublicKey", new String[]{info.getRecipientPublicKey()});
                 paramter.put("amountNQT", new String[]{info.getAmountNQT()});
                 paramter.put("transactionID", new String[]{info.getTransactionID()});
@@ -188,11 +188,11 @@ public final class Airdrop extends CreateTransaction {
                 BizParameterRequestWrapper reqWrapper = new BizParameterRequestWrapper(req, req.getParameterMap(), paramter);
                 Account account = ParameterParser.getSenderAccount(reqWrapper);
 
-                long recipient = ParameterParser.getAccountId(reqWrapper, "recipient", true);
+                long recipient = ParameterParser.getAccountId(reqWrapper, "recipientRS", true);
                 long amountNQT = ParameterParser.getAmountNQT(reqWrapper);
 
                 JSONStreamAware transaction = createTransaction(reqWrapper, account, recipient, amountNQT);
-                org.json.simple.JSONObject transactionJsonObject = (org.json.simple.JSONObject) transaction;
+                org.json.simple.JSONObject transactionJsonObject = (org.json.simple.JSONObject) JSONValue.parse(org.conch.util.JSON.toString(transaction));
                 if (transactionJsonObject.get("broadcasted") != null && transactionJsonObject.get("broadcasted").equals(true)) {
                     // write info to the doneList
                     info.setTransactionID((String) transactionJsonObject.get("transaction"));
