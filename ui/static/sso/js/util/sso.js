@@ -576,6 +576,7 @@ var Sso = (function (NRS, $, undefined) {
         var previousLastBlock = (firstTime ? "0" : NRS.state.lastBlock);
 
         NRS.state = response;
+        console.log("NRS.state", NRS.state);
         var lastBlock = NRS.state.lastBlock;
         var height = response.apiProxy ? NRS.lastProxyBlockHeight : NRS.state.numberOfBlocks - 1;
 
@@ -1788,7 +1789,6 @@ var Sso = (function (NRS, $, undefined) {
         // downloadingBlockchain.find(".last_num_blocks").html($.t("sso.last_num_blocks", {"blocks": lastNumBlocks}));
 
         debug("NRS.state.isLightClient=" + NRS.state.isLightClient + ",NRS.serverConnect=" + NRS.serverConnect + ",NRS.peerConnect=" + NRS.peerConnect);
-
         if (NRS.state.isLightClient) {
             // downloadingBlockchain.find(".db_active").hide();
             // downloadingBlockchain.find(".db_halted").hide();

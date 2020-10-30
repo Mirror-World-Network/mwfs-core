@@ -2505,7 +2505,7 @@ export default {
                 if (typeof res.errorDescription === 'undefined') {
                     console.log("res", res);
                     // res.jsonResult write to JSON file
-                    _this.$global.funDownload(JSON.stringify(res.jsonResult), "airdrop.json");
+                    _this.$global.funDownload(JSON.stringify(res.jsonResult), _this.batch_transfer.fileName);
                     _this.$message.success(_this.$t('transfer.batch_transfer_success'));
                     _this.closeDialog();
                 } else {
@@ -2534,7 +2534,7 @@ export default {
                 if (typeof res.errorDescription === 'undefined') {
                     console.log("res", res);
                     // res.jsonResult write to JSON file
-                    _this.$global.funDownload(JSON.stringify(res.jsonResult), "airdrop.json");
+                    _this.$global.funDownload(JSON.stringify(res.jsonResult), _this.batch_transfer.fileName);
                     _this.$message.success(_this.$t('transfer.detection_transfer_success'));
                     _this.closeDialog();
                 } else {

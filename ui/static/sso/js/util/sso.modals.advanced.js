@@ -15,7 +15,7 @@
  ******************************************************************************/
 
 /**
- * @depends {nrs.js}
+ * @depends {sso.js}
  * @depends {nrs.modals.js}
  */
 var NRS = (function(NRS, $, undefined) {
