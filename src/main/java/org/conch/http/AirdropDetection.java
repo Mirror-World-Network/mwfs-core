@@ -55,7 +55,7 @@ public final class AirdropDetection extends CreateTransaction {
         DetectionTransferInfo(Airdrop.TransferInfo transferInfo) {
             this.setTransactionID(transferInfo.getTransactionID());
             this.setRecipientPublicKey(transferInfo.getRecipientPublicKey());
-            this.setRecipient(transferInfo.getRecipient());
+            this.setRecipientRS(transferInfo.getRecipientRS());
             this.setAmountNQT(transferInfo.getAmountNQT());
         }
 

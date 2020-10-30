@@ -1,3 +1,22 @@
+/******************************************************************************
+ * Copyright © 2017 mwfs.io.                                              *
+ *                                                                            *
+ * See the LICENSE.txt file at the top-level directory of this distribution   *
+ * for licensing information.                                                 *
+ *                                                                            *
+ * Unless otherwise agreed in a custom licensing agreement with mwfs.io,  *
+ * no part of the COS software, including this file, may be copied, modified, *
+ * propagated, or distributed except according to the terms contained in the  *
+ * LICENSE.txt file.                                                          *
+ *                                                                            *
+ * Removal or modification of this copyright notice is prohibited.            *
+ *                                                                            *
+ ******************************************************************************/
+
+/**
+ * @depends {sso.js}
+ */
+
 var NRS = (function (NRS, $, undefined) {
     var _password;
 
@@ -377,6 +396,7 @@ var NRS = (function (NRS, $, undefined) {
             if (!options.remoteNode && NRS.isConfirmResponse() &&
                 !(response.errorCode || response.errorDescription || response.errorMessage || response.error)) {
                 var requestRemoteNode = NRS.isMobileApp() ? NRS.getRemoteNode() : { address: "localhost", announcedAddress: "localhost" }; // TODO unify getRemoteNode with apiProxyPeer
+                console.log("NRS",NRS);
                 NRS.confirmResponse(requestType, data, response, requestRemoteNode);
             }
             if (!options.doNotEscape) {
