@@ -1049,7 +1049,7 @@ const en = {
         "status_refuse":"Refuse",
     },
     poc: {
-        'block_reward_tips_phase1': "NOTE: Miner joining phase(before the height 1000)，block reward is 0",
+        'block_reward_tips_phase1': "NOTE: In network stable phase(Miner joining phase)，block reward is 0",
         'creator': "Creator",
         'type': "Type",
         'nodeType': "Node Type",

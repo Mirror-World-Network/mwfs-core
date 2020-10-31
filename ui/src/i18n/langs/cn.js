@@ -1050,7 +1050,7 @@ const cn = {
         "status_refuse":"拒绝发放",
     },
     poc: {
-        'block_reward_tips_phase1': "说明: 矿工接入期(1000高度之前)，没有出块奖励",
+        'block_reward_tips_phase1': "说明: 网络稳定期间(矿工接入期)，没有出块奖励",
         'creator': "创建者",
         'type': "类型",
         'nodeType': "节点类型",
