@@ -203,6 +203,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
 
     };
 
+    private static long lastForceConnectMS = System.currentTimeMillis();
     /**
      * Synchronize blocks from the feeder peer
      *
@@ -212,8 +213,13 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         try {
             long startTime = System.currentTimeMillis();
             int limitConnectedSize = Math.min(1, defaultNumberOfForkConfirmations);
-            boolean needConnectNow = isExceedUnfinishedDownload(MAX_DOWNLOAD_TIME / 2);
+
+            boolean needConnectNow = (System.currentTimeMillis() - lastForceConnectMS) > (MAX_DOWNLOAD_TIME / 2);
             List<Peer> bootNodes = Peers.checkOrConnectAllBootNodes(needConnectNow);
+            if(bootNodes.size() > 0){
+                lastForceConnectMS = System.currentTimeMillis();
+            }
+
             connectedPublicPeers = Peers.getPublicPeers(Peer.State.CONNECTED, true);
             int connectedSize = connectedPublicPeers.size();
             if (!Generator.isBootNode
@@ -767,7 +773,9 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
     }
 
     private JSONObject getPeersDifficulty(Peer peer) {
-        if (peer == null) return null;
+        if (peer == null) {
+            return null;
+        }
 
         JSONObject request = new JSONObject();
         request.put("requestType", "getCumulativeDifficulty");
