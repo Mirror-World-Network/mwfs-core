@@ -765,7 +765,7 @@ final class PeerImpl implements Peer {
                     blacklist("Old version: " + version);
                 }
             } else {
-                //Logger.logDebugMessage("Failed to connect to peer " + peerAddress);
+                Logger.logDebugMessage("Failed to connect to peer %s[%s]", announcedAddress, host);
                 setState(State.NON_CONNECTED);
             }
         } catch (RuntimeException e) {

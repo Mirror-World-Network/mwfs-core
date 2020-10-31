@@ -53,10 +53,7 @@ public class PocProcessorImpl implements PocProcessor {
      **/
 
     public static PocProcessorImpl instance = getOrCreate();
-//    private static final int peerSynThreadInterval = 600;
-    private static final int pocTxSynThreadInterval = 60;
-
-    private static final String LOCAL_STORAGE_POC_CALCULATOR = "StoredPocCalculator";
+    private static final int pocTxSynThreadInterval = 4 * 60;
 
     // height : { accountId : account }
     private static Map<Integer, Map<Long, Account>> balanceChangedMap = Maps.newConcurrentMap();

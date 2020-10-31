@@ -1744,16 +1744,35 @@ public final class Peers {
 
     public static List<Peer> checkOrConnectAllBootNodes(boolean needConnectNow){
         List<Peer> connectedNodes = Lists.newArrayList();
+
+        // check whether connect one of boot nodes
+        boolean connectedBootNodes = false;
+        List<String> needConnectNodes = Lists.newArrayList();
         for(String nodeHost : Constants.bootNodesHost){
             if(Conch.matchMyAddress(nodeHost)){
                 continue;
             }
 
-            Peer peer = _connectToPeer(nodeHost, needConnectNow);
-            if(peer != null) {
+            Peer peer = Peers.getPeer(nodeHost, true);
+            if(peer != null
+            && Peer.State.CONNECTED == peer.getState()) {
+                connectedBootNodes = true;
                 connectedNodes.add(peer);
+            }else{
+                needConnectNodes.add(nodeHost);
             }
         }
+
+        // connect to none-connected boot nodes
+        if(!connectedBootNodes) {
+            needConnectNodes.forEach(nodeHost -> {
+                Peer peer = _connectToPeer(nodeHost, needConnectNow);
+                if(peer != null) {
+                    connectedNodes.add(peer);
+                }
+            });
+        }
+
         return connectedNodes;
     }
 

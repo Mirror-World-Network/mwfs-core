@@ -49,7 +49,6 @@ import java.util.Map;
 public final class PeerServlet extends WebSocketServlet {
 
     // static final boolean alwaysResponse = Conch.getBooleanProperty("sharder.response");
-    // close this setting since v0.1.7 to avoid block synchronization error
     static final boolean alwaysResponse = false;
     
     abstract static class PeerRequestHandler {
