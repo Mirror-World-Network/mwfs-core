@@ -1738,23 +1738,18 @@ public final class Peers {
         return myServices.contains(service);
     }
 
-    private static int connectCount = 0;
-    private static int randomConnectCount = 0;
-
-    public static Peer checkOrConnectBootNodeRandom(){
-        boolean needConnectNow = randomConnectCount++ % 100 == 0;
-        return _connectToPeer(Constants.getBootNodeRandom());
+    public static Peer checkOrConnectBootNodeRandom(boolean needConnectNow){
+        return _connectToPeer(Constants.getBootNodeRandom(), needConnectNow);
     }
 
-    public static List<Peer> checkOrConnectAllBootNodes(){
+    public static List<Peer> checkOrConnectAllBootNodes(boolean needConnectNow){
         List<Peer> connectedNodes = Lists.newArrayList();
         for(String nodeHost : Constants.bootNodesHost){
-            boolean needConnectNow = connectCount++ % 100 == 0;
             if(Conch.matchMyAddress(nodeHost)){
                 continue;
             }
 
-            Peer peer = _connectToPeer(nodeHost);
+            Peer peer = _connectToPeer(nodeHost, needConnectNow);
             if(peer != null) {
                 connectedNodes.add(peer);
             }
@@ -1762,8 +1757,7 @@ public final class Peers {
         return connectedNodes;
     }
 
-    private static Peer _connectToPeer(String nodeHost){
-        boolean needConnectNow = false;
+    private static Peer _connectToPeer(String nodeHost, boolean needConnectNow){
         Peer peer = Peers.getPeer(nodeHost, true);
         if(peer == null) {
             peer = Peers.findOrCreatePeer(nodeHost, false, true);
@@ -1788,11 +1782,11 @@ public final class Peers {
 
     public static void checkOrReConnectAllPeers(){
         for (Peer peer : peers.values()) {
-            if(peer != null) {
+            if(peer != null && Peer.State.CONNECTED != peer.getState()) {
                 connectPeer(peer);
             }
         }
-        checkOrConnectAllBootNodes();
+        checkOrConnectAllBootNodes(true);
     }
 
 }

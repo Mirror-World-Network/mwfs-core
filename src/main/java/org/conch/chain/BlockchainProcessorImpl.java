@@ -141,7 +141,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                         }
 
                         // re-connect all peers when download can't finish long time
-                        if (System.currentTimeMillis() - lastDownloadMS > MAX_DOWNLOAD_TIME) {
+                        if (isExceedUnfinishedDownload(MAX_DOWNLOAD_TIME)) {
                             Logger.logInfoMessage("Can't finish the block synchronization in the %d Minutes, re-connect all peers", MAX_DOWNLOAD_TIME/1000/60);
                             Peers.checkOrReConnectAllPeers();
                         }
@@ -213,7 +213,8 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         try {
             long startTime = System.currentTimeMillis();
             int limitConnectedSize = Math.min(1, defaultNumberOfForkConfirmations);
-            List<Peer> bootNodes = Peers.checkOrConnectAllBootNodes();
+            boolean needConnectNow = isExceedUnfinishedDownload(MAX_DOWNLOAD_TIME / 2);
+            List<Peer> bootNodes = Peers.checkOrConnectAllBootNodes(needConnectNow);
             connectedPublicPeers = Peers.getPublicPeers(Peer.State.CONNECTED, true);
             int connectedSize = connectedPublicPeers.size();
             if (!Generator.isBootNode
@@ -222,7 +223,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     Logger.logInfoMessage("No enough connected peers[limit size=" + (limitConnectedSize) + ",current connected size=" + connectedSize + "], break syn blocks...");
                 }
 
-                if (System.currentTimeMillis() - lastDownloadMS > MAX_DOWNLOAD_TIME) {
+                if (isExceedUnfinishedDownload(MAX_DOWNLOAD_TIME)) {
                     Peers.checkOrReConnectAllPeers();
                 }
                 return;
@@ -307,9 +308,9 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
 
             int heightDiffCount = lastBlockchainFeederHeight - commonBlock.getHeight();
             // fetch the db archive and restart
-            if (System.currentTimeMillis() - lastDownloadMS > MAX_DOWNLOAD_TIME) {
+            if (isExceedUnfinishedDownload(MAX_DOWNLOAD_TIME)) {
                 Logger.logWarningMessage("Can't finish the block synchronization in the %d hours"
-                        + ", try to RESET and RESTART this client manually!!"
+                        + ", try to RESET and RESTART this client manually to fix problem!!"
                         , (MAX_DOWNLOAD_TIME/1000/60/60), heightDiffCount);
 //                ClientUpgradeTool.restoreDbToLastArchive(true, true);
             }
@@ -585,7 +586,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     peer = feederPeer;
                 } else {
                     if (forceSwitchToBootNodesFork) {
-                        peer = Peers.checkOrConnectBootNodeRandom();
+                        peer = Peers.checkOrConnectBootNodeRandom(false);
                     } else {
                         if (nextPeerIndex >= connectedPublicPeers.size()) {
                             nextPeerIndex = 0;
@@ -776,6 +777,10 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         return peer.send(JSON.prepareRequest(request));
     }
 
+    private boolean isExceedUnfinishedDownload(long maxTimeSeconds){
+        return (System.currentTimeMillis() - lastDownloadMS) > maxTimeSeconds;
+    }
+
     public boolean checkAndSwitchToBootNodesFork() {
         try {
             if (Generator.isBootNode
@@ -786,7 +791,8 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
 
             forceSwitchToBootNodesFork = true;
             // connect to the boot nodes
-            Peer peer = Peers.checkOrConnectBootNodeRandom();
+            boolean needConnectNow = isExceedUnfinishedDownload(MAX_DOWNLOAD_TIME / 2);
+            Peer peer = Peers.checkOrConnectBootNodeRandom(needConnectNow);
             if (peer == null) {
                 Logger.logWarningMessage("Can't connect to boot nodes, break and wait for next round. ForkSwitchingFailed=%d, SwitchToBootNodeFailedCount=%d",
                         forkSwitchFailedCount, switchToBootNodeFailedCount);
