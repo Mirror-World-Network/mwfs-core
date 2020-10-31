@@ -41,7 +41,6 @@ import org.conch.peer.Peers;
 import org.conch.storage.StorageBackup;
 import org.conch.storage.tx.StorageTx;
 import org.conch.storage.tx.StorageTxProcessorImpl;
-import org.conch.tools.ClientUpgradeTool;
 import org.conch.tx.*;
 import org.conch.util.*;
 import org.conch.vote.PhasingPoll;
@@ -828,12 +827,14 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
 
             } else {
                 // restore to the check point(known db archive)
+                /**
                 if (isRestoringDb) {
                     return false;
                 }
                 isRestoringDb = true;
                 ClientUpgradeTool.restoreDbToLastArchive(true, true);
                 return false;
+                **/
             }
 
         } catch (Exception e) {
