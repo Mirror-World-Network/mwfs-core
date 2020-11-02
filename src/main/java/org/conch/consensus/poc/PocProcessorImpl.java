@@ -257,55 +257,84 @@ public class PocProcessorImpl implements PocProcessor {
             return;
         }
 
+        boolean openNewDbTx = false;
         try {
+            if(!Db.db.isInTransaction()) {
+                Db.db.beginTransaction();
+                openNewDbTx = true;
+            }
             Conch.getBlockchain().updateLock();
             long t1 = System.currentTimeMillis();
-            Db.db.beginTransaction();
             Account.syncAccountTable("ACCOUNT","ACCOUNT_CACHE",Constants.SYNC_WORK_BLOCK_NUM);
             Account.syncAccountTable("ACCOUNT_CACHE","ACCOUNT_HISTORY",Constants.SYNC_CACHE_BLOCK_NUM);
-            Db.db.commitTransaction();
+            if(openNewDbTx) {
+                Db.db.commitTransaction();
+            }
             long t2 = System.currentTimeMillis();
             Logger.logDebugMessage("Sync ACCOUNT and ACCOUNT_CACHE tables used %d S", (t2 - t1)/1000);
         } catch (Exception e) {
             Logger.logWarningMessage("Sync ACCOUNT and ACCOUNT_CACHE tables occur error %s, rollback and wait for next", e.getMessage());
-            Db.db.rollbackTransaction();
+            if(openNewDbTx) {
+                Db.db.rollbackTransaction();
+            }
         }finally {
-            Db.db.endTransaction();
+            if(openNewDbTx) {
+                Db.db.endTransaction();
+            }
             Conch.getBlockchain().updateUnlock();
         }
 
-
+        openNewDbTx = false;
         try {
+            if(!Db.db.isInTransaction()) {
+                Db.db.beginTransaction();
+                openNewDbTx = true;
+            }
             Conch.getBlockchain().updateLock();
             long t1 = System.currentTimeMillis();
-            Db.db.beginTransaction();
             Account.syncAccountGuaranteedBalanceTable("ACCOUNT_GUARANTEED_BALANCE","ACCOUNT_GUARANTEED_BALANCE_CACHE",Constants.SYNC_WORK_BLOCK_NUM);
             Account.syncAccountGuaranteedBalanceTable("ACCOUNT_GUARANTEED_BALANCE_CACHE","ACCOUNT_GUARANTEED_BALANCE_HISTORY",Constants.SYNC_CACHE_BLOCK_NUM);
-            Db.db.commitTransaction();
+            if(openNewDbTx) {
+                Db.db.commitTransaction();
+            }
             long t2 = System.currentTimeMillis();
             Logger.logDebugMessage("sync ACCOUNT_GUARANTEED_BALANCE and ACCOUNT_GUARANTEED_BALANCE_CACHE tables used %d S", (t2 - t1)/1000);
         } catch (Exception e) {
             Logger.logWarningMessage("Sync ACCOUNT_GUARANTEED_BALANCE and ACCOUNT_GUARANTEED_BALANCE_CACHE tables occur error %s, rollback and wait for next", e.getMessage());
-            Db.db.rollbackTransaction();
+            if(openNewDbTx) {
+                Db.db.rollbackTransaction();
+            }
         }finally {
-            Db.db.endTransaction();
+            if(openNewDbTx) {
+                Db.db.endTransaction();
+            }
             Conch.getBlockchain().updateUnlock();
         }
 
+        openNewDbTx = false;
         try {
+            if(!Db.db.isInTransaction()) {
+                Db.db.beginTransaction();
+                openNewDbTx = true;
+            }
             Conch.getBlockchain().updateLock();
             long t1 = System.currentTimeMillis();
-            Db.db.beginTransaction();
             Account.syncAccountPocScoreTable("ACCOUNT_POC_SCORE", "ACCOUNT_POC_SCORE_CACHE", Constants.SYNC_WORK_BLOCK_NUM);
             Account.syncAccountPocScoreTable("ACCOUNT_POC_SCORE_CACHE", "ACCOUNT_POC_SCORE_HISTORY", Constants.SYNC_CACHE_BLOCK_NUM);
-            Db.db.commitTransaction();
+            if(openNewDbTx) {
+                Db.db.commitTransaction();
+            }
             long t2 = System.currentTimeMillis();
             Logger.logDebugMessage("Sync ACCOUNT_POC_SCORE and ACCOUNT_POC_SCORE_CACHE tables used %d S", (t2 - t1)/1000);
         } catch (Exception e) {
             Logger.logWarningMessage("Sync ACCOUNT_POC_SCORE and ACCOUNT_POC_SCORE_CACHE tables occur error %s, rollback and wait for next", e.getMessage());
-            Db.db.rollbackTransaction();
+            if(openNewDbTx) {
+                Db.db.rollbackTransaction();
+            }
         }finally {
-            Db.db.endTransaction();
+            if(openNewDbTx) {
+                Db.db.endTransaction();
+            }
             Conch.getBlockchain().updateUnlock();
         }
 
@@ -519,13 +548,12 @@ public class PocProcessorImpl implements PocProcessor {
     }
 
     private synchronized static Map<Long,CertifiedPeer> readFromConfigFile() {
-        Logger.logInfoMessage("List all certified peers from config file");
         Map<Long,CertifiedPeer> peerMap = Maps.newHashMap();
         File file = new File(PEER_CONFIG_PATH);
         if(!file.exists()) {
             return peerMap;
         }
-
+        Logger.logInfoMessage("Load all certified peers from config file");
         FileReader fr = null;
         try {
             fr = new FileReader(file);
