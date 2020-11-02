@@ -29,6 +29,7 @@ import org.conch.consensus.poc.hardware.GetNodeHardware;
 import org.conch.env.RuntimeEnvironment;
 import org.conch.http.API;
 import org.conch.mint.Generator;
+import org.conch.peer.Peers;
 
 import java.io.*;
 import java.util.Map;
@@ -535,4 +536,5 @@ public final class Logger {
     public static final String GetNodeHardware_P_report = GetNodeHardware.class.getName() + "#report";
     public static final String IpUtil_geoTransformFailed = IpUtil.class.getName() + "#geoTransformFailed";
     public static final String API_incorrectAdmPwd = API.class.getName() + "#incorrectAdmPwd";
+    public static final String PEERS_CHECK_OR_CONNECT_TO_PEER = Peers.class.getName() + "#_connectToPeer";
 }

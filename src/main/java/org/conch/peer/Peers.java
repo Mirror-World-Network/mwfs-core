@@ -1796,8 +1796,10 @@ public final class Peers {
 
         if(peer != null) {
             if(needConnectNow || Peer.State.CONNECTED != peer.getState()){
-                Logger.logDebugMessage("Re-connect boot node %s[%s] when its state is %s",
-                        peer.getAnnouncedAddress(), peer.getHost(), peer.getState());
+                if (Logger.printNow(Logger.PEERS_CHECK_OR_CONNECT_TO_PEER)) {
+                    Logger.logDebugMessage("Re-connect boot node %s[%s] when its state is %s",
+                            peer.getAnnouncedAddress(), peer.getHost(), peer.getState());
+                }
                 connectPeer(peer);
             }
         }
