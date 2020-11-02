@@ -51,13 +51,17 @@
 
 @media only screen and (max-width: 780px) {
     .container_login .content {
-        width: 375px;
+        //width: 375px;
+        padding-top: 20px;
+        width: auto;
+        margin: 0 15px;
+
     }
     .container_login .content {
         .content_message {
             padding: 0 15px;
-            margin-left: 15px;
-            margin-right: 15px;
+            //margin-left: 15px;
+            //margin-right: 15px;
             height: 200px;
 
             > div:first-child {
@@ -70,9 +74,10 @@
         }
 
         .content_operation {
-            margin: 0 15px 30px;
+            //margin: 0 15px 30px;
+            margin: 0 0 30px;
             padding: 0 15px;
-
+            height: 560px;
             .content_container {
                 width: auto;
             }
