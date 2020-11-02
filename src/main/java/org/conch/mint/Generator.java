@@ -198,12 +198,16 @@ public class Generator implements Comparable<Generator> {
         if(!Conch.getBlockchainProcessor().isUpToDate()) {
             String nodeType = isBootNode ? "Boot" : "Normal";
             if (hitMatched) {
+                String miningStatusTips = isBootNode ? "still mining" : "DON'T MINING";
                 Logger.logInfoMessage("Current node is %s node and blockchain state[%s] isn't " +
                                 "UP_TO_DATE[sinceLastBlock=%d minutes, trigger=%d min delay], " +
-                                "still mining when the miner[%s]' hit is matched at height %d, its mining time is %s",
+                                "%s when the miner[%s]' hit is matched at height %d, its estimated mining time is %s",
                         nodeType, Peers.getMyBlockchainStateName(), minutesSinceLastBlock, OBSOLETE_DELAY,
-                        linkedGenerator.rsAddress, lastBlock.getHeight(),
+                        miningStatusTips, linkedGenerator.rsAddress, lastBlock.getHeight(),
                         Convert.dateFromEpochTime(linkedGenerator.hitTime));
+                if(!isBootNode) {
+                    return false;
+                }
             } else {
                 if (Logger.printNow(Logger.Generator_isBlockStuckOnBootNode)) {
                     Logger.logInfoMessage("Current node is %s node and blockchain state[%s] isn't " +
