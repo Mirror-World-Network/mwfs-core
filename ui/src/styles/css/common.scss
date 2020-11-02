@@ -849,3 +849,33 @@
 input:focus {
     border-color: #3fb09a !important;
 }
+
+@media only screen and (max-width: 780px) {
+    .block_list {
+        .list_table {
+            .list_content {
+                table {
+                    th {
+                        height: auto;
+                        font: {
+                            size: 12px;
+                        }
+                    }
+                }
+            }
+
+            .list_pagination {
+                border-top: 1px solid #ddd;
+                height: 60px;
+                text-align: right;
+                vertical-align: middle;
+            }
+        }
+    }
+    .el-input__inner{
+        background-color: #fff0;
+    }
+    .el-radio-button__inner {
+        padding: 8px 10px;
+    }
+}
