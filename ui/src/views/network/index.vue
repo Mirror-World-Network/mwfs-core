@@ -129,7 +129,7 @@
                                 <th class="pc-table">{{$t('network.block_has_distribution_reward')}}</th>
                                 <th class="w200 ">{{$t('network.block_list_generator')}}</th>
                                 <th class="pc-table">{{$t('network.block_list_operating')}}</th>
-                                <th class="mobile title">
+                                <th class="mobile title" style="padding-top: 5px">
                                     <span>{{$t('network.block_has_distribution_reward')}}</span>
                                 </th>
                             </tr>
