@@ -160,20 +160,20 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                         return;
                     }
 
-//                    if(lastBootNodeHeight == -1) bootNodeHeightCompare();
-
                     int chainHeight = blockchain.getHeight();
+                    long downloadStartMS = System.currentTimeMillis();
                     downloadPeer();
-//                    bootNodeHeightCompare();
                     if (blockchain.getHeight() == chainHeight) {
                         if (isDownloading && !simulateEndlessDownload) {
                             isDownloading = false;
                             lastDownloadMS = System.currentTimeMillis();
                             Peers.checkAndUpdateBlockchainState(null);
                             Block lastBlock = blockchain.getLastBlock();
-                            Logger.logInfoMessage("Finished blockchain downloaded %d blocks from %s[%s], sync last block[miner=%s, id=%d]" +
-                                    "current height is %d, chain state is %s" ,
+                            long downloadUsedMS= System.currentTimeMillis() - downloadStartMS;
+                            Logger.logInfoMessage("Finished blockchain downloaded %d blocks from %s[%s] used %d Min(%d S), sync last block[miner=%s, id=%d], " +
+                                    "current chain[height=%d, state=%s]" ,
                                     totalBlocks, lastBlockchainFeeder.getAnnouncedAddress(), lastBlockchainFeeder.getHost(),
+                                    downloadUsedMS/1000/60, downloadUsedMS/1000,
                                     Account.rsAccount(lastBlock.getGeneratorId()), lastBlock.getId(),
                                     blockchain.getHeight(), Peers.getMyBlockchainStateName());
                             bootNodeForkSwitchCheck(lastBlockchainFeeder);
@@ -332,8 +332,8 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 }
                 long lastBlockId = blockchain.getLastBlock().getId();
                 int syncHeightCount = lastBlockchainFeederHeight - blockchain.getHeight();
-                long estimatedSyncSeconds = syncHeightCount * 30;
-                Logger.logInfoMessage("Synchronize the blocks from feeder %s[%s], current height %d -> feeder's height %d, sync %d blocks estimated processing time is %d M(%d S) ...",
+                long estimatedSyncSeconds = syncHeightCount * 1;
+                Logger.logInfoMessage("Synchronize the blocks from feeder %s[%s], current height %d -> feeder's height %d, sync %d blocks estimated processing time is %d Min(%d S) ...",
                         lastBlockchainFeeder.getAnnouncedAddress(), lastBlockchainFeeder.getHost(),
                         blockchain.getHeight(), lastBlockchainFeederHeight, syncHeightCount,
                         estimatedSyncSeconds / 60 , estimatedSyncSeconds);
