@@ -583,6 +583,8 @@
                         _this.selectLanValue = language;
                     }
                 }
+                _this.activeSearch = false;
+                _this.placeholder = _this.$t('header.search');
             }
         },
     };
