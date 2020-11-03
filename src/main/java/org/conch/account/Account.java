@@ -2399,7 +2399,8 @@ public final class Account {
                 int floorHeight = heightRs.next() ? heightRs.getInt("height") : 0;
                 Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
                 if (workHeight - floorHeight < dif) {
-                    return;
+//                    return;
+                    continue;
                 }
                 int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
 
@@ -2470,7 +2471,8 @@ public final class Account {
                 int floorHeight = heightRs.next() ? heightRs.getInt("height") : 0;
                 Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
                 if (workHeight - floorHeight < dif) {
-                    return;
+//                    return;
+                    continue;
                 }
                 int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
 
@@ -2536,7 +2538,8 @@ public final class Account {
                 int floorHeight = heightRs.next() ? heightRs.getInt("height") : 0;
                 Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
                 if (workHeight - floorHeight < dif) {
-                    return;
+//                    return;
+                    continue;
                 }
                 int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
 
@@ -2610,7 +2613,8 @@ public final class Account {
                 int floorHeight = heightRs.next() ? heightRs.getInt("height") : 0;
                 Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
                 if (workHeight - floorHeight < dif) {
-                    return;
+//                    return;
+                    continue;
                 }
                 int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
 

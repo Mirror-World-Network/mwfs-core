@@ -257,13 +257,13 @@ public class PocProcessorImpl implements PocProcessor {
             return;
         }
 
+        Logger.logInfoMessage("Start to sync cache and history tables at height %d", height);
         boolean openNewDbTx = false;
         try {
             if(!Db.db.isInTransaction()) {
                 Db.db.beginTransaction();
                 openNewDbTx = true;
             }
-            Conch.getBlockchain().updateLock();
             long t1 = System.currentTimeMillis();
             Account.syncAccountTable("ACCOUNT","ACCOUNT_CACHE",Constants.SYNC_WORK_BLOCK_NUM);
             Account.syncAccountTable("ACCOUNT_CACHE","ACCOUNT_HISTORY",Constants.SYNC_CACHE_BLOCK_NUM);
@@ -281,7 +281,6 @@ public class PocProcessorImpl implements PocProcessor {
             if(openNewDbTx) {
                 Db.db.endTransaction();
             }
-            Conch.getBlockchain().updateUnlock();
         }
 
         openNewDbTx = false;
@@ -290,7 +289,6 @@ public class PocProcessorImpl implements PocProcessor {
                 Db.db.beginTransaction();
                 openNewDbTx = true;
             }
-            Conch.getBlockchain().updateLock();
             long t1 = System.currentTimeMillis();
             Account.syncAccountGuaranteedBalanceTable("ACCOUNT_GUARANTEED_BALANCE","ACCOUNT_GUARANTEED_BALANCE_CACHE",Constants.SYNC_WORK_BLOCK_NUM);
             Account.syncAccountGuaranteedBalanceTable("ACCOUNT_GUARANTEED_BALANCE_CACHE","ACCOUNT_GUARANTEED_BALANCE_HISTORY",Constants.SYNC_CACHE_BLOCK_NUM);
@@ -308,7 +306,6 @@ public class PocProcessorImpl implements PocProcessor {
             if(openNewDbTx) {
                 Db.db.endTransaction();
             }
-            Conch.getBlockchain().updateUnlock();
         }
 
         openNewDbTx = false;
@@ -317,7 +314,6 @@ public class PocProcessorImpl implements PocProcessor {
                 Db.db.beginTransaction();
                 openNewDbTx = true;
             }
-            Conch.getBlockchain().updateLock();
             long t1 = System.currentTimeMillis();
             Account.syncAccountPocScoreTable("ACCOUNT_POC_SCORE", "ACCOUNT_POC_SCORE_CACHE", Constants.SYNC_WORK_BLOCK_NUM);
             Account.syncAccountPocScoreTable("ACCOUNT_POC_SCORE_CACHE", "ACCOUNT_POC_SCORE_HISTORY", Constants.SYNC_CACHE_BLOCK_NUM);
@@ -335,7 +331,6 @@ public class PocProcessorImpl implements PocProcessor {
             if(openNewDbTx) {
                 Db.db.endTransaction();
             }
-            Conch.getBlockchain().updateUnlock();
         }
 
 //        try {
