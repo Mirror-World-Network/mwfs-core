@@ -124,7 +124,7 @@ public class ClientUpgradeTool {
 
     public static volatile boolean forceDownloadFromOSS = false;
     private static volatile boolean restoring = false;
-    private static final long FETCH_DB_ARCHIVE_INTERVAL_MS = 12*60*60*1000L;
+    private static final long FETCH_DB_ARCHIVE_INTERVAL_MS = 1*60*60*1000L;
     // default value is 5 days
     private static final long DOWNLOAD_DB_ARCHIVE_INTERVAL_MS = 5*(24*60*60*1000L);
     private static volatile JSONObject lastDbArchiveObj = null;

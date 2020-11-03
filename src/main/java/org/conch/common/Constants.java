@@ -357,7 +357,7 @@ public final class Constants {
     }
     
     private static final String gapMinutes = isDevnet() ?  Conch.getStringProperty("sharder.devnetBlockGap") :
-            ( isTestnet() ? Conch.getStringProperty("sharder.testnetBlockGap") : Conch.getStringProperty("sharder.blockGap"));
+            ( isTestnet() ? Conch.getStringProperty("sharder.testnetBlockGap", "10") : Conch.getStringProperty("sharder.blockGap", "10"));
     public static final int GAP_SECONDS = getBlockGapSeconds();
     /**
      * interval between two block generation, the min is 1min

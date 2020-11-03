@@ -63,7 +63,7 @@ public class RewardCalculator {
 
     // Halve height, -1 means close halve
     private static final int HALVE_COUNT = -1;
-    public static final int NETWORK_STABLE_PHASE = 5000; // Estimated stable height after network reset
+    public static final int NETWORK_STABLE_PHASE = 1000; // Estimated stable height after network reset
     /**
      * how much one block reward
      * @return
