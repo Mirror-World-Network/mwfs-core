@@ -5,6 +5,11 @@
                 <p class="block_title">
                     <img src="../../assets/img/network.svg"/>
                     <span>{{$t('network.network_title')}}</span>
+                    <span class="hrefbtn fr csp only_mobile">
+                        <a @click="turn2peers" style="color: #3fb09a;">
+                            <span>{{$t('network.peers_detail')}}</span>
+                        </a>
+                    </span>
                 </p>
                 <div class="w dfl">
                     <div class="block_blue radius_blue">

@@ -95,6 +95,16 @@
 
         <div class="mobile">
             <div class="navbar">
+                <div id="logo_mobile">
+                    <a href="#" class="logo">
+<!--                        <img src="../../assets/img/logo.svg"/>-->
+                        <div @click="openCosUpgradeDialog()">
+                            <span v-if="isUpdate" title="Update" class="update"></span>
+                            <span>MW</span>
+                            <span>{{blockchainStatus.fullVersion}}</span>
+                        </div>
+                    </a>
+                </div>
                 <el-menu class="navbar_left el-menu-demo" :class="this.$i18n.locale === 'en'? 'en_menu' : ''"
                          mode="horizontal" :router=isRouter @select="activeItem">
                     <el-menu-item index="/account" :class="this.$route.path.indexOf('/account') >= 0 ? 'activeLi' : ''">
