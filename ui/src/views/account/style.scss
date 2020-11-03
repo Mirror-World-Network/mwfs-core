@@ -79,17 +79,17 @@
         //float: left;
         height: 30px;
         .el-select {
-            height: 24px;
-            width: 80px;
+            height: 28.5px;
+            width: 90px;
 
             .el-input__inner {
                 font-size: 13px;
-                width: 80px;
-                height: 24px;
+                width: 90px;
+                height: 28.5px;
                 //margin-left: 20px;
                 background: transparent;
                 border: 1px solid #3fb09a;
-                padding: 0 15px 0 0;
+                padding: 5px 15px 5px 5px;
                 text-align: center;
             }
         }
@@ -107,6 +107,7 @@
             border: 0.5px solid #3fb09a;
             border-radius: 4px;
             margin-right: 10px;
+            height: 28px;
         }
 
         .active {
