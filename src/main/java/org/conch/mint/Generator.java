@@ -190,6 +190,11 @@ public class Generator implements Comparable<Generator> {
             }
         }
 
+        if(linkedGenerator == null) {
+            Logger.logDebugMessage("No linked miner, please finish the client initial or miner address linking firstly ...");
+            return false;
+        }
+
         int miningTime = linkedGenerator.getTimestamp(generationLimit);
         boolean hitMatched = verifyHit(linkedGenerator.hit, linkedGenerator.pocScore, lastBlock, miningTime);
         long secondsSinceLastBlock = Conch.getEpochTime() - Conch.getBlockchain().getLastBlockTimestamp();
