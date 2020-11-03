@@ -34,7 +34,7 @@
           <span class="block_title fl">
             <img src="../../assets/img/peerlist.svg" />
             <span>{{$t('peers.peer_list')}}</span>
-            <span>{{$t('peers.peer_list_link')}}</span>
+            <span class="peer_link">{{$t('peers.peer_list_link')}}</span>
           </span>
           <span class="hrefbtn fr block_title csp">
             <a @click="openAddPeer">
@@ -48,13 +48,13 @@
             <table class="table table-striped" id="peers_table">
               <thead>
                 <tr>
-                  <th>{{$t('peers.peer_address')}}</th>
-                  <th>{{$t('peers.download')}}</th>
-                  <th>{{$t('peers.upload')}}</th>
-                  <th>{{$t('peers.application')}}</th>
-                  <th>{{$t('peers.platform')}}</th>
-                  <th>{{$t('peers.server')}}</th>
-                  <th>{{$t('peers.operating')}}</th>
+                  <th class="w100">{{$t('peers.peer_address')}}</th>
+                  <th class="pc-table">{{$t('peers.download')}}</th>
+                  <th class="pc-table">{{$t('peers.upload')}}</th>
+                  <th class="w100">{{$t('peers.application')}}</th>
+                  <th class="w100">{{$t('peers.platform')}}</th>
+                  <th class="pc-table">{{$t('peers.server')}}</th>
+                  <th class="pc-table">{{$t('peers.operating')}}</th>
                 </tr>
               </thead>
               <tbody>
@@ -74,8 +74,8 @@
                       </span>
                     </el-tooltip>
                   </td>
-                  <td>{{formatByte(peer.downloadedVolume)}}</td>
-                  <td>{{formatByte(peer.uploadedVolume)}}</td>
+                  <td class="pc-table">{{formatByte(peer.downloadedVolume)}}</td>
+                  <td class="pc-table">{{formatByte(peer.uploadedVolume)}}</td>
                   <td>
                     <span class="patch">{{peer.application}}&nbsp;{{peer.version}} {{peer.cosUpdateTimeSubstring}}</span>
                   </td>
@@ -91,7 +91,7 @@
                       <span>{{service}}</span>
                     </el-tooltip>
                   </td>
-                  <td>
+                  <td class="pc-table">
                     <button
                       class="list_button w40"
                       @click="openConnectPeer(peer.address)"

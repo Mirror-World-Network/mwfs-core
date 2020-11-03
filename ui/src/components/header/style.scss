@@ -332,6 +332,65 @@
             color: #3fb09a;
         }
     }
+    #logo_mobile {
+        vertical-align: middle;
+        width: 20%;
+        //padding: 5px;
+        padding-top: 20px;
+        .logo {
+            display: block;
+            height: auto;
+            width: 20%;
+            text-decoration: none;
+            &:hover {
+                color: #3fb09a;
+                text-decoration: none !important;
+            }
+
+            &:focus {
+                outline: none;
+                text-decoration: none !important;
+            }
+
+            img {
+                margin-bottom: auto;
+                margin-top: auto;
+                width: 30px;
+                height: 20px;
+            }
+
+            div:last-child {
+                display: grid;
+                margin-left: 6px;
+                margin-top: auto;
+                margin-bottom: auto;
+                color: #3fb09a;
+                width: 80px;
+
+                span:first-child {
+                    font-size: 20px;
+                    font-weight: bold;
+                }
+
+                span:last-child {
+                    font-size: 12px;
+                    padding-top: 3px;
+                }
+            }
+
+            .update {
+                display: inline-block;
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+                background: red;
+                position: absolute;
+                top: -12px;
+                left: 25px;
+                transform: scale(0.1);
+            }
+        }
+    }
     .navbar_lang {
         line-height: 60px;
         .el-input--suffix .el-input__inner {
