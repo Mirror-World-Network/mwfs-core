@@ -24,9 +24,8 @@ package org.conch.tx;
 import org.conch.chain.BlockDb;
 import org.conch.chain.BlockImpl;
 import org.conch.common.ConchException;
-import org.conch.common.Constants;
-import org.conch.consensus.reward.RewardCalculator;
-import org.conch.db.*;
+import org.conch.db.Db;
+import org.conch.db.DbUtils;
 import org.conch.util.Convert;
 
 import java.nio.ByteBuffer;
@@ -421,17 +420,17 @@ public final class TransactionDb {
         }
     }
 
-    public static TransactionImpl findTransactionsByAccount(int height, int subType,int type) {
+    public static TransactionImpl findTxByType(int height, int subType, int type) {
         Connection con;
         try {
             con = Db.db.getConnection();
-            PreparedStatement pstmt = con.prepareStatement("SELECT * FROM transaction where subtype = ? and type = ? and height = ?");
+            PreparedStatement pstmt = con.prepareStatement("SELECT * FROM transaction where subtype = ? and type = ? and height <= ? limit 1");
             pstmt.setLong(1,subType);
             pstmt.setLong(2,type);
             pstmt.setInt(3,height);
             try (ResultSet rs = pstmt.executeQuery()){
                 if (rs.next()) {
-                    return (loadTransaction(con, rs));
+                    return loadTransaction(con, rs);
                 }
             }
         } catch (Exception e) {
