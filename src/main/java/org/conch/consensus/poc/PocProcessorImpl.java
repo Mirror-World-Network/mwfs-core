@@ -152,7 +152,7 @@ public class PocProcessorImpl implements PocProcessor {
                Connection con = null;
                try {
                    con = Db.db.getConnection();
-                   PreparedStatement pstmt = con.prepareStatement("SELECT * FROM transaction type=" + TransactionType.TYPE_POC
+                   PreparedStatement pstmt = con.prepareStatement("SELECT * FROM transaction where type=" + TransactionType.TYPE_POC
                            +  " AND subtype=" + PocTxWrapper.SUBTYPE_POC_NODE_TYPE
                            +  " ORDER BY block_timestamp ASC, transaction_index ASC");
 

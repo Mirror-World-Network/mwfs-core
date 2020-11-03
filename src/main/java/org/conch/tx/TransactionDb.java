@@ -421,6 +421,25 @@ public final class TransactionDb {
         }
     }
 
+    public static TransactionImpl findTransactionsByAccount(int height, int subType,int type) {
+        Connection con;
+        try {
+            con = Db.db.getConnection();
+            PreparedStatement pstmt = con.prepareStatement("SELECT * FROM transaction where subtype = ? and type = ? and height = ?");
+            pstmt.setLong(1,subType);
+            pstmt.setLong(2,type);
+            pstmt.setInt(3,height);
+            try (ResultSet rs = pstmt.executeQuery()){
+                if (rs.next()) {
+                    return (loadTransaction(con, rs));
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e.toString(), e);
+        }
+        return null;
+    }
+
     public static class PrunableTransaction {
         private final long id;
         private final TransactionType transactionType;
