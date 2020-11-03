@@ -299,6 +299,10 @@
         display: block;
         margin-bottom: 20px;
     }
+    .el-menu--horizontal>.el-menu-item.is-active {
+        border-bottom: 2px solid #3fb09a;
+        color: #3fb09a;
+    }
     .header {
         min-width: 300px;
         height: 120px;
