@@ -528,7 +528,9 @@ public class PocDb  {
         }
 
         private int insert(Connection con, CertifiedPeer certifiedPeer) throws SQLException {
-            if(con == null) return 0;
+            if(con == null) {
+                return 0;
+            }
 
             PreparedStatement pstmtInsert = con.prepareStatement("INSERT INTO certified_peer(host, "
                     + " account_id, type, height, last_updated) VALUES(?, ?, ?, ?, ?)");
@@ -586,7 +588,7 @@ public class PocDb  {
             if(Constants.SYNC_BUTTON) {
                 return;
             }
-            _trim("certified_peer", height);
+           // _trim("certified_peer", height);
         }
     }
     private static final CertifiedPeerTable certifiedPeerTable = new CertifiedPeerTable();
