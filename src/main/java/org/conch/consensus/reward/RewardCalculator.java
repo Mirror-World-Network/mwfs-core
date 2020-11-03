@@ -46,8 +46,8 @@ public class RewardCalculator {
     private enum RewardDef {
         BLOCK_REWARD(1333 * Constants.ONE_SS),
         CROWD_MINERS_REWARD(667 * Constants.ONE_SS),
-        STABLE_PHASE_BLOCK_REWARD(2L),
-        STABLE_PHASE_CROWD_MINERS_REWARD(1L);
+        STABLE_PHASE_BLOCK_REWARD(1 * Constants.ONE_SS),
+        STABLE_PHASE_CROWD_MINERS_REWARD(1 * Constants.ONE_SS / 2);
 
         private final long amount;
 
