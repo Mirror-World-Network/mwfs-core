@@ -123,13 +123,13 @@
                             <tr>
                                 <th>{{$t('network.block_list_height')}}</th>
                                 <th class="w200">{{$t('network.block_list_time')}}</th>
-                                <th>{{$t('network.block_list_amount')}}</th>
+                                <th class="w200">{{$t('network.block_list_amount')}}</th>
                                 <th class="pc-table">{{$t('network.block_list_fee')}}</th>
                                 <th class="pc-table">{{$t('network.block_list_transaction')}}</th>
                                 <th class="pc-table">{{$t('network.block_has_distribution_reward')}}</th>
-                                <th class="w200 ">{{$t('network.block_list_generator')}}</th>
+                                <th class="w200 block_generator">{{$t('network.block_list_generator')}}</th>
                                 <th class="pc-table">{{$t('network.block_list_operating')}}</th>
-                                <th class="mobile title" style="padding-top: 5px">
+                                <th class="mobile title block_reward">
                                     <span>{{$t('network.block_has_distribution_reward')}}</span>
                                 </th>
                             </tr>
