@@ -367,7 +367,7 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
 
         try {
             String version = "0.1.5";
-            String updateTime = "2020-08-20 19:19:19";
+            String updateTime = "2020-11-03 01:01:01";
             boolean forceReset = Conch.versionCompare(version, updateTime) <= 0;
 
             if(forceReset) {
