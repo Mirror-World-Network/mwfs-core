@@ -201,7 +201,7 @@ public class Generator implements Comparable<Generator> {
                 String miningStatusTips = isBootNode ? "still mining" : "DON'T MINING";
                 Logger.logInfoMessage("Current node is %s node and blockchain state[%s] isn't " +
                                 "UP_TO_DATE[sinceLastBlock=%d minutes, trigger=%d min delay], " +
-                                "%s when the miner[%s]' hit is matched at height %d, its estimated mining time is %s",
+                                "%s when the miner[%s]' hit is matched at height %d, its original estimated mining time is %s",
                         nodeType, Peers.getMyBlockchainStateName(), minutesSinceLastBlock, OBSOLETE_DELAY,
                         miningStatusTips, linkedGenerator.rsAddress, lastBlock.getHeight(),
                         Convert.dateFromEpochTime(linkedGenerator.hitTime));
