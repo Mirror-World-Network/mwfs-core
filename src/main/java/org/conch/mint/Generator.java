@@ -125,6 +125,7 @@ public class Generator implements Comparable<Generator> {
     
     // obsolete time delay, default value is 60 minutes
     public static final int OBSOLETE_DELAY = Constants.isDevnet() ? 1 : Conch.getIntProperty("sharder.obsoleteDelay", 60);
+    private static final boolean WAIT_WHEN_OBSOLETE = false;
     /**
      * check current blockchain state:
      * - mining height
@@ -196,11 +197,11 @@ public class Generator implements Comparable<Generator> {
         if(!Conch.getBlockchainProcessor().isUpToDate()) {
             String nodeType = isBootNode ? "Boot" : "Normal";
             if (hitMatched) {
-                if(isBootNode) {
+                if(!WAIT_WHEN_OBSOLETE || isBootNode) {
                     if (Logger.printNow(Logger.Generator_isBlockStuck)) {
                         Logger.logInfoMessage("Current node is %s node and blockchain state[%s] isn't " +
                                         "UP_TO_DATE[sinceLastBlock=%d minutes, mining trigger=%d min delay], " +
-                                        "still mining when the miner[%s] hit is matched at height %d, its original estimated mining time is %s",
+                                        "still mining when the miner[%s] hit is matched at height %d, its mining time is %s",
                                 nodeType, Peers.getMyBlockchainStateName(), minutesSinceLastBlock, OBSOLETE_DELAY,
                                 linkedGenerator.rsAddress, lastBlock.getHeight(),
                                 Convert.dateFromEpochTime(linkedGenerator.hitTime));
