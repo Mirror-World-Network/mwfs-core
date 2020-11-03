@@ -420,14 +420,14 @@ public final class TransactionDb {
         }
     }
 
-    public static TransactionImpl findTxByType(int height, int subType, int type) {
+    public static TransactionImpl findTxByType(int height, int type, int subType) {
         Connection con;
         try {
             con = Db.db.getConnection();
             PreparedStatement pstmt = con.prepareStatement("SELECT * FROM transaction where subtype = ? and type = ? and height <= ? limit 1");
-            pstmt.setLong(1,subType);
-            pstmt.setLong(2,type);
-            pstmt.setInt(3,height);
+            pstmt.setLong(1, subType);
+            pstmt.setLong(2, type);
+            pstmt.setInt(3, height);
             try (ResultSet rs = pstmt.executeQuery()){
                 if (rs.next()) {
                     return loadTransaction(con, rs);

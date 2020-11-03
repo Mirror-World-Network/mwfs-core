@@ -10,10 +10,11 @@ import org.conch.common.ConchException;
 import org.conch.common.Constants;
 import org.conch.consensus.poc.db.PocDb;
 import org.conch.consensus.poc.tx.PocTxBody;
+import org.conch.consensus.poc.tx.PocTxWrapper;
 import org.conch.mint.Generator;
 import org.conch.peer.CertifiedPeer;
 import org.conch.peer.Peer;
-import org.conch.tx.Transaction;
+import org.conch.tx.*;
 import org.conch.util.Logger;
 
 import java.io.Serializable;
@@ -201,26 +202,16 @@ public class PocHolder implements Serializable {
 
         if(pocScore == null) {
             pocScore = new PocScore(accountId,height);
-//            TransactionImpl txImpl = TransactionDb.findTransactionsByAccount(height, PocTxWrapper.SUBTYPE_POC_NODE_TYPE,TransactionType.TYPE_POC);
-//            if (ObjectUtil.isEmpty(txImpl)) {
-//                Logger.logDebugMessage("account poc data missing");
-//                return null;
-//            }
-//            PocTxBody.PocNodeTypeV2 nodeTypeV2 = null;
-//            PocTxBody.PocNodeTypeV3 nodeTypeV3 = null;
-//            Attachment attachment = txImpl.getAttachment();
-//            if(attachment instanceof PocTxBody.PocNodeTypeV3){
-//                nodeTypeV3 = (PocTxBody.PocNodeTypeV3) attachment;
-//            }
-//            else if(nodeTypeV3 == null && attachment instanceof PocTxBody.PocNodeTypeV2){
-//                nodeTypeV2 = (PocTxBody.PocNodeTypeV2) attachment;
-//            }
-//            else if(nodeTypeV2 == null && attachment instanceof PocTxBody.PocNodeType) {
-//                PocTxBody.PocNodeType nodeType = (PocTxBody.PocNodeType) attachment;
-//                nodeTypeV2 = CheckSumValidator.isPreAccountsInTestnet(nodeType.getIp(), height);
-//            }
-//
-//            pocScore.nodeTypeCal(nodeTypeV3 != null ? nodeTypeV3 : nodeTypeV2);
+            // inst form txs
+            TransactionImpl nodeTypeTx = TransactionDb.findTxByType(height, TransactionType.TYPE_POC, PocTxWrapper.SUBTYPE_POC_NODE_TYPE);
+            if (nodeTypeTx != null) {
+                PocTxBody.PocNodeTypeV3 nodeType = null;
+                Attachment attachment = nodeTypeTx.getAttachment();
+                if(attachment instanceof PocTxBody.PocNodeTypeV3){
+                    nodeType = (PocTxBody.PocNodeTypeV3) attachment;
+                }
+                pocScore.nodeTypeCal(nodeType);
+            }
             scoreMapping(pocScore);
         }else{
             inst.scoreMap.put(accountId, pocScore);
