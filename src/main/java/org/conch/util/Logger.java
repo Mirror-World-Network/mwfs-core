@@ -524,7 +524,7 @@ public final class Logger {
     public static final String Generator_getNextGenerators = Generator.class.getName() + "#getNextGenerators";
     public static final String Generator_isMintHeightReached = Generator.class.getName() + "#isMintHeightReached";
     public static final String Generator_checkOrStartAutoMining = Generator.class.getName() + "#checkOrStartAutoMining";
-    public static final String Generator_isBlockStuckOnBootNode = Generator.class.getName() + "#isBlockStuckOnBootNode";
+    public static final String Generator_isBlockStuck = Generator.class.getName() + "#isBlockStuck";
     public static final String Generator_isPocTxsProcessed = Generator.class.getName() + "#isPocTxsProcessed";
     public static final String Generator_startMining = Generator.class.getName() + "#startMining";
     public static final String CONCH_P_reachLastKnownBlock = Conch.class.getName() + "#reachLastKnownBlock";

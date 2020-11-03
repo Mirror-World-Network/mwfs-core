@@ -193,23 +193,30 @@ public class Generator implements Comparable<Generator> {
         boolean hitMatched = verifyHit(linkedGenerator.hit, linkedGenerator.pocScore, lastBlock, miningTime);
         long secondsSinceLastBlock = Conch.getEpochTime() - Conch.getBlockchain().getLastBlockTimestamp();
         long minutesSinceLastBlock = secondsSinceLastBlock/60;
-//        boolean isObsoleteTime =  (secondsSinceLastBlock - Constants.GAP_SECONDS) > (60 * OBSOLETE_DELAY);
-//        boolean stuckOnBootNode = Conch.getBlockchainProcessor().isObsolete() && isObsoleteTime && isBootNode;
         if(!Conch.getBlockchainProcessor().isUpToDate()) {
             String nodeType = isBootNode ? "Boot" : "Normal";
             if (hitMatched) {
-                String miningStatusTips = isBootNode ? "still mining" : "DON'T MINING";
-                Logger.logInfoMessage("Current node is %s node and blockchain state[%s] isn't " +
-                                "UP_TO_DATE[sinceLastBlock=%d minutes, trigger=%d min delay], " +
-                                "%s when the miner[%s]' hit is matched at height %d, its original estimated mining time is %s",
-                        nodeType, Peers.getMyBlockchainStateName(), minutesSinceLastBlock, OBSOLETE_DELAY,
-                        miningStatusTips, linkedGenerator.rsAddress, lastBlock.getHeight(),
-                        Convert.dateFromEpochTime(linkedGenerator.hitTime));
-                if(!isBootNode) {
+                if(isBootNode) {
+                    if (Logger.printNow(Logger.Generator_isBlockStuck)) {
+                        Logger.logInfoMessage("Current node is %s node and blockchain state[%s] isn't " +
+                                        "UP_TO_DATE[sinceLastBlock=%d minutes, trigger=%d min delay], " +
+                                        "still mining when the miner[%s]' hit is matched at height %d, its original estimated mining time is %s",
+                                nodeType, Peers.getMyBlockchainStateName(), minutesSinceLastBlock, OBSOLETE_DELAY,
+                                linkedGenerator.rsAddress, lastBlock.getHeight(),
+                                Convert.dateFromEpochTime(linkedGenerator.hitTime));
+                    }
+                } else {
+                    if (Logger.printNow(Logger.Generator_isBlockStuck)) {
+                        Logger.logInfoMessage("Current blockchain state[%s] isn't UP_TO_DATE[sinceLastBlock=%d minutes], " +
+                                        "DON'T MINING when the miner[%s]' hit is matched at height %d, its original estimated mining time is %s",
+                                nodeType, Peers.getMyBlockchainStateName(), minutesSinceLastBlock,
+                                linkedGenerator.rsAddress, lastBlock.getHeight(),
+                                Convert.dateFromEpochTime(linkedGenerator.hitTime));
+                    }
                     return false;
                 }
             } else {
-                if (Logger.printNow(Logger.Generator_isBlockStuckOnBootNode)) {
+                if (Logger.printNow(Logger.Generator_isBlockStuck)) {
                     Logger.logInfoMessage("Current node is %s node and blockchain state[%s] isn't " +
                                     "UP_TO_DATE[sinceLastBlock=%d minutes, trigger=%d min delay], " +
                                     "but miner[%s]'s hit didn't matched at height %d, its mining time is %s",
