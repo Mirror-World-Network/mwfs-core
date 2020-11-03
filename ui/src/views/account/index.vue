@@ -1571,7 +1571,7 @@ export default {
                     _this.registerSharderSiteUser.pictureVerificationCode = "";
 
                 } else {
-                    console.info("jie:" + res.result.data);
+                    console.log("jie:" + res.result.data);
                     if (res.result.data[0] === "短信验证码错误") {
                         _this.$message.error(_this.$t('hubsetting.register_error_tip2'));
                     } else if (res.result.data[0] === "图片验证码错误") {
@@ -1921,7 +1921,7 @@ export default {
             }
         },
         registerNatService() {
-            console.info("registering nat service for normal node...");
+            console.log("registering nat service for normal node...");
             const _this = this;
             _this.registerNatLoading = true;
 
@@ -3274,7 +3274,7 @@ export default {
             }
         },
         formatRegisterStatus(status) {
-            console.info('审核状态', status);
+            console.log('审核状态', status);
             if (status === 0) {
                 return this.$t('hubsetting.register_status_invalid');
             } else if (status === 1) {

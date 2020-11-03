@@ -209,7 +209,7 @@
         },
         created() {
             window.token = window.location.search.substring(1 + "token".length);
-            console.info("token:"+token);
+            console.log("token:"+token);
 
         }
     }

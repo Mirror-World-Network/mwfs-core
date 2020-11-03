@@ -88,7 +88,7 @@
 
                 if (nxtAddress.set(accountId)) {
                     accountRS = nxtAddress.toString();
-                    console.info("node-accountRS:"+accountRS);
+                    console.log("node-accountRS:"+accountRS);
                     return accountRS;
                 }
                 return accountId;

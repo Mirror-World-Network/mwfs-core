@@ -59,7 +59,7 @@
         created() {
             const _this = this;
 
-            console.info("Net work type is:", SSO.netWorkType);
+            console.log("Net work type is:", SSO.netWorkType);
 
             this.$global.getUserConfig(this).then(res => {
                 _this.$store.state.isHubInit = res["sharder.HubBindAddress"] ? false : true;

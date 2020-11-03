@@ -424,7 +424,7 @@
             _this.miningList = [];
             if (!_this.$store.state.isLogin) {
                 window.token = window.location.search.substring(1 + "token".length);
-                console.info("token", token);
+                console.log("token", token);
                 _this.account();
             } else {
                 _this.loginAfter();
@@ -577,7 +577,7 @@
                     shell: "account",
                     token: window.token,
                 }, "authorizationLogin").then(value => {
-                    console.info("authorizationLogin ", value);
+                    console.log("authorizationLogin ", value);
                     if (!value.success) {
                         console.log("验证签名：", value.success);
                         history.back(-1);

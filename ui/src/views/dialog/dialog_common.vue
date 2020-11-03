@@ -803,8 +803,8 @@
                                     });
                                 }else if (t.type === 9) {
                                     _this.coinBaseTx=t;
-                                    console.info('coinBaseTx')
-                                    console.info(_this.coinBaseTx)
+                                    console.log('coinBaseTx')
+                                    console.log(_this.coinBaseTx)
                                 }else if(t.type === 1){
                                     _this.messageInfoList.push({
                                         messageInfo:t.attachment,
@@ -835,14 +835,10 @@
                                 }
                             }).then(function (res) {
                                 if (!res.data.errorDescription) {
-                                    console.info(res.data);
-                                    console.info("rs:"+_this.rs);
                                     _this.accountIdMap = res.data.rsAccountInfo;
-                                    console.info("map:"+_this.accountIdMap);
-
-
+                                    console.log("map:"+_this.accountIdMap);
                                 } else {
-                                    console.info(res.data.errorDescription);
+                                    console.log(res.data.errorDescription);
                                 }
                             }).catch(function (err) {
                                 console.info(err);
