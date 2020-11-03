@@ -199,8 +199,8 @@ public class Generator implements Comparable<Generator> {
                 if(isBootNode) {
                     if (Logger.printNow(Logger.Generator_isBlockStuck)) {
                         Logger.logInfoMessage("Current node is %s node and blockchain state[%s] isn't " +
-                                        "UP_TO_DATE[sinceLastBlock=%d minutes, trigger=%d min delay], " +
-                                        "still mining when the miner[%s]' hit is matched at height %d, its original estimated mining time is %s",
+                                        "UP_TO_DATE[sinceLastBlock=%d minutes, mining trigger=%d min delay], " +
+                                        "still mining when the miner[%s] hit is matched at height %d, its original estimated mining time is %s",
                                 nodeType, Peers.getMyBlockchainStateName(), minutesSinceLastBlock, OBSOLETE_DELAY,
                                 linkedGenerator.rsAddress, lastBlock.getHeight(),
                                 Convert.dateFromEpochTime(linkedGenerator.hitTime));
@@ -208,8 +208,8 @@ public class Generator implements Comparable<Generator> {
                 } else {
                     if (Logger.printNow(Logger.Generator_isBlockStuck)) {
                         Logger.logInfoMessage("Current blockchain state[%s] isn't UP_TO_DATE[sinceLastBlock=%d minutes], " +
-                                        "DON'T MINING when the miner[%s]' hit is matched at height %d, its original estimated mining time is %s",
-                                nodeType, Peers.getMyBlockchainStateName(), minutesSinceLastBlock,
+                                        "DON'T MINING when the miner[%s] hit is matched at height %d, its original estimated mining time is %s",
+                                Peers.getMyBlockchainStateName(), minutesSinceLastBlock,
                                 linkedGenerator.rsAddress, lastBlock.getHeight(),
                                 Convert.dateFromEpochTime(linkedGenerator.hitTime));
                     }
@@ -219,7 +219,7 @@ public class Generator implements Comparable<Generator> {
                 if (Logger.printNow(Logger.Generator_isBlockStuck)) {
                     Logger.logInfoMessage("Current node is %s node and blockchain state[%s] isn't " +
                                     "UP_TO_DATE[sinceLastBlock=%d minutes, trigger=%d min delay], " +
-                                    "but miner[%s]'s hit didn't matched at height %d, its mining time is %s",
+                                    "but miner[%s] hit didn't matched at height %d, its mining time is %s",
                             nodeType, Peers.getMyBlockchainStateName(), minutesSinceLastBlock, OBSOLETE_DELAY,
                             linkedGenerator.rsAddress, lastBlock.getHeight(),
                             Convert.dateFromEpochTime(linkedGenerator.hitTime));
