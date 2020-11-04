@@ -121,8 +121,18 @@ public final class Conch {
     private static String serialNum = "";
     private static String nodeType = Peer.Type.NORMAL.getSimpleName();
     public static String nodeIp = IpUtil.getNetworkIp();
+    public static Map<Integer, Boolean> airdropHeightMap = Maps.newHashMap();
 
-    public static Map<Integer, Boolean> airdropHeightStatus = Maps.newHashMap();
+    public static boolean getAirdropHeighStatus(int height) {
+        if (airdropHeightMap.get(height) != null) {
+            return true;
+        }
+        return false;
+    }
+
+    public static synchronized void setAirdropHeighStatus(int height, boolean status) {
+        airdropHeightMap.put(height, status);
+    }
     
     public static SystemInfo systemInfo = null;
 
