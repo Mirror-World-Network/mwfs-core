@@ -380,6 +380,31 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
         }
     }
 
+    public static final String PROPERTY_RESET_FOR_BAD_TXS = "sharder.resetForBadTxs";
+    public static final boolean resetForBadTxs = Conch.getBooleanProperty(PROPERTY_RESET_FOR_BAD_TXS, false);
+    /**
+     * Reset COS client to avoid bad txs
+     */
+    private static void checkOrResetResetForBadTxs(){
+        if(!resetForBadTxs) {
+            return;
+        }
+
+        try {
+            String version = "0.0.5";
+            String updateTime = "2020-11-04 01:01:01";
+            boolean forceReset = Conch.versionCompare(version, updateTime) <= 0;
+
+            if(forceReset) {
+                _manualReset();
+                Conch.restartApplication(null);
+            }
+
+        } catch (Exception e) {
+            Logger.logErrorMessage("checkOrResetOldClients occur unknown exception", e);
+        }
+    }
+
     public static void init() {
         // auto upgrade
         boolean closeAutoUpgrade = Conch.getBooleanProperty(PROPERTY_CLOSE_AUTO_UPGRADE);
@@ -392,7 +417,7 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
 //       checkOrForceDeleteBakFolder();
         checkOrManualReset();
         checkOrResetOldClients();
-
+        checkOrResetResetForBadTxs();
 //        // switch fork
 //        if(StringUtils.isEmpty(currentFork) || !"Giant".equals(currentFork)){
 //            forceSwitchForkAccordingToCmdTool(); // execute immediately once
