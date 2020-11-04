@@ -565,6 +565,14 @@ public final class JSONResponses {
         ACCESS_CLOSED = JSON.prepare(response);
     }
 
+    public static final JSONStreamAware ACCESS_CLOSED_AT_HEIGHT;
+    static {
+        JSONObject response = new JSONObject();
+        response.put("errorCode", 6);
+        response.put("errorDescription", "The interface access is closed at current height");
+        ACCESS_CLOSED_AT_HEIGHT = JSON.prepare(response);
+    }
+
     private JSONResponses() {} // never
 
 }
