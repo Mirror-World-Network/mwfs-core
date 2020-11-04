@@ -380,24 +380,37 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
         }
     }
 
-    public static final String PROPERTY_RESET_FOR_BAD_TXS = "sharder.resetForBadTxs";
-    public static final boolean resetForBadTxs = Conch.getBooleanProperty(PROPERTY_RESET_FOR_BAD_TXS, false);
+    public static final String PROPERTY_RESET_FOR_DUP_TXS = "sharder.resetForDupTxs";
+    public static final boolean resetForDupTxs = Conch.getBooleanProperty(PROPERTY_RESET_FOR_DUP_TXS, false);
     /**
      * Reset COS client to avoid bad txs
      */
-    private static void checkOrResetResetForBadTxs(){
-        if(!resetForBadTxs) {
+    private static void checkOrResetForDupTxs(){
+        if(!resetForDupTxs) {
             return;
         }
 
         try {
-            String version = "0.0.5";
-            String updateTime = "2020-11-04 01:01:01";
-            boolean forceReset = Conch.versionCompare(version, updateTime) <= 0;
+//            String version = "0.0.5";
+//            String updateTime = "2020-11-04 19:01:01";
+//            boolean forceReset = Conch.versionCompare(version, updateTime) <= 0;
+            boolean forceReset = true;
 
             if(forceReset) {
                 _manualReset();
-                Conch.restartApplication(null);
+
+                Thread resetForDupTxsThread = new Thread(() -> {
+                    try {
+                        Logger.logInfoMessage("Pause the blockchain for ResetForBadTxs processing");
+                        Conch.pause();
+                    } catch (Exception e) {
+                        Logger.logErrorMessage("Can't pause in the checkOrResetResetForBadTxs processing",e);
+                        Thread.currentThread().interrupt();
+                    }
+                });
+
+                resetForDupTxsThread.setDaemon(true);
+                resetForDupTxsThread.start();
             }
 
         } catch (Exception e) {
@@ -417,7 +430,7 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
 //       checkOrForceDeleteBakFolder();
         checkOrManualReset();
         checkOrResetOldClients();
-        checkOrResetResetForBadTxs();
+        checkOrResetForDupTxs();
 //        // switch fork
 //        if(StringUtils.isEmpty(currentFork) || !"Giant".equals(currentFork)){
 //            forceSwitchForkAccordingToCmdTool(); // execute immediately once
