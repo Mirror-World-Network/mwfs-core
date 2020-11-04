@@ -128,7 +128,10 @@ public final class Airdrop extends CreateTransaction {
 
     @Override
     protected JSONStreamAware processRequest(HttpServletRequest req) throws ConchException {
-
+        // If the height is not empty, return
+        if (Conch.getAirdropHeighStatus(Conch.getBlockchain().getHeight()) == true) {
+            return ACCESS_CLOSED_AT_HEIGHT;
+        }
         org.json.simple.JSONObject response = new org.json.simple.JSONObject();
         String pathName = req.getParameter("pathName");
         String key = req.getParameter("key");
@@ -256,6 +259,9 @@ public final class Airdrop extends CreateTransaction {
         response.put("transferFailList", transferFailList);
         response.put("transferTotalCount", list.size());
         response.put("transferSuccessCount", transferSuccessList.size());
+
+        // Set this height to no longer be airdropped
+        Conch.setAirdropHeighStatus(Conch.getBlockchain().getHeight(), false);
 
         return response;
     }

@@ -603,14 +603,14 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" v-loading="batch_transfer.executing" class="btn common_btn writeBtn"
-                                @click.once="sendBatchTransferInfo">
+                                @click="sendBatchTransferInfo"  :disabled="isDisable">
                             {{ $t('transfer.batch_transfer_send') }}
                         </button>
                         <el-row>
                             <el-col :span="24"><div style="text-align: center; margin: 5px auto">or</div></el-col>
                         </el-row>
                         <button type="button" v-loading="batch_transfer.executingAnother" class="btn common_btn writeBtn"
-                                @click.once="detectionBatchTransferInfo">
+                                @click="detectionBatchTransferInfo"  :disabled="isDisableBatch">
                             {{ $t('transfer.batch_transfer_detection') }}
                         </button>
 
@@ -1058,6 +1058,8 @@ export default {
             this.$t('rules.mustRequired')
         );
         return {
+            isDisable: false,
+            isDisableBatch: false,
             isMobile: false,
             //dialog
             src: "",
@@ -2480,6 +2482,7 @@ export default {
         },
         sendBatchTransferInfo: function () {
             const _this = this;
+            _this.isDisable = true;
 
             if (_this.batch_transfer.fileName === "") {
                 _this.$message.warning(_this.$t('sso.error_no_file_chosen'));
@@ -2513,9 +2516,13 @@ export default {
                 }
                 _this.batch_transfer.executing = false;
             });
+            setTimeout(() => {
+                _this.isDisable = false;
+            }, 3000)
         },
         detectionBatchTransferInfo: function () {
             const _this = this;
+            _this.isDisableBatch = true;
             if (_this.batch_transfer.fileName === "") {
                 _this.$message.warning(_this.$t('sso.error_no_file_chosen'));
                 return;
@@ -2542,6 +2549,9 @@ export default {
                 }
                 _this.batch_transfer.executingAnother = false;
             });
+            setTimeout(() => {
+                _this.isDisableBatch = false;
+            }, 3000)
         },
         sendTransferInfo: function () {
             const _this = this;
