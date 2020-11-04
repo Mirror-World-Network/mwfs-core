@@ -265,7 +265,7 @@ public final class TransactionProcessorImpl implements TransactionProcessor {
                     }
                 }
             } catch (Exception e) {
-                Logger.logMessage("Error removing unconfirmed transactions", e);
+                Logger.logErrorMessage("Error removing unconfirmed transactions", e);
             }
         } catch (Throwable t) {
             Logger.logErrorMessage("CRITICAL ERROR. PLEASE REPORT TO THE DEVELOPERS.\n" + t.toString());
