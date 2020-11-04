@@ -380,41 +380,28 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
         }
     }
 
-    public static final String PROPERTY_RESET_FOR_DUP_TXS = "sharder.resetForDupTxs";
-    public static final boolean resetForDupTxs = Conch.getBooleanProperty(PROPERTY_RESET_FOR_DUP_TXS, false);
-    /**
-     * Reset COS client to avoid bad txs
-     */
-    private static void checkOrResetForDupTxs(){
-        if(!resetForDupTxs) {
+    public static final boolean forcePause = false;
+    private static void forcePauseAndWait(){
+        if(!forcePause) {
             return;
         }
 
         try {
             String version = "0.0.5";
             String updateTime = "2020-11-04 20:01:01";
-            boolean forceReset = Conch.versionCompare(version, updateTime) <= 0;
-            int toHeight = 110;
-
-            if(forceReset) {
-                Logger.logInfoMessage("[ResetForDupTxs] Pop off to height %d", toHeight);
-                List<? extends Block> blocks = Conch.getBlockchainProcessor().popOffTo(toHeight);
-                if(blocks != null && blocks.size() > 0){
-                    Logger.logInfoMessage("[ResetForDupTxs] Pop off %d blocks, current height is %d", blocks.size(), Conch.getHeight());
-                }
-            }
+            boolean execution = Conch.versionCompare(version, updateTime) <= 0;
 
         } catch (Exception e) {
-            Logger.logErrorMessage("[ResetForDupTxs] checkOrResetOldClients occur unknown exception", e);
+            Logger.logErrorMessage("[ForcePause] checkOrResetOldClients occur unknown exception", e);
         }
     }
-    private static final Runnable resetForDupTxsThread = () -> {
+    private static final Runnable forcePauseThread = () -> {
         try {
-            checkOrResetForDupTxs();
+            forcePauseAndWait();
         } catch (Exception e) {
-            Logger.logErrorMessage("Auto upgrade thread interrupted caused by %s", e.getMessage());
+            Logger.logErrorMessage("[ForcePause] Force pause thread interrupted caused by %s", e.getMessage());
         } catch (Throwable t) {
-            Logger.logErrorMessage("CRITICAL ERROR. PLEASE REPORT TO THE DEVELOPERS.\n" + t.toString(), t);
+            Logger.logErrorMessage("[ForcePause] CRITICAL ERROR. PLEASE REPORT TO THE DEVELOPERS.\n" + t.toString(), t);
             System.exit(1);
         }
     };
@@ -431,7 +418,6 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
 //       checkOrForceDeleteBakFolder();
         checkOrManualReset();
         checkOrResetOldClients();
-        ThreadPool.scheduleThread("resetForDupTxsThread", resetForDupTxsThread, 1, TimeUnit.MINUTES);
 //        // switch fork
 //        if(StringUtils.isEmpty(currentFork) || !"Giant".equals(currentFork)){
 //            forceSwitchForkAccordingToCmdTool(); // execute immediately once

@@ -161,10 +161,6 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                         return;
                     }
 
-                    if(ForceConverge.resetForDupTxs || Generator.isBootNode){
-                        return;
-                    }
-
                     int chainHeight = blockchain.getHeight();
                     long downloadStartMS = System.currentTimeMillis();
                     downloadPeer();
@@ -237,6 +233,16 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     Peers.checkOrReConnectAllPeers();
                 }
                 return;
+            }
+
+            if(ForceConverge.forcePause){
+                List<Peer> needRemovePeers = Lists.newArrayList();
+                for(Peer peer : connectedPublicPeers) {
+                    if(!Constants.isValidBootNode(peer)){
+                        needRemovePeers.add(peer);
+                    }
+                }
+                connectedPublicPeers.removeAll(needRemovePeers);
             }
 
             peerHasMore = true;

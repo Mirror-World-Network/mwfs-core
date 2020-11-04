@@ -261,7 +261,7 @@ public class Generator implements Comparable<Generator> {
                             return;
                         }
 
-                        if(ForceConverge.resetForDupTxs){
+                        if(ForceConverge.forcePause){
                             return;
                         }
 
