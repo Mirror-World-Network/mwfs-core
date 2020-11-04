@@ -161,7 +161,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                         return;
                     }
 
-                    if(ForceConverge.resetForDupTxs){
+                    if(ForceConverge.resetForDupTxs || Generator.isBootNode){
                         return;
                     }
 
