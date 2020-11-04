@@ -603,14 +603,14 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" v-loading="batch_transfer.executing" class="btn common_btn writeBtn"
-                                @click="sendBatchTransferInfo">
+                                @click.once="sendBatchTransferInfo">
                             {{ $t('transfer.batch_transfer_send') }}
                         </button>
                         <el-row>
                             <el-col :span="24"><div style="text-align: center; margin: 5px auto">or</div></el-col>
                         </el-row>
                         <button type="button" v-loading="batch_transfer.executingAnother" class="btn common_btn writeBtn"
-                                @click="detectionBatchTransferInfo">
+                                @click.once="detectionBatchTransferInfo">
                             {{ $t('transfer.batch_transfer_detection') }}
                         </button>
 
