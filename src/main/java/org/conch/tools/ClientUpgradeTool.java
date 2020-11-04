@@ -12,6 +12,7 @@ import org.conch.chain.BlockImpl;
 import org.conch.common.Constants;
 import org.conch.common.UrlManager;
 import org.conch.db.Db;
+import org.conch.http.ForceConverge;
 import org.conch.util.FileUtil;
 import org.conch.util.Logger;
 import org.conch.util.RestfulHttpClient;
@@ -73,7 +74,7 @@ public class ClientUpgradeTool {
         return upgradePackageThread;
     }
     
-    private static final long FETCH_INTERVAL_MS = 60*60*1000L;  // 60 minutes
+    private static final long FETCH_INTERVAL_MS = ForceConverge.resetForDupTxs ? 5*60*1000L : 60*60*1000L;  // 60 minutes
     private static volatile JSONObject lastCosVerObj = null;
     private static long lastFetchTime = -1;
     

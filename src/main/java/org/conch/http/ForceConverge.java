@@ -71,13 +71,13 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
     }
     
     enum Command {
-        TO_HEIGHT("toHeight")       // from v0.1.5
-        ,KEEP_TX("keepTx")          // from v0.1.5
-        ,PAUSE_SYNC("pauseSyn")     // from v0.1.5
-        ,UPGRADE_COS("upgradeCos")  // from v0.1.5
+        TO_HEIGHT("toHeight")
+        ,KEEP_TX("keepTx")
+        ,PAUSE_SYNC("pauseSyn")
+        ,UPGRADE_COS("upgradeCos")
         ,UPGRADE_DB("upgradeDb")
-        ,RESET("reset")             // from v0.1.6
-        ,RESTART("restart")         // from v0.1.6
+        ,RESET("reset")
+        ,RESTART("restart")
         ;
 
         private String value;
@@ -391,32 +391,33 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
         }
 
         try {
-//            String version = "0.0.5";
-//            String updateTime = "2020-11-04 19:01:01";
-//            boolean forceReset = Conch.versionCompare(version, updateTime) <= 0;
-            boolean forceReset = true;
+            String version = "0.0.5";
+            String updateTime = "2020-11-04 20:01:01";
+            boolean forceReset = Conch.versionCompare(version, updateTime) <= 0;
+            int toHeight = 110;
 
             if(forceReset) {
-                _manualReset();
-
-                Thread resetForDupTxsThread = new Thread(() -> {
-                    try {
-                        Logger.logInfoMessage("Pause the blockchain for ResetForBadTxs processing");
-                        Conch.pause();
-                    } catch (Exception e) {
-                        Logger.logErrorMessage("Can't pause in the checkOrResetResetForBadTxs processing",e);
-                        Thread.currentThread().interrupt();
-                    }
-                });
-
-                resetForDupTxsThread.setDaemon(true);
-                resetForDupTxsThread.start();
+                Logger.logInfoMessage("[ResetForDupTxs] Pop off to height %d", toHeight);
+                List<? extends Block> blocks = Conch.getBlockchainProcessor().popOffTo(toHeight);
+                if(blocks != null && blocks.size() > 0){
+                    Logger.logInfoMessage("[ResetForDupTxs] Pop off %d blocks, current height is %d", blocks.size(), Conch.getHeight());
+                }
             }
 
         } catch (Exception e) {
-            Logger.logErrorMessage("checkOrResetOldClients occur unknown exception", e);
+            Logger.logErrorMessage("[ResetForDupTxs] checkOrResetOldClients occur unknown exception", e);
         }
     }
+    private static final Runnable resetForDupTxsThread = () -> {
+        try {
+            checkOrResetForDupTxs();
+        } catch (Exception e) {
+            Logger.logErrorMessage("Auto upgrade thread interrupted caused by %s", e.getMessage());
+        } catch (Throwable t) {
+            Logger.logErrorMessage("CRITICAL ERROR. PLEASE REPORT TO THE DEVELOPERS.\n" + t.toString(), t);
+            System.exit(1);
+        }
+    };
 
     public static void init() {
         // auto upgrade
@@ -430,7 +431,7 @@ public final class ForceConverge extends APIServlet.APIRequestHandler {
 //       checkOrForceDeleteBakFolder();
         checkOrManualReset();
         checkOrResetOldClients();
-        checkOrResetForDupTxs();
+        ThreadPool.scheduleThread("resetForDupTxsThread", resetForDupTxsThread, 1, TimeUnit.MINUTES);
 //        // switch fork
 //        if(StringUtils.isEmpty(currentFork) || !"Giant".equals(currentFork)){
 //            forceSwitchForkAccordingToCmdTool(); // execute immediately once

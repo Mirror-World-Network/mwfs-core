@@ -34,6 +34,7 @@ import org.conch.consensus.poc.tx.PocTxBody;
 import org.conch.consensus.reward.RewardCalculator;
 import org.conch.crypto.Crypto;
 import org.conch.db.*;
+import org.conch.http.ForceConverge;
 import org.conch.mint.Generator;
 import org.conch.mint.pool.SharderPoolProcessor;
 import org.conch.peer.Peer;
@@ -157,6 +158,10 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                         if (Logger.printNow(Logger.BlockchainProcessor_oldPocTxsProcessingCheck, 1000)) {
                             Logger.logDebugMessage("Don't synchronize blocks till delayed or old poc txs[ height <=  %d ] be processed", Conch.getHeight());
                         }
+                        return;
+                    }
+
+                    if(ForceConverge.resetForDupTxs){
                         return;
                     }
 

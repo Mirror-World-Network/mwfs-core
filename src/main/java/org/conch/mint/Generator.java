@@ -33,6 +33,7 @@ import org.conch.consensus.poc.PocScore;
 import org.conch.crypto.Crypto;
 import org.conch.db.Db;
 import org.conch.env.RuntimeEnvironment;
+import org.conch.http.ForceConverge;
 import org.conch.mint.pool.SharderPoolProcessor;
 import org.conch.peer.CertifiedPeer;
 import org.conch.peer.Peer;
@@ -257,6 +258,10 @@ public class Generator implements Comparable<Generator> {
                     Conch.getBlockchain().updateLock();
                     try {
                         if(forcePause) {
+                            return;
+                        }
+
+                        if(ForceConverge.resetForDupTxs){
                             return;
                         }
 
