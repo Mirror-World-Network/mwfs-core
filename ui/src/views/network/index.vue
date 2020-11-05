@@ -153,7 +153,8 @@
                                     <span v-if="block.hasRewardDistribution">{{$t('network.crowd_miner_reward_success')}}</span>
                                     <span v-if="!block.hasRewardDistribution">{{$t('network.crowd_miner_reward_fail')}}</span>
                                 </td>
-                                <td class="linker" @click="openAccountInfo(block.generatorRS)">{{block.generatorRS | generatorRSFilter}}</td>
+<!--                                <td class="linker" @click="openAccountInfo(block.generatorRS)">{{block.generatorRS | generatorRSFilter}}</td>-->
+                                <td class="linker" @click="openAccountInfo(block.generatorRS)">{{block.generatorRS }}</td>
                                 <td class="linker pc-table" @click="openBlockInfo(block.height)">{{$t('network.view_details')}}</td>
                                 <td class="mobile icon-box">
                                     <span v-if="block.hasRewardDistribution"><i class="el-icon-check" style="font-size: 15px;color: green"></i></span>

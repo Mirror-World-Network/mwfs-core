@@ -13,6 +13,7 @@ import org.conch.common.Constants;
 import org.conch.db.Db;
 import org.conch.db.DbIterator;
 import org.conch.db.DbUtils;
+import org.conch.http.Airdrop;
 import org.conch.peer.CertifiedPeer;
 import org.conch.tx.Transaction;
 import org.conch.tx.TransactionImpl;
@@ -31,14 +32,58 @@ import java.util.*;
  */
 public class SnapshotTest {
 
+    static class TransferInfo {
+        public String recipientRS;
+        public String amountNQT;
+        public String recipientPublicKey;
+
+        TransferInfo() {
+        }
+    }
 
     public static void main(String[] args) {
 //        ssAmountSnapshot();
 //        pocTxsSnapshot();
 //        ssPaymentTxsSnapshot();
-        amountAirdropBySnapshot();
+//        amountAirdropBySnapshot();
+        airdropDataStatistics();
     }
-    
+
+    private static void airdropDataStatistics() {
+        // 交互式
+        Scanner scanner = new Scanner(System.in);
+        // 1.1. 输入文件路径
+
+        System.out.println("input file path(Press enter, default is batch): ");
+        String path = scanner.nextLine();
+        if (StringUtils.isEmpty(path)) {
+            path = "batch";
+        }
+        // 判断该路径是否存在
+        File file = new File(path);
+        if (!file.exists()) {
+            System.out.println("file path is not exists!\n");
+        }
+        // 1.2. 输入文件名
+        System.out.println("input file name: ");
+        String filename = scanner.next();
+        String pathFileName = path + File.separator + filename;
+        // 1.3. 解析文件
+        String readJsonStr = org.conch.util.JSON.readJsonFile(pathFileName);
+        JSONObject parseObject = JSON.parseObject(readJsonStr);
+        JSONArray listOrigin = parseObject.getJSONArray("failList");
+        // 2. 输出文件数据的统计信息
+        Integer listSize = listOrigin.size();
+        Long totalAmount = 0L;
+        List<TransferInfo> list = JSONObject.parseArray(listOrigin.toJSONString(), TransferInfo.class);
+        for (TransferInfo info : list) {
+            totalAmount += Long.parseLong(info.amountNQT);
+        }
+        System.out.println("Account Count: " + listSize + "\n");
+        System.out.println("Account Total amountNQT: " + totalAmount + "\n");
+        System.out.println("Account Total amountNQT: " + (totalAmount/Constants.ONE_SS+1) + " MW\n");
+    }
+
     private static int startHeight = 270;
     static void pocTxsSnapshot(){
         Db.init();
@@ -163,10 +208,10 @@ public class SnapshotTest {
             file.mkdir();
         }
         int count = 0;
-        int batchUnit = 2000;
+        int batchUnit = 500;
         try {
             con = Db.db.getConnection();
-            PreparedStatement pstmt = con.prepareStatement("SELECT * FROM ACCOUNT WHERE LATEST=TRUE ORDER BY HEIGHT ASC");
+            PreparedStatement pstmt = con.prepareStatement("SELECT * FROM ACCOUNT WHERE LATEST=TRUE ORDER BY BALANCE ASC");
             ResultSet rs = pstmt.executeQuery();
             JSONObject amountJson = new JSONObject();
             amountJson.put("totalBalance" , 0L);
@@ -176,9 +221,6 @@ public class SnapshotTest {
             String transferJsonStr = "";
             while(rs.next()){
                 count++;
-                /*if (count > 108) {
-                    break;
-                }*/
                 long accountId = rs.getLong("ID");
                 long balance = rs.getLong("BALANCE");
                 long unconfirmedBalance = rs.getLong("UNCONFIRMED_BALANCE");
