@@ -208,10 +208,10 @@ public class SnapshotTest {
             file.mkdir();
         }
         int count = 0;
-        int batchUnit = 2000;
+        int batchUnit = 500;
         try {
             con = Db.db.getConnection();
-            PreparedStatement pstmt = con.prepareStatement("SELECT * FROM ACCOUNT WHERE LATEST=TRUE ORDER BY HEIGHT ASC");
+            PreparedStatement pstmt = con.prepareStatement("SELECT * FROM ACCOUNT WHERE LATEST=TRUE ORDER BY BALANCE ASC");
             ResultSet rs = pstmt.executeQuery();
             JSONObject amountJson = new JSONObject();
             amountJson.put("totalBalance" , 0L);
@@ -221,9 +221,6 @@ public class SnapshotTest {
             String transferJsonStr = "";
             while(rs.next()){
                 count++;
-                /*if (count > 108) {
-                    break;
-                }*/
                 long accountId = rs.getLong("ID");
                 long balance = rs.getLong("BALANCE");
                 long unconfirmedBalance = rs.getLong("UNCONFIRMED_BALANCE");
