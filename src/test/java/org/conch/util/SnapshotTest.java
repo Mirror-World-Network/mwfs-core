@@ -74,6 +74,9 @@ public class SnapshotTest {
         if(isScanFilesMode) {
             File[] files = pathFile.listFiles();
             for(int i = 0 ; i < files.length ; i++){
+                if(".DS_Store".equalsIgnoreCase(files[i].getName())){
+                    continue;
+                }
                 jsonFiles.add(path + File.separator + files[i].getName());
             }
         }else{
@@ -125,7 +128,7 @@ public class SnapshotTest {
         statis += pathFileName + "\n";
         statis += "----------------------" + "\n";
         statis += String.format("Account Count: %d \n", listSize);
-        statis += String.format("Total amount: %d MW, %d NQT \n", totalAmountBD.longValue(), totalAmount);
+        statis += String.format("Total amount: %d MW (%d NQT) \n", totalAmountBD.longValue(), totalAmount);
 
         return statis;
     }
