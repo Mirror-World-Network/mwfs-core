@@ -103,7 +103,9 @@ public class SnapshotTest {
             System.exit(1);
         }
         jsonFiles.forEach(jsonFile -> System.out.println(singleAirdropFileStatistics(jsonFile, type)));
-        System.out.println(String.format("##########################\nStatistic %d airdrop files\nPath: %s\nType: %s \nAirdrop files: %s",
+        System.out.println(String.format("##########################\n" +
+                        "Statistic %d airdrop files\nPath: %s\nType: %s \nAirdrop files: %s\n",
+
                 jsonFiles.size(), path, typeStrPrint, Arrays.toString(jsonFiles.toArray())));
     }
 
@@ -128,7 +130,8 @@ public class SnapshotTest {
         statis += pathFileName + "\n";
         statis += "----------------------" + "\n";
         statis += String.format("Account Count: %d \n", listSize);
-        statis += String.format("Total amount: %d MW (%d NQT) \n", totalAmountBD.longValue(), totalAmount);
+        statis += String.format("Total Amount: %d MW (%d NQT) \n", totalAmountBD.longValue(), totalAmount);
+        statis += String.format("Suggest airdrop out account balance: %d MW (Estimated Fees %d MW) \n", (totalAmountBD.longValue() + listSize), listSize);
 
         return statis;
     }
