@@ -49,15 +49,15 @@ public class SnapshotTest {
         airdropDataStatistics();
     }
 
+    private static final String DEFAULT_AIRDROP_PATH="batch";
+    private static final String DEFAULT_STATIS_TYPE="1";
     private static void airdropDataStatistics() {
         // 交互式
         Scanner scanner = new Scanner(System.in);
         // 1.1. 输入文件路径
-        System.out.println("Input the file path(Press enter, default is batch): ");
+        System.out.println(String.format("Input the file path(Press enter, default is %s): ", DEFAULT_AIRDROP_PATH));
         String path = scanner.nextLine();
-        if (StringUtils.isEmpty(path)) {
-            path = "batch";
-        }
+        path = StringUtils.isEmpty(path) ? DEFAULT_AIRDROP_PATH : path;
         // 判断该路径是否存在
         File pathFile = new File(path);
         if (!pathFile.exists()) {
@@ -66,9 +66,9 @@ public class SnapshotTest {
         // 1.2. 输入文件名和文件格式
         System.out.println("Input the file name or files name:");
         System.out.println("- airdrop_1.json or array mode: airdrop_1.json,airdrop_2.json...");
-        System.out.println("- * means scan all files below the path): ");
-        String filename = scanner.next();
-        boolean isScanFilesMode = "*".equalsIgnoreCase(filename);
+        System.out.println("- input * or enter directly means scan all files below the path): ");
+        String filename = scanner.nextLine();
+        boolean isScanFilesMode = StringUtils.isEmpty(filename) || "*".equalsIgnoreCase(filename);
         List<String> jsonFiles = Lists.newArrayList();
 
         if(isScanFilesMode) {
@@ -88,13 +88,20 @@ public class SnapshotTest {
             }
         }
 
-        System.out.println("Choose the code of type (1-airdrop, 2-airdrop result): ");
-        String typeStr = scanner.next();
+        System.out.println(String.format("Choose the code of type (1-airdrop, 2-airdrop result, " +
+                "enter will use the default value %s): ", DEFAULT_STATIS_TYPE));
+        String typeStr = scanner.nextLine();
+        typeStr = StringUtils.isEmpty(typeStr) ? DEFAULT_STATIS_TYPE : typeStr;
         int type = Integer.valueOf(typeStr).intValue();
+        String typeStrPrint = (type == 1 ? "airdrop" : "airdrop result");
         // 1.3. 解析文件
+        if(jsonFiles.size() == 0) {
+            System.out.println(String.format("Not found airdrop files[path=%s, type=%s to analyze, exit the statistic", path, typeStrPrint));
+            System.exit(1);
+        }
         jsonFiles.forEach(jsonFile -> System.out.println(singleAirdropFileStatistics(jsonFile, type)));
-        System.out.println(String.format("Statistic %d airdrop files [type=%s])",
-                jsonFiles.size(), (type == 1 ? "airdrop" : "airdrop result")));
+        System.out.println(String.format("##########################\nStatistic %d airdrop files\nPath: %s\nType: %s \nAirdrop files: %s",
+                jsonFiles.size(), path, typeStrPrint, Arrays.toString(jsonFiles.toArray())));
     }
 
     private static String singleAirdropFileStatistics(String pathFileName, int type){
