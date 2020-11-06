@@ -13,13 +13,14 @@ import org.conch.common.Constants;
 import org.conch.db.Db;
 import org.conch.db.DbIterator;
 import org.conch.db.DbUtils;
-import org.conch.http.Airdrop;
 import org.conch.peer.CertifiedPeer;
 import org.conch.tx.Transaction;
 import org.conch.tx.TransactionImpl;
 import org.conch.tx.TransactionType;
 
 import java.io.File;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -37,8 +38,7 @@ public class SnapshotTest {
         public String amountNQT;
         public String recipientPublicKey;
 
-        TransferInfo() {
-        }
+        TransferInfo() {}
     }
 
     public static void main(String[] args) {
@@ -53,25 +53,60 @@ public class SnapshotTest {
         // 交互式
         Scanner scanner = new Scanner(System.in);
         // 1.1. 输入文件路径
-
-        System.out.println("input file path(Press enter, default is batch): ");
+        System.out.println("Input the file path(Press enter, default is batch): ");
         String path = scanner.nextLine();
         if (StringUtils.isEmpty(path)) {
             path = "batch";
         }
         // 判断该路径是否存在
-        File file = new File(path);
-        if (!file.exists()) {
+        File pathFile = new File(path);
+        if (!pathFile.exists()) {
             System.out.println("file path is not exists!\n");
         }
-        // 1.2. 输入文件名
-        System.out.println("input file name: ");
+        // 1.2. 输入文件名和文件格式
+        System.out.println("Input the file name or files name:");
+        System.out.println("- airdrop_1.json or array mode: airdrop_1.json,airdrop_2.json...");
+        System.out.println("- * means scan all files below the path): ");
         String filename = scanner.next();
-        String pathFileName = path + File.separator + filename;
+        boolean isScanFilesMode = "*".equalsIgnoreCase(filename);
+        List<String> jsonFiles = Lists.newArrayList();
+
+        if(isScanFilesMode) {
+            File[] files = pathFile.listFiles();
+            for(int i = 0 ; i < files.length ; i++){
+                jsonFiles.add(path + File.separator + files[i].getName());
+            }
+        }else{
+            boolean arrayMode = filename.contains(",");
+            if(arrayMode){
+                String[] fileArray = filename.split(",");
+                for(int i = 0 ; i < fileArray.length ; i++){
+                    jsonFiles.add(path + File.separator + fileArray[i]);
+                }
+            }else{
+                jsonFiles.add(path + File.separator + filename);
+            }
+        }
+
+        System.out.println("Choose the code of type (1-airdrop, 2-airdrop result): ");
+        String typeStr = scanner.next();
+        int type = Integer.valueOf(typeStr).intValue();
         // 1.3. 解析文件
+        jsonFiles.forEach(jsonFile -> System.out.println(singleAirdropFileStatistics(jsonFile, type)));
+        System.out.println(String.format("Statistic %d airdrop files [type=%s])",
+                jsonFiles.size(), (type == 1 ? "airdrop" : "airdrop result")));
+    }
+
+    private static String singleAirdropFileStatistics(String pathFileName, int type){
+        String statis = "";
         String readJsonStr = org.conch.util.JSON.readJsonFile(pathFileName);
         JSONObject parseObject = JSON.parseObject(readJsonStr);
-        JSONArray listOrigin = parseObject.getJSONArray("failList");
+        JSONArray listOrigin = null;
+        if(type == 1){
+            listOrigin = parseObject.getJSONArray("list");
+        }else if(type == 2){
+            listOrigin = parseObject.getJSONArray("failList");
+        }
         // 2. 输出文件数据的统计信息
         Integer listSize = listOrigin.size();
         Long totalAmount = 0L;
@@ -79,9 +114,13 @@ public class SnapshotTest {
         for (TransferInfo info : list) {
             totalAmount += Long.parseLong(info.amountNQT);
         }
-        System.out.println("Account Count: " + listSize + "\n");
-        System.out.println("Account Total amountNQT: " + totalAmount + "\n");
-        System.out.println("Account Total amountNQT: " + (totalAmount/Constants.ONE_SS+1) + " MW\n");
+        BigDecimal totalAmountBD = new BigDecimal(totalAmount / Constants.ONE_SS).setScale(0, RoundingMode.UP);
+        statis += pathFileName + "\n";
+        statis += "----------------------" + "\n";
+        statis += String.format("Account Count: %d \n", listSize);
+        statis += String.format("Total amount: %d MW, %d NQT \n", totalAmountBD.longValue(), totalAmount);
+
+        return statis;
     }
 
     private static int startHeight = 270;
