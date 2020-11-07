@@ -267,7 +267,7 @@ const en = {
         'network_title': "Network Overview",
         'block_height': "Block Height",
         'block_newest_time': "Block Generation Time ",
-        'block_avg_transaction_volume': "Average Txn Volume",
+        'block_avg_transaction_volume': "24H Total Txn Volume",
         'block_peers_volume': "Node Volume",
         'declared_peers_size': "All Declared Node Size",
         'miner_info': "Trading Summary",
