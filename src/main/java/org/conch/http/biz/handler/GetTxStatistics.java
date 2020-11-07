@@ -61,7 +61,7 @@ public final class GetTxStatistics extends APIServlet.APIRequestHandler {
         Long storageDataLength = 0L;
         Long storageCount24H = 0L;
         Long storageDataLength24H = 0L;
-        Long crowdMinerJoinerCount = 0l;
+        Long crowdMinerJoinerCount = 0L;
         JSONObject jsonObject = new JSONObject();
 
         Connection con = null;
