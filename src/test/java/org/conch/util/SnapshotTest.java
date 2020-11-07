@@ -50,34 +50,48 @@ public class SnapshotTest {
     }
 
     private static final String DEFAULT_AIRDROP_PATH="batch";
-    private static final String DEFAULT_STATIS_TYPE="1";
+    private static final String DEFAULT_STATIS_TYPE = "1";
+    private static final boolean INTERACTION_MODE = false;
     private static void airdropDataStatistics() {
         // 交互式
-        Scanner scanner = new Scanner(System.in);
+        Scanner scanner = null;
+        if(INTERACTION_MODE) {
+            scanner = new Scanner(System.in);
+        }
         // 1.1. 输入文件路径
-        System.out.println(String.format("Input the file path(Press enter, default is %s): ", DEFAULT_AIRDROP_PATH));
-        String path = scanner.nextLine();
+        String path = null;
+        if(INTERACTION_MODE) {
+            System.out.println(String.format("Input the file path(Press enter, default is %s): ", DEFAULT_AIRDROP_PATH));
+            path = scanner.nextLine();
+        }
         path = StringUtils.isEmpty(path) ? DEFAULT_AIRDROP_PATH : path;
         // 判断该路径是否存在
         File pathFile = new File(path);
         if (!pathFile.exists()) {
             System.out.println("file path is not exists!\n");
         }
+
         // 1.2. 输入文件名和文件格式
-        System.out.println("Input the file name or files name:");
-        System.out.println("- airdrop_1.json or array mode: airdrop_1.json,airdrop_2.json...");
-        System.out.println("- input * or enter directly means scan all files below the path): ");
-        String filename = scanner.nextLine();
+        String filename = null;
+        if(INTERACTION_MODE) {
+            System.out.println("Input the file name or files name:");
+            System.out.println("- airdrop_1.json or array mode: airdrop_1.json,airdrop_2.json...");
+            System.out.println("- input * or enter directly means scan all files below the path): ");
+            filename = scanner.nextLine();
+        }
         boolean isScanFilesMode = StringUtils.isEmpty(filename) || "*".equalsIgnoreCase(filename);
         List<String> jsonFiles = Lists.newArrayList();
 
         if(isScanFilesMode) {
             File[] files = pathFile.listFiles();
             for(int i = 0 ; i < files.length ; i++){
-                if(".DS_Store".equalsIgnoreCase(files[i].getName())){
+                String airdropFileName = files[i].getName();
+                boolean isIgnoreFile = (".DS_Store".equalsIgnoreCase(airdropFileName))
+                        || (StringUtils.isNotEmpty(airdropFileName) && airdropFileName.startsWith("."));
+                if(isIgnoreFile){
                     continue;
                 }
-                jsonFiles.add(path + File.separator + files[i].getName());
+                jsonFiles.add(path + File.separator + airdropFileName);
             }
         }else{
             boolean arrayMode = filename.contains(",");
@@ -91,48 +105,70 @@ public class SnapshotTest {
             }
         }
 
-        System.out.println(String.format("Choose the code of type (1-airdrop, 2-airdrop result, " +
-                "enter will use the default value %s): ", DEFAULT_STATIS_TYPE));
-        String typeStr = scanner.nextLine();
+        String typeStr = null;
+        if(INTERACTION_MODE) {
+            System.out.println(String.format("Choose the code of type (1-airdrop, 2-airdrop result, " +
+                    "enter will use the default value %s): ", DEFAULT_STATIS_TYPE));
+            typeStr = scanner.nextLine();
+        }
         typeStr = StringUtils.isEmpty(typeStr) ? DEFAULT_STATIS_TYPE : typeStr;
         int type = Integer.valueOf(typeStr).intValue();
         String typeStrPrint = (type == 1 ? "airdrop" : "airdrop result");
         // 1.3. 解析文件
         if(jsonFiles.size() == 0) {
-            System.out.println(String.format("Not found airdrop files[path=%s, type=%s to analyze, exit the statistic", path, typeStrPrint));
+            System.out.println(String.format("Not found airdrop files[path=%s, type=%s] to analyze, exit the statistic", path, typeStrPrint));
             System.exit(1);
         }
-        jsonFiles.forEach(jsonFile -> System.out.println(singleAirdropFileStatistics(jsonFile, type)));
+        jsonFiles.forEach(jsonFile -> {
+            String singleStatistic = singleAirdropFileStatistics(jsonFile, type);
+            if(StringUtils.isNotEmpty(singleStatistic)){
+                System.out.println(singleStatistic);
+            }
+        });
         System.out.println(String.format("##########################\n" +
                         "Statistic %d airdrop files\nPath: %s\nType: %s \nAirdrop files: %s\n",
-
                 jsonFiles.size(), path, typeStrPrint, Arrays.toString(jsonFiles.toArray())));
     }
 
     private static String singleAirdropFileStatistics(String pathFileName, int type){
         String statis = "";
-        String readJsonStr = org.conch.util.JSON.readJsonFile(pathFileName);
-        JSONObject parseObject = JSON.parseObject(readJsonStr);
-        JSONArray listOrigin = null;
-        if(type == 1){
-            listOrigin = parseObject.getJSONArray("list");
-        }else if(type == 2){
-            listOrigin = parseObject.getJSONArray("failList");
+        try{
+            String readJsonStr = org.conch.util.JSON.readJsonFile(pathFileName);
+            JSONObject parseObject = JSON.parseObject(readJsonStr);
+            JSONArray listOrigin = null;
+            if(type == 1){
+                listOrigin = parseObject.getJSONArray("list");
+            }else if(type == 2){
+                listOrigin = parseObject.getJSONArray("failList");
+            }
+            // 2. 输出文件数据的统计信息
+            Integer airdropSize = listOrigin.size();
+            Long totalAmount = 0L;
+            Long maxSingleAmount = 0L;
+            Long minSingleAmount = 0L;
+            List<TransferInfo> list = JSONObject.parseArray(listOrigin.toJSONString(), TransferInfo.class);
+            for (TransferInfo info : list) {
+                Long singleAmount = Long.parseLong(info.amountNQT);
+                if(maxSingleAmount == 0 || singleAmount >= maxSingleAmount){
+                    maxSingleAmount = singleAmount;
+                }
+                if(minSingleAmount == 0 || singleAmount <= minSingleAmount){
+                    minSingleAmount = singleAmount;
+                }
+                totalAmount += singleAmount;
+            }
+            BigDecimal totalAmountBD = new BigDecimal(totalAmount / Constants.ONE_SS).setScale(0, RoundingMode.UP);
+            BigDecimal avgSingleAmountBD = new BigDecimal(totalAmount / Constants.ONE_SS / airdropSize).setScale(0, RoundingMode.UP);
+            statis += pathFileName + "\n";
+            statis += "----------------------" + "\n";
+            statis += String.format("Account Count: %d \n", airdropSize);
+            statis += String.format("Max Amount: %d | Min Amount: %d | Avg Amount: %d\n", maxSingleAmount / Constants.ONE_SS, minSingleAmount / Constants.ONE_SS, avgSingleAmountBD.longValue());
+            statis += String.format("Total Amount: %d MW (%d NQT) \n", totalAmountBD.longValue(), totalAmount);
+            statis += String.format("Suggest airdrop out account balance: %d MW (Estimated Fees %d MW) \n", (totalAmountBD.longValue() + airdropSize), airdropSize);
+        }catch(Exception e){
+           // System.out.println(e.getMessage());
+            statis = null;
         }
-        // 2. 输出文件数据的统计信息
-        Integer listSize = listOrigin.size();
-        Long totalAmount = 0L;
-        List<TransferInfo> list = JSONObject.parseArray(listOrigin.toJSONString(), TransferInfo.class);
-        for (TransferInfo info : list) {
-            totalAmount += Long.parseLong(info.amountNQT);
-        }
-        BigDecimal totalAmountBD = new BigDecimal(totalAmount / Constants.ONE_SS).setScale(0, RoundingMode.UP);
-        statis += pathFileName + "\n";
-        statis += "----------------------" + "\n";
-        statis += String.format("Account Count: %d \n", listSize);
-        statis += String.format("Total Amount: %d MW (%d NQT) \n", totalAmountBD.longValue(), totalAmount);
-        statis += String.format("Suggest airdrop out account balance: %d MW (Estimated Fees %d MW) \n", (totalAmountBD.longValue() + listSize), listSize);
-
         return statis;
     }
 
