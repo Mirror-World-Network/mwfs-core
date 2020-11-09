@@ -827,13 +827,11 @@
                                         feeNQT:t.feeNQT,
                                     });
                                 }
-
                             }
-                            _this.$http.get('/sharder?requestType=getAccountId', {
-                                params: {
-                                    accoutId: accoutIdArray.join(","),
-                                }
-                            }).then(function (res) {
+                            let formData = new FormData();
+                            formData.append("accoutId", accoutIdArray.join(","));
+                            _this.loading = true;
+                            _this.$http.post('/sharder?requestType=getAccountId', formData).then(function (res) {
                                 if (!res.data.errorDescription) {
                                     _this.accountIdMap = res.data.rsAccountInfo;
                                     console.log("map:"+_this.accountIdMap);
