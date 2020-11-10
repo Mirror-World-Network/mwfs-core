@@ -31,11 +31,13 @@ import org.conch.chain.CheckSumValidator;
 import org.conch.common.ConchException;
 import org.conch.common.Constants;
 import org.conch.consensus.genesis.SharderGenesis;
+import org.conch.consensus.poc.PocScore;
 import org.conch.crypto.Crypto;
 import org.conch.crypto.EncryptedData;
 import org.conch.db.*;
 import org.conch.market.Exchange;
 import org.conch.market.Trade;
+import org.conch.mint.Generator;
 import org.conch.shuffle.ShufflingTransaction;
 import org.conch.tx.Appendix;
 import org.conch.tx.Attachment;
@@ -495,7 +497,68 @@ public final class Account {
 
         @Override
         public void rollback(int height) {
-            super.rollback(height);
+            if (!db.isInTransaction()) {
+                throw new IllegalStateException("Not in transaction");
+            }
+            Connection con = null;
+            try {
+                con = Db.db.getConnection();
+                PreparedStatement pstmtSelect = con.prepareStatement("select distinct id FROM account WHERE height > ?");
+                pstmtSelect.setInt(1, height);
+                ResultSet resultSet = pstmtSelect.executeQuery();
+                try (PreparedStatement pstmtWorkDelete = con.prepareStatement("DELETE FROM account WHERE height > ?");
+                     PreparedStatement pstmtCacheDelete = con.prepareStatement("DELETE FROM account_cache WHERE height > ?");
+                     PreparedStatement pstmtHistoryDelete = con.prepareStatement("DELETE FROM account_history WHERE height > ?");
+                ) {
+                    pstmtWorkDelete.setInt(1, height);
+                    pstmtWorkDelete.executeUpdate();
+                    pstmtCacheDelete.setInt(1, height);
+                    pstmtCacheDelete.executeUpdate();
+                    pstmtHistoryDelete.setInt(1, height);
+                    pstmtHistoryDelete.executeUpdate();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e.toString(), e);
+                }
+                while (resultSet.next()) {
+                    long accountId = resultSet.getLong("id");
+                    PreparedStatement workTable = con.prepareStatement("select * FROM account WHERE id = ? order by height desc limit 1");
+                    workTable.setLong(1, accountId);
+                    ResultSet resultSetWork = workTable.executeQuery();
+                    if (resultSetWork.next()) {
+                        PreparedStatement update = con.prepareStatement("update account set latest = true where db_id = ?");
+                        update.setLong(1,resultSetWork.getLong("db_id"));
+                        update.executeUpdate();
+                        continue;
+                    }
+                    PreparedStatement cacheTable = con.prepareStatement("select * FROM account_cache WHERE id = ? order by height desc limit 1");
+                    cacheTable.setLong(1, accountId);
+                    ResultSet resultSetCache = cacheTable.executeQuery();
+                    if (!resultSetCache.next()) {
+                        PreparedStatement historyTable = con.prepareStatement("select * FROM account_history WHERE id = ? order by height desc limit 1");
+                        historyTable.setLong(1, accountId);
+                        resultSetCache = historyTable.executeQuery();
+                        if (!resultSetCache.next()) {
+                            continue;
+                        }
+                    }
+                    PreparedStatement pstmtInsert = con.prepareStatement("INSERT INTO account (ID,BALANCE,UNCONFIRMED_BALANCE,FORGED_BALANCE," +
+                            "ACTIVE_LESSEE_ID,HAS_CONTROL_PHASING,HEIGHT,FROZEN_BALANCE) KEY (account_id, height) VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
+                    pstmtInsert.setLong(1, resultSetCache.getLong("ID"));
+                    pstmtInsert.setLong(2, resultSetCache.getLong("BALANCE"));
+                    pstmtInsert.setLong(3, resultSetCache.getLong("UNCONFIRMED_BALANCE"));
+                    pstmtInsert.setLong(4, resultSetCache.getLong("FORGED_BALANCE"));
+                    pstmtInsert.setLong(5, resultSetCache.getLong("ACTIVE_LESSEE_ID"));
+                    pstmtInsert.setBoolean(6, resultSetCache.getBoolean("HAS_CONTROL_PHASING"));
+                    pstmtInsert.setInt(7, resultSetCache.getInt("HEIGHT"));
+                    pstmtInsert.setLong(8, resultSetCache.getLong("FROZEN_BALANCE"));
+                    pstmtInsert.executeUpdate();
+                }
+
+            }catch (SQLException e) {
+                throw new RuntimeException(e.toString(), e);
+            } finally {
+                DbUtils.close(con);
+            }
         }
     };
 
@@ -521,7 +584,7 @@ public final class Account {
 
         @Override
         public void rollback(int height) {
-            super.rollback(height);
+            //super.rollback(height);
         }
 
         @Override
@@ -551,7 +614,7 @@ public final class Account {
 
         @Override
         public void rollback(int height) {
-            super.rollback(height);
+            //super.rollback(height);
         }
 
         @Override
@@ -736,9 +799,63 @@ public final class Account {
 
         @Override
         public void rollback(int height) {
-            _rollback(height, "account_guaranteed_balance",
-                    "account_guaranteed_balance_cache",
-                    "account_guaranteed_balance_history");
+            if (!db.isInTransaction()) {
+                throw new IllegalStateException("Not in transaction");
+            }
+            Connection con = null;
+            try {
+                con = Db.db.getConnection();
+                PreparedStatement pstmtSelect = con.prepareStatement("select distinct account_id FROM account_guaranteed_balance WHERE height > ?");
+                pstmtSelect.setInt(1, height);
+                ResultSet resultSet = pstmtSelect.executeQuery();
+                try (PreparedStatement pstmtWorkDelete = con.prepareStatement("DELETE FROM account_guaranteed_balance WHERE height > ?");
+                     PreparedStatement pstmtCacheDelete = con.prepareStatement("DELETE FROM account_guaranteed_balance_cache WHERE height > ?");
+                     PreparedStatement pstmtHistoryDelete = con.prepareStatement("DELETE FROM account_guaranteed_balance_history WHERE height > ?");
+                ) {
+                    pstmtWorkDelete.setInt(1, height);
+                    pstmtWorkDelete.executeUpdate();
+                    pstmtCacheDelete.setInt(1, height);
+                    pstmtCacheDelete.executeUpdate();
+                    pstmtHistoryDelete.setInt(1, height);
+                    pstmtHistoryDelete.executeUpdate();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e.toString(), e);
+                }
+                while (resultSet.next()) {
+                    long accountId = resultSet.getLong("account_id");
+                    PreparedStatement workTable = con.prepareStatement("select * FROM account_guaranteed_balance WHERE account_id = ? order by height desc limit 1");
+                    workTable.setLong(1, accountId);
+                    ResultSet resultSetWork = workTable.executeQuery();
+                    if (resultSetWork.next()) {
+                        PreparedStatement update = con.prepareStatement("update account_guaranteed_balance set latest = true where db_id = ?");
+                        update.setLong(1,resultSetWork.getLong("db_id"));
+                        update.executeUpdate();
+                        continue;
+                    }
+                    PreparedStatement cacheTable = con.prepareStatement("select * FROM account_guaranteed_balance_cache WHERE account_id = ? order by height desc limit 1");
+                    cacheTable.setLong(1, accountId);
+                    ResultSet resultSetCache = cacheTable.executeQuery();
+                    if (!resultSetCache.next()) {
+                        PreparedStatement historyTable = con.prepareStatement("select * FROM account_guaranteed_balance_history WHERE account_id = ? order by height desc limit 1");
+                        historyTable.setLong(1, accountId);
+                        resultSetCache = historyTable.executeQuery();
+                        if (!resultSetCache.next()) {
+                            continue;
+                        }
+                    }
+                    PreparedStatement pstmtUpdate = con.prepareStatement("INSERT INTO ACCOUNT_GUARANTEED_BALANCE (ACCOUNT_ID,"
+                            + " ADDITIONS, HEIGHT) VALUES (?, ?, ?)");
+                    pstmtUpdate.setLong(1, resultSetCache.getLong("ACCOUNT_ID"));
+                    pstmtUpdate.setLong(2, resultSetCache.getLong("ADDITIONS"));
+                    pstmtUpdate.setInt(3, resultSetCache.getInt("HEIGHT"));
+                    pstmtUpdate.executeUpdate();
+                }
+
+            }catch (SQLException e) {
+                throw new RuntimeException(e.toString(), e);
+            } finally {
+                DbUtils.close(con);
+            }
         }
     };
 

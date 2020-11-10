@@ -595,7 +595,7 @@ public class PocProcessorImpl implements PocProcessor {
     @Override
     public boolean rollbackTo(int height) {
         try {
-            PocDb.rollbackScore(height);
+            //PocDb.rollbackScore(height);
             // reset the score map
             synchronized (PocHolder.inst.scoreMap) {
                 PocHolder.inst.scoreMap.values().removeIf(pocScore -> pocScore.getHeight() > height);
