@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.conch.Conch;
 import org.conch.chain.BlockchainImpl;
 import org.conch.common.Constants;
+import org.conch.consensus.poc.PocHolder;
 import org.conch.consensus.poc.PocScore;
 import org.conch.consensus.poc.tx.PocTxBody;
 import org.conch.consensus.poc.tx.PocTxWrapper;
@@ -12,6 +13,7 @@ import org.conch.db.Db;
 import org.conch.db.DbIterator;
 import org.conch.db.DbUtils;
 import org.conch.db.DerivedDbTable;
+import org.conch.mint.Generator;
 import org.conch.peer.CertifiedPeer;
 import org.conch.peer.Peer;
 import org.conch.tx.Transaction;
@@ -138,7 +140,7 @@ public class PocDb  {
                 con = Db.db.getConnection();
                 PreparedStatement pstmt = con.prepareStatement("SELECT poc_detail AS detail, poc_score, account_id, height "
                         + "FROM account_poc_score WHERE account_id = ?"
-                        + " AND height = ?"
+                        + " AND height <= ?"
                         + " ORDER BY height DESC LIMIT 1");
                 pstmt.setLong(1, accountId);
                 pstmt.setLong(2, height);
@@ -313,9 +315,69 @@ public class PocDb  {
 
         @Override
         public void rollback(int height) {
-            _rollback(height, "account_poc_score",
-                    "account_poc_score_cache",
-                    "account_poc_score_history");
+            if (!db.isInTransaction()) {
+                throw new IllegalStateException("Not in transaction");
+            }
+            Connection con = null;
+            try {
+                con = Db.db.getConnection();
+                PreparedStatement pstmtSelect = con.prepareStatement("select distinct account_id FROM account_poc_score WHERE height > ?");
+                pstmtSelect.setInt(1, height);
+                ResultSet resultSet = pstmtSelect.executeQuery();
+                try (PreparedStatement pstmtWorkDelete = con.prepareStatement("DELETE FROM account_poc_score WHERE height > ?");
+                     PreparedStatement pstmtCacheDelete = con.prepareStatement("DELETE FROM account_poc_score_cache WHERE height > ?");
+                     PreparedStatement pstmtHistoryDelete = con.prepareStatement("DELETE FROM account_poc_score_history WHERE height > ?");
+                ) {
+                    pstmtWorkDelete.setInt(1, height);
+                    pstmtWorkDelete.executeUpdate();
+                    pstmtCacheDelete.setInt(1, height);
+                    pstmtCacheDelete.executeUpdate();
+                    pstmtHistoryDelete.setInt(1, height);
+                    pstmtHistoryDelete.executeUpdate();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e.toString(), e);
+                }
+                while (resultSet.next()) {
+                    long accountId = resultSet.getLong("account_id");
+                    PocHolder.clearCache(accountId);
+                    PreparedStatement workTable = con.prepareStatement("select * FROM account_poc_score WHERE account_id = ? order by height desc limit 1");
+                    workTable.setLong(1, accountId);
+                    ResultSet resultSetWork = workTable.executeQuery();
+                    if (resultSetWork.next()) {
+                        PreparedStatement update = con.prepareStatement("update account_poc_score set latest = true where db_id = ?");
+                        PocScore pocScore = new PocScore(resultSetWork.getLong("account_id"), resultSetWork.getInt("height"), resultSetWork.getString("detail"));
+                        Generator.updatePocScore(pocScore);
+                        update.setLong(1,resultSetWork.getLong("db_id"));
+                        update.executeUpdate();
+                        continue;
+                    }
+                    PreparedStatement cacheTable = con.prepareStatement("select * FROM account_poc_score_cache WHERE account_id = ? order by height desc limit 1");
+                    cacheTable.setLong(1, accountId);
+                    ResultSet resultSetCache = cacheTable.executeQuery();
+                    if (!resultSetCache.next()) {
+                        PreparedStatement historyTable = con.prepareStatement("select * FROM account_poc_score_history WHERE account_id = ? order by height desc limit 1");
+                        historyTable.setLong(1, accountId);
+                        resultSetCache = cacheTable.executeQuery();
+                        if (!resultSetCache.next()) {
+                            continue;
+                        }
+                    }
+                    PocScore pocScore = new PocScore(resultSetWork.getLong("account_id"), resultSetWork.getInt("height"), resultSetWork.getString("detail"));
+                    Generator.updatePocScore(pocScore);
+                    PreparedStatement pstmtInsert = con.prepareStatement("INSERT INTO account_poc_score(account_id, "
+                            + " poc_score, height, poc_detail) VALUES(?, ?, ?, ?)");
+                    pstmtInsert.setLong(1, pocScore.getAccountId());
+                    pstmtInsert.setLong(2, pocScore.total().longValue());
+                    pstmtInsert.setInt(3, pocScore.getHeight());
+                    pstmtInsert.setString(4, pocScore.toSimpleJson());
+                    pstmtInsert.executeUpdate();
+                }
+
+            }catch (SQLException e) {
+                throw new RuntimeException(e.toString(), e);
+            } finally {
+                DbUtils.close(con);
+            }
         }
 
         /**
