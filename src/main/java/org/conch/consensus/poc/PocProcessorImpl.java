@@ -601,7 +601,7 @@ public class PocProcessorImpl implements PocProcessor {
                 PocHolder.inst.scoreMap.values().removeIf(pocScore -> pocScore.getHeight() > height);
             }
 
-            PocDb.rollbackPeer(height);
+//            PocDb.rollbackPeer(height);
             // reset the certified peers
             synchronized (PocHolder.inst.certifiedPeers) {
                 PocHolder.inst.certifiedPeers.values().removeIf(certifiedPeer -> certifiedPeer.getHeight() > height);
