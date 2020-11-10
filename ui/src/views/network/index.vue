@@ -633,7 +633,7 @@
             fetchPeers(){
                 const _this = this;
                 _this.$global.fetch("GET", {startThis:"startThis"}, "getPeers").then(res => {
-                    _this.peerNum = res.peers.length + _this.limitPeerSize;
+                    _this.peerNum = res.peers.length>0 ? res.peers.length : _this.limitPeerSize;
                     _this.declaredPeerSize = res.declaredPeerSize;
                 }).catch(err => {
                     console.info("error", err);
@@ -642,7 +642,7 @@
             drawPeerMap(){
                 const _this = this;
                 _this.$global.fetch("GET", {startThis:"startThis"}, "getPeers").then(res => {
-                    _this.peerNum = res.peers.length + _this.limitPeerSize;
+                    _this.peerNum = res.peers.length>0 ? res.peers.length : _this.limitPeerSize;
                     _this.declaredPeerSize = res.declaredPeerSize;
                     try {
                         _this.$global.coordinatesMap = JSON.parse(res.coordinates);

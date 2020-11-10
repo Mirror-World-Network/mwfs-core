@@ -33,7 +33,8 @@
         <p>
           <span class="block_title fl">
             <img src="../../assets/img/peerlist.svg" />
-            <span>{{$t('peers.peer_list')}}</span>
+            <span v-if="peerListFilterStatus == true">{{$t('peers.valid_peer_list')}}</span>
+            <span v-else>{{$t('peers.peer_list')}}</span>
             <span class="peer_link">{{$t('peers.peer_list_link')}}</span>
           </span>
           <span class="hrefbtn fr block_title csp">
@@ -299,25 +300,25 @@
                 limitPeerSize: 12,
                 startTimestamp: null,
                 timer: 0,
-                standardPrecent: 0.7,
+                peerListFilterStatus: false,
             };
         },
         created: function () {
             let _this = this;
             _this.startTimestamp = Date.parse(new Date());
             _this.getSPPeers();
-            _this.init(_this.peersListFilter(_this.$global.peers.peers));
+            _this.init(_this.$global.peers.peers);
         },
         methods: {
             init: function (peersList) {
                 const _this = this;
-                _this.peersList = peersList;
+                _this.peersList = _this.peersListFilter(peersList);
                 _this.peersList.forEach(ele => {
                     if (ele.cosUpdateTime) {
                         ele.cosUpdateTimeSubstring = ele.cosUpdateTime.substring(0,10);
                     }
                 });
-                _this.totalSize = peersList.length;
+                _this.totalSize = _this.peersList.length;
                 _this.getPeersInfo(peersList);
                 _this.activeHubCount = 0;
                 _this.minerList.forEach(function (item) {
@@ -330,10 +331,12 @@
                     }
                 });
             },
-            // peers filter
+            // valid peers filter
             peersListFilter(peersList){
                 let newPeersList = [];
                 let validPrecent = 0;
+                const _this = this;
+                _this.peerListFilterStatus = false;
                 console.log("[peersList]", peersList);
                 peersList.forEach(ele => {
                     if(ele.state){
@@ -342,8 +345,9 @@
                 })
                 validPrecent = newPeersList.length/peersList.length;
 
-                if (validPrecent < this.standardPrecent) {
+                if (validPrecent < _this.$global.validPeerPercentage) {
                     // 1. !NON_CONNECTED peer less than standardPrecent of all peer, filter corresponding peer
+                    _this.peerListFilterStatus = true;
                     return newPeersList;
                 }
                 // 2. Otherwise, do no filtering
@@ -412,7 +416,7 @@
             },
             getPeersInfo: function (data) {
                 let _this = this;
-                _this.peersCount = data.length + _this.limitPeerSize;
+                _this.peersCount = data.length>0 ? data.length : _this.limitPeerSize;
                 _this.activePeersCount = 0;
                 data.forEach(function (item) {
                     if (item.application === 'COS') {

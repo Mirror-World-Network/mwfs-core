@@ -311,6 +311,7 @@ const cn = {
         'active_hub': "矿机运行数",
         'active_peers': "活跃节点数",
         'peer_list': "节点列表",
+        'valid_peer_list': "有效节点列表",
         'peer_list_link': "(至少需要连接2个节点才能正常出块)",
         'peer_address': "节点地址",
         'download': "已下载",
