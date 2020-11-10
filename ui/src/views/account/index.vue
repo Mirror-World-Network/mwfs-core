@@ -384,7 +384,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" v-loading="messageForm.executing" class="btn common_btn writeBtn"
-                                @click="sendMessageInfo">
+                                @click="sendMessageInfo" :disabled="isDisable">
                             {{ $t('sendMessage.send_message') }}
                         </button>
                     </div>
@@ -426,7 +426,7 @@
                         </el-form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn common_btn writeBtn" @click="uploadFile">
+                        <button type="button" class="btn common_btn writeBtn" @click="uploadFile" :disabled="isDisable">
                             {{ $t('sendMessage.upload_file') }}
                         </button>
                     </div>
@@ -468,7 +468,7 @@
                         </el-form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn common_btn writeBtn" @click="onChain">
+                        <button type="button" class="btn common_btn writeBtn" @click="onChain"  :disabled="isDisable">
                             {{ $t('sendMessage.upload_file') }}
                         </button>
                     </div>
@@ -502,7 +502,7 @@
                         </el-form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn common_btn writeBtn" @click="joinNet">
+                        <button type="button" class="btn common_btn writeBtn" @click="joinNet"  :disabled="isDisable">
                             {{ $t('joinNet.joinNet') }}
                         </button>
                     </div>
@@ -560,7 +560,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" v-loading="transfer.executing" class="btn common_btn writeBtn"
-                                @click="sendTransferInfo">
+                                @click="sendTransferInfo" :disabled="isDisable">
                             {{ $t('transfer.transfer_send') }}
                         </button>
                     </div>
@@ -610,7 +610,7 @@
                             <el-col :span="24"><div style="text-align: center; margin: 5px auto">or</div></el-col>
                         </el-row>
                         <button type="button" v-loading="batch_transfer.executingAnother" class="btn common_btn writeBtn"
-                                @click="detectionBatchTransferInfo"  :disabled="isDisableBatch">
+                                @click="detectionBatchTransferInfo"  :disabled="isDisable">
                             {{ $t('transfer.batch_transfer_detection') }}
                         </button>
 
@@ -721,7 +721,7 @@
                 </el-form>
                 <div class="footer-btn">
                     <button class="common_btn writeBtn" v-loading="hubsetting.executing"
-                            @click="verifyHubSetting('init')">
+                            @click="verifyHubSetting('init')"  :disabled="isDisable">
                         {{ $t('hubsetting.confirm_restart') }}
                     </button>
                     <button class="common_btn writeBtn" @click="closeDialog">{{ $t('hubsetting.cancel') }}</button>
@@ -1059,7 +1059,6 @@ export default {
         );
         return {
             isDisable: false,
-            isDisableBatch: false,
             isMobile: false,
             //dialog
             src: "",
@@ -1891,6 +1890,7 @@ export default {
         verifyHubSetting: function (type) {
             this.hubsetting.executing = true;
             const _this = this;
+            _this.preventRepeatedClick();
             let reConfigFormData = _this.verifyAndGenerateHubSettingFormData();
             if (reConfigFormData !== false) {
                 reConfigFormData.append("isInit", "true");
@@ -2243,6 +2243,7 @@ export default {
         },
         uploadFile: function () {
             const _this = this;
+            _this.preventRepeatedClick();
             let formData = new FormData();
             formData.append("feeNQT", _this.messageForm.fee * 100000000);
             formData.append("secretPhrase", _this.messageForm.password || _this.secretPhrase);
@@ -2273,6 +2274,7 @@ export default {
         },
         onChain: function () {
             const _this = this;
+            _this.preventRepeatedClick();
             let formData = new FormData();
             formData.append("feeNQT", _this.messageForm.fee * 100000000);
             formData.append("secretPhrase", _this.messageForm.password || _this.secretPhrase);
@@ -2309,9 +2311,22 @@ export default {
 
         joinNet: function () {
             //todo joinNet
+            _this.preventRepeatedClick();
+        },
+        /**
+         * 防止重复点击
+         * @param disable
+         */
+        preventRepeatedClick() {
+            const _this = this;
+            _this.isDisable = true;
+            setTimeout(() => {
+                _this.isDisable = false;
+            }, 3000)
         },
         sendMessageInfo: function () {
             const _this = this;
+            _this.preventRepeatedClick();
             _this.messageForm.executing = true;
             let options = {};
             let encrypted = {};
@@ -2482,8 +2497,7 @@ export default {
         },
         sendBatchTransferInfo: function () {
             const _this = this;
-            _this.isDisable = true;
-
+            _this.preventRepeatedClick();
             if (_this.batch_transfer.fileName === "") {
                 _this.$message.warning(_this.$t('sso.error_no_file_chosen'));
                 return;
@@ -2516,13 +2530,11 @@ export default {
                 }
                 _this.batch_transfer.executing = false;
             });
-            setTimeout(() => {
-                _this.isDisable = false;
-            }, 3000)
+
         },
         detectionBatchTransferInfo: function () {
             const _this = this;
-            _this.isDisableBatch = true;
+            _this.preventRepeatedClick();
             if (_this.batch_transfer.fileName === "") {
                 _this.$message.warning(_this.$t('sso.error_no_file_chosen'));
                 return;
@@ -2549,12 +2561,11 @@ export default {
                 }
                 _this.batch_transfer.executingAnother = false;
             });
-            setTimeout(() => {
-                _this.isDisableBatch = false;
-            }, 3000)
+
         },
         sendTransferInfo: function () {
             const _this = this;
+            _this.preventRepeatedClick();
             _this.transfer.executing = true;
             let options = {};
             let encrypted = {};
@@ -2633,6 +2644,7 @@ export default {
                 _this.sendTransfer(formData);
                 _this.transfer.executing = false;
             });
+
         },
         sendTransfer: function (formData) {
             const _this = this;
