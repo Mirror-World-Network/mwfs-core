@@ -311,6 +311,7 @@ const en = {
         'active_hub': "Active Clients",
         'active_peers': "Active Nodes",
         'peer_list': "Node List",
+        'valid_peer_list': "Valid Peer List",
         'peer_list_link': "(At least 2 nodes must be connected to generate blocks)",
         'peer_address': "Node Address",
         'download': "Downloaded",
