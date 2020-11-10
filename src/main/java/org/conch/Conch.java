@@ -402,7 +402,7 @@ public final class Conch {
     private static final Properties properties = new Properties(DEFAULT_PROPERTIES);
 
     static {
-        loadProperties(properties, CONCH_DEFAULT_PROPERTIES, false);
+        loadProperties(properties, CONCH_PROPERTIES, false);
         
         // use the external ip as its myAddress default value
         myAddress = readAndParseMyAddress();
@@ -530,7 +530,7 @@ public final class Conch {
     
     public static void storePropertiesToFile(HashMap<String, String> parameters) {
         OutputStream output = null;
-        Properties userProperties = loadProperties(properties, CONCH_DEFAULT_PROPERTIES, false);
+        Properties userProperties = loadProperties(properties, CONCH_PROPERTIES, false);
         parameters.entrySet().forEach(map -> userProperties.setProperty(map.getKey(), map.getValue()));
         try {
             output = new FileOutputStream("conf/" + CONCH_PROPERTIES);
