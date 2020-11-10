@@ -339,7 +339,6 @@ public class PocDb  {
                 }
                 while (resultSet.next()) {
                     long accountId = resultSet.getLong("account_id");
-                    PocHolder.clearCache(accountId);
                     PreparedStatement workTable = con.prepareStatement("select * FROM account_poc_score WHERE account_id = ? order by height desc limit 1");
                     workTable.setLong(1, accountId);
                     ResultSet resultSetWork = workTable.executeQuery();
@@ -357,7 +356,7 @@ public class PocDb  {
                     if (!resultSetCache.next()) {
                         PreparedStatement historyTable = con.prepareStatement("select * FROM account_poc_score_history WHERE account_id = ? order by height desc limit 1");
                         historyTable.setLong(1, accountId);
-                        resultSetCache = cacheTable.executeQuery();
+                        resultSetCache = historyTable.executeQuery();
                         if (!resultSetCache.next()) {
                             continue;
                         }

@@ -317,15 +317,6 @@ public class PocHolder implements Serializable {
         }
     }
 
-    /**
-     * clear Poc score map invalid data
-     */
-    public static void clearCache(long accountId) {
-        if (inst.scoreMap.containsKey(accountId)) {
-            inst.scoreMap.remove(accountId);
-        }
-    }
-
     public static void main(String[] args) {
         System.out.println(Peer.BlockchainState.UP_TO_DATE);
     }
