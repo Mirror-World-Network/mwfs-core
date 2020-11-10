@@ -1179,7 +1179,8 @@ export default {
                 settingSerialClickCount: 0,
                 natSerialClickCount: 0,
                 executing: false,
-                airdropAccount: ''
+                airdropAccount: '',
+                airdropStatus: false,
             },
             unconfirmedTransactionsList: [],
             blockchainState: this.$global.blockchainState,
@@ -1461,6 +1462,7 @@ export default {
             _this.hubsetting.clientSecretkey = res["sharder.NATClientKey"];
             _this.hubsetting.publicAddress = res["sharder.myAddress"];
             _this.hubsetting.airdropAccount = res["sharder.airdrop.account"];
+            _this.hubsetting.airdropStatus = res["sharder.airdrop.enable"];
             //_this.hubsetting.SS_Address = res["sharder.HubBindAddress"];
         });
         // _this.getLatestHubVersion();
@@ -3415,21 +3417,20 @@ export default {
             return this.$store.state.currentLang;
         },
         openAirdrop: function () {
-            let isOpenAirdrop = this.$global.isOpenAirdrop;
-            console.log("openAirdrop", isOpenAirdrop);
-            if (!this.airdropFlag) {
+            const _this = this;
+            if (_this.hubsetting.airdropStatus) {
                 let airdropAccount = [];
-                if (this.hubsetting.airdropAccount) {
-                    airdropAccount = this.hubsetting.airdropAccount.split(";");
+                if (_this.hubsetting.airdropAccount) {
+                    airdropAccount = _this.hubsetting.airdropAccount.split(";");
                 }
                 airdropAccount.forEach(ele => {
-                    if (ele === this.accountInfo.accountRS) {
-                        this.airdropFlag = true;
+                    console.log("ele", ele === _this.accountInfo.accountRS)
+                    if (ele === _this.accountInfo.accountRS) {
+                        _this.airdropFlag = true;
                     }
                 })
-                console.log("airdropAccount", airdropAccount);
             }
-            return (isOpenAirdrop == undefined || isOpenAirdrop == null) ? false : isOpenAirdrop && this.airdropFlag;
+            return _this.airdropFlag;
         }
     },
     watch: {

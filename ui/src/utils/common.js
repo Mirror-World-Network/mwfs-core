@@ -21,8 +21,8 @@ export default {
     unit: " MW",
     poolPledgeAmount: 10000000000000, // pledge amount of pool creator
     optHeight: {join: 0, quit: 0, destroy: 0, create: 0},
-    isOpenAirdrop: true, // enabled by the specified user
     isOpenApiProxy: false,
+    validPeerPercentage: 0.7, // Less than this value filter display mode, greater than or equal to close
     sendVerifyCode(url, username, fun) {
 
         $.ajax({
