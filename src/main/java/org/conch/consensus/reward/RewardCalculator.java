@@ -148,8 +148,9 @@ public class RewardCalculator {
     private static HashMap<Long, Long> localPeerAndScoreMap = null;
 
     private static boolean containPeerConfig(){
-        File file = new File(CROWD_MINER_CONFIG_PATH);
-        return file.exists();
+//        File file = new File(CROWD_MINER_CONFIG_PATH);
+//        return file.exists();
+        return false;
     }
 
     private static HashMap<Long,Long> readFromConfigFile() {

@@ -195,6 +195,9 @@ public class PocHolder implements Serializable {
         height = height < 0 ? 0 : height;
 
         PocScore pocScore = inst.scoreMap.containsKey(accountId) ? inst.scoreMap.get(accountId) : null;
+        if (pocScore != null) {
+            pocScore.total = pocScore.total();
+        }
         if(pocScore == null
         || pocScore.total().intValue() == 0) {
             pocScore = getExistedPocScore(height, accountId);

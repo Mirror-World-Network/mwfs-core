@@ -1,4 +1,4 @@
-# CDWH API DOCUNMENT
+# CDWH DEVELOP DOCUNMENT
 
 ## Airdrop 空投相关API
 > Ref code:<br> org.conch.http.Airdrop <br> & <br> org.conch.http.AirdropDetection
@@ -65,3 +65,63 @@ curl "https://IP/sharder?requestType=getCommandLineClientInfo"
 
 - 引导节点间boot、na、nb的tcp和udp端口连通检测
 ```
+
+## 创建交易deadline属性详解
+
+**deadline:** 创建的交易的有效时间（min）,超过该时间后该交易将不再被其他节点处理,不再进行广播处理
+
+> eg: deadline = 18, 新创建的交易有效时间为18分钟
+
+
+> org.conch.tx.TransactionImpl.getExpiration
+```java
+public int getExpiration() {
+    return timestamp + deadline * 60;
+}
+```
+getExpiration 定义了transaction的有效时间截止至 timestamp + deadline * 60, timestamp = transaction被build的时间戳
+
+
+> org.conch.chain.BlockchainProcessorImpl.validateTransactions
+```java
+// org/conch/chain/BlockchainProcessorImpl.java:1836
+if (transaction.getTimestamp() > block.getTimestamp() + Constants.MAX_TIMEDRIFT
+        || (transaction.getExpiration() < block.getTimestamp())) {
+    throw new TransactionNotAcceptedException(
+            "Invalid transaction timestamp "
+                    + transaction.getTimestamp()
+                    + ", current time is "
+                    + curTime
+                    + ", block timestamp is "
+                    + block.getTimestamp(),
+            transaction);
+}
+```
+当交易的有效截至时间戳 小于 区块生成的时间戳，交易校验为无效
+
+> org.conch.chain.BlockchainProcessorImpl.selectUnconfirmedTransactions
+```java
+if (blockTimestamp > 0
+        && (unconfirmedTransaction.getTimestamp() > blockTimestamp + Constants.MAX_TIMEDRIFT
+        || unconfirmedTransaction.getExpiration() < blockTimestamp)) {
+    continue;
+}
+```
+当未确认的交易有效截至时间戳 小于 区块生成的时间戳，将被丢且
+
+> org.conch.tx.TransactionProcessorImpl.rebroadcastTransactionsThread
+```java
+for (TransactionImpl transaction : broadcastedTransactions) {
+    if (transaction.getExpiration() < curTime || TransactionDb.hasTransaction(transaction.getId())) {
+        broadcastedTransactions.remove(transaction);
+    } else if (transaction.getTimestamp() < curTime - 30) {
+        transactionList.add(transaction);
+    }
+}
+```
+已广播的交易的有效截至时间 小于 当前时间时，将取消该交易的再次广播
+
+> org.conch.tx.TransactionProcessorImpl.processTransaction
+> org.conch.tx.TransactionProcessorImpl.processWaitingTransactions
+
+在处理未确认的交易&等待的交易时，交易的有效截至时间 小于 当前时间，该交易将被视为无效
