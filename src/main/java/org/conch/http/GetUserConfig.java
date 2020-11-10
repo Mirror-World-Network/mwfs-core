@@ -74,7 +74,7 @@ public final class GetUserConfig extends APIServlet.APIRequestHandler {
         Properties prop = new Properties();
         InputStream input = null;
         try {
-            String filename = "conf/" + Conch.CONCH_PROPERTIES;
+            String filename = "conf/" + Conch.CONCH_DEFAULT_PROPERTIES;
             File file = new File(filename);
             if (!file.exists()) {
                 return response;
