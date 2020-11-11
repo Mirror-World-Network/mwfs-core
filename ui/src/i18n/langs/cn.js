@@ -967,6 +967,7 @@ const cn = {
         'sendmessage_null_secret_key': "必须输入您的秘钥来加密此信息",
         'transfer_amount_error': "请正确输入您要转账的值",
         'transfer_balance_insufficient': "您的余额不足",
+        'transfer_balance_decimal_not_support': "转账金额最小单位为小数位后8位",
         'transfer_null_secret_key': "必须输入密钥。",
         'transfer_null_public_key': "请输入接收者公钥。",
         'sendmessage_success': "您的消息已发送",

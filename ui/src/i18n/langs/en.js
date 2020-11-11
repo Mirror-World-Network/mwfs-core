@@ -966,6 +966,7 @@ const en = {
         'sendmessage_null_secret_key': "Your private key must be entered to encrypt message",
         'transfer_amount_error': "Please enter the correct transfer amount",
         'transfer_balance_insufficient': "Insufficient balance",
+        'transfer_balance_decimal_not_support': "The minimum unit of amount is the last 8 digits of the decimal place",
         'transfer_null_secret_key': "Private key must be entered",
         'transfer_null_public_key': "Please enter the recipient’s public key",
         'sendmessage_success': "Your message has been sent",
