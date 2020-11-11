@@ -2189,7 +2189,7 @@ export default {
                     }
                 }
                 _this.accountInfo = res;
-                if (_this.transfer.number > _this.accountInfo.effectiveBalanceNQT / 100000000) {
+                if (_this.transfer.number > _this.accountInfo.effectiveBalanceNQT / _this.$global.unitValue) {
                     _this.$message.warning(_this.$t('notification.transfer_balance_insufficient'));
                     return;
                 }
@@ -2207,7 +2207,7 @@ export default {
                 formData.append("calculateFee", "true");
                 formData.append("broadcast", "false");
                 formData.append("feeNQT", "0");
-                formData.append("amountNQT", _this.transfer.number * 100000000);
+                formData.append("amountNQT", _this.transfer.number * _this.$global.unitValue);
 
                 if (_this.transfer.hasMessage && _this.transfer.message !== "") {
                     if (_this.transfer.isEncrypted) {
@@ -2247,7 +2247,7 @@ export default {
             const _this = this;
             _this.preventRepeatedClick();
             let formData = new FormData();
-            formData.append("feeNQT", _this.messageForm.fee * 100000000);
+            formData.append("feeNQT", _this.messageForm.fee * _this.$global.unitValue);
             formData.append("secretPhrase", _this.messageForm.password || _this.secretPhrase);
             formData.append("name", _this.messageForm.fileName);
             formData.append("file", _this.storagefile);
@@ -2278,7 +2278,7 @@ export default {
             const _this = this;
             _this.preventRepeatedClick();
             let formData = new FormData();
-            formData.append("feeNQT", _this.messageForm.fee * 100000000);
+            formData.append("feeNQT", _this.messageForm.fee * _this.$global.unitValue);
             formData.append("secretPhrase", _this.messageForm.password || _this.secretPhrase);
             formData.append("phased", 'false');
             formData.append("phasingLinkedFullHash", '');
@@ -2366,7 +2366,7 @@ export default {
             formData.append("phasingLinkedFullHash", '');
             formData.append("phasingHashedSecret", '');
             formData.append("phasingHashedSecretAlgorithm", '2');
-            formData.append("feeNQT", _this.messageForm.fee * 100000000);
+            formData.append("feeNQT", _this.messageForm.fee * _this.$global.unitValue);
             formData.append("secretPhrase", _this.messageForm.password || _this.secretPhrase);
             formData.append("deadline", '1440');
 
@@ -2423,7 +2423,7 @@ export default {
                         });
                     } else {
                         console.log(res);
-                        _this.transfer.fee = res.transactionJSON.feeNQT / 100000000;
+                        _this.transfer.fee = res.transactionJSON.feeNQT / _this.$global.unitValue;
                     }
                 } else {
                     if (res.errorDescription.indexOf("$.t") != -1) {
@@ -2451,7 +2451,7 @@ export default {
                             });
                         } else {
                             console.log(res.data);
-                            _this.messageForm.fee = res.data.transactionJSON.feeNQT / 100000000;
+                            _this.messageForm.fee = res.data.transactionJSON.feeNQT / _this.$global.unitValue;
                             resolve(res.data);
                         }
                     } else {
@@ -2605,7 +2605,13 @@ export default {
                     }
                 }
                 _this.accountInfo = res;
-                if (_this.transfer.number > _this.accountInfo.effectiveBalanceNQT / 100000000) {
+
+                if (_this.transfer.number.toString().split(".")[1].length > _this.$global.unitValue.toString().length - 1) {
+                    _this.$message.warning(_this.$t('notification.transfer_balance_decimal_not_support'));
+                    _this.transfer.executing = false;
+                    return;
+                }
+                if (_this.transfer.number > _this.accountInfo.effectiveBalanceNQT / _this.$global.unitValue) {
                     _this.$message.warning(_this.$t('notification.transfer_balance_insufficient'));
                     _this.transfer.executing = false;
                     return;
@@ -2623,8 +2629,8 @@ export default {
                 formData.append("phasingHashedSecret", '');
                 formData.append("phasingHashedSecretAlgorithm", '2');
                 formData.append("publicKey", "");
-                formData.append("feeNQT", _this.transfer.fee * 100000000);
-                formData.append("amountNQT", _this.transfer.number * 100000000);
+                formData.append("feeNQT", _this.transfer.fee * _this.$global.unitValue);
+                formData.append("amountNQT", _this.transfer.number * _this.$global.unitValue);
                 formData.append("secretPhrase", _this.secretPhrase || _this.transfer.password);
 
                 if (_this.transfer.hasMessage && _this.transfer.message !== "") {
@@ -2661,7 +2667,7 @@ export default {
                         });
                     } else {
                         console.log(res);
-                        _this.transfer.fee = res.transactionJSON.feeNQT / 100000000;
+                        _this.transfer.fee = res.transactionJSON.feeNQT / _this.$global.unitValue;
                     }
                 } else {
                     if (res.errorDescription.indexOf("$.t") != -1) {
@@ -2689,7 +2695,7 @@ export default {
                             });
                         } else {
                             console.log(res.data);
-                            _this.transfer.fee = res.data.transactionJSON.feeNQT / 100000000;
+                            _this.transfer.fee = res.data.transactionJSON.feeNQT / _this.$global.unitValue;
                             resolve(res.data);
                         }
                     } else {
@@ -2812,7 +2818,7 @@ export default {
         },
         calPledgeCapacityByBalance: function () {
             const _this = this;
-            let accountBalance = _this.accountInfo.effectiveBalanceNQT / 100000000;
+            let accountBalance = _this.accountInfo.effectiveBalanceNQT / _this.$global.unitValue;
             let val = Math.ceil(accountBalance / 133);
             if (val <= 192) {
                 this.capacity = val;
@@ -3221,7 +3227,7 @@ export default {
                             barchat.xAxis.push(_this.$t('account.income'));
                         }
                     }
-                    barchat.series.push(value.amountNQT / 100000000);
+                    barchat.series.push(value.amountNQT / _this.$global.unitValue);
                 });
                 for (; j !== 5; j++) {
                     barchat.xAxis.push("");
@@ -3247,16 +3253,16 @@ export default {
                         if (value.type === 0) {
                             yields.xAxis.push(_this.$global.myFormatTime(value.timestamp, "YMD", true));
                             if (value.senderRS !== SSO.accountRS) {
-                                assets = assets + value.amountNQT / 100000000;
+                                assets = assets + value.amountNQT / _this.$global.unitValue;
                             } else {
-                                assets = assets - value.amountNQT / 100000000 - value.feeNQT / 100000000;
+                                assets = assets - value.amountNQT / _this.$global.unitValue - value.feeNQT / _this.$global.unitValue;
                             }
                         } else if (value.type === 9) {
                             yields.xAxis.push(_this.$global.myFormatTime(value.timestamp, "YMD", true));
-                            assets = assets + value.amountNQT / 100000000;
+                            assets = assets + value.amountNQT / _this.$global.unitValue;
                         } else if (value.senderRS === SSO.accountRS) {
                             yields.xAxis.push(_this.$global.myFormatTime(value.timestamp, "YMD", true));
-                            assets = assets - value.amountNQT / 100000000 - value.feeNQT / 100000000;
+                            assets = assets - value.amountNQT / _this.$global.unitValue - value.feeNQT / _this.$global.unitValue;
                         }
                         yields.series.push(assets);
                     });
