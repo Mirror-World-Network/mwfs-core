@@ -19,6 +19,7 @@ export default {
     $vue: {},
     placeholder: "--",
     unit: " MW",
+    unitValue: 100000000,
     poolPledgeAmount: 10000000000000, // pledge amount of pool creator
     optHeight: {join: 0, quit: 0, destroy: 0, create: 0},
     isOpenApiProxy: false,
