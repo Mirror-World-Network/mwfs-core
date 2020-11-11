@@ -5,7 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.conch.Conch;
 import org.conch.chain.BlockchainImpl;
 import org.conch.common.Constants;
-import org.conch.consensus.poc.PocHolder;
 import org.conch.consensus.poc.PocScore;
 import org.conch.consensus.poc.tx.PocTxBody;
 import org.conch.consensus.poc.tx.PocTxWrapper;
@@ -344,7 +343,7 @@ public class PocDb  {
                     ResultSet resultSetWork = workTable.executeQuery();
                     if (resultSetWork.next()) {
                         PreparedStatement update = con.prepareStatement("update account_poc_score set latest = true where db_id = ?");
-                        PocScore pocScore = new PocScore(resultSetWork.getLong("account_id"), resultSetWork.getInt("height"), resultSetWork.getString("detail"));
+                        PocScore pocScore = new PocScore(resultSetWork.getLong("account_id"), resultSetWork.getInt("height"), resultSetWork.getString("poc_detail"));
                         Generator.updatePocScore(pocScore);
                         update.setLong(1,resultSetWork.getLong("db_id"));
                         update.executeUpdate();
@@ -361,7 +360,7 @@ public class PocDb  {
                             continue;
                         }
                     }
-                    PocScore pocScore = new PocScore(resultSetCache.getLong("account_id"), resultSetCache.getInt("height"), resultSetCache.getString("detail"));
+                    PocScore pocScore = new PocScore(resultSetCache.getLong("account_id"), resultSetCache.getInt("height"), resultSetCache.getString("poc_detail"));
                     Generator.updatePocScore(pocScore);
                     PreparedStatement pstmtInsert = con.prepareStatement("INSERT INTO account_poc_score(account_id, "
                             + " poc_score, height, poc_detail) VALUES(?, ?, ?, ?)");
