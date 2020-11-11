@@ -126,7 +126,7 @@ public class Generator implements Comparable<Generator> {
     
     // obsolete time delay, default value is 60 minutes
     public static final int OBSOLETE_DELAY = Constants.isDevnet() ? 1 : Conch.getIntProperty("sharder.obsoleteDelay", 60);
-    private static final boolean WAIT_WHEN_OBSOLETE = false;
+    private static final boolean WAIT_WHEN_OBSOLETE = true;
     /**
      * check current blockchain state:
      * - mining height
