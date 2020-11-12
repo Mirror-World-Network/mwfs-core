@@ -534,8 +534,9 @@ final class PeerImpl implements Peer {
             // Create a new WebSocket session if we don't have one
             //
             // [NAT] If the node use NAT, seperate the host(host like 116.89.251.206:10415) to combine the websocket url
-            if (useWebSocket && !webSocket.isOpen())
+            if (useWebSocket && !webSocket.isOpen()) {
                 useWebSocket = webSocket.startClient(URI.create("ws://" + Peers.addressHost(host) + ":" + Peers.addressPort(host) + "/sharder"));
+            }
             //
             // Send the request and process the response
             //
@@ -546,8 +547,9 @@ final class PeerImpl implements Peer {
                 StringWriter wsWriter = new StringWriter(1000);
                 request.writeJSONString(wsWriter);
                 String wsRequest = wsWriter.toString();
-                if (communicationLoggingMask != 0)
+                if (communicationLoggingMask != 0) {
                     log = "WebSocket " + host + ": " + wsRequest;
+                }
                 String wsResponse = webSocket.doPost(wsRequest);
                 updateUploadedVolume(wsRequest.length());
                 if (maxResponseSize > 0) {
@@ -585,27 +587,31 @@ final class PeerImpl implements Peer {
                         if ((communicationLoggingMask & Peers.LOGGING_MASK_200_RESPONSES) != 0) {
                             CountingInputStream cis = new CountingInputStream(connection.getInputStream(), maxResponseSize);
                             InputStream responseStream = cis;
-                            if ("gzip".equals(connection.getHeaderField("Content-Encoding")))
+                            if ("gzip".equals(connection.getHeaderField("Content-Encoding"))) {
                                 responseStream = new GZIPInputStream(cis);
+                            }
                             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                             byte[] buffer = new byte[1024];
                             int numberOfBytes;
                             try (InputStream inputStream = responseStream) {
-                                while ((numberOfBytes = inputStream.read(buffer, 0, buffer.length)) > 0)
+                                while ((numberOfBytes = inputStream.read(buffer, 0, buffer.length)) > 0) {
                                     byteArrayOutputStream.write(buffer, 0, numberOfBytes);
+                                }
                             }
                             String responseValue = byteArrayOutputStream.toString("UTF-8");
-                            if (responseValue.length() > 0 && responseStream instanceof GZIPInputStream)
+                            if (responseValue.length() > 0 && responseStream instanceof GZIPInputStream) {
                                 log += String.format("[length: %d, compression ratio: %.2f]",
                                               cis.getCount(), (double)cis.getCount()/(double) responseValue.length());
+                            }
                             log += " >>> " + responseValue;
                             showLog = true;
                             response = (JSONObject) JSONValue.parseWithException(responseValue);
                             updateDownloadedVolume(responseValue.length());
                         } else {
                             InputStream responseStream = connection.getInputStream();
-                            if ("gzip".equals(connection.getHeaderField("Content-Encoding")))
+                            if ("gzip".equals(connection.getHeaderField("Content-Encoding"))) {
                                 responseStream = new GZIPInputStream(responseStream);
+                            }
                             try (Reader reader = new BufferedReader(new InputStreamReader(responseStream, "UTF-8"))) {
                                 CountingInputReader cir = new CountingInputReader(reader, maxResponseSize);
                                 response = (JSONObject)JSONValue.parseWithException(cir);
