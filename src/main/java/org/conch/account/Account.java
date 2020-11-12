@@ -1081,26 +1081,38 @@ public final class Account {
 
 
     private static final Integer DONT_APPOINT_HEIGHT = -1;
+
     /**
-     * TODO add description
+     * query account according to accountId and height
+     * if account data not exist at the height, return the closest height's account data in work,cache and history table
+     * if exist cache data, return account data from cache
+     * use the cache when the query operations happen in the same transaction
+     *
      * @param accountId
-     * @param height null or -1(DONT_APPOINT_HEIGHT) means don't appoint end height
+     * @param height    null or -1(DONT_APPOINT_HEIGHT) means don't appoint end height
      * @return
      */
-    private static Account _getAccount(long accountId, Integer height){
+    private static Account _getAccount(long accountId, Integer height, boolean cache) {
+        // get data from cache
+        DbKey dbKey = accountDbKeyFactory.newKey(accountId);
+        if (cache && Db.db.isInTransaction()) {
+            Account account = (Account) Db.db.getCache("account").get(dbKey);
+            if (account != null) {
+                return account;
+            }
+        }
+
         boolean appointHeight = true;
         if(height == null || (height.intValue() == DONT_APPOINT_HEIGHT.intValue())) {
             appointHeight = false;
         }
 
         // query height should smaller than current height
-        if(appointHeight
-            && height > Conch.getHeight()){
+        if (appointHeight
+                && height > Conch.getHeight()) {
             throw new IllegalArgumentException("Height " + height + " exceeds blockchain height " + Conch.getHeight());
         }
 
-        //TODO add description
-        DbKey dbKey = accountDbKeyFactory.newKey(accountId);
         Connection con = null;
         try {
             con = Db.db.getConnection();
@@ -1112,7 +1124,7 @@ public final class Account {
             String workTableQuerySql = String.format(querySql, "account");
             PreparedStatement accountWorkQuery = con.prepareStatement(workTableQuerySql);
             accountWorkQuery.setLong(1, accountId);
-            if(appointHeight) {
+            if (appointHeight) {
                 accountWorkQuery.setInt(2, height);
             }
 
@@ -1121,7 +1133,7 @@ public final class Account {
                 String cacheTableQuerySql = String.format(querySql, "account_cache");
                 PreparedStatement accountCacheQuery = con.prepareStatement(cacheTableQuerySql);
                 accountCacheQuery.setLong(1, accountId);
-                if(appointHeight) {
+                if (appointHeight) {
                     accountCacheQuery.setInt(2, height);
                 }
                 resultSet = accountCacheQuery.executeQuery();
@@ -1129,10 +1141,11 @@ public final class Account {
                     String historyTableQuerySql = String.format(querySql, "account_history");
                     PreparedStatement accountHistoryQuery = con.prepareStatement(historyTableQuerySql);
                     accountHistoryQuery.setLong(1, accountId);
-                    if(appointHeight) {
+                    if (appointHeight) {
                         accountHistoryQuery.setInt(2, height);
                     }
                     resultSet = accountHistoryQuery.executeQuery();
+                    // if database doesn't exist data return new entity
                     if (!resultSet.next()) {
                         PublicKey publicKey = publicKeyTable.get(dbKey);
                         if (publicKey != null) {
@@ -1143,13 +1156,8 @@ public final class Account {
                     }
                 }
             }
-
-            //TODO add description
-            boolean doesNotExceed = Conch.getHeight() <= height
-                    && !(accountTable.isPersistent() && Conch.getBlockchainProcessor().isScanning());
-
-            boolean getFromCache = appointHeight ? doesNotExceed : true;
-            if (getFromCache && Db.db.isInTransaction()) {
+            // set data to cache and return
+            if (Db.db.isInTransaction()) {
                 DbKey dbKey1 = accountDbKeyFactory.newKey(resultSet);
                 account = (Account) Db.db.getCache("account").get(dbKey1);
                 if (account == null) {
@@ -1160,7 +1168,7 @@ public final class Account {
                 account = new Account(resultSet, dbKey);
             }
             return account;
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
         } finally {
             DbUtils.close(con);
@@ -1169,11 +1177,18 @@ public final class Account {
     }
 
     public static Account getAccount(long id) {
-        return _getAccount(id, DONT_APPOINT_HEIGHT);
+        return _getAccount(id, DONT_APPOINT_HEIGHT, true);
     }
 
     public static Account getAccount(long id, int height) {
-        return _getAccount(id, height);
+        // if param height illegal or setting not allowed, get the latest data
+        boolean doesNotExceed = Conch.getHeight() <= height
+                && !(accountTable.isPersistent() && Conch.getBlockchainProcessor().isScanning());
+
+        if (height < 0 || doesNotExceed) {
+            getAccount(id);
+        }
+        return _getAccount(id, height, false);
     }
 
     public static Account getAccount(byte[] publicKey) {
