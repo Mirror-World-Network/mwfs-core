@@ -1031,7 +1031,7 @@ public final class Account {
 
     public static Account getAccount(long id) {
         DbKey dbKey = accountDbKeyFactory.newKey(id);
-        Account account = accountTable.get(dbKey);
+        /*Account account = accountTable.get(dbKey);
         if (account == null) {
             PublicKey publicKey = publicKeyTable.get(dbKey);
             if (publicKey != null) {
@@ -1039,11 +1039,55 @@ public final class Account {
                 account.publicKey = publicKey;
             }
         }
-        return account;
+        return account;*/
+        Connection con = null;
+        try {
+            con = Db.db.getConnection();
+            Account account = null;
+
+            PreparedStatement accountWorkQuery = con.prepareStatement("select * FROM account WHERE id = ? order by height desc limit 1");
+            accountWorkQuery.setLong(1, id);
+            ResultSet resultSet = accountWorkQuery.executeQuery();
+            if (!resultSet.next()) {
+                PreparedStatement accountCacheQuery = con.prepareStatement("select * FROM account_cache WHERE id = ? order by height desc limit 1");
+                accountCacheQuery.setLong(1, id);
+                resultSet = accountCacheQuery.executeQuery();
+                if (!resultSet.next()) {
+                    PreparedStatement accountHistoryQuery = con.prepareStatement("select * FROM account_history WHERE id = ? order by height desc limit 1");
+                    accountHistoryQuery.setLong(1, id);
+                    resultSet = accountHistoryQuery.executeQuery();
+                    if (!resultSet.next()) {
+                        PublicKey publicKey = publicKeyTable.get(dbKey);
+                        if (publicKey != null) {
+                            account = accountTable.newEntity(dbKey);
+                            account.publicKey = publicKey;
+                        }
+                        return account;
+                    }
+                }
+            }
+
+            DbKey dbKey1 = accountDbKeyFactory.newKey(resultSet);
+            if (Db.db.isInTransaction()) {
+                account = (Account) Db.db.getCache("account").get(dbKey1);
+                if (account == null) {
+                    account = new Account(resultSet,dbKey1);
+                    Db.db.getCache("account").put(dbKey1, account);
+                }
+            } else {
+                account = new Account(resultSet, dbKey);
+            }
+            return account;
+        }catch (SQLException e) {
+            throw new RuntimeException(e.toString(), e);
+        } finally {
+            DbUtils.close(con);
+        }
+
     }
 
     public static Account getAccount(long id, int height) {
-        DbKey dbKey = accountDbKeyFactory.newKey(id);
+        /*DbKey dbKey = accountDbKeyFactory.newKey(id);
         Account account = accountTable.get(dbKey, height);
         if (account == null) {
             account =accountCacheTable.get(dbKey, height);
@@ -1058,7 +1102,56 @@ public final class Account {
                 }
             }
         }
-        return account;
+        return account;*/
+        if (height > Conch.getBlockchain().getHeight()) {
+            throw new IllegalArgumentException("Height " + height + " exceeds blockchain height " + Conch.getBlockchain().getHeight());
+        }
+        DbKey dbKey = accountDbKeyFactory.newKey(id);
+//        Account account = accountTable.get(dbKey);
+        Connection con = null;
+        try {
+            con = Db.db.getConnection();
+            Account account = null;
+            PreparedStatement accountWorkQuery = con.prepareStatement("select * FROM account WHERE id = ? and height <= ? order by height desc limit 1");
+            accountWorkQuery.setLong(1, id);
+            accountWorkQuery.setInt(2, height);
+            ResultSet resultSet = accountWorkQuery.executeQuery();
+            if (!resultSet.next()) {
+                PreparedStatement accountCacheQuery = con.prepareStatement("select * FROM account_cache WHERE id = ? and height <= ? order by height desc limit 1");
+                accountCacheQuery.setLong(1, id);
+                accountCacheQuery.setInt(2, height);
+                resultSet = accountCacheQuery.executeQuery();
+                if (!resultSet.next()) {
+                    PreparedStatement accountHistoryQuery = con.prepareStatement("select * FROM account_history WHERE id = ? and height <= ? order by height desc limit 1");
+                    accountHistoryQuery.setLong(1, id);
+                    accountHistoryQuery.setInt(2, height);
+                    resultSet = accountHistoryQuery.executeQuery();
+                    if (!resultSet.next()) {
+                        PublicKey publicKey = publicKeyTable.get(dbKey);
+                        if (publicKey != null) {
+                            account = accountTable.newEntity(dbKey);
+                            account.publicKey = publicKey;
+                        }
+                        return account;
+                    }
+                }
+            }
+            if (Conch.getBlockchain().getHeight() <= height && !(accountTable.isPersistent() && Conch.getBlockchainProcessor().isScanning()) && Db.db.isInTransaction()) {
+                DbKey dbKey1 = accountDbKeyFactory.newKey(resultSet);
+                account = (Account) Db.db.getCache("account").get(dbKey1);
+                if (account == null) {
+                    account = new Account(resultSet, dbKey1);
+                    Db.db.getCache("account").put(dbKey1, account);
+                }
+            } else {
+                account = new Account(resultSet, dbKey);
+            }
+            return account;
+        }catch (SQLException e) {
+            throw new RuntimeException(e.toString(), e);
+        } finally {
+            DbUtils.close(con);
+        }
     }
 
     public static Account getAccount(byte[] publicKey) {
