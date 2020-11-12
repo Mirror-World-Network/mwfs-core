@@ -1103,7 +1103,7 @@ public final class Account {
         }
 
         boolean appointHeight = true;
-        if (height == -1 || height == null) {
+        if(height == null || (height.intValue() == DONT_APPOINT_HEIGHT.intValue())) {
             appointHeight = false;
         }
 
