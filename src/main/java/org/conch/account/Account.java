@@ -1145,7 +1145,7 @@ public final class Account {
             }
 
             //TODO add description
-            boolean doesNotExceed = Conch.getBlockchain().getHeight() <= height
+            boolean doesNotExceed = Conch.getHeight() <= height
                     && !(accountTable.isPersistent() && Conch.getBlockchainProcessor().isScanning());
 
             boolean getFromCache = appointHeight ? doesNotExceed : true;
