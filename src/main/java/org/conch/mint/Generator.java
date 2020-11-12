@@ -1106,7 +1106,6 @@ public class Generator implements Comparable<Generator> {
     private static final String AUTO_MINT_ADDRESS = autoMintAccountRs();
     static boolean autoMintRunning = false;
 
-
     private static String autoMintPR = Convert.emptyToNull(Conch.getStringProperty("sharder.autoMint.secretPhrase", "", true));
     /**
      * local auto mint rs account
@@ -1164,17 +1163,15 @@ public class Generator implements Comparable<Generator> {
     }
     
     /**
-     * sequence: hub bound account > local auto mint account
+     * sequence: cos bound account > local auto mint account
      *
      * @return pr of auto mining account
      */
     private static String getAutoMiningPR() {
-        // [Hub Miner] if owner bind the passphrase then start mine automatic
         if (HUB_IS_BIND && StringUtils.isNotEmpty(HUB_BIND_PR)) {
             return HUB_BIND_PR;
         }
-        // [Normal Miner] if owner set the passphrase of autoMint then start mining
-        return Convert.emptyToNull(Conch.getStringProperty("sharder.autoMint.secretPhrase", "", true));
+        return autoMintPR;
     }
 
     /**
