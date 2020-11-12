@@ -1186,7 +1186,7 @@ public final class Account {
                 && !(accountTable.isPersistent() && Conch.getBlockchainProcessor().isScanning());
 
         if (height < 0 || doesNotExceed) {
-            getAccount(id);
+            return getAccount(id);
         }
         return _getAccount(id, height, false);
     }
