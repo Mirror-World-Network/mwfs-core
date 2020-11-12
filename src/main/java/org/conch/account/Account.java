@@ -1089,7 +1089,7 @@ public final class Account {
      */
     private static Account _getAccount(long accountId, Integer height){
         boolean appointHeight = true;
-        if(height == -1 || height == null) {
+        if(height == null || (height.intValue() == DONT_APPOINT_HEIGHT.intValue())) {
             appointHeight = false;
         }
 
