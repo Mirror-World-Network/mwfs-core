@@ -22,6 +22,21 @@
 package org.conch.account;
 
 import com.google.common.collect.Sets;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.conch.Conch;
 import org.conch.asset.AssetDividend;
 import org.conch.asset.AssetTransfer;
@@ -31,13 +46,19 @@ import org.conch.chain.CheckSumValidator;
 import org.conch.common.ConchException;
 import org.conch.common.Constants;
 import org.conch.consensus.genesis.SharderGenesis;
-import org.conch.consensus.poc.PocScore;
 import org.conch.crypto.Crypto;
 import org.conch.crypto.EncryptedData;
-import org.conch.db.*;
+import org.conch.db.Db;
+import org.conch.db.DbClause;
+import org.conch.db.DbIterator;
+import org.conch.db.DbKey;
+import org.conch.db.DbTrimUtils;
+import org.conch.db.DbUtils;
+import org.conch.db.DerivedDbTable;
+import org.conch.db.VersionedEntityDbTable;
+import org.conch.db.VersionedPersistentDbTable;
 import org.conch.market.Exchange;
 import org.conch.market.Trade;
-import org.conch.mint.Generator;
 import org.conch.shuffle.ShufflingTransaction;
 import org.conch.tx.Appendix;
 import org.conch.tx.Attachment;
@@ -46,11 +67,6 @@ import org.conch.util.Convert;
 import org.conch.util.Listener;
 import org.conch.util.Listeners;
 import org.conch.util.Logger;
-
-import java.sql.*;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 @SuppressWarnings({"UnusedDeclaration", "SuspiciousNameCombination"})
 public final class Account {
@@ -1029,9 +1045,10 @@ public final class Account {
         return accountPropertyTable.getBy(dbClause);
     }
 
+    /**
     public static Account getAccount(long id) {
         DbKey dbKey = accountDbKeyFactory.newKey(id);
-        /*Account account = accountTable.get(dbKey);
+        Account account = accountTable.get(dbKey);
         if (account == null) {
             PublicKey publicKey = publicKeyTable.get(dbKey);
             if (publicKey != null) {
@@ -1039,7 +1056,12 @@ public final class Account {
                 account.publicKey = publicKey;
             }
         }
-        return account;*/
+        return account;
+    }
+    **/
+
+    public static Account getAccount(long id) {
+        DbKey dbKey = accountDbKeyFactory.newKey(id);
         Connection con = null;
         try {
             con = Db.db.getConnection();
@@ -1086,8 +1108,9 @@ public final class Account {
 
     }
 
+    /**
     public static Account getAccount(long id, int height) {
-        /*DbKey dbKey = accountDbKeyFactory.newKey(id);
+        DbKey dbKey = accountDbKeyFactory.newKey(id);
         Account account = accountTable.get(dbKey, height);
         if (account == null) {
             account =accountCacheTable.get(dbKey, height);
@@ -1102,12 +1125,15 @@ public final class Account {
                 }
             }
         }
-        return account;*/
-        if (height > Conch.getBlockchain().getHeight()) {
-            throw new IllegalArgumentException("Height " + height + " exceeds blockchain height " + Conch.getBlockchain().getHeight());
+        return account;
+    }
+    **/
+
+    public static Account getAccount(long id, int height) {
+        if (height > Conch.getHeight()) {
+            throw new IllegalArgumentException("Height " + height + " exceeds blockchain height " + Conch.getHeight());
         }
         DbKey dbKey = accountDbKeyFactory.newKey(id);
-//        Account account = accountTable.get(dbKey);
         Connection con = null;
         try {
             con = Db.db.getConnection();
@@ -1136,7 +1162,9 @@ public final class Account {
                     }
                 }
             }
-            if (Conch.getBlockchain().getHeight() <= height && !(accountTable.isPersistent() && Conch.getBlockchainProcessor().isScanning()) && Db.db.isInTransaction()) {
+            if (!(accountTable.isPersistent()
+                && Conch.getBlockchainProcessor().isScanning())
+                && Db.db.isInTransaction()) {
                 DbKey dbKey1 = accountDbKeyFactory.newKey(resultSet);
                 account = (Account) Db.db.getCache("account").get(dbKey1);
                 if (account == null) {
