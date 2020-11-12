@@ -20,9 +20,9 @@
                     <el-menu-item index="/network" :class="this.$route.path.indexOf('/network') >= 0 ? 'activeLi' : ''">
                         {{$t('header.network')}}
                     </el-menu-item>
-                    <!--<el-menu-item index="/mining" :class="this.$route.path.indexOf('/mining') >= 0 ? 'activeLi' : ''">-->
-                        <!--{{$t('header.mining')}}-->
-                    <!--</el-menu-item>-->
+<!--                    <el-menu-item index="/mining" :class="this.$route.path.indexOf('/mining') >= 0 ? 'activeLi' : ''">-->
+<!--                        {{$t('header.mining')}}-->
+<!--                    </el-menu-item>-->
                 </el-menu>
 <!--                <div class="navbar_console">-->
 <!--                    <el-button type="text" @click="goConsole">-->
@@ -89,6 +89,12 @@
                             </el-option>
                         </el-select>
                     </div>
+                    <div class="navbar_refresh">
+                        <el-tooltip class="item csp" :content="$t('header.refresh')" placement="bottom"
+                                    effect="light" v-if="isHubInit">
+                            <i class="el-icon-refresh-right" @click="refreshPage"></i>
+                        </el-tooltip>
+                    </div>
                 </div>
             </nav>
         </div>
@@ -132,6 +138,12 @@
                     </div>
                     <div class="navbar_exit">
                         <span class="csp" @click="exit"><a>{{$t('header.exit')}}</a></span>
+                    </div>
+                    <div class="navbar_refresh">
+                        <el-tooltip class="item csp" :content="$t('header.refresh')" placement="bottom"
+                                    effect="light" v-if="isHubInit">
+                            <i class="el-icon-refresh-right" @click="refreshPage"></i>
+                        </el-tooltip>
                     </div>
                 </div>
             </div>
@@ -510,6 +522,10 @@
                 // localStorage.setItem('peerNum', 0);
                 // _this.$router.push("/login");
             },
+            refreshPage: function () {
+                this.$store.commit('refresh', true);
+                setTimeout( () => this.$store.commit('refresh', false), 2000);
+            },
             isClose: function () {
                 const _this = this;
                 _this.isSearch = false;
@@ -596,7 +612,7 @@
                 _this.activeSearch = false;
                 _this.placeholder = _this.$t('header.search');
             }
-        },
+        }
     };
 </script>
 <style lang="scss" type="text/scss">
