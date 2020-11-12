@@ -1416,60 +1416,62 @@ export default {
         };
     },
     created() {
-        if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) { //移动端
-            this.isMobile = true
-        }
-
-        const _this = this;
-        _this.getAccount(_this.accountInfo.accountRS).then(res => {
-            _this.accountInfo.account = res.account;
-            _this.accountInfo.balanceNQT = res.balanceNQT;
-            _this.accountInfo.effectiveBalanceNQT = res.effectiveBalanceNQT;
-            _this.accountInfo.forgedBalanceNQT = res.forgedBalanceNQT;
-            _this.accountInfo.frozenBalanceNQT = res.frozenBalanceNQT;
-            _this.accountInfo.guaranteedBalanceNQT = res.guaranteedBalanceNQT;
-            _this.accountInfo.unconfirmedBalanceNQT = res.unconfirmedBalanceNQT;
-            if (res.pocScore != null) {
-                _this.accountInfo.pocScore = res.pocScore.total;
-                _this.pocScoreDetail[0].bcScore = res.pocScore.bcScore;
-                _this.pocScoreDetail[0].blockMissScore = res.pocScore.blockMissScore;
-                _this.pocScoreDetail[0].effectiveBalance = res.pocScore.effectiveBalance;
-                _this.pocScoreDetail[0].hardwareScore = res.pocScore.hardwareScore;
-                _this.pocScoreDetail[0].height = res.pocScore.height;
-                _this.pocScoreDetail[0].networkScore = res.pocScore.networkScore;
-                _this.pocScoreDetail[0].nodeTypeScore = res.pocScore.nodeTypeScore;
-                _this.pocScoreDetail[0].onlineRateScore = res.pocScore.onlineRateScore;
-                _this.pocScoreDetail[0].performanceScore = res.pocScore.performanceScore;
-                _this.pocScoreDetail[0].serverScore = res.pocScore.serverScore;
-                _this.pocScoreDetail[0].ssScore = res.pocScore.ssScore;
-                _this.pocScoreDetail[0].nodeType = res.nodeType;
-                _this.pocScoreDetail[0].pocScoreTotal = res.pocScore.total;
-            }
-            _this.accountInfo.name = res.name;
-            _this.pocScoreDetail[0].nodeTime = res.declaredTime;
-        });
-        _this.getAccountTransactionList();
-        _this.getDrawData();
-        _this.getYieldData();
-        _this.$global.setBlockchainState(_this).then(res => {
-            _this.blockchainState = res.data;
-            _this.getLatestHubVersion();
-        });
-        SSO.getState();
-        _this.$global.getUserConfig(_this).then(res => {
-            _this.hubsetting.address = res["sharder.NATServiceAddress"];
-            _this.hubsetting.port = res["sharder.NATServicePort"];
-            _this.hubsetting.clientSecretkey = res["sharder.NATClientKey"];
-            _this.hubsetting.publicAddress = res["sharder.myAddress"];
-            _this.hubsetting.airdropAccount = res["sharder.airdrop.account"];
-            _this.hubsetting.airdropStatus = res["sharder.airdrop.enable"];
-            //_this.hubsetting.SS_Address = res["sharder.HubBindAddress"];
-        });
-        // _this.getLatestHubVersion();
-        _this.getPicVCode();
+        this.init();
     },
     methods: {
+        init() {
+            if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) { //移动端
+                this.isMobile = true
+            }
 
+            const _this = this;
+            _this.getAccount(_this.accountInfo.accountRS).then(res => {
+                _this.accountInfo.account = res.account;
+                _this.accountInfo.balanceNQT = res.balanceNQT;
+                _this.accountInfo.effectiveBalanceNQT = res.effectiveBalanceNQT;
+                _this.accountInfo.forgedBalanceNQT = res.forgedBalanceNQT;
+                _this.accountInfo.frozenBalanceNQT = res.frozenBalanceNQT;
+                _this.accountInfo.guaranteedBalanceNQT = res.guaranteedBalanceNQT;
+                _this.accountInfo.unconfirmedBalanceNQT = res.unconfirmedBalanceNQT;
+                if (res.pocScore != null) {
+                    _this.accountInfo.pocScore = res.pocScore.total;
+                    _this.pocScoreDetail[0].bcScore = res.pocScore.bcScore;
+                    _this.pocScoreDetail[0].blockMissScore = res.pocScore.blockMissScore;
+                    _this.pocScoreDetail[0].effectiveBalance = res.pocScore.effectiveBalance;
+                    _this.pocScoreDetail[0].hardwareScore = res.pocScore.hardwareScore;
+                    _this.pocScoreDetail[0].height = res.pocScore.height;
+                    _this.pocScoreDetail[0].networkScore = res.pocScore.networkScore;
+                    _this.pocScoreDetail[0].nodeTypeScore = res.pocScore.nodeTypeScore;
+                    _this.pocScoreDetail[0].onlineRateScore = res.pocScore.onlineRateScore;
+                    _this.pocScoreDetail[0].performanceScore = res.pocScore.performanceScore;
+                    _this.pocScoreDetail[0].serverScore = res.pocScore.serverScore;
+                    _this.pocScoreDetail[0].ssScore = res.pocScore.ssScore;
+                    _this.pocScoreDetail[0].nodeType = res.nodeType;
+                    _this.pocScoreDetail[0].pocScoreTotal = res.pocScore.total;
+                }
+                _this.accountInfo.name = res.name;
+                _this.pocScoreDetail[0].nodeTime = res.declaredTime;
+            });
+            _this.getAccountTransactionList();
+            _this.getDrawData();
+            _this.getYieldData();
+            _this.$global.setBlockchainState(_this).then(res => {
+                _this.blockchainState = res.data;
+                _this.getLatestHubVersion();
+            });
+            SSO.getState();
+            _this.$global.getUserConfig(_this).then(res => {
+                _this.hubsetting.address = res["sharder.NATServiceAddress"];
+                _this.hubsetting.port = res["sharder.NATServicePort"];
+                _this.hubsetting.clientSecretkey = res["sharder.NATClientKey"];
+                _this.hubsetting.publicAddress = res["sharder.myAddress"];
+                _this.hubsetting.airdropAccount = res["sharder.airdrop.account"];
+                _this.hubsetting.airdropStatus = res["sharder.airdrop.enable"];
+                //_this.hubsetting.SS_Address = res["sharder.HubBindAddress"];
+            });
+            // _this.getLatestHubVersion();
+            _this.getPicVCode();
+        },
         // menuAdapter() {
         //     document.getElementsByClassName('header')[0].style.display = 'block'
         //     var menuLi = document.querySelectorAll('.navbar .el-menu li')
@@ -3430,7 +3432,6 @@ export default {
                     airdropAccount = _this.hubsetting.airdropAccount.split(";");
                 }
                 airdropAccount.forEach(ele => {
-                    console.log("ele", ele === _this.accountInfo.accountRS)
                     if (ele === _this.accountInfo.accountRS) {
                         _this.airdropFlag = true;
                     }

@@ -245,6 +245,7 @@ const en = {
         'search_open': "Search By Account ID/Tx ID/Block ID",
         'open_console': "Console running，recording logs…",
         'console': "console",
+        'refresh': "refresh",
     },
     network: {
         'mining_time': "Estimated Block Generation Time",

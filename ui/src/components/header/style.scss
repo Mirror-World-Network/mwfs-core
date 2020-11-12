@@ -272,6 +272,11 @@
                         }
                     }
                 }
+                .navbar_refresh {
+                    line-height: 80px;
+                    margin: auto 10px;
+                    color: #3fb09a;
+                }
             }
         }
     }
@@ -403,6 +408,13 @@
         .el-input__inner {
             border: 0;
         }
+    }
+    .navbar_refresh {
+        display: flex;
+        //height: 100%;
+        line-height: 60px;
+        margin: auto 5px;
+        color: #3fb09a;
     }
     .navbar_search {
         height: 100%;
