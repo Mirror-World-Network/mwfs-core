@@ -246,6 +246,7 @@ const cn = {
         'search_open': "输入账户ID/交易ID/区块ID进行搜索",
         'open_console': "打开控制台，日志记录开始......",
         'console': "控制台",
+        'refresh': "刷新",
     },
     network: {
         'mining_time': "预计出块时间",

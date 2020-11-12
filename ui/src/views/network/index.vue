@@ -774,7 +774,7 @@
             //         }
             //     }
             // }
-        },
+        }
     };
 </script>
 <style lang="scss" type="text/scss">
