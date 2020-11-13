@@ -1711,7 +1711,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 blockchain.setLastBlock(previousLastBlock);
                 if (e instanceof BlockOutOfOrderException) {
                     Logger.logWarningMessage("Push block at height %d failed caused by BlockOutOfOrderException %s",
-                     previousLastBlock.getHeight(), block.toSummary());
+                            previousLastBlock.getHeight(), block.toSummary());
                 } else {
                     Logger.logErrorMessage(String.format("Push block at height %d failed",
                      previousLastBlock.getHeight()), e);
