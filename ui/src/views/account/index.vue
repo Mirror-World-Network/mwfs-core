@@ -2608,7 +2608,7 @@ export default {
                 }
                 _this.accountInfo = res;
 
-                if (_this.transfer.number.toString().split(".")[1].length > _this.$global.unitValue.toString().length - 1) {
+                if (_this.transfer.number.toString().split(".")[1] !== undefined && _this.transfer.number.toString().split(".")[1].length > _this.$global.unitValue.toString().length - 1) {
                     _this.$message.warning(_this.$t('notification.transfer_balance_decimal_not_support'));
                     _this.transfer.executing = false;
                     return;
