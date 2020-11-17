@@ -186,24 +186,29 @@ public class Generator implements Comparable<Generator> {
 
         if(linkedGenerator == null) {
             String miningPR = getAutoMiningPR();
-            if(StringUtils.isNotEmpty(miningPR)) {
+            if (StringUtils.isNotEmpty(miningPR)) {
                 linkedGenerator = new Generator(miningPR.trim());
             }
         }
 
-        if(linkedGenerator == null) {
-            Logger.logDebugMessage("No linked miner, please finish the client initial or miner address linking firstly ...");
+        if (linkedGenerator == null) {
+            Logger.logDebugMessage("No linked miner, please finish the client initial or miner address linking " +
+                    "firstly ...");
             return false;
+        }
+
+        if (linkedGenerator.pocScore == null) {
+            linkedGenerator.setLastBlock(lastBlock);
         }
 
         int miningTime = linkedGenerator.getTimestamp(generationLimit);
         boolean hitMatched = verifyHit(linkedGenerator.hit, linkedGenerator.pocScore, lastBlock, miningTime);
         long secondsSinceLastBlock = Conch.getEpochTime() - Conch.getBlockchain().getLastBlockTimestamp();
-        long minutesSinceLastBlock = secondsSinceLastBlock/60;
-        if(!Conch.getBlockchainProcessor().isUpToDate()) {
+        long minutesSinceLastBlock = secondsSinceLastBlock / 60;
+        if (!Conch.getBlockchainProcessor().isUpToDate()) {
             String nodeType = isBootNode ? "Boot" : "Normal";
             if (hitMatched) {
-                if(!WAIT_WHEN_OBSOLETE || isBootNode) {
+                if (!WAIT_WHEN_OBSOLETE || isBootNode) {
                     if (Logger.printNow(Logger.Generator_isBlockStuck)) {
                         Logger.logInfoMessage("Current node is %s node and blockchain state[%s] isn't " +
                                         "UP_TO_DATE[sinceLastBlock=%d minutes, mining trigger=%d min delay], " +
@@ -644,14 +649,18 @@ public class Generator implements Comparable<Generator> {
      * @return
      */
     public static boolean verifyHit(BigInteger hit, BigInteger pocScore, Block previousBlock, int miningTime) {
-//        if(isBootDirectlyMiningPhase(previousBlock.getHeight()+1)){
-//            return true;
-//        }
+        //        if(isBootDirectlyMiningPhase(previousBlock.getHeight()+1)){
+        //            return true;
+        //        }
+        if (pocScore == null || previousBlock == null) {
+            return false;
+        }
+
         int currentTime = Conch.getEpochTime();
         int elapsedTime = miningTime - previousBlock.getTimestamp();
         if (elapsedTime <= 0) {
-            if(Generator.isBootNode) {
-                if(linkedGenerator != null) {
+            if (Generator.isBootNode) {
+                if (linkedGenerator != null) {
                     Logger.logDebugMessage("Set last block again to re-calculate the miner[%s]'s poc score " +
                             "and continue to validate the hit when the Boot Node's elapsed time[%d] <=0 " +
                             "and stuck on the boot node", linkedGenerator.rsAddress, elapsedTime);
@@ -672,7 +681,8 @@ public class Generator implements Comparable<Generator> {
             reCalculateScore(currentTime, miningTime, previousBlock);
             return false;
         }
-        
+
+
         BigInteger effectiveBaseTarget = BigInteger.valueOf(previousBlock.getBaseTarget()).multiply(pocScore);
         int ratio = elapsedTime - Constants.GAP_SECONDS - 1;
         if(ratio <= 0) {
