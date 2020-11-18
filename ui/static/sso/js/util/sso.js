@@ -646,18 +646,18 @@ var Sso = (function (NRS, $, undefined) {
         }
         NRS.sendRequest("getBlockchainStatus", {}, function (response) {
             if (response.errorCode) {
-                NRS.connectionError(response.errorDescription);
+                // NRS.connectionError(response.errorDescription);
             } else {
                 var clientOptionsLink = $("#header_client_options_link");
                 if (NRS.isMobileApp()) {
-                    clientOptionsLink.html($.t("sso.mobile_client"));
+                    // clientOptionsLink.html($.t("sso.mobile_client"));
                 }
                 if (response.apiProxy) {
                     if (!NRS.isMobileApp()) {
                         if (response.isLightClient) {
-                            clientOptionsLink.html($.t("sso.light_client"));
+                            // clientOptionsLink.html($.t("sso.light_client"));
                         } else {
-                            clientOptionsLink.html($.t("sso.roaming_client"));
+                            // clientOptionsLink.html($.t("sso.roaming_client"));
                         }
                     }
                     NRS.sendRequest("getBlocks", {
@@ -672,14 +672,14 @@ var Sso = (function (NRS, $, undefined) {
                             NRS.lastProxyBlockHeight = proxyBlocksResponse.blocks[0].height;
                             NRS.lastBlockHeight = NRS.lastProxyBlockHeight;
                             // NRS.incoming.updateDashboardBlocks(NRS.lastProxyBlockHeight - prevHeight);
-                            NRS.updateDashboardLastBlock(proxyBlocksResponse.blocks[0]);
+                            // NRS.updateDashboardLastBlock(proxyBlocksResponse.blocks[0]);
                             NRS.handleBlockchainStatus(response, callback);
                             // NRS.updateDashboardMessage();
                         }
                     }, {isAsync: false});
                     if (!NRS.isMobileApp()) {
                         NRS.logConsole("look for remote confirmation nodes");
-                        NRS.initRemoteNodesMgr(NRS.isTestnet);
+                        // NRS.initRemoteNodesMgr(NRS.isTestnet);
                     }
                 } else {
                     NRS.handleBlockchainStatus(response, callback);
@@ -1806,7 +1806,7 @@ var Sso = (function (NRS, $, undefined) {
             // downloadingBlockchain.find(".db_light").hide();
         // if(!NRS.state.isLightClient && NRS.serverConnect && NRS.peerConnect){
             NRS.percentageTotal = 0;    //进度百分比
-            NRS.blocksLeft = null;             //剩余区块数量
+            NRS.blocksLeft = null;      //剩余区块数量
             NRS.percentageLast = 0;     //
             if (NRS.state.lastBlockchainFeederHeight && NRS.state.numberOfBlocks <= NRS.state.lastBlockchainFeederHeight) {
                 NRS.percentageTotal = parseInt(Math.round((NRS.state.numberOfBlocks / NRS.state.lastBlockchainFeederHeight) * 100), 10);

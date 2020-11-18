@@ -1459,7 +1459,7 @@ export default {
                 _this.blockchainState = res.data;
                 _this.getLatestHubVersion();
             });
-            SSO.getState();
+            // SSO.getState();
             _this.$global.getUserConfig(_this).then(res => {
                 _this.hubsetting.address = res["sharder.NATServiceAddress"];
                 _this.hubsetting.port = res["sharder.NATServicePort"];
@@ -1600,7 +1600,7 @@ export default {
         },
         getLatestHubVersion() {
             const _this = this;
-            _this.$http.get('/sharder?requestType=getLatestCosVersion').then(res => {
+            _this.$http.get(_this.$global.urlPrefix() + '?requestType=getLatestCosVersion').then(res => {
                 if (res.data.success) {
                     _this.latesetVersion = res.data.cosver.version;
                     _this.upgradeMode = res.data.cosver.mode;
@@ -2066,7 +2066,7 @@ export default {
         getAccount(account) {
             const _this = this;
             return new Promise((resolve, reject) => {
-                this.$http.get('/sharder?requestType=getAccount', {
+                this.$http.get(_this.$global.urlPrefix() + '?requestType=getAccount', {
                     params: {
                         account: account,
                         includeLessors: true,
@@ -2260,7 +2260,7 @@ export default {
                     'Content-Type': 'multipart/form-data'
                 }
             };
-            _this.$http.post('/sharder?requestType=storeData', formData, config).then(res => {
+            _this.$http.post(_this.$global.urlPrefix() + '?requestType=storeData', formData, config).then(res => {
                 if (typeof res.data.errorDescription === 'undefined') {
                     if (res.data.broadcasted) {
                         _this.$message.success(_this.$t('notification.upload_success'));
@@ -2738,11 +2738,11 @@ export default {
             }
 
             _this.loading = true;
-            this.$http.get('/sharder?requestType=getBlockchainTransactions', {params}).then(function (res1) {
+            this.$http.get(_this.$global.urlPrefix() + '?requestType=getBlockchainTransactions', {params}).then(function (res1) {
                 _this.accountTransactionList = res1.data.transactions;
                 params.delete("firstIndex");
                 params.delete("lastIndex");
-                _this.$http.get('/sharder?requestType=getBlockchainTransactionsCount', {params}).then(function (res2) {
+                _this.$http.get(_this.$global.urlPrefix() + '?requestType=getBlockchainTransactionsCount', {params}).then(function (res2) {
 
                     if (typeof res2.data.errorDescription === "undefined") {
                         _this.totalSize = res2.data.count;
@@ -3073,7 +3073,7 @@ export default {
             formData.append("phasingHashedSecretAlgorithm", "2");
             formData.append("feeNQT", "0");
 
-            _this.$http.post('/sharder?requestType=setAccountInfo', formData).then(res => {
+            _this.$http.post(_this.$global.urlPrefix() + '?requestType=setAccountInfo', formData).then(res => {
                 if (typeof res.data.errorDescription === "undefined") {
                     _this.$message.success(_this.$t('notification.modify_success'));
                     _this.accountInfo.name = res.data.transactionJSON.attachment.name;
@@ -3219,7 +3219,7 @@ export default {
             params.append("firstIndex", '0');
             params.append("lastIndex", '4');
             params.append("type", "0");
-            _this.$http.get('/sharder?requestType=getBlockchainTransactions', {params}).then(res => {
+            _this.$http.get(_this.$global.urlPrefix() + '?requestType=getBlockchainTransactions', {params}).then(res => {
                 res.data.transactions.forEach(function (value, index, array) {
 
                     if (_this.$i18n) {
@@ -3248,7 +3248,7 @@ export default {
             let assets = 0;
             let params = new URLSearchParams();
             params.append("account", _this.accountInfo.accountRS);
-            _this.$http.get('/sharder?requestType=getBlockchainTransactions', {params}).then(res => {
+            _this.$http.get(_this.$global.urlPrefix() + '?requestType=getBlockchainTransactions', {params}).then(res => {
                 if (typeof res.data.errorDescription === "undefined") {
                     let info = res.data.transactions.reverse();
                     info.forEach(function (value, index, array) {

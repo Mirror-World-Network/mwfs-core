@@ -333,7 +333,7 @@
             let _this = this;
             setInterval(() => {
                 _this.getData();
-            }, SSO.downloadingBlockchain ? this.$global.cfg.soonInterval : this.$global.cfg.defaultInterval);
+            }, SSO.downloadingBlockchain ? this.$global.cfg.soonInterval : (this.$global.isOpenApiProxy() ? this.$global.cfg.slowInterval : this.$global.cfg.defaultInterval));
 
             if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) { //移动端
                 this.search_focus()
@@ -342,7 +342,7 @@
         methods: {
             getAccountInfo:function(){
                 const _this = this;
-                _this.$http.get("/sharder?requestType=getAccount", {
+                _this.$http.get(_this.$global.urlPrefix() + "?requestType=getAccount", {
                     params: {
                         includeEffectiveBalance: true,
                         account: SSO.account
@@ -364,7 +364,7 @@
                     /*if(_this.$global.isOpenConsole){
                         _this.$global.addToConsole("/sharder?requestType=getBlockchainStatus",'GET',res);
                     }*/
-                    SSO.addToConsole("/sharder?requestType=getBlockchainStatus", 'GET', res.data, res);
+                    // SSO.addToConsole("/sharder?requestType=getBlockchainStatus", 'GET', res.data, res);
                 });
                 _this.$global.setUnconfirmedTransactions(_this, SSO.account).then(res => {
                     _this.$store.state.unconfirmedTransactionsList = res.data;
@@ -372,17 +372,19 @@
                     /*if(_this.$global.isOpenConsole){
                         _this.$global.addToConsole("/sharder?requestType=getUnconfirmedTransactions",'GET',res);
                     }*/
-                    SSO.addToConsole("/sharder?requestType=getUnconfirmedTransactions", 'GET', res.data, res);
+                    // SSO.addToConsole("/sharder?requestType=getUnconfirmedTransactions", 'GET', res.data, res);
                 });
                 _this.$global.setPeers(_this).then(res => {
                     /*if(_this.$global.isOpenConsole){
                         _this.$global.addToConsole("/sharder?requestType=getPeers",'GET',res);
                     }*/
-                    SSO.addToConsole("/sharder?requestType=getPeers", 'GET', res.data, res);
+                    // SSO.addToConsole("/sharder?requestType=getPeers", 'GET', res.data, res);
                 });
                 // }
                 // _this.getLatestHubVersion();
-                _this.downloadingBlockChain();
+                if (!_this.$global.isOpenApiProxy()) {
+                    _this.downloadingBlockChain();
+                }
             },
             downloadingBlockChain(){
                 const _this = this;
@@ -533,7 +535,7 @@
             },
             getLatestHubVersion() {
                 const _this = this;
-                _this.$http.get('/sharder?requestType=getLatestCosVersion').then(res => {
+                _this.$http.get(_this.$global.urlPrefix() + '?requestType=getLatestCosVersion').then(res => {
                     if (res.data.success) {
                         _this.latestVersion = res.data.cosver.version;
                         _this.upgradeMode = res.data.cosver.mode;
