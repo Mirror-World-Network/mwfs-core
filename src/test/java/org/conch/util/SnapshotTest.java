@@ -26,6 +26,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:xy@mwfs.io">Ben</a>
@@ -40,18 +42,179 @@ public class SnapshotTest {
 
         TransferInfo() {}
     }
+    static class Miner {
+        public Long accountId;
+        public String accountRS;
+        Miner() {}
+
+        public Long getAccountId() {
+            return accountId;
+        }
+
+        public void setAccountId(Long accountId) {
+            this.accountId = accountId;
+        }
+
+        public String getAccountRS() {
+            return accountRS;
+        }
+
+        public void setAccountRS(String accountRS) {
+            this.accountRS = accountRS;
+        }
+    }
 
     public static void main(String[] args) {
 //        ssAmountSnapshot();
 //        pocTxsSnapshot();
 //        ssPaymentTxsSnapshot();
 //        amountAirdropBySnapshot();
-        airdropDataStatistics();
+//        airdropDataStatistics();
+        fileDataComparison();
+    }
+
+    /**
+     * 交互式矿工数据比对
+     * 支持大于等于2个文件进行数据比对，取所有文件交集数据并输出到指定的文件
+     * @return
+     */
+    private static String fileDataComparison() {
+        // 交互式
+        Scanner scanner = null;
+        if(INTERACTION_MODE) {
+            scanner = new Scanner(System.in);
+        }
+        // 1.1. 输入文件路径
+        String path = null;
+        if(INTERACTION_MODE) {
+            System.out.println(String.format("Input the file path(Press enter, default is %s): ", DEFAULT_AIRDROP_PATH));
+            path = scanner.nextLine();
+        }
+        path = StringUtils.isEmpty(path) ? DEFAULT_AIRDROP_PATH : path;
+        // 判断该路径是否存在
+        File pathFile = new File(path);
+        if (!pathFile.exists()) {
+            System.out.println("file path is not exists!\n");
+        }
+
+        // 1.2. 输入文件名和文件格式
+        String filename = null;
+        if(INTERACTION_MODE) {
+            System.out.println("Input the file name or files name:");
+            System.out.println("- filename_1.json or array mode: filename_1.json,filename_2.json...");
+            System.out.println("- input * or enter directly means scan all files below the path(default): ");
+            filename = scanner.nextLine();
+        }
+        boolean isScanFilesMode = StringUtils.isEmpty(filename) || "*".equalsIgnoreCase(filename);
+        List<String> jsonFiles = Lists.newArrayList();
+
+        if(isScanFilesMode) {
+            File[] files = pathFile.listFiles();
+            for(int i = 0 ; i < files.length ; i++){
+                String airdropFileName = files[i].getName();
+                boolean isIgnoreFile = (".DS_Store".equalsIgnoreCase(airdropFileName))
+                        || (StringUtils.isNotEmpty(airdropFileName) && airdropFileName.startsWith(".")) || (StringUtils.isNotEmpty(airdropFileName) && airdropFileName.equalsIgnoreCase(DEFAULT_MINER_FILENAME));
+                if(isIgnoreFile){
+                    continue;
+                }
+                jsonFiles.add(path + File.separator + airdropFileName);
+            }
+        }else{
+            boolean arrayMode = filename.contains(",");
+            if(arrayMode){
+                String[] fileArray = filename.split(",");
+                for(int i = 0 ; i < fileArray.length ; i++){
+                    jsonFiles.add(path + File.separator + fileArray[i]);
+                }
+            }else{
+                jsonFiles.add(path + File.separator + filename);
+            }
+        }
+
+        String typeStr = null;
+//        if(INTERACTION_MODE) {
+//            System.out.println(String.format("Choose the code of type (1-Data Comparison, 2-, " +
+//                    "enter will use the default value %s): ", DEFAULT_STATIS_TYPE));
+//            typeStr = scanner.nextLine();
+//        }
+        typeStr = StringUtils.isEmpty(typeStr) ? DEFAULT_STATIS_TYPE : typeStr;
+        int type = Integer.valueOf(typeStr).intValue();
+        String typeStrPrint = (type == 1 ? "airdrop" : "airdrop result");
+        // 1.3. 解析文件
+        if(jsonFiles.size() == 0) {
+            System.out.println(String.format("Not found files[path=%s, type=%s] to analyze, exit the statistic", path, typeStrPrint));
+            System.exit(1);
+        }
+        // 存储所有数据
+        List<List<Miner>> complexList = Lists.newArrayList();
+        jsonFiles.forEach(jsonFile -> {
+            String singleStatistic = dataComparison(jsonFile, type, jsonFiles.size(), complexList);
+            if(StringUtils.isNotEmpty(singleStatistic)){
+                System.out.println(singleStatistic);
+            }
+        });
+        return path;
+    }
+
+    private static String dataComparison(String pathFileName, int type, int size, List<List<Miner>> complexList) {
+        String statis = "";
+        try{
+            String readJsonStr = org.conch.util.JSON.readJsonFile(pathFileName);
+            JSONObject parseObject = JSON.parseObject(readJsonStr);
+            List<Miner> listOrigin = null;
+            if(type == 1){
+                listOrigin = JSONObject.parseArray(parseObject.getJSONArray("crowdMiners").toJSONString(), Miner.class);
+            }else if(type == 2){
+                listOrigin = JSONObject.parseArray(parseObject.getJSONArray("crowdMiners").toJSONString(), Miner.class);
+            }
+            complexList.add(listOrigin);
+            if (complexList.size() >= 2) {
+                // 比对complexList第一项 & 最后一项文件数据，取交集，存入第一项
+                List<Miner> oldList = complexList.get(0);
+                List<Miner> newList = complexList.get(complexList.size() - 1);
+                // todo list去重 - 暂不处理
+
+                // 判断较大数组作为old，较大数组作为基准
+                if (oldList.size() < newList.size()) {
+                    List<Miner> middleList = null;
+                    middleList = newList;
+                    newList = oldList;
+                    oldList = middleList;
+                }
+                // 新建list保存 交集
+                List<Miner> list = Lists.newArrayList();
+                // 转换oldList, 用于比对
+                List<String> strList = oldList.stream().map(Miner::getAccountRS).collect(Collectors.toList());
+
+                for (Miner miner : newList) {
+                    if (strList.contains(miner.accountRS)) {
+                        list.add(miner);
+                    }
+                }
+                // 将list存入complexList第一项
+                complexList.set(0, list);
+            }
+            if (complexList.size() == size) {
+                // 遍历结束，输出交集
+                List<Miner> minerList = complexList.get(0);
+                org.json.simple.JSONObject jsonObject = new org.json.simple.JSONObject();
+                jsonObject.put("crowdMiners", JSON.toJSON(minerList));
+                jsonObject.put("minersCount", complexList.get(0).size());
+
+                org.conch.util.JSON.JsonWrite(jsonObject, DEFAULT_AIRDROP_PATH + File.separator + DEFAULT_MINER_FILENAME);
+                statis = "operate successfully!\n";
+            }
+
+        }catch(Exception e){
+            statis = "operate aborted!\n";
+        }
+        return statis;
     }
 
     private static final String DEFAULT_AIRDROP_PATH="batch";
     private static final String DEFAULT_STATIS_TYPE = "1";
-    private static final boolean INTERACTION_MODE = false;
+    private static final boolean INTERACTION_MODE = true;
+    private static final String DEFAULT_MINER_FILENAME = "minerIntersectionList.json";
     private static void airdropDataStatistics() {
         // 交互式
         Scanner scanner = null;
