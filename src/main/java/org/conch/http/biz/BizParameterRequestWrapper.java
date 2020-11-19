@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Vector;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class BizParameterRequestWrapper extends HttpServletRequestWrapper {
     private Map<String, String[]> params;
@@ -155,4 +156,8 @@ public class BizParameterRequestWrapper extends HttpServletRequestWrapper {
         }
     }
 
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
+    }
 }
