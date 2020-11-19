@@ -43,16 +43,35 @@ public class SnapshotTest {
         TransferInfo() {}
     }
     static class Miner {
-        public Long accountId;
         public String accountRS;
+        public String recipientPublicKey;
+        public String amountNQT;
         Miner() {}
 
-        public Long getAccountId() {
-            return accountId;
+        public Miner(String accountRS) {
+            this.accountRS = accountRS;
         }
 
-        public void setAccountId(Long accountId) {
-            this.accountId = accountId;
+        public Miner(String accountRS, String recipientPublicKey, String amountNQT) {
+            this.accountRS = accountRS;
+            this.recipientPublicKey = recipientPublicKey;
+            this.amountNQT = amountNQT;
+        }
+
+        public String getRecipientPublicKey() {
+            return recipientPublicKey;
+        }
+
+        public void setRecipientPublicKey(String recipientPublicKey) {
+            this.recipientPublicKey = recipientPublicKey;
+        }
+
+        public String getAmountNQT() {
+            return amountNQT;
+        }
+
+        public void setAmountNQT(String amountNQT) {
+            this.amountNQT = amountNQT;
         }
 
         public String getAccountRS() {
@@ -62,6 +81,7 @@ public class SnapshotTest {
         public void setAccountRS(String accountRS) {
             this.accountRS = accountRS;
         }
+
     }
 
     public static void main(String[] args) {
@@ -87,10 +107,10 @@ public class SnapshotTest {
         // 1.1. 输入文件路径
         String path = null;
         if(INTERACTION_MODE) {
-            System.out.println(String.format("Input the file path(Press enter, default is %s): ", DEFAULT_AIRDROP_PATH));
+            System.out.println(String.format("Input the file path(Press enter, default is %s): ", DEFAULT_BATCH_PATH));
             path = scanner.nextLine();
         }
-        path = StringUtils.isEmpty(path) ? DEFAULT_AIRDROP_PATH : path;
+        path = StringUtils.isEmpty(path) ? DEFAULT_BATCH_PATH : path;
         // 判断该路径是否存在
         File pathFile = new File(path);
         if (!pathFile.exists()) {
@@ -113,7 +133,7 @@ public class SnapshotTest {
             for(int i = 0 ; i < files.length ; i++){
                 String airdropFileName = files[i].getName();
                 boolean isIgnoreFile = (".DS_Store".equalsIgnoreCase(airdropFileName))
-                        || (StringUtils.isNotEmpty(airdropFileName) && airdropFileName.startsWith(".")) || (StringUtils.isNotEmpty(airdropFileName) && airdropFileName.equalsIgnoreCase(DEFAULT_MINER_FILENAME));
+                        || (StringUtils.isNotEmpty(airdropFileName) && (airdropFileName.startsWith(".")));
                 if(isIgnoreFile){
                     continue;
                 }
@@ -132,14 +152,14 @@ public class SnapshotTest {
         }
 
         String typeStr = null;
-//        if(INTERACTION_MODE) {
-//            System.out.println(String.format("Choose the code of type (1-Data Comparison, 2-, " +
-//                    "enter will use the default value %s): ", DEFAULT_STATIS_TYPE));
-//            typeStr = scanner.nextLine();
-//        }
+        if(INTERACTION_MODE) {
+            System.out.println(String.format("Choose the code of type (1-Intersection, 2-Difference, " +
+                    "enter will use the default value %s): ", DEFAULT_STATIS_TYPE));
+            typeStr = scanner.nextLine();
+        }
         typeStr = StringUtils.isEmpty(typeStr) ? DEFAULT_STATIS_TYPE : typeStr;
         int type = Integer.valueOf(typeStr).intValue();
-        String typeStrPrint = (type == 1 ? "airdrop" : "airdrop result");
+        String typeStrPrint = (type == 1 ? "Intersection" : "Difference");
         // 1.3. 解析文件
         if(jsonFiles.size() == 0) {
             System.out.println(String.format("Not found files[path=%s, type=%s] to analyze, exit the statistic", path, typeStrPrint));
@@ -162,11 +182,7 @@ public class SnapshotTest {
             String readJsonStr = org.conch.util.JSON.readJsonFile(pathFileName);
             JSONObject parseObject = JSON.parseObject(readJsonStr);
             List<Miner> listOrigin = null;
-            if(type == 1){
-                listOrigin = JSONObject.parseArray(parseObject.getJSONArray("crowdMiners").toJSONString(), Miner.class);
-            }else if(type == 2){
-                listOrigin = JSONObject.parseArray(parseObject.getJSONArray("crowdMiners").toJSONString(), Miner.class);
-            }
+            listOrigin = JSONObject.parseArray(parseObject.getJSONArray("crowdMiners").toJSONString(), Miner.class);
             complexList.add(listOrigin);
             if (complexList.size() >= 2) {
                 // 比对complexList第一项 & 最后一项文件数据，取交集，存入第一项
@@ -185,10 +201,24 @@ public class SnapshotTest {
                 List<Miner> list = Lists.newArrayList();
                 // 转换oldList, 用于比对
                 List<String> strList = oldList.stream().map(Miner::getAccountRS).collect(Collectors.toList());
+                if (type == 1) {
+                    for (Miner miner : newList) {
+                        if (strList.contains(miner.accountRS)) {
+                            miner.setAmountNQT("400");
+                            miner.setRecipientPublicKey("");
+                            list.add(miner);
+                        }
+                    }
 
-                for (Miner miner : newList) {
-                    if (strList.contains(miner.accountRS)) {
-                        list.add(miner);
+                } else if (type == 2) {
+                    for (Miner miner : newList) {
+                        if (strList.contains(miner.accountRS)) {
+                            strList.remove(miner.accountRS);
+                        }
+                    }
+                    // strList 转为 List<Miner>
+                    for (String s : strList) {
+                        list.add(new Miner(s, "", "100"));
                     }
                 }
                 // 将list存入complexList第一项
@@ -198,10 +228,13 @@ public class SnapshotTest {
                 // 遍历结束，输出交集
                 List<Miner> minerList = complexList.get(0);
                 org.json.simple.JSONObject jsonObject = new org.json.simple.JSONObject();
-                jsonObject.put("crowdMiners", JSON.toJSON(minerList));
-                jsonObject.put("minersCount", complexList.get(0).size());
+                jsonObject.put("list", JSON.toJSON(minerList));
+                jsonObject.put("listCount", complexList.get(0).size());
+                jsonObject.put("feeNQT", "0");
+                jsonObject.put("deadline", "30");
+                jsonObject.put("secretPhrase", "");
 
-                org.conch.util.JSON.JsonWrite(jsonObject, DEFAULT_AIRDROP_PATH + File.separator + DEFAULT_MINER_FILENAME);
+                org.conch.util.JSON.JsonWrite(jsonObject, DEFAULT_BATCH_PATH + File.separator + (type == 1 ? MINER_INTERSECTION : MINER_DIFF));
                 statis = "operate successfully!\n";
             }
 
@@ -211,10 +244,11 @@ public class SnapshotTest {
         return statis;
     }
 
-    private static final String DEFAULT_AIRDROP_PATH="batch";
+    private static final String DEFAULT_BATCH_PATH="batch";
     private static final String DEFAULT_STATIS_TYPE = "1";
     private static final boolean INTERACTION_MODE = true;
-    private static final String DEFAULT_MINER_FILENAME = "minerIntersectionList.json";
+    private static final String MINER_INTERSECTION = "minerIntersectionList.json";
+    private static final String MINER_DIFF = "minerDiffList.json";
     private static void airdropDataStatistics() {
         // 交互式
         Scanner scanner = null;
@@ -224,10 +258,10 @@ public class SnapshotTest {
         // 1.1. 输入文件路径
         String path = null;
         if(INTERACTION_MODE) {
-            System.out.println(String.format("Input the file path(Press enter, default is %s): ", DEFAULT_AIRDROP_PATH));
+            System.out.println(String.format("Input the file path(Press enter, default is %s): ", DEFAULT_BATCH_PATH));
             path = scanner.nextLine();
         }
-        path = StringUtils.isEmpty(path) ? DEFAULT_AIRDROP_PATH : path;
+        path = StringUtils.isEmpty(path) ? DEFAULT_BATCH_PATH : path;
         // 判断该路径是否存在
         File pathFile = new File(path);
         if (!pathFile.exists()) {
