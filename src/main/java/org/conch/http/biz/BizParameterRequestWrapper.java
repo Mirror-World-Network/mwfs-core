@@ -21,12 +21,12 @@
 
 package org.conch.http.biz;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
+import com.alibaba.fastjson.JSON;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Vector;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 
 public class BizParameterRequestWrapper extends HttpServletRequestWrapper {
     private Map<String, String[]> params;
@@ -111,10 +111,12 @@ public class BizParameterRequestWrapper extends HttpServletRequestWrapper {
         String requestType = req.getParameter("requestType");
         switch (requestType) {
             case UPLOAD_TEXTDATA:
-                if (req.getParameter("deadline") == null)
+                if (req.getParameter("deadline") == null) {
                     this.params.put("deadline", new String[]{"3600"});
-                if (req.getParameter("feeNQT") == null)
+                }
+                if (req.getParameter("feeNQT") == null) {
                     this.params.put("feeNQT", new String[]{"0"});
+                }
                 this.params.put("channel", new String[]{req.getParameter("clientAccount")});
                 this.params.put("secretPhrase", new String[]{req.getParameter("passPhrase")});
                 this.params.put("name", new String[]{req.getParameter("fileName")});
@@ -158,6 +160,6 @@ public class BizParameterRequestWrapper extends HttpServletRequestWrapper {
 
     @Override
     public String toString() {
-        return ToStringBuilder.reflectionToString(this);
+        return "[DEBUG] BizParameterRequestWrapper: " + JSON.toJSONString(params);
     }
 }
