@@ -385,14 +385,14 @@ var Sso = (function (NRS, $, undefined) {
                     }
 
                     if (!isTestnet) {
-                        $(".testnet_only").hide();
+                        // $(".testnet_only").hide();
                     } else {
                         NRS.isTestNet = true;
-                        var testnetWarningDiv = $("#testnet_warning");
-                        var warningText = testnetWarningDiv.text() + " The testnet peer port is " + peerPort + (isOffline ? ", the peer is working offline." : ".");
-                        NRS.logConsole(warningText);
-                        testnetWarningDiv.text(warningText);
-                        $(".testnet_only, #testnet_login, #testnet_warning").show();
+                        // var testnetWarningDiv = $("#testnet_warning");
+                        // var warningText = testnetWarningDiv.text() + " The testnet peer port is " + peerPort + (isOffline ? ", the peer is working offline." : ".");
+                        // NRS.logConsole(warningText);
+                        // testnetWarningDiv.text(warningText);
+                        // $(".testnet_only, #testnet_login, #testnet_warning").show();
                     }
 
                     if (NRS.isInitializePlugins()) {
@@ -423,23 +423,23 @@ var Sso = (function (NRS, $, undefined) {
                     return; // do not load client if local storage is disabled
                 }
 
-                if (!(navigator.userAgent.indexOf("Safari") != -1 &&
-                    navigator.userAgent.indexOf("Chrome") == -1) &&
-                    navigator.userAgent.indexOf("JavaFX") == -1) {
-                    // Don't use account based DB in Safari due to a buggy indexedDB implementation (2015-02-24)
-                    NRS.createLegacyDatabase();
-                }
+                // if (!(navigator.userAgent.indexOf("Safari") != -1 &&
+                //     navigator.userAgent.indexOf("Chrome") == -1) &&
+                //     navigator.userAgent.indexOf("JavaFX") == -1) {
+                //     // Don't use account based DB in Safari due to a buggy indexedDB implementation (2015-02-24)
+                //     NRS.createLegacyDatabase();
+                // }
 
-                if (NRS.mobileSettings.is_check_remember_me) {
-                    $("#remember_me").prop("checked", true);
-                }
+                // if (NRS.mobileSettings.is_check_remember_me) {
+                //     $("#remember_me").prop("checked", true);
+                // }
                 NRS.getSettings(false);
 
-                NRS.getState(function () {
-                    /*setTimeout(function () {
-                        NRS.checkAliasVersions();
-                    }, 5000);*/
-                });
+                // NRS.getState(function () {
+                //     /*setTimeout(function () {
+                //         NRS.checkAliasVersions();
+                //     }, 5000);*/
+                // });
 
   /*
                 $("body").popover({
@@ -453,11 +453,11 @@ var Sso = (function (NRS, $, undefined) {
                 if (!savedPassphrase) {
                     NRS.showLockscreen();
                 }
-                NRS.setStateInterval(30);
+                // NRS.setStateInterval(30);
 
                 // setInterval(NRS.checkAliasVersions, 1000 * 60 * 60);
 
-                NRS.allowLoginViaEnter();
+                // NRS.allowLoginViaEnter();
                 // NRS.automaticallyCheckRecipient();
 
                 // $("#dashboard_table, #transactions_table").on("mouseenter", "td.confirmations", function () {
@@ -467,15 +467,15 @@ var Sso = (function (NRS, $, undefined) {
                     // $(".popover").remove();
                 // });
 
-                _fix();
+                // _fix();
 
-                $(window).on("resize", function () {
-                    _fix();
-
-                    if (NRS.currentPage == "asset_exchange") {
-                        NRS.positionAssetSidebar();
-                    }
-                });
+                // $(window).on("resize", function () {
+                //     _fix();
+                //
+                //     if (NRS.currentPage == "asset_exchange") {
+                //         NRS.positionAssetSidebar();
+                //     }
+                // });
                 // Enable all static tooltip components
                 // tooltip components generated dynamically (for tables cells for example)
                 // has to be enabled by activating this code on the specific widget
