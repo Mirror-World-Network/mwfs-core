@@ -3426,7 +3426,7 @@ export default {
         },
         openAirdrop: function () {
             const _this = this;
-            if (_this.hubsetting.airdropStatus) {
+            if (_this.hubsetting.airdropStatus && !_this.isOpenApiProxy() && !_this.airdropFlag) {
                 let airdropAccount = [];
                 if (_this.hubsetting.airdropAccount) {
                     airdropAccount = _this.hubsetting.airdropAccount.split(";");
