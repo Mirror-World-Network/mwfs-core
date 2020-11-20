@@ -253,7 +253,7 @@ public final class API {
                 filterHolder.setAsyncSupported(true);
             }
 
-            if (Conch.getBooleanProperty("sharder.apiFrameOptionsSameOrigin")) {
+            if (Conch.getBooleanProperty("sharder.apiFrameOptionsSameOrigin") && !Constants.isLightClient) {
                 FilterHolder filterHolder = apiHandler.addFilter(XFrameOptionsFilter.class, "/*", null);
                 filterHolder.setAsyncSupported(true);
             }
