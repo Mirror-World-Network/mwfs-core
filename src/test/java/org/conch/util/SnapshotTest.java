@@ -35,12 +35,20 @@ import java.util.stream.Collectors;
  */
 public class SnapshotTest {
 
+    private static final String AMOUNT_400_MW = "40000000000";
+    private static final String AMOUNT_100_MW = "10000000000";
+
     static class TransferInfo {
         public String recipientRS;
         public String amountNQT;
         public String recipientPublicKey;
 
         TransferInfo() {}
+
+        public TransferInfo(String recipientRS, String amountNQT) {
+            this.recipientRS = recipientRS;
+            this.amountNQT = amountNQT;
+        }
     }
     static class Miner {
         public String accountRS;
@@ -52,9 +60,8 @@ public class SnapshotTest {
             this.accountRS = accountRS;
         }
 
-        public Miner(String accountRS, String recipientPublicKey, String amountNQT) {
+        public Miner(String accountRS, String amountNQT) {
             this.accountRS = accountRS;
-            this.recipientPublicKey = recipientPublicKey;
             this.amountNQT = amountNQT;
         }
 
@@ -204,7 +211,7 @@ public class SnapshotTest {
                 if (type == 1) {
                     for (Miner miner : newList) {
                         if (strList.contains(miner.accountRS)) {
-                            miner.setAmountNQT("400");
+                            miner.setAmountNQT(AMOUNT_400_MW);
                             miner.setRecipientPublicKey("");
                             list.add(miner);
                         }
@@ -218,7 +225,7 @@ public class SnapshotTest {
                     }
                     // strList 转为 List<Miner>
                     for (String s : strList) {
-                        list.add(new Miner(s, "", "100"));
+                        list.add(new Miner(s, AMOUNT_100_MW));
                     }
                 }
                 // 将list存入complexList第一项
@@ -227,9 +234,14 @@ public class SnapshotTest {
             if (complexList.size() == size) {
                 // 遍历结束，输出交集
                 List<Miner> minerList = complexList.get(0);
+                // javabean 转换
+                List<TransferInfo> transferInfoList = Lists.newArrayList();
+                for (Miner miner : minerList) {
+                    transferInfoList.add(new TransferInfo(miner.accountRS, miner.amountNQT));
+                }
                 org.json.simple.JSONObject jsonObject = new org.json.simple.JSONObject();
-                jsonObject.put("list", JSON.toJSON(minerList));
-                jsonObject.put("listCount", complexList.get(0).size());
+                jsonObject.put("list", JSON.toJSON(transferInfoList));
+                jsonObject.put("listCount", transferInfoList.size());
                 jsonObject.put("feeNQT", "0");
                 jsonObject.put("deadline", "30");
                 jsonObject.put("secretPhrase", "");
