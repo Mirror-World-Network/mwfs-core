@@ -3540,7 +3540,7 @@ export default {
             } else {
                 clearInterval(periodicTransactions);
             }
-        }, SSO.downloadingBlockchain ? this.$global.cfg.soonInterval : this.$global.cfg.defaultInterval);
+        }, SSO.downloadingBlockchain ? this.$global.cfg.soonInterval : (this.$global.isOpenApiProxy() ? this.$global.cfg.slowInterval : this.$global.cfg.defaultInterval));
 
         $('#receiver').on("blur", function () {
             _this.validationReceiver("messageForm");

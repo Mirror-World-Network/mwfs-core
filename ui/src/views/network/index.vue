@@ -561,10 +561,11 @@
                     _this.networkUrlBlocks();
                     _this.httpGetNextBlockGenerators();
                     _this.fetchPeers();
+                    _this.httpGetTxStatistics();
                 }else{
                     clearInterval(networkDataLoader);
                 }
-            }, SSO.downloadingBlockchain ? this.$global.cfg.soonInterval : this.$global.cfg.defaultInterval);
+            }, SSO.downloadingBlockchain ? this.$global.cfg.soonInterval : (this.$global.isOpenApiProxy() ? this.$global.cfg.slowInterval : this.$global.cfg.defaultInterval));
 
             let peerDataLoader = setInterval(() => {
                 if (_this.$route.path === '/network') {

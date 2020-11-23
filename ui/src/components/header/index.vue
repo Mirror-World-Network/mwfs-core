@@ -382,9 +382,7 @@
                 });
                 // }
                 // _this.getLatestHubVersion();
-                if (!_this.$global.isOpenApiProxy()) {
-                    _this.downloadingBlockChain();
-                }
+                _this.downloadingBlockChain();
             },
             downloadingBlockChain(){
                 const _this = this;
@@ -404,8 +402,11 @@
                         'Content-Type': 'multipart/form-data'
                     }
                 };
+                if (SSO.isPassphraseAtRisk) {
+                    return _this.$message.warn(_this.$t('notification.passphrase_at_risk'));
+                }
                 if (b) {
-                    if(SSO.accountInfo.balanceNQT/ 100000000 + SSO.accountInfo.frozenBalanceNQT / 100000000 < 133){
+                    if(SSO.accountInfo.balanceNQT/ _this.$global.unitValue + SSO.accountInfo.frozenBalanceNQT / _this.$global.unitValue < 133){
                         return _this.$message.error(_this.$t('notification.ss_not_enough'));
                     }
 

@@ -998,6 +998,7 @@ const en = {
         'sendVCode':"Send a verification code must fill in the registered mobile phone number or email address",
         'errorCreatePool':'Please drag the mine pool income distribution ratio',
         'ss_not_enough':'Your MW amount not enough, cant start mining',
+        'passphrase_at_risk':'Please open in local or private network',
     },
     enter: {
         'enter_tip': "Your mnemonic phrase is very important, in order to be sure that you have saved it! Please enter your mnemonic phrase below",
