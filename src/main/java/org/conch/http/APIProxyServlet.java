@@ -175,6 +175,7 @@ public final class APIProxyServlet extends AsyncMiddleManServlet {
         } else {
             Peer servingPeer = APIProxy.getInstance().getServingPeer(requestType);
             if (servingPeer == null) {
+                Logger.logDebugMessage("Get Serving peer fail");
                 return false;
             }
             uri = servingPeer.getPeerApiUri();

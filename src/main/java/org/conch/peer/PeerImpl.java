@@ -95,7 +95,7 @@ final class PeerImpl implements Peer {
         this.useWebSocket = Peers.useWebSockets && !Peers.useProxy;
         this.disabledAPIs = EnumSet.noneOf(APIEnum.class);
         this.apiServerIdleTimeout = API.apiServerIdleTimeout;
-        this.blockchainState = BlockchainState.UP_TO_DATE;
+        this.blockchainState = BlockchainState.LIGHT_CLIENT;
         this.peerLoad = new PeerLoad(this.host, this.port, 0);
     }
 
@@ -306,6 +306,11 @@ final class PeerImpl implements Peer {
     void setBlockchainState(Object blockchainStateObj) {
         if (blockchainStateObj instanceof Integer) {
             int blockchainStateInt = (int)blockchainStateObj;
+            if (blockchainStateInt >= 0 && blockchainStateInt < BlockchainState.values().length) {
+                this.blockchainState = BlockchainState.values()[blockchainStateInt];
+            }
+        } else if (blockchainStateObj instanceof Long) {
+            int blockchainStateInt = ((Long) blockchainStateObj).intValue();
             if (blockchainStateInt >= 0 && blockchainStateInt < BlockchainState.values().length) {
                 this.blockchainState = BlockchainState.values()[blockchainStateInt];
             }
@@ -717,11 +722,6 @@ final class PeerImpl implements Peer {
                 long origServices = services;
                 parseJSONObject(response);
 
-                String cosUpdateTime = Convert.emptyToNull((String) response.get("cosUpdateTime"));
-                if (StringUtils.isNotEmpty(cosUpdateTime)) {
-                    setCosUpdateTime(cosUpdateTime);
-                }
-
                 if (!Peers.ignorePeerAnnouncedAddress) {
                     String newAnnouncedAddress = Convert.emptyToNull((String) response.get("announcedAddress"));
                     if (newAnnouncedAddress != null) {
@@ -1055,6 +1055,7 @@ final class PeerImpl implements Peer {
         setDisabledAPIs(json.get("disabledAPIs"));
         setApiServerIdleTimeout(json.get("apiServerIdleTimeout"));
         setBlockchainState(json.get("blockchainState"));
+        setCosUpdateTime(Convert.emptyToNull((String) json.get("cosUpdateTime")));
         lastUpdated = lastConnectAttempt;
         setVersion((String) json.get("version"));
         setPlatform((String) json.get("platform"));
