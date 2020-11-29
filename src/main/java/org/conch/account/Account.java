@@ -1521,7 +1521,7 @@ public final class Account {
             PreparedStatement pstmt = con.prepareStatement("MERGE INTO account (id, "
                     + "balance, unconfirmed_balance, forged_balance, frozen_balance,"
                     + "active_lessee_id, has_control_phasing, height, latest) "
-                    + "VALUES (?, ?, ?, ?,?, ?, ?, ?, TRUE)");
+                    + "KEY (id, height) VALUES (?, ?, ?, ?,?, ?, ?, ?, TRUE)");
             int i = 0;
             pstmt.setLong(++i, this.id);
             pstmt.setLong(++i, this.balanceNQT);
