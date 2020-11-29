@@ -550,15 +550,18 @@ public final class Account {
                     cacheTable.setLong(1, accountId);
                     ResultSet resultSetCache = cacheTable.executeQuery();
                     if (!resultSetCache.next()) {
-                        PreparedStatement historyTable = con.prepareStatement("select * FROM account_history WHERE id = ? order by height desc limit 1");
+                        PreparedStatement historyTable = con.prepareStatement("select * FROM account_history WHERE id" +
+                         " = ? order by height desc limit 1");
                         historyTable.setLong(1, accountId);
                         resultSetCache = historyTable.executeQuery();
                         if (!resultSetCache.next()) {
                             continue;
                         }
                     }
-                    PreparedStatement pstmtInsert = con.prepareStatement("INSERT INTO account (ID,BALANCE,UNCONFIRMED_BALANCE,FORGED_BALANCE," +
-                            "ACTIVE_LESSEE_ID,HAS_CONTROL_PHASING,HEIGHT,FROZEN_BALANCE) KEY (account_id, height) VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
+                    PreparedStatement pstmtInsert = con.prepareStatement("INSERT INTO account (ID,BALANCE," +
+                            "UNCONFIRMED_BALANCE,FORGED_BALANCE," +
+                            "ACTIVE_LESSEE_ID,HAS_CONTROL_PHASING,HEIGHT,FROZEN_BALANCE) VALUES(?, ?, ?, ?, ?, ?, ?, " +
+                            "?)");
                     pstmtInsert.setLong(1, resultSetCache.getLong("ID"));
                     pstmtInsert.setLong(2, resultSetCache.getLong("BALANCE"));
                     pstmtInsert.setLong(3, resultSetCache.getLong("UNCONFIRMED_BALANCE"));
@@ -1518,7 +1521,7 @@ public final class Account {
             PreparedStatement pstmt = con.prepareStatement("MERGE INTO account (id, "
                     + "balance, unconfirmed_balance, forged_balance, frozen_balance,"
                     + "active_lessee_id, has_control_phasing, height, latest) "
-                    + "KEY (id, height) VALUES (?, ?, ?, ?,?, ?, ?, ?, TRUE)");
+                    + "VALUES (?, ?, ?, ?,?, ?, ?, ?, TRUE)");
             int i = 0;
             pstmt.setLong(++i, this.id);
             pstmt.setLong(++i, this.balanceNQT);
