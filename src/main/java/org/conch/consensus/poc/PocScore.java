@@ -3,6 +3,7 @@ package org.conch.consensus.poc;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.conch.Conch;
 import org.conch.account.Account;
 import org.conch.common.Constants;
 import org.conch.consensus.genesis.SharderGenesis;
@@ -37,7 +38,7 @@ public class PocScore implements Serializable {
     BigInteger total = null;
 
     // don't use the static parameter (calculate should base on the height)
-    private static BigInteger SCORE_MULTIPLIER = parseAndGetScoreMagnification(0);
+    private static BigInteger SCORE_MULTIPLIER = parseAndGetScoreMagnification(Conch.getHeight());
 
     /**
      * mag. of poc score is use to increase the poc score of the miner to make sure the mining gap is match the preset interval
