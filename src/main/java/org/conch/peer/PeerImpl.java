@@ -95,7 +95,7 @@ final class PeerImpl implements Peer {
         this.useWebSocket = Peers.useWebSockets && !Peers.useProxy;
         this.disabledAPIs = EnumSet.noneOf(APIEnum.class);
         this.apiServerIdleTimeout = API.apiServerIdleTimeout;
-        this.blockchainState = BlockchainState.LIGHT_CLIENT;
+        this.blockchainState = BlockchainState.NONE;
         this.peerLoad = new PeerLoad(this.host, this.port, 0);
     }
 

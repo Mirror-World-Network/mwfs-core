@@ -181,7 +181,9 @@ public interface Peer extends Comparable<Peer> {
         //分叉
         FORK,
         //过期
-        OBSOLETE
+        OBSOLETE,
+        //无状态
+        NONE,
     }
 
     enum RunningMode {
