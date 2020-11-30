@@ -1050,7 +1050,7 @@ final class PeerImpl implements Peer {
         String servicesString = (String)json.get("services");
         services = (servicesString != null ? Long.parseUnsignedLong(servicesString) : 0);
         setApplication((String)json.get("application"));
-        apiPort = Integer.parseInt(String.valueOf(json.get("apiPort")));
+        apiPort = Integer.parseInt(json.get("apiPort") == null ? "0" : String.valueOf(json.get("apiPort")));
         setApiSSLPort(json.get("apiSSLPort"));
         setDisabledAPIs(json.get("disabledAPIs"));
         setApiServerIdleTimeout(json.get("apiServerIdleTimeout"));
