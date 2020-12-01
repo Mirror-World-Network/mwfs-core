@@ -635,7 +635,7 @@
                 const _this = this;
                 _this.$global.fetch("GET", {startThis:"startThis"}, "getPeers").then(res => {
                     _this.peerNum = res.peers.length>0 ? res.peers.length : _this.limitPeerSize;
-                    _this.declaredPeerSize = res.declaredPeerSize;
+                    _this.declaredPeerSize = _this.$global.isOpenApiProxy() ? '--' : res.declaredPeerSize;
                 }).catch(err => {
                     console.info("error", err);
                 });
@@ -644,7 +644,7 @@
                 const _this = this;
                 _this.$global.fetch("GET", {startThis:"startThis"}, "getPeers").then(res => {
                     _this.peerNum = res.peers.length>0 ? res.peers.length : _this.limitPeerSize;
-                    _this.declaredPeerSize = res.declaredPeerSize;
+                    _this.declaredPeerSize = _this.$global.isOpenApiProxy() ? '--' : res.declaredPeerSize;
                     try {
                         _this.$global.coordinatesMap = JSON.parse(res.coordinates);
                     }catch (e) {

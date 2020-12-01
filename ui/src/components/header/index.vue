@@ -6,7 +6,8 @@
                     <img src="../../assets/img/logo.svg"/>
                     <div @click="openCosUpgradeDialog()">
                         <span v-if="isUpdate" title="Update" class="update"></span>
-                        <span>MW</span>
+                        <span v-if="openApiProxy">MW·Light</span>
+                        <span v-else>MW</span>
                         <span>{{blockchainStatus.application}}{{$t('header.version')}}{{blockchainStatus.fullVersion}}</span>
                     </div>
                 </a>
@@ -214,6 +215,7 @@
                 <div class="version-info">
                     <span>{{$t('upgrade.current_version')}}v{{blockchainStatus.version}}</span>
                     <span style="color: #555;font-style: italic;font-size: smaller;"> {{blockchainStatus.cosLastUpgradeDate}}</span>
+                    <span style="color: #ccc;font-style: italic;font-size: smaller;" v-if="openApiProxy">{{$t('sso.light_client')}}</span>
                     <br/>
                     <span v-if="isUpdate">
                         {{$t('upgrade.discover_new_version')}}
@@ -614,6 +616,12 @@
                 }
                 _this.activeSearch = false;
                 _this.placeholder = _this.$t('header.search');
+            }
+        },
+        computed: {
+            openApiProxy: function () {
+                const _this = this;
+                return _this.$global.isOpenApiProxy();
             }
         }
     };

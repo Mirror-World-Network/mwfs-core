@@ -1,6 +1,13 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div>
         <div>
+<!--            <el-row v-if="openApiProxy" class="notice-container">-->
+<!--                <el-col :span="24">-->
+<!--                    <div class="notice" style="background: #ffffff">-->
+<!--                        <div><a>{{$t('sso.light_client')}}</a></div>-->
+<!--                    </div>-->
+<!--                </el-col>-->
+<!--            </el-row>-->
             <div class="block_account mb20">
                 <p class="block_title">
                     <img src="../../assets/img/account.svg"/>
@@ -3426,7 +3433,7 @@ export default {
         },
         openAirdrop: function () {
             const _this = this;
-            if (_this.hubsetting.airdropStatus && !_this.isOpenApiProxy() && !_this.airdropFlag) {
+            if (_this.hubsetting.airdropStatus && !_this.$global.isOpenApiProxy() && !_this.airdropFlag) {
                 let airdropAccount = [];
                 if (_this.hubsetting.airdropAccount) {
                     airdropAccount = _this.hubsetting.airdropAccount.split(";");
@@ -3438,6 +3445,10 @@ export default {
                 })
             }
             return _this.airdropFlag;
+        },
+        openApiProxy: function () {
+            const _this = this;
+            return _this.$global.isOpenApiProxy();
         }
     },
     watch: {
@@ -3563,6 +3574,19 @@ export default {
 <style lang="scss" type="text/scss">
 /*@import '~scss_vars';*/
 @import './style.scss';
+
+.notice-container {
+    .notice {
+        padding: 15px;
+        margin-bottom: 20px;
+        text-align: center;
+        font-size: 16px;
+        font-weight: 600;
+        color: #3fb09a;
+        line-height: 150%;
+        border-radius: 4px;
+    }
+}
 </style>
 <style scoped lang="scss" type="text/scss">
 
