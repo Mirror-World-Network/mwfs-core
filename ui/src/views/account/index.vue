@@ -3337,28 +3337,32 @@ export default {
         whetherShowHubSettingBtn() {
             /*
             At the same time satisfy the following conditions:
-            1. sharder.HubBindAddress has value；
-            2. using secretPhrase to login；
-            3. NodeType is Hub；
-            4. Hub bind MW address must equals to user account address。
+            1. sharder.HubBindAddress has value;
+            2. using secretPhrase to login;
+            3. NodeType is Hub;
+            4. Hub bind MW address must equals to user account address;
+            5. Not a light client;
             */
             //return true;
             return this.secretPhrase
                 && !this.initHUb
                 && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center')
-                && this.userConfig.ssAddress === this.accountInfo.accountRS;
+                && this.userConfig.ssAddress === this.accountInfo.accountRS
+                && !this.$global.isOpenApiProxy();
         },
         whetherShowHubInitBtn() {
             /*
             At the same time satisfy the following conditions:
-            1. sharder.HubBindAddress has no value；
-            2. using secretPhrase to login；
-            3. NodeType is Hub。
+            1. sharder.HubBindAddress has no value;
+            2. using secretPhrase to login;
+            3. NodeType is Hub;
+            4. Not a light client;
             */
             //return true;
             return this.secretPhrase
                 && this.initHUb
-                && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center');
+                && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center')
+                && !this.$global.isOpenApiProxy();
             /* return true;*/
         },
         whetherShowUseNATServiceBtn() {
