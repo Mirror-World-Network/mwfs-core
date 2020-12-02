@@ -6,7 +6,7 @@
                     <img src="../../assets/img/logo.svg"/>
                     <div @click="openCosUpgradeDialog()">
                         <span v-if="isUpdate" title="Update" class="update"></span>
-                        <span v-if="openApiProxy">MW·Light</span>
+                        <span v-if="openApiProxy">MW·<span style="color: #ccc;font-size: smaller;">Light</span></span>
                         <span v-else>MW</span>
                         <span>{{blockchainStatus.application}}{{$t('header.version')}}{{blockchainStatus.fullVersion}}</span>
                     </div>
