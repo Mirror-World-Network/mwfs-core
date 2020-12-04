@@ -2,7 +2,9 @@ package org.conch.http;
 
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.conch.Conch;
+import org.conch.account.Account;
 import org.conch.chain.Block;
 import org.conch.chain.BlockImpl;
 import org.conch.common.ConchException;
@@ -61,9 +63,9 @@ public class GetMinerStatistics extends APIServlet.APIRequestHandler{
         Map<Long, MintStatisticsData> data = new HashMap<>();
         for (Block block : blocks) {
             if (data.containsKey(block.getGeneratorId())) {
-                data.get(block.getGeneratorId()).updateData(block, endHeight);
+                data.get(block.getGeneratorId()).updateData(block, startHeight, endHeight);
             } else {
-                data.put(block.getGeneratorId(), MintStatisticsData.init(block.getGeneratorId(), block.getTimestamp(), endHeight));
+                data.put(block.getGeneratorId(), MintStatisticsData.init(block.getGeneratorId(), block.getTimestamp(), startHeight, endHeight));
             }
         }
         //downloadData(data);
@@ -72,26 +74,37 @@ public class GetMinerStatistics extends APIServlet.APIRequestHandler{
 
     /**
      * download the excel of miner mining data to local
+     *
      * @param data
      */
-    private static void downloadData(Map<Long, MintStatisticsData> data,String savaPath) {
+    private static void downloadData(Map<Long, MintStatisticsData> data, String savaPath, int startHeight, int endHeight) {
         HSSFWorkbook wb = new HSSFWorkbook();
         HSSFSheet sheet = wb.createSheet("矿工信息统计");
+        String[] titles = {"账号", "出块总数", "出块比率", "最近一次出块时间", "平均出块时间(天)", "矿机ip", "节点类型", "pocScore", "pocDetail"};
         int rowNum = 0;
         HSSFRow row = sheet.createRow(rowNum);
         HSSFCellStyle style = wb.createCellStyle();
         style.setAlignment(HorizontalAlignment.CENTER);
+        creatCell(row, style, new String[titles.length]);
+        HSSFCell baseMsg = row.getCell(0);
+        HSSFCellStyle leftStyle = wb.createCellStyle();
+        leftStyle.setAlignment(HorizontalAlignment.LEFT);
+        baseMsg.setCellStyle(leftStyle);
+        baseMsg.setCellValue("起始高度：" + startHeight + "，" + "截止高度：" + endHeight);
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, titles.length - 1));
 
-        creatCell(row, style,new String[]{"矿工id","出块总数","出块比率","最近一次出块时间","平均出块时间(天)","矿机ip","节点类型", "pocScore","pocDetail"});
+
+        row = sheet.createRow(++rowNum);
+        creatCell(row, style, titles);
 
         for (Long key : data.keySet()) {
             MintStatisticsData mintStatisticsData = data.get(key);
             row = sheet.createRow(++rowNum);
-            creatCell(row, style, new String[]{key.toString(),
+            creatCell(row, style, new String[]{Account.rsAccount(key),
                     mintStatisticsData.getGenerateCount().toString(),
                     mintStatisticsData.getGenerateRate().multiply(new BigDecimal("100")).toString() + "%",
                     Convert.dateFromEpochTime(mintStatisticsData.getLatestMiningTime()),
-                    mintStatisticsData.getAvgMiningTime() == null ? "--" : new BigDecimal(mintStatisticsData.getAvgMiningTime() * 1000).divide(new BigDecimal(24 * 60 * 60 * 1000),2,BigDecimal.ROUND_FLOOR).toString(),
+                    mintStatisticsData.getAvgMiningTime() == null ? "--" : new BigDecimal(mintStatisticsData.getAvgMiningTime() * 1000).divide(new BigDecimal(24 * 60 * 60 * 1000), 2, BigDecimal.ROUND_FLOOR).toString(),
                     mintStatisticsData.getMiningMachineIP(),
                     mintStatisticsData.getNoteType(),
                     mintStatisticsData.getPocScore().getTotal().toString(),
@@ -100,7 +113,7 @@ public class GetMinerStatistics extends APIServlet.APIRequestHandler{
         }
 
         try {
-            String fileName = "minerStatistics-" + new SimpleDateFormat("yyyyMMddhhmmss").format(new Date()) + ".xls";
+            String fileName = "MinerStatistics-" + new SimpleDateFormat("yyyyMMddhhmmss").format(new Date()) + ".xls";
             FileOutputStream fos = new FileOutputStream(savaPath + "\\" + fileName);
             wb.write(fos);
             fos.close();
@@ -138,11 +151,11 @@ public class GetMinerStatistics extends APIServlet.APIRequestHandler{
         Map<Long, MintStatisticsData> data = new HashMap<>();
         for (Block block : blocks) {
             if (data.containsKey(block.getGeneratorId())) {
-                data.get(block.getGeneratorId()).updateData(block, endHeight);
+                data.get(block.getGeneratorId()).updateData(block, startHeight, endHeight);
             } else {
-                data.put(block.getGeneratorId(), MintStatisticsData.init(block.getGeneratorId(), block.getTimestamp(), endHeight));
+                data.put(block.getGeneratorId(), MintStatisticsData.init(block.getGeneratorId(), block.getTimestamp(), startHeight, endHeight));
             }
         }
-        downloadData(data,"D:\\data");
+        downloadData(data,"D:\\data",startHeight,endHeight);
     }
 }
