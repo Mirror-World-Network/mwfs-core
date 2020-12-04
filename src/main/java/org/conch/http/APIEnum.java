@@ -301,6 +301,7 @@ public enum APIEnum {
     GET_INFO("getInfo",GetInfo.instance),
     AIRDROP("airdrop",Airdrop.instance),
     AIRDROP_DETECTION("airdropDetection",AirdropDetection.instance),
+    GET_MINER_STATISTICS("getMinerStatistics",GetMinerStatistics.instance),
     //sharder_authorization_login
     AUTHORIZATION_LOGIN("authorizationLogin",AuthorizationLogin.instance),
     // sharder pool
