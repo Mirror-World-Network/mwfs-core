@@ -24,7 +24,7 @@
                         {{ $t('account.assets') + $global.formatNQTMoney(accountInfo.effectiveBalanceNQT, 2) }}
                     </p>
                     <div class="account_tool">
-                        <button class="common_btn imgBtn writeBtn" @click="openTransferDialog">
+                        <button class="common_btn imgBtn " v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}" v-bind:disabled="!isUpToDateOrLight" @click="openTransferDialog">
                             <span class="icon">
                                 <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 174.62 174.83">
                                     <path
@@ -34,7 +34,7 @@
                             </span>
                             <span>{{ $t('account.transfer') }}</span>
                         </button>
-                        <button class="common_btn imgBtn writeBtn" @click="openBatchTransferDialog" v-if="openAirdrop">
+                        <button class="common_btn imgBtn " v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}" v-bind:disabled="!isUpToDateOrLight" @click="openBatchTransferDialog" v-if="openAirdrop">
                             <span class="icon">
                                 <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 174.62 174.83">
                                     <path
@@ -44,7 +44,7 @@
                             </span>
                             <span>{{ $t('transfer.batch_transfer') }}</span>
                         </button>
-                        <button class="common_btn imgBtn writeBtn" v-if="whetherShowSendMsgBtn()"
+                        <button class="common_btn imgBtn " v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}" v-bind:disabled="!isUpToDateOrLight" v-if="whetherShowSendMsgBtn()"
                                 @click="openSendMessageDialog">
                             <span class="icon">
                                 <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 171.43 137.08">
@@ -55,7 +55,7 @@
                             </span>
                             <span>{{ $t('account.send_message') }}</span>
                         </button>
-                        <button class="common_btn imgBtn writeBtn" v-if="whetherShowStorageBtn()"
+                        <button class="common_btn imgBtn " v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}" v-bind:disabled="!isUpToDateOrLight" v-if="whetherShowStorageBtn()"
                                 @click="openStorageFileDialog">
                             <span class="icon">
                                 <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 162.5">
@@ -1102,24 +1102,19 @@ export default {
                 ssAddress: this.$store.state.userConfig['sharder.HubBindAddress'],
                 siteAccount: this.$store.state.userConfig['sharder.siteAccount'],
             },
-
             registerSharderSiteUser: {
-
                 sharderAccountPhoneOrEmail: '',
                 verificationCode: "",
                 setSharderPwd: '',
                 confirmSharderPwd: '',
                 pictureVerificationCode: "",
             },
-
             needRegister: false,
             isShowName: true,
             generatorRS: '',
             secretPhrase: SSO.secretPhrase,
-
             blockInfoDialog: false,
             height: '',
-
             publicKey: SSO.publicKey,
             messageForm: {
                 errorCode: false,
@@ -3453,6 +3448,11 @@ export default {
         openApiProxy: function () {
             const _this = this;
             return _this.$global.isOpenApiProxy();
+        },
+        isUpToDateOrLight: function () {
+            const _this = this;
+            console.log("isUpToDateOrLight", _this.blockchainState.blockchainState === 'UP_TO_DATE' || _this.blockchainState.blockchainState === 'LIGHT_CLIENT')
+            return _this.blockchainState.blockchainState === 'UP_TO_DATE' || _this.blockchainState.blockchainState === 'LIGHT_CLIENT';
         }
     },
     watch: {

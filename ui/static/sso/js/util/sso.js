@@ -435,11 +435,11 @@ var Sso = (function (NRS, $, undefined) {
                 // }
                 NRS.getSettings(false);
 
-                // NRS.getState(function () {
-                //     /*setTimeout(function () {
-                //         NRS.checkAliasVersions();
-                //     }, 5000);*/
-                // });
+                NRS.getState(function () {
+                    /*setTimeout(function () {
+                        NRS.checkAliasVersions();
+                    }, 5000);*/
+                });
 
   /*
                 $("body").popover({
@@ -453,7 +453,7 @@ var Sso = (function (NRS, $, undefined) {
                 if (!savedPassphrase) {
                     NRS.showLockscreen();
                 }
-                // NRS.setStateInterval(30);
+                NRS.setStateInterval(60);
 
                 // setInterval(NRS.checkAliasVersions, 1000 * 60 * 60);
 
@@ -548,7 +548,7 @@ var Sso = (function (NRS, $, undefined) {
     }
 
     NRS.setStateInterval = function (seconds) {
-        if (!NRS.isPollGetState()) {
+        if (!NRS.isPGetStateoll()) {
             return;
         }
         if (seconds == stateIntervalSeconds && stateInterval) {
