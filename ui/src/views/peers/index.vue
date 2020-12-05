@@ -401,7 +401,7 @@
             openInfo: function (address) {
                 let _this = this;
                 this.closeDialog();
-                _this.$http.get('/sharder?requestType=getPeer', {
+                _this.$http.get(_this.$global.urlPrefix() + '?requestType=getPeer', {
                     params: {
                         peer: address
                     }
@@ -435,7 +435,7 @@
                 formData.append("adminPassword", adminPassword);
                 formData.append("feeNQT", 0);
                 _this.loading = true;
-                _this.$http.post('/sharder?requestType=addPeer', formData).then(function (res) {
+                _this.$http.post(_this.$global.urlPrefix() + '?requestType=addPeer', formData).then(function (res) {
                     _this.loading = false;
                     if (res.data.errorDescription) {
                         return _this.$message.error(res.data.errorDescription);
@@ -459,7 +459,7 @@
                 formData.append("peer", address);
                 formData.append("adminPassword", _this.adminPassword);
                 _this.loading = true;
-                _this.$http.post('/sharder?requestType=blacklistPeer', formData).then(function (res) {
+                _this.$http.post(_this.$global.urlPrefix() + '?requestType=blacklistPeer', formData).then(function (res) {
                     _this.loading = false;
                     if (res.data.errorDescription) {
                         return _this.$message.error(res.data.errorDescription);
@@ -480,7 +480,7 @@
                 formData.append("peer", address);
                 formData.append("adminPassword", _this.adminPassword);
                 _this.loading = true;
-                this.$http.post('/sharder?requestType=addPeer', formData).then(function (res) {
+                this.$http.post(_this.$global.urlPrefix() + '?requestType=addPeer', formData).then(function (res) {
                     _this.loading = false;
                     if (res.data.errorDescription) {
                         return _this.$message.error(res.data.errorDescription);

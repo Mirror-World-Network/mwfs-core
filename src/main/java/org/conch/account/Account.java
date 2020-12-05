@@ -2624,6 +2624,7 @@ public final class Account {
         Connection con = null;
         try {
             con = Db.db.getConnection();
+            long t1 = System.currentTimeMillis();
             Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             String idQuerySql = "SELECT distinct id" + " FROM " + sourceTable;
             ResultSet accountIdRs = statement.executeQuery(idQuerySql);
@@ -2658,7 +2659,7 @@ public final class Account {
                 pstmtSelect.setInt(2, ceilingHeight);
                 pstmtSelect.setLong(3, accountId);
                 ResultSet resultSet = pstmtSelect.executeQuery();
-                while (!resultSet.next()) {
+                if (!resultSet.next()) {
                     continue;
                 }
                 StringBuilder sb = new StringBuilder("INSERT INTO " + targetTable + " (DB_ID,ID,BALANCE,UNCONFIRMED_BALANCE,FORGED_BALANCE," +
@@ -2685,10 +2686,9 @@ public final class Account {
                 pstmtDelete.setLong(3, accountId);
                 pstmtDelete.execute();
             }
+            Logger.logDebugMessage("sync time:" + (System.currentTimeMillis() - t1));
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
-        }finally {
-            DbUtils.close(con);
         }
     }
 
@@ -2730,7 +2730,7 @@ public final class Account {
                 pstmtSelect.setInt(2, ceilingHeight);
                 pstmtSelect.setLong(3, accountId);
                 ResultSet resultSet = pstmtSelect.executeQuery();
-                while (!resultSet.next()) {
+                if (!resultSet.next()) {
                     continue;
                 }
                 StringBuilder sb = new StringBuilder("INSERT INTO " + targetTable + " (DB_ID,ACCOUNT_ID,ADDITIONS,HEIGHT,LATEST) VALUES");
@@ -2753,8 +2753,6 @@ public final class Account {
             }
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
-        }finally {
-            DbUtils.close(con);
         }
     }
 
@@ -2797,7 +2795,7 @@ public final class Account {
                 pstmtSelect.setInt(2, ceilingHeight);
                 pstmtSelect.setLong(3, accountId);
                 ResultSet resultSet = pstmtSelect.executeQuery();
-                while (!resultSet.next()) {
+                if (!resultSet.next()) {
                     continue;
                 }
                 StringBuilder sb = new StringBuilder("INSERT INTO " + targetTable + " (DB_ID,ACCOUNT_ID,EVENT_TYPE,EVENT_ID,HOLDING_TYPE," +
@@ -2828,8 +2826,6 @@ public final class Account {
             }
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
-        }finally {
-            DbUtils.close(con);
         }
     }
 
@@ -2872,7 +2868,7 @@ public final class Account {
                 pstmtSelect.setInt(2, ceilingHeight);
                 pstmtSelect.setLong(3, accountId);
                 ResultSet resultSet = pstmtSelect.executeQuery();
-                while (!resultSet.next()) {
+                if (!resultSet.next()) {
                     continue;
                 }
                 StringBuilder sb = new StringBuilder("INSERT INTO " + targetTable + " (DB_ID,ACCOUNT_ID,POC_SCORE,HEIGHT,POC_DETAIL,LATEST) VALUES");
@@ -2896,8 +2892,6 @@ public final class Account {
             }
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
-        }finally {
-            DbUtils.close(con);
         }
     }
 

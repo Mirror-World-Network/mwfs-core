@@ -28,6 +28,7 @@ import com.google.common.collect.Maps;
 import org.conch.Conch;
 import org.conch.account.Account;
 import org.conch.common.ConchException;
+import org.conch.common.Constants;
 import org.conch.http.biz.BizParameterRequestWrapper;
 import org.json.simple.JSONStreamAware;
 import org.json.simple.JSONValue;
@@ -131,6 +132,9 @@ public final class Airdrop extends CreateTransaction {
         // If the height is not empty, return
         if (Conch.getAirdropHeighStatus(Conch.getBlockchain().getHeight()) == true) {
             return ACCESS_CLOSED_AT_HEIGHT;
+        }
+        if (Constants.isLightClient) {
+            throw new ParameterException(NOT_ENABLE_ON_LIGHTCLIENT);
         }
         org.json.simple.JSONObject response = new org.json.simple.JSONObject();
         String pathName = req.getParameter("pathName");

@@ -29,12 +29,14 @@ import org.conch.asset.token.*;
 import org.conch.chain.Block;
 import org.conch.common.Constants;
 import org.conch.common.Token;
+import org.conch.consensus.poc.PocScore;
 import org.conch.consensus.reward.RewardCalculator;
 import org.conch.crypto.Crypto;
 import org.conch.crypto.EncryptedData;
 import org.conch.db.DbIterator;
 import org.conch.db.DbUtils;
 import org.conch.market.*;
+import org.conch.mint.MintStatisticsData;
 import org.conch.peer.Hallmark;
 import org.conch.peer.Peer;
 import org.conch.shuffle.Shuffler;
@@ -49,6 +51,7 @@ import org.conch.util.Filter;
 import org.conch.vote.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONStreamAware;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -630,6 +633,46 @@ public final class JSONData {
         }
         json.put("results", resultsJson);
         return json;
+    }
+
+    public static JSONStreamAware minerStatistics(Map<Long, MintStatisticsData> data) {
+        JSONObject json = new JSONObject();
+        Map<String, String> jsonData = new HashMap<>();
+        for (Long key : data.keySet()) {
+            jsonData.put(key.toString(), phasingMinerStatisticsData(data.get(key)));
+        }
+        json.put("data", JSONObject.toJSONString(jsonData));
+        return json;
+    }
+
+    private static String phasingMinerStatisticsData(MintStatisticsData mintStatisticsData) {
+        JSONObject json = new JSONObject();
+        json.put("avgMiningTime", mintStatisticsData.getAvgMiningTime());
+        json.put("generateCount", mintStatisticsData.getGenerateCount());
+        json.put("generateRate", mintStatisticsData.getGenerateRate());
+        json.put("latestMiningTime", mintStatisticsData.getLatestMiningTime());
+        json.put("minerId", mintStatisticsData.getMinerId());
+        json.put("miningMachineIP", mintStatisticsData.getMiningMachineIP());
+        json.put("pocScore", phasingPocScore(mintStatisticsData.getPocScore()));
+        return json.toJSONString();
+    }
+
+    public static String phasingPocScore(PocScore pocScore) {
+        JSONObject json = new JSONObject();
+        json.put("accountId", pocScore.getAccountId());
+        json.put("height", pocScore.getHeight());
+        json.put("total", pocScore.total());
+        json.put("effectiveBalance", pocScore.getEffectiveBalance());
+        json.put("bcScore", pocScore.getBcScore());
+        json.put("blockMissScore", pocScore.getBlockMissScore());
+        json.put("hardwareScore", pocScore.getHardwareScore());
+        json.put("networkScore", pocScore.getNetworkScore());
+        json.put("nodeTypeScore", pocScore.getNodeTypeScore());
+        json.put("onlineRateScore", pocScore.getOnlineRateScore());
+        json.put("performanceScore", pocScore.getPerformanceScore());
+        json.put("serverScore", pocScore.getServerScore());
+        json.put("ssScore", pocScore.getSsScore());
+        return json.toJSONString();
     }
 
     interface VoteWeighter {

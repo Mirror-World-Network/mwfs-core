@@ -409,7 +409,7 @@
                 }
                 // if (_this.$router.currentRoute.name !== "mining") return;
 
-            }, SSO.downloadingBlockchain ? this.$global.cfg.soonInterval : this.$global.cfg.defaultInterval);
+            }, SSO.downloadingBlockchain ? this.$global.cfg.soonInterval : (this.$global.isOpenApiProxy() ? this.$global.cfg.slowInterval : this.$global.cfg.defaultInterval));
 
             // document.getElementsByClassName('header')[0].style.display = 'none'
         },
