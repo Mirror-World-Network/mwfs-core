@@ -267,7 +267,7 @@
             getAccount(account) {
                 const _this = this;
                 return new Promise((resolve, reject) => {
-                    _this.$http.get('/sharder?requestType=getAccount', {
+                    _this.$http.get(_this.$global.urlPrefix() + '?requestType=getAccount', {
                         params: {
                             account: account,
                             includeLessors: true,
