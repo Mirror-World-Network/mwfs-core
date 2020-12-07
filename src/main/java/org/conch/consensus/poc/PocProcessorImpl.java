@@ -251,7 +251,7 @@ public class PocProcessorImpl implements PocProcessor {
         }
 
         boolean reachSyncHeight = height > 0 && height % Constants.SYNC_BLOCK_NUM == 0;
-        if(!reachSyncHeight){
+        if(!reachSyncHeight && !Constants.SYNC_BLOCK_BUTTON){
             Logger.logDebugMessage("Dont't sync cache and history tables till height exceed" +
                     "[current height=%d, sync step=%d]", height, Constants.SYNC_BLOCK_NUM);
             return;
@@ -331,6 +331,9 @@ public class PocProcessorImpl implements PocProcessor {
             if(openNewDbTx) {
                 Db.db.endTransaction();
             }
+        }
+        if (Constants.SYNC_BLOCK_BUTTON) {
+            Constants.SYNC_BLOCK_BUTTON = false;
         }
 
 //        try {

@@ -2648,13 +2648,14 @@ public final class Account {
                 }
                 int workHeight = workHeightRs.getInt("height");
                 int floorHeight = heightRs.next() ? heightRs.getInt("height") : 0;
-                Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
-                if (workHeight - floorHeight < dif) {
+                //Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
+
+                int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
+
+                if (workHeight - floorHeight < dif || ceilingHeight > workHeight) {
 //                    return;
                     continue;
                 }
-                int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
-
                 pstmtSelect.setInt(1, floorHeight);
                 pstmtSelect.setInt(2, ceilingHeight);
                 pstmtSelect.setLong(3, accountId);
@@ -2680,10 +2681,10 @@ public final class Account {
                 PreparedStatement pstmtInsert = con.prepareStatement(sb.toString());
                 pstmtInsert.execute();
                 PreparedStatement pstmtDelete = con.prepareStatement("DELETE FROM " + sourceTable + " "
-                        + "WHERE height < ? and latest = ? and id = ?");
+                        + "WHERE height < ? and id = ?");
                 pstmtDelete.setInt(1, ceilingHeight);
-                pstmtDelete.setBoolean(2, false);
-                pstmtDelete.setLong(3, accountId);
+                //pstmtDelete.setBoolean(2, false);
+                pstmtDelete.setLong(2, accountId);
                 pstmtDelete.execute();
             }
             Logger.logDebugMessage("sync time:" + (System.currentTimeMillis() - t1));
@@ -2719,13 +2720,13 @@ public final class Account {
                 }
                 int workHeight = workHeightRs.getInt("height");
                 int floorHeight = heightRs.next() ? heightRs.getInt("height") : 0;
-                Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
-                if (workHeight - floorHeight < dif) {
+                //Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
+
+                int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
+                if (workHeight - floorHeight < dif || ceilingHeight > workHeight) {
 //                    return;
                     continue;
                 }
-                int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
-
                 pstmtSelect.setInt(1, floorHeight);
                 pstmtSelect.setInt(2, ceilingHeight);
                 pstmtSelect.setLong(3, accountId);
@@ -2745,10 +2746,10 @@ public final class Account {
                 PreparedStatement pstmtInsert = con.prepareStatement(sb.toString());
                 pstmtInsert.execute();
                 PreparedStatement pstmtDelete = con.prepareStatement("DELETE FROM " + sourceTable
-                        + " WHERE height < ? and latest = ? and account_id = ?");
+                        + " WHERE height < ? and account_id = ?");
                 pstmtDelete.setInt(1, ceilingHeight);
-                pstmtDelete.setBoolean(2, false);
-                pstmtDelete.setLong(3, accountId);
+                //pstmtDelete.setBoolean(2, false);
+                pstmtDelete.setLong(2, accountId);
                 pstmtDelete.execute();
             }
         } catch (SQLException e) {
@@ -2784,13 +2785,14 @@ public final class Account {
                 }
                 int workHeight = workHeightRs.getInt("height");
                 int floorHeight = heightRs.next() ? heightRs.getInt("height") : 0;
-                Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
-                if (workHeight - floorHeight < dif) {
+                //Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
+
+                int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
+
+                if (workHeight - floorHeight < dif || ceilingHeight > workHeight) {
 //                    return;
                     continue;
                 }
-                int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
-
                 pstmtSelect.setInt(1, floorHeight);
                 pstmtSelect.setInt(2, ceilingHeight);
                 pstmtSelect.setLong(3, accountId);
@@ -2818,10 +2820,10 @@ public final class Account {
                 PreparedStatement pstmtInsert = con.prepareStatement(sb.toString());
                 pstmtInsert.execute();
                 PreparedStatement pstmtDelete = con.prepareStatement("DELETE FROM " + sourceTable
-                        + " WHERE height < ? and latest = ? and account_id = ?");
+                        + " WHERE height < ? and account_id = ?");
                 pstmtDelete.setInt(1, ceilingHeight);
-                pstmtDelete.setBoolean(2, false);
-                pstmtDelete.setLong(3, accountId);
+                //pstmtDelete.setBoolean(2, false);
+                pstmtDelete.setLong(2, accountId);
                 pstmtDelete.execute();
             }
         } catch (SQLException e) {
@@ -2857,13 +2859,13 @@ public final class Account {
                 }
                 int workHeight = workHeightRs.getInt("height");
                 int floorHeight = heightRs.next() ? heightRs.getInt("height") : 0;
-                Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
-                if (workHeight - floorHeight < dif) {
+                //Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
+                int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
+
+                if (workHeight - floorHeight < dif || ceilingHeight > workHeight) {
 //                    return;
                     continue;
                 }
-                int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
-
                 pstmtSelect.setInt(1, floorHeight);
                 pstmtSelect.setInt(2, ceilingHeight);
                 pstmtSelect.setLong(3, accountId);
@@ -2884,10 +2886,10 @@ public final class Account {
                 PreparedStatement pstmtInsert = con.prepareStatement(sb.toString());
                 pstmtInsert.execute();
                 PreparedStatement pstmtDelete = con.prepareStatement("DELETE FROM " + sourceTable
-                        + " WHERE height < ? and latest = ? and account_id = ?");
+                        + " WHERE height < ? and account_id = ?");
                 pstmtDelete.setInt(1, ceilingHeight);
-                pstmtDelete.setBoolean(2, false);
-                pstmtDelete.setLong(3, accountId);
+                //pstmtDelete.setBoolean(2, false);
+                pstmtDelete.setLong(2, accountId);
                 pstmtDelete.execute();
             }
         } catch (SQLException e) {
