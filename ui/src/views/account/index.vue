@@ -1,6 +1,13 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div>
         <div>
+<!--            <el-row v-if="openApiProxy" class="notice-container">-->
+<!--                <el-col :span="24">-->
+<!--                    <div class="notice" style="background: #ffffff">-->
+<!--                        <div><a>{{$t('sso.light_client')}}</a></div>-->
+<!--                    </div>-->
+<!--                </el-col>-->
+<!--            </el-row>-->
             <div class="block_account mb20">
                 <p class="block_title">
                     <img src="../../assets/img/account.svg"/>
@@ -17,7 +24,7 @@
                         {{ $t('account.assets') + $global.formatNQTMoney(accountInfo.effectiveBalanceNQT, 2) }}
                     </p>
                     <div class="account_tool">
-                        <button class="common_btn imgBtn writeBtn" @click="openTransferDialog">
+                        <button class="common_btn imgBtn " v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}" v-bind:disabled="!isUpToDateOrLight" @click="openTransferDialog">
                             <span class="icon">
                                 <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 174.62 174.83">
                                     <path
@@ -27,7 +34,7 @@
                             </span>
                             <span>{{ $t('account.transfer') }}</span>
                         </button>
-                        <button class="common_btn imgBtn writeBtn" @click="openBatchTransferDialog" v-if="openAirdrop">
+                        <button class="common_btn imgBtn " v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}" v-bind:disabled="!isUpToDateOrLight" @click="openBatchTransferDialog" v-if="openAirdrop">
                             <span class="icon">
                                 <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 174.62 174.83">
                                     <path
@@ -37,7 +44,7 @@
                             </span>
                             <span>{{ $t('transfer.batch_transfer') }}</span>
                         </button>
-                        <button class="common_btn imgBtn writeBtn" v-if="whetherShowSendMsgBtn()"
+                        <button class="common_btn imgBtn " v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}" v-bind:disabled="!isUpToDateOrLight" v-if="whetherShowSendMsgBtn()"
                                 @click="openSendMessageDialog">
                             <span class="icon">
                                 <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 171.43 137.08">
@@ -48,7 +55,7 @@
                             </span>
                             <span>{{ $t('account.send_message') }}</span>
                         </button>
-                        <button class="common_btn imgBtn writeBtn" v-if="whetherShowStorageBtn()"
+                        <button class="common_btn imgBtn " v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}" v-bind:disabled="!isUpToDateOrLight" v-if="whetherShowStorageBtn()"
                                 @click="openStorageFileDialog">
                             <span class="icon">
                                 <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 162.5">
@@ -1095,24 +1102,19 @@ export default {
                 ssAddress: this.$store.state.userConfig['sharder.HubBindAddress'],
                 siteAccount: this.$store.state.userConfig['sharder.siteAccount'],
             },
-
             registerSharderSiteUser: {
-
                 sharderAccountPhoneOrEmail: '',
                 verificationCode: "",
                 setSharderPwd: '',
                 confirmSharderPwd: '',
                 pictureVerificationCode: "",
             },
-
             needRegister: false,
             isShowName: true,
             generatorRS: '',
             secretPhrase: SSO.secretPhrase,
-
             blockInfoDialog: false,
             height: '',
-
             publicKey: SSO.publicKey,
             messageForm: {
                 errorCode: false,
@@ -1459,7 +1461,7 @@ export default {
                 _this.blockchainState = res.data;
                 _this.getLatestHubVersion();
             });
-            SSO.getState();
+            // SSO.getState();
             _this.$global.getUserConfig(_this).then(res => {
                 _this.hubsetting.address = res["sharder.NATServiceAddress"];
                 _this.hubsetting.port = res["sharder.NATServicePort"];
@@ -1600,7 +1602,7 @@ export default {
         },
         getLatestHubVersion() {
             const _this = this;
-            _this.$http.get('/sharder?requestType=getLatestCosVersion').then(res => {
+            _this.$http.get(_this.$global.urlPrefix() + '?requestType=getLatestCosVersion').then(res => {
                 if (res.data.success) {
                     _this.latesetVersion = res.data.cosver.version;
                     _this.upgradeMode = res.data.cosver.mode;
@@ -2066,7 +2068,7 @@ export default {
         getAccount(account) {
             const _this = this;
             return new Promise((resolve, reject) => {
-                this.$http.get('/sharder?requestType=getAccount', {
+                this.$http.get(_this.$global.urlPrefix() + '?requestType=getAccount', {
                     params: {
                         account: account,
                         includeLessors: true,
@@ -2260,7 +2262,7 @@ export default {
                     'Content-Type': 'multipart/form-data'
                 }
             };
-            _this.$http.post('/sharder?requestType=storeData', formData, config).then(res => {
+            _this.$http.post(_this.$global.urlPrefix() + '?requestType=storeData', formData, config).then(res => {
                 if (typeof res.data.errorDescription === 'undefined') {
                     if (res.data.broadcasted) {
                         _this.$message.success(_this.$t('notification.upload_success'));
@@ -2738,11 +2740,11 @@ export default {
             }
 
             _this.loading = true;
-            this.$http.get('/sharder?requestType=getBlockchainTransactions', {params}).then(function (res1) {
+            this.$http.get(_this.$global.urlPrefix() + '?requestType=getBlockchainTransactions', {params}).then(function (res1) {
                 _this.accountTransactionList = res1.data.transactions;
                 params.delete("firstIndex");
                 params.delete("lastIndex");
-                _this.$http.get('/sharder?requestType=getBlockchainTransactionsCount', {params}).then(function (res2) {
+                _this.$http.get(_this.$global.urlPrefix() + '?requestType=getBlockchainTransactionsCount', {params}).then(function (res2) {
 
                     if (typeof res2.data.errorDescription === "undefined") {
                         _this.totalSize = res2.data.count;
@@ -3073,7 +3075,7 @@ export default {
             formData.append("phasingHashedSecretAlgorithm", "2");
             formData.append("feeNQT", "0");
 
-            _this.$http.post('/sharder?requestType=setAccountInfo', formData).then(res => {
+            _this.$http.post(_this.$global.urlPrefix() + '?requestType=setAccountInfo', formData).then(res => {
                 if (typeof res.data.errorDescription === "undefined") {
                     _this.$message.success(_this.$t('notification.modify_success'));
                     _this.accountInfo.name = res.data.transactionJSON.attachment.name;
@@ -3219,7 +3221,7 @@ export default {
             params.append("firstIndex", '0');
             params.append("lastIndex", '4');
             params.append("type", "0");
-            _this.$http.get('/sharder?requestType=getBlockchainTransactions', {params}).then(res => {
+            _this.$http.get(_this.$global.urlPrefix() + '?requestType=getBlockchainTransactions', {params}).then(res => {
                 res.data.transactions.forEach(function (value, index, array) {
 
                     if (_this.$i18n) {
@@ -3248,7 +3250,7 @@ export default {
             let assets = 0;
             let params = new URLSearchParams();
             params.append("account", _this.accountInfo.accountRS);
-            _this.$http.get('/sharder?requestType=getBlockchainTransactions', {params}).then(res => {
+            _this.$http.get(_this.$global.urlPrefix() + '?requestType=getBlockchainTransactions', {params}).then(res => {
                 if (typeof res.data.errorDescription === "undefined") {
                     let info = res.data.transactions.reverse();
                     info.forEach(function (value, index, array) {
@@ -3330,28 +3332,32 @@ export default {
         whetherShowHubSettingBtn() {
             /*
             At the same time satisfy the following conditions:
-            1. sharder.HubBindAddress has value；
-            2. using secretPhrase to login；
-            3. NodeType is Hub；
-            4. Hub bind MW address must equals to user account address。
+            1. sharder.HubBindAddress has value;
+            2. using secretPhrase to login;
+            3. NodeType is Hub;
+            4. Hub bind MW address must equals to user account address;
+            5. Not a light client;
             */
             //return true;
             return this.secretPhrase
                 && !this.initHUb
                 && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center')
-                && this.userConfig.ssAddress === this.accountInfo.accountRS;
+                && this.userConfig.ssAddress === this.accountInfo.accountRS
+                && !this.$global.isOpenApiProxy();
         },
         whetherShowHubInitBtn() {
             /*
             At the same time satisfy the following conditions:
-            1. sharder.HubBindAddress has no value；
-            2. using secretPhrase to login；
-            3. NodeType is Hub。
+            1. sharder.HubBindAddress has no value;
+            2. using secretPhrase to login;
+            3. NodeType is Hub;
+            4. Not a light client;
             */
             //return true;
             return this.secretPhrase
                 && this.initHUb
-                && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center');
+                && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center')
+                && !this.$global.isOpenApiProxy();
             /* return true;*/
         },
         whetherShowUseNATServiceBtn() {
@@ -3426,7 +3432,7 @@ export default {
         },
         openAirdrop: function () {
             const _this = this;
-            if (_this.hubsetting.airdropStatus) {
+            if (_this.hubsetting.airdropStatus && !_this.$global.isOpenApiProxy() && !_this.airdropFlag) {
                 let airdropAccount = [];
                 if (_this.hubsetting.airdropAccount) {
                     airdropAccount = _this.hubsetting.airdropAccount.split(";");
@@ -3438,6 +3444,15 @@ export default {
                 })
             }
             return _this.airdropFlag;
+        },
+        openApiProxy: function () {
+            const _this = this;
+            return _this.$global.isOpenApiProxy();
+        },
+        isUpToDateOrLight: function () {
+            const _this = this;
+            console.log("isUpToDateOrLight", _this.blockchainState.blockchainState === 'UP_TO_DATE' || _this.blockchainState.blockchainState === 'LIGHT_CLIENT')
+            return _this.blockchainState.blockchainState === 'UP_TO_DATE' || _this.blockchainState.blockchainState === 'LIGHT_CLIENT';
         }
     },
     watch: {
@@ -3540,7 +3555,7 @@ export default {
             } else {
                 clearInterval(periodicTransactions);
             }
-        }, SSO.downloadingBlockchain ? this.$global.cfg.soonInterval : this.$global.cfg.defaultInterval);
+        }, SSO.downloadingBlockchain ? this.$global.cfg.soonInterval : (this.$global.isOpenApiProxy() ? this.$global.cfg.slowInterval : this.$global.cfg.defaultInterval));
 
         $('#receiver').on("blur", function () {
             _this.validationReceiver("messageForm");
@@ -3563,6 +3578,19 @@ export default {
 <style lang="scss" type="text/scss">
 /*@import '~scss_vars';*/
 @import './style.scss';
+
+.notice-container {
+    .notice {
+        padding: 15px;
+        margin-bottom: 20px;
+        text-align: center;
+        font-size: 16px;
+        font-weight: 600;
+        color: #3fb09a;
+        line-height: 150%;
+        border-radius: 4px;
+    }
+}
 </style>
 <style scoped lang="scss" type="text/scss">
 

@@ -321,7 +321,7 @@ var NRS = (function (NRS, $, undefined) {
                 return;
             }
             // NRS.logConsole("getBlockchainStatus response received");
-            global.state = response;
+            NRS.state = response;
             var accountRequest;
             var requestVariable;
             if (isPassphraseLogin) {

@@ -22,7 +22,6 @@ export default {
     unitValue: 100000000,
     poolPledgeAmount: 10000000000000, // pledge amount of pool creator
     optHeight: {join: 0, quit: 0, destroy: 0, create: 0},
-    isOpenApiProxy: false,
     validPeerPercentage: 0.7, // Less than this value filter display mode, greater than or equal to close
     sendVerifyCode(url, username, fun) {
 
@@ -88,9 +87,11 @@ export default {
     },
 
     fetch(type, requestData, requestType) {
+        const _this = this;
         return new Promise(function (resolve, reject) {
+            let sharderUrl = _this.isOpenApiProxy() ? window.api.sharderProxyUrl : window.api.sharderUrl;
             $.ajax({
-                url: window.api.sharderUrl + "?requestType=" + requestType,
+                url: sharderUrl + "?requestType=" + requestType,
                 dataType: "json",
                 type: type,
                 data: requestData,
@@ -113,7 +114,7 @@ export default {
         const _this = this;
         return new Promise(function (resolve, reject) {
             _this.blockchainState =
-                t.$http.get('/sharder?requestType=getBlockchainStatus', {
+                t.$http.get(_this.urlPrefix() + '?requestType=getBlockchainStatus', {
                     params: {
                         random: parseInt(new Date().getTime().toString())
                     }
@@ -130,8 +131,9 @@ export default {
      * @returns {Promise<any>}
      */
     setUnconfirmedTransactions(t, account) {
+        const _this = this;
         return new Promise(function (resolve, reject) {
-            t.$http.get('/sharder?requestType=getUnconfirmedTransactions', {
+            t.$http.get(_this.urlPrefix() + '?requestType=getUnconfirmedTransactions', {
                 params: {
                     random: parseInt(new Date().getTime().toString()),
                     account: account
@@ -149,7 +151,7 @@ export default {
     setPeers(t) {
         const _this = this;
         return new Promise(function (resolve, reject) {
-            t.$http.get('/sharder?requestType=getPeers', {
+            t.$http.get(_this.urlPrefix() + '?requestType=getPeers', {
                 params: {
                     includePeerInfo: true,
                     random: parseInt(new Date().getTime().toString())
@@ -636,6 +638,15 @@ export default {
     isDevNet() {
         return SSO.netWorkType === 'Devnet';
     },
+    isOpenApiProxy() {
+        console.log("isOpenApiProxy", SSO.state && SSO.state.apiProxy);
+        return SSO.state && SSO.state.apiProxy;
+    },
+    urlPrefix() {
+        const _this = this;
+        return  _this.isOpenApiProxy() === true ? '/sharder-proxy' : '/sharder';
+    },
+
     useEoLinker() {
         return SSO.useEoLinker;
     },

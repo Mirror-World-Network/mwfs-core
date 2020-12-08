@@ -732,14 +732,14 @@
                 const _this = this;
                 return new Promise((resolve, reject) => {
 
-                    _this.$http.get('/sharder?requestType=getAccount', {
+                    _this.$http.get(_this.$global.urlPrefix() + '?requestType=getAccount', {
                         params: {
                             account: accountID
                         }
                     }).then(function (res) {
                         if (!res.data.errorDescription) {
                             _this.accountInfo = res.data;
-                            _this.$http.get('/sharder?requestType=getBlockchainTransactions', {
+                            _this.$http.get(_this.$global.urlPrefix() + '?requestType=getBlockchainTransactions', {
                                 params: {
                                     account: accountID
                                 }
@@ -765,7 +765,7 @@
                 _this.messageInfoList = [];
                 _this.storageFileInfo =[];
                 return new Promise((resolve, reject) => {
-                    _this.$http.get('/sharder?requestType=getBlock', {
+                    _this.$http.get(_this.$global.urlPrefix() + '?requestType=getBlock', {
                         params: {
                             height: height,
                             block: BlockID,
@@ -831,7 +831,7 @@
                             let formData = new FormData();
                             formData.append("accoutId", accoutIdArray.join(","));
                             _this.loading = true;
-                            _this.$http.post('/sharder?requestType=getAccountId', formData).then(function (res) {
+                            _this.$http.post(_this.$global.urlPrefix() + '?requestType=getAccountId', formData).then(function (res) {
                                 if (!res.data.errorDescription) {
                                     _this.accountIdMap = res.data.rsAccountInfo;
                                     console.log("map:"+_this.accountIdMap);
@@ -854,7 +854,7 @@
             httpGetTradingInfo(tradingID) {
                 const _this = this;
                 return new Promise((resolve, reject) => {
-                    this.$http.get('/sharder?requestType=getTransaction', {
+                    this.$http.get(_this.$global.urlPrefix() + '?requestType=getTransaction', {
                         params: {
                             transaction: tradingID
                         }
@@ -1059,7 +1059,7 @@
                 if (subtype === 5) return _this.$root.$t("transaction.transaction_type_account");
             },
             downloadFile(row,column){
-                window.open("/sharder?requestType=downloadStoredData&ssid="+row.fileInfo.ssid+"&filename="+row.fileInfo.name,"_blank");
+                window.open(_this.$global.urlPrefix() + "?requestType=downloadStoredData&ssid="+row.fileInfo.ssid+"&filename="+row.fileInfo.name,"_blank");
             },
 
         },

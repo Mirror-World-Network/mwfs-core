@@ -561,10 +561,11 @@
                     _this.networkUrlBlocks();
                     _this.httpGetNextBlockGenerators();
                     _this.fetchPeers();
+                    _this.httpGetTxStatistics();
                 }else{
                     clearInterval(networkDataLoader);
                 }
-            }, SSO.downloadingBlockchain ? this.$global.cfg.soonInterval : this.$global.cfg.defaultInterval);
+            }, SSO.downloadingBlockchain ? this.$global.cfg.soonInterval : (this.$global.isOpenApiProxy() ? this.$global.cfg.slowInterval : this.$global.cfg.defaultInterval));
 
             let peerDataLoader = setInterval(() => {
                 if (_this.$route.path === '/network') {
@@ -634,7 +635,7 @@
                 const _this = this;
                 _this.$global.fetch("GET", {startThis:"startThis"}, "getPeers").then(res => {
                     _this.peerNum = res.peers.length>0 ? res.peers.length : _this.limitPeerSize;
-                    _this.declaredPeerSize = res.declaredPeerSize;
+                    _this.declaredPeerSize = _this.$global.isOpenApiProxy() ? '--' : res.declaredPeerSize;
                 }).catch(err => {
                     console.info("error", err);
                 });
@@ -643,7 +644,7 @@
                 const _this = this;
                 _this.$global.fetch("GET", {startThis:"startThis"}, "getPeers").then(res => {
                     _this.peerNum = res.peers.length>0 ? res.peers.length : _this.limitPeerSize;
-                    _this.declaredPeerSize = res.declaredPeerSize;
+                    _this.declaredPeerSize = _this.$global.isOpenApiProxy() ? '--' : res.declaredPeerSize;
                     try {
                         _this.$global.coordinatesMap = JSON.parse(res.coordinates);
                     }catch (e) {

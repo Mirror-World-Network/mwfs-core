@@ -6,7 +6,8 @@
                     <img src="../../assets/img/logo.svg"/>
                     <div @click="openCosUpgradeDialog()">
                         <span v-if="isUpdate" title="Update" class="update"></span>
-                        <span>MW</span>
+                        <span v-if="openApiProxy">MW·<span style="color: #ccc;font-size: smaller;">Light</span></span>
+                        <span v-else>MW</span>
                         <span>{{blockchainStatus.application}}{{$t('header.version')}}{{blockchainStatus.fullVersion}}</span>
                     </div>
                 </a>
@@ -214,6 +215,7 @@
                 <div class="version-info">
                     <span>{{$t('upgrade.current_version')}}v{{blockchainStatus.version}}</span>
                     <span style="color: #555;font-style: italic;font-size: smaller;"> {{blockchainStatus.cosLastUpgradeDate}}</span>
+                    <span style="color: #ccc;font-style: italic;font-size: smaller;" v-if="openApiProxy">{{$t('sso.light_client')}}</span>
                     <br/>
                     <span v-if="isUpdate">
                         {{$t('upgrade.discover_new_version')}}
@@ -333,7 +335,7 @@
             let _this = this;
             setInterval(() => {
                 _this.getData();
-            }, SSO.downloadingBlockchain ? this.$global.cfg.soonInterval : this.$global.cfg.defaultInterval);
+            }, SSO.downloadingBlockchain ? this.$global.cfg.soonInterval : (this.$global.isOpenApiProxy() ? this.$global.cfg.slowInterval : this.$global.cfg.defaultInterval));
 
             if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) { //移动端
                 this.search_focus()
@@ -342,7 +344,7 @@
         methods: {
             getAccountInfo:function(){
                 const _this = this;
-                _this.$http.get("/sharder?requestType=getAccount", {
+                _this.$http.get(_this.$global.urlPrefix() + "?requestType=getAccount", {
                     params: {
                         includeEffectiveBalance: true,
                         account: SSO.account
@@ -364,7 +366,7 @@
                     /*if(_this.$global.isOpenConsole){
                         _this.$global.addToConsole("/sharder?requestType=getBlockchainStatus",'GET',res);
                     }*/
-                    SSO.addToConsole("/sharder?requestType=getBlockchainStatus", 'GET', res.data, res);
+                    // SSO.addToConsole("/sharder?requestType=getBlockchainStatus", 'GET', res.data, res);
                 });
                 _this.$global.setUnconfirmedTransactions(_this, SSO.account).then(res => {
                     _this.$store.state.unconfirmedTransactionsList = res.data;
@@ -372,13 +374,13 @@
                     /*if(_this.$global.isOpenConsole){
                         _this.$global.addToConsole("/sharder?requestType=getUnconfirmedTransactions",'GET',res);
                     }*/
-                    SSO.addToConsole("/sharder?requestType=getUnconfirmedTransactions", 'GET', res.data, res);
+                    // SSO.addToConsole("/sharder?requestType=getUnconfirmedTransactions", 'GET', res.data, res);
                 });
                 _this.$global.setPeers(_this).then(res => {
                     /*if(_this.$global.isOpenConsole){
                         _this.$global.addToConsole("/sharder?requestType=getPeers",'GET',res);
                     }*/
-                    SSO.addToConsole("/sharder?requestType=getPeers", 'GET', res.data, res);
+                    // SSO.addToConsole("/sharder?requestType=getPeers", 'GET', res.data, res);
                 });
                 // }
                 // _this.getLatestHubVersion();
@@ -402,8 +404,11 @@
                         'Content-Type': 'multipart/form-data'
                     }
                 };
+                if (SSO.isPassphraseAtRisk) {
+                    return _this.$message.warn(_this.$t('notification.passphrase_at_risk'));
+                }
                 if (b) {
-                    if(SSO.accountInfo.balanceNQT/ 100000000 + SSO.accountInfo.frozenBalanceNQT / 100000000 < 133){
+                    if(SSO.accountInfo.balanceNQT/ _this.$global.unitValue + SSO.accountInfo.frozenBalanceNQT / _this.$global.unitValue < 133){
                         return _this.$message.error(_this.$t('notification.ss_not_enough'));
                     }
 
@@ -533,7 +538,7 @@
             },
             getLatestHubVersion() {
                 const _this = this;
-                _this.$http.get('/sharder?requestType=getLatestCosVersion').then(res => {
+                _this.$http.get(_this.$global.urlPrefix() + '?requestType=getLatestCosVersion').then(res => {
                     if (res.data.success) {
                         _this.latestVersion = res.data.cosver.version;
                         _this.upgradeMode = res.data.cosver.mode;
@@ -611,6 +616,12 @@
                 }
                 _this.activeSearch = false;
                 _this.placeholder = _this.$t('header.search');
+            }
+        },
+        computed: {
+            openApiProxy: function () {
+                const _this = this;
+                return _this.$global.isOpenApiProxy();
             }
         }
     };

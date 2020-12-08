@@ -37,6 +37,4 @@
     global.extensions = require("./util/extensions");
     global.util = require("./util/sso.util");
     global.async = require("async");
-    // open apiproxy
-    global.SSO.state.apiProxy = global.isOpenApiProxy;
 })();

@@ -125,3 +125,13 @@ for (TransactionImpl transaction : broadcastedTransactions) {
 > org.conch.tx.TransactionProcessorImpl.processWaitingTransactions
 
 在处理未确认的交易&等待的交易时，交易的有效截至时间 小于 当前时间，该交易将被视为无效
+
+## 转账API相关说明
+
+### 转账接口中离线签名模式流程图
+
+![](https://mwfs.oss-cn-shenzhen.aliyuncs.com/docs/2_20201012155304.png)
+
+### 转账接口内部逻辑流程图
+
+![](https://mwfs.oss-cn-shenzhen.aliyuncs.com/docs/1_20201012155258.png)
