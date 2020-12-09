@@ -24,6 +24,7 @@ package org.conch.peer;
 import org.conch.Conch;
 import org.conch.chain.BlockchainProcessor;
 import org.conch.common.Constants;
+import org.conch.security.Guard;
 import org.conch.util.CountingInputReader;
 import org.conch.util.CountingOutputWriter;
 import org.conch.util.JSON;
@@ -295,9 +296,16 @@ public final class PeerServlet extends WebSocketServlet {
      * @return                      JSON response
      */
     private JSONStreamAware process(PeerImpl peer, Reader inputReader) {
-        //
-        // Check for blacklisted peer
-        //
+
+        // 加入IP连接数限制逻辑
+        // 1. 对IP连接数 进行计数
+        // 2. 连接数比对，超过最大值加入黑名单
+        // 3. 连接频次记录，超过阈值加入黑名单
+        Guard.connectFrequencyStatistics(peer.getHost());
+
+        /**
+         * Check for blacklisted peer
+         */
         if (peer.isBlacklisted()) {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("error", Errors.BLACKLISTED);

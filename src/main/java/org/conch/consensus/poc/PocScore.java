@@ -38,7 +38,8 @@ public class PocScore implements Serializable {
     BigInteger total = null;
 
     // don't use the static parameter (calculate should base on the height)
-    private static BigInteger SCORE_MULTIPLIER = parseAndGetScoreMagnification(Conch.getHeight());
+//    private static BigInteger SCORE_MULTIPLIER = parseAndGetScoreMagnification(Conch.getHeight());
+    private static BigInteger SCORE_MULTIPLIER = parseAndGetScoreMagnification(0);
 
     /**
      * mag. of poc score is use to increase the poc score of the miner to make sure the mining gap is match the preset interval
