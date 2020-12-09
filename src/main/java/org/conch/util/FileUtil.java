@@ -334,13 +334,13 @@ public class FileUtil {
                         }
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Logger.logDebugMessage("read old file fail:" + e);
                 }finally {
                     if (reader != null) {
                         try {
                             reader.close();
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            Logger.logDebugMessage("close source error:" + e);
                         }
                     }
                 }
@@ -358,7 +358,7 @@ public class FileUtil {
                     try {
                         fos.close();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        Logger.logDebugMessage("close source error:" + e);
                     }
                 }
             }
