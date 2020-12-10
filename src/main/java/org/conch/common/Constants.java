@@ -31,6 +31,8 @@ import java.util.*;
 
 public final class Constants {
 
+    public static boolean isCloseGuard = Conch.getBooleanProperty("sharder.closeGuard");
+
     /**
      * Network definition
      */
@@ -394,7 +396,7 @@ public final class Constants {
         }else if(isTestnet()){
             return "testboot.mw.run";
         }
-        return "devboot.mw.run";
+        return "192.168.0.239";
     }
     
     private static final List<String> parseBootNodesHost() {
@@ -403,7 +405,7 @@ public final class Constants {
        }else if(isTestnet()){
            return Lists.newArrayList("testboot.mw.run","testna.mw.run","testnb.mw.run");
        }
-       return Lists.newArrayList("devboot.mw.run");
+       return Lists.newArrayList("192.168.0.239");
     }
     
     

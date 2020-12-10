@@ -72,9 +72,12 @@ public class UrlManager {
     private static final String ARCHIVE_DB_DEV_URL = Constants.OSS_PREFIX + "cos/client/dev/cos-db-archive";
     
     private static final String COS_RELEASE_URL = Constants.OSS_PREFIX + "cos/client/release/";
-    
-   
+
+    /**
+     * 该地址更新，避免文件格式变化后未升级的节点无法正常读取文件 filename = constant-settings
+     */
     public static final String KNOWN_IGNORE_BLOCKS = Constants.OSS_PREFIX + "cos/client/release/ignore-blocks";
+    public static final String CONSTANT_SETTINGS = Constants.OSS_PREFIX + "cos/client/release/constant-settings";
     public static final String CMD_TOOLS = Constants.OSS_PREFIX + "cos/client/release/cmd-tools";
     /*=============================================HUB UPGRADE API END========================================*/
     
