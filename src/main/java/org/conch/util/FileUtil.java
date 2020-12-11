@@ -21,6 +21,7 @@
 
 package org.conch.util;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.io.FileUtils;
@@ -35,6 +36,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.FileSystem;
 import java.nio.file.*;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -156,7 +158,7 @@ public class FileUtil {
         boolean isFullMode = ClientUpgradeTool.isFullUpgrade(mode);
         
         Map<String, String> libFileMap = Maps.newConcurrentMap();
-        List<Path> removeOldLibFiles = Lists.newArrayList();
+        List<String> removeOldLibFiles = Lists.newArrayList();
         if(isFullMode){
             deleteDirectory(appRootPath.resolve("html"));
             deleteDirectory(appRootPath.resolve("lib"));
@@ -236,6 +238,7 @@ public class FileUtil {
                     }
                 }
 
+
                 // copy and replace the upgrade files
                 InputStream is = file.getInputStream(zipEntry);
                 String targetName = name;
@@ -250,10 +253,11 @@ public class FileUtil {
                 // check and add the old version lib file into remove list
                 if(StringUtils.isNotEmpty(targetName) && targetName.contains("lib")) {
                     String targetLibFile = removeVersion((targetName));
-                    Logger.logDebugMessage("found targetLibFile[full name=" + targetName + ", name=" + targetLibFile + "]");
-                    if(libFileMap.containsKey(targetLibFile)
-                    && !targetName.endsWith(libFileMap.get(targetLibFile))) {
-                        removeOldLibFiles.add(appRootPath.resolve("lib").resolve(libFileMap.get(targetLibFile)));
+                    String targetFile = removePath(targetLibFile);
+                    Logger.logDebugMessage("found targetLibFile[full name=" + targetName + ", name=" + targetFile + "]");
+                    if(libFileMap.containsKey(targetFile)
+                    && !targetName.endsWith(libFileMap.get(targetFile))) {
+                        removeOldLibFiles.add(libFileMap.get(targetFile));
                     }
                 }
                 
@@ -266,21 +270,21 @@ public class FileUtil {
             }
         }
         file.close();
-        
+
         File unzipFolder = new File(appRootPath.resolve(archiveRoot).toString());
         File appFolder = new File(appRootPath.toString());
         Logger.logInfoMessage("copy folder form %s to %s", unzipFolder.getPath(), appFolder.getPath());
         FileUtils.copyDirectory(unzipFolder,appFolder);
-        
-        
+
+
         String deletedOldLibFiles = "";
         // delete old lib files
-        if(removeOldLibFiles.size() > 0) {
-            for (Path libPath : removeOldLibFiles) {
-                deletedOldLibFiles += "[ OK ] Deleted old lib file " + libPath.getFileName() + " on path " + libPath.toString() + " \n";
-                Files.deleteIfExists(libPath);
-            }
-        }
+//            for (String libName : removeOldLibFiles) {
+//                deletedOldLibFiles += "[ OK ] Deleted old lib file " + libPath.getFileName() + " on path " + libPath.toString() + " \n";
+//                Files.deleteIfExists(libPath);
+//            }
+
+        deleteList(appRootPath, removeOldLibFiles);
         if(deletedOldLibFiles.length() > 1){
             upgradeDetail += "--- old lib file deletion ---\n" + deletedOldLibFiles;
         }
@@ -301,6 +305,63 @@ public class FileUtil {
         if (deleteSource) {
             FileUtils.forceDelete(archive);
             Logger.logDebugMessage("[ UPGRADE CLIENT ] delete temp upgrade archive file " + archive.getName());
+        }
+    }
+
+    private static void deleteList(Path appRootPath, List<String> removeOldLibFiles) {
+        if(removeOldLibFiles.size() > 0) {
+            File deleteList = appRootPath.resolve("lib").resolve("deleteList.json").toFile();
+            // read the content of exist file of deleteList.json
+            if (deleteList.exists()) {
+                BufferedReader reader = null;
+                try {
+                    reader = new BufferedReader(new FileReader(deleteList));
+                    String read = "";
+                    String content = "";
+                    while ((read = reader.readLine()) != null) {
+                        content += read;
+                    }
+                    reader.close();
+                    // add the list of exist filename to the added lib filename list
+                    if (StringUtils.isNotEmpty(content)) {
+                        List<String> oldFileList = JSONObject.parseObject(content, List.class);
+                        if (oldFileList != null && oldFileList.size() > 0) {
+                            for (String fileName : oldFileList) {
+                                if (!removeOldLibFiles.contains(fileName)) {
+                                    removeOldLibFiles.add(fileName);
+                                }
+                            }
+                        }
+                    }
+                } catch (IOException e) {
+                    Logger.logDebugMessage("read old file fail:" + e);
+                }finally {
+                    if (reader != null) {
+                        try {
+                            reader.close();
+                        } catch (IOException e) {
+                            Logger.logDebugMessage("close source error:" + e);
+                        }
+                    }
+                }
+            }
+            String fileString = JSONObject.toJSONString(removeOldLibFiles);
+            FileOutputStream fos = null;
+            try {
+                fos = new FileOutputStream(deleteList);
+                fos.write(fileString.getBytes("UTF-8"));
+                fos.close();
+            } catch (IOException e) {
+                Logger.logDebugMessage("write out file fail:" + e);
+            }finally {
+                if (fos != null) {
+                    try {
+                        fos.close();
+                    } catch (IOException e) {
+                        Logger.logDebugMessage("close source error:" + e);
+                    }
+                }
+            }
         }
     }
 
@@ -385,12 +446,20 @@ public class FileUtil {
     }
     
     private static final String VERSION_SPILLER = "-";
+    private static final String PATH_SPILLER = "/";
 
     static String removeVersion(String fullName){
         if(fullName.contains(VERSION_SPILLER)){ 
            int lastFileSepIndex = fullName.lastIndexOf(File.separator);
            int startIndex = (lastFileSepIndex == -1) ? 0 : lastFileSepIndex + 1;
            return  fullName.substring(startIndex,fullName.lastIndexOf(VERSION_SPILLER));
+        }
+        return fullName;
+    }
+
+    private static String removePath(String fullName) {
+        if(fullName.contains(PATH_SPILLER)){
+            return fullName.substring(fullName.lastIndexOf(PATH_SPILLER) + 1, fullName.length());
         }
         return fullName;
     }
