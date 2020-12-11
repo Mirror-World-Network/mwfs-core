@@ -155,7 +155,7 @@ public class Guard {
             BLACK_PEERS_MAP_2.put(host, accessPeerObj);
             if (accessPeerObj.getLongValue(LATEST_ACCESS_TIME_KEY) > accessPeerObj.getLongValue(LAST_ACCESS_TIME_KEY)) {
                 // 因初期时间间隔不足1min时，会导致分母过小致使frequency的值会过大，设定一个平均频率稳定期 stablePeriod = 1min
-                long frequency = 0;
+                float frequency = 0;
                 long intervalTime = accessPeerObj.getLongValue(LATEST_ACCESS_TIME_KEY) - accessPeerObj.getLongValue(FIRST_ACCESS_TIME_KEY);
                 if (intervalTime > 1000 * 60) {
                     // 计算平均连接频率
