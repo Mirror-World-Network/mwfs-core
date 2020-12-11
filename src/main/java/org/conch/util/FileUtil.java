@@ -254,25 +254,32 @@ public class FileUtil {
                 // copy and replace the upgrade files
                 InputStream is = file.getInputStream(zipEntry);
                 String targetName = name;
-//                if (targetRoot.length() > 1) {
-//                    targetName = targetName.replace(targetRoot, "");
-//                }
+                //                if (targetRoot.length() > 1) {
+                //                    targetName = targetName.replace(targetRoot, "");
+                //                }
 
                 Path targetPath = appRootPath.resolve(targetName);
-//                Path targetPath = fileSystem.getPath(appRootFolder + File.separator + targetName);
-                
-                // lib folder 
-                // check and add the old version lib file into remove list
-                if(StringUtils.isNotEmpty(targetName) && targetName.contains("lib")) {
-                    String targetLibFile = removeVersion((targetName));
-                    String targetFile = removePath(targetLibFile);
-                    Logger.logDebugMessage("found targetLibFile[full name=" + targetName + ", name=" + targetFile + "]");
-                    if(libFileMap.containsKey(targetFile)
-                    && !targetName.endsWith(libFileMap.get(targetFile))) {
-                        removeOldLibFiles.add(libFileMap.get(targetFile));
+                //                Path targetPath = fileSystem.getPath(appRootFolder + File.separator + targetName);
+
+                // lib folder
+                if (Constants.GENERATE_EXPIRED_FILE_BUTTON) {
+                    try {
+                        // check and add the old version lib file into remove list
+                        if (StringUtils.isNotEmpty(targetName) && targetName.contains("lib")) {
+                            String targetLibFile = removeVersion((targetName));
+                            String targetFile = removePath(targetLibFile);
+                            Logger.logDebugMessage("found targetLibFile[full name=" + targetName + ", name=" + targetFile + "]");
+                            if (libFileMap.containsKey(targetFile)
+                                    && !targetName.endsWith(libFileMap.get(targetFile))) {
+                                removeOldLibFiles.add(libFileMap.get(targetFile));
+                            }
+                        }
+                    } catch (Exception e) {
+                        Logger.logWarningMessage("[Ignore] Compare and generation expired file list failed, caused by" +
+                                " to %s", e.getMessage());
                     }
                 }
-                
+
                 size += Files.copy(is, targetPath, StandardCopyOption.REPLACE_EXISTING);
                 upgradeDetail += "[ OK ] Create or replace " + targetPath.toString() + " \n";
                 count++;
@@ -329,7 +336,7 @@ public class FileUtil {
      */
     private static void deleteList(Path appRootPath, List<String> removeOldLibFiles) {
         if (removeOldLibFiles.size() > 0) {
-            File deleteList = appRootPath.resolve("lib").resolve("ExpiredFiles.json").toFile();
+            File deleteList = appRootPath.resolve("lib").resolve("ExpiredFiles.data").toFile();
             // read the content of exist file of deleteList.json
             if (deleteList.exists()) {
                 BufferedReader reader = null;
