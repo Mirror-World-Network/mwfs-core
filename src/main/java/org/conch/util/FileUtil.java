@@ -27,6 +27,7 @@ import com.google.common.collect.Maps;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.conch.Conch;
+import org.conch.common.Constants;
 import org.conch.db.Db;
 import org.conch.tools.ClientUpgradeTool;
 
@@ -283,8 +284,9 @@ public class FileUtil {
 //                deletedOldLibFiles += "[ OK ] Deleted old lib file " + libPath.getFileName() + " on path " + libPath.toString() + " \n";
 //                Files.deleteIfExists(libPath);
 //            }
-
-        deleteList(appRootPath, removeOldLibFiles);
+        if (Constants.GENERATE_EXPIRED_FILE_BUTTON) {
+            deleteList(appRootPath, removeOldLibFiles);
+        }
         if(deletedOldLibFiles.length() > 1){
             upgradeDetail += "--- old lib file deletion ---\n" + deletedOldLibFiles;
         }
@@ -310,7 +312,7 @@ public class FileUtil {
 
     private static void deleteList(Path appRootPath, List<String> removeOldLibFiles) {
         if(removeOldLibFiles.size() > 0) {
-            File deleteList = appRootPath.resolve("lib").resolve("deleteList.json").toFile();
+            File deleteList = appRootPath.resolve("lib").resolve("ExpiredFiles.json").toFile();
             // read the content of exist file of deleteList.json
             if (deleteList.exists()) {
                 BufferedReader reader = null;
