@@ -30,6 +30,7 @@ import org.conch.common.Constants;
 import org.conch.consensus.genesis.SharderGenesis;
 import org.conch.http.API;
 import org.conch.http.APIEnum;
+import org.conch.security.Guard;
 import org.conch.util.*;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONStreamAware;
@@ -80,7 +81,7 @@ final class PeerImpl implements Peer {
     private volatile PeerLoad peerLoad;
     private volatile JSONObject blockSummaryJson = new JSONObject();
     private volatile String cosUpdateTime;
-    
+
 
     PeerImpl(String host, String announcedAddress) {
         this.host = host;
@@ -146,12 +147,12 @@ final class PeerImpl implements Peer {
     }
 
     @Override
-    public Type getType(){
+    public Type getType() {
         return this.type == null ? Type.NORMAL : this.type;
     }
 
     @Override
-    public void setType(Type type){
+    public void setType(Type type) {
         this.type = type;
     }
 
@@ -254,7 +255,7 @@ final class PeerImpl implements Peer {
     void setApiPort(Object apiPortValue) {
         if (apiPortValue != null) {
             try {
-                apiPort = ((Long)apiPortValue).intValue();
+                apiPort = ((Long) apiPortValue).intValue();
             } catch (RuntimeException e) {
                 throw new IllegalArgumentException("Invalid peer apiPort " + apiPortValue);
             }
@@ -269,7 +270,7 @@ final class PeerImpl implements Peer {
     void setApiSSLPort(Object apiSSLPortValue) {
         if (apiSSLPortValue != null) {
             try {
-                apiSSLPort = ((Long)apiSSLPortValue).intValue();
+                apiSSLPort = ((Long) apiSSLPortValue).intValue();
             } catch (RuntimeException e) {
                 throw new IllegalArgumentException("Invalid peer apiSSLPort " + apiSSLPortValue);
             }
@@ -305,7 +306,7 @@ final class PeerImpl implements Peer {
 
     void setBlockchainState(Object blockchainStateObj) {
         if (blockchainStateObj instanceof Integer) {
-            int blockchainStateInt = (int)blockchainStateObj;
+            int blockchainStateInt = (int) blockchainStateObj;
             if (blockchainStateInt >= 0 && blockchainStateInt < BlockchainState.values().length) {
                 this.blockchainState = BlockchainState.values()[blockchainStateInt];
             }
@@ -330,7 +331,7 @@ final class PeerImpl implements Peer {
     public String getAnnouncedAddress() {
         return announcedAddress;
     }
-    
+
     @Override
     public String getAddress() {
         return StringUtils.isNotEmpty(announcedAddress) ? announcedAddress : host;
@@ -373,7 +374,7 @@ final class PeerImpl implements Peer {
             hallmarkBalance = account == null ? 0 : account.getBalanceNQT();
             hallmarkBalanceHeight = Conch.getBlockchain().getHeight();
         }
-        return (int)(adjustedWeight * (hallmarkBalance / Constants.ONE_SS) / Constants.MAX_BALANCE_SS);
+        return (int) (adjustedWeight * (hallmarkBalance / Constants.ONE_SS) / Constants.MAX_BALANCE_SS);
     }
 
     @Override
@@ -393,7 +394,7 @@ final class PeerImpl implements Peer {
         if (cause instanceof ParseException && Errors.END_OF_FILE.equals(cause.toString())) {
             return;
         }
-        if (! isBlacklisted()) {
+        if (!isBlacklisted()) {
             cause.printStackTrace();
             if (cause instanceof IOException || cause instanceof ParseException || cause instanceof IllegalArgumentException) {
                 Logger.logDebugMessage("Blacklisting " + host + " because of: " + cause.toString());
@@ -403,28 +404,28 @@ final class PeerImpl implements Peer {
         }
         blacklist(cause.toString() == null || Peers.hideErrorDetails ? cause.getClass().getName() : cause.toString());
     }
-    
-    boolean isProtectPeer(){
-        if(!IpUtil.isFoundationDomain(this.announcedAddress) 
-            && !IpUtil.isFoundationDomain(this.host)) {
+
+    boolean isProtectPeer() {
+        if (!IpUtil.isFoundationDomain(this.announcedAddress)
+                && !IpUtil.isFoundationDomain(this.host)) {
             return false;
         }
-        
-        for(SharderGenesis.GenesisPeer genesisPeer : SharderGenesis.GenesisPeer.getAll()){
-            if(IpUtil.matchHost(genesisPeer.domain, this.host)) {
+
+        for (SharderGenesis.GenesisPeer genesisPeer : SharderGenesis.GenesisPeer.getAll()) {
+            if (IpUtil.matchHost(genesisPeer.domain, this.host)) {
                 return true;
             }
         }
         return false;
     }
-    
+
     @Override
     public void blacklist(String cause) {
-        if(isProtectPeer()) {
+        if (isProtectPeer()) {
             Logger.logDebugMessage("peer %s[%s] is the protected peer, don't black it", announcedAddress, host);
             return;
         }
-        
+
         blacklistingTime = Conch.getEpochTime();
         blacklistingCause = cause;
         setState(State.NON_CONNECTED);
@@ -434,8 +435,8 @@ final class PeerImpl implements Peer {
 
     @Override
     public void unBlacklist() {
-        if (blacklistingTime == 0 ) return;
-        
+        if (blacklistingTime == 0) return;
+
         Logger.logDebugMessage("Unblacklisting " + host);
         setState(State.NON_CONNECTED);
         blacklistingTime = 0;
@@ -444,12 +445,12 @@ final class PeerImpl implements Peer {
     }
 
     void updateBlacklistedStatus(int curTime) {
-        if (blacklistingTime > 0 
-            && blacklistingTime + Peers.blacklistingPeriod <= curTime) {
+        if (blacklistingTime > 0
+                && blacklistingTime + Peers.blacklistingPeriod <= curTime) {
             unBlacklist();
         }
-        if (isOldVersion 
-            && lastUpdated < curTime - 3600) {
+        if (isOldVersion
+                && lastUpdated < curTime - 3600) {
             isOldVersion = false;
         }
     }
@@ -496,7 +497,7 @@ final class PeerImpl implements Peer {
     @Override
     public boolean isInboundWebSocket() {
         PeerWebSocket s;
-        return ((s=inboundSocket) != null && s.isOpen());
+        return ((s = inboundSocket) != null && s.isOpen());
     }
 
     @Override
@@ -516,8 +517,8 @@ final class PeerImpl implements Peer {
 
     @Override
     public boolean isType(Type type) {
-        if(type == null) return false;
-        
+        if (type == null) return false;
+
         return type == this.type;
     }
 
@@ -535,6 +536,16 @@ final class PeerImpl implements Peer {
         int communicationLoggingMask = Peers.communicationLoggingMask;
 
         try {
+            /**
+             * Check for blacklisted peer
+             */
+            if (Guard.OPEN_BLACKLIST_FILTER != 0 && isBlacklisted()) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("error", Errors.BLACKLISTEDTHEM);
+                jsonObject.put("cause", getBlacklistingCause());
+                return jsonObject;
+            }
+
             //
             // Create a new WebSocket session if we don't have one
             //
@@ -564,7 +575,7 @@ final class PeerImpl implements Peer {
                     }
                     if (wsResponse.length() > maxResponseSize)
                         throw new ConchException.ConchIOException("Maximum size exceeded: " + wsResponse.length());
-                    response = (JSONObject)JSONValue.parseWithException(wsResponse);
+                    response = (JSONObject) JSONValue.parseWithException(wsResponse);
                     updateDownloadedVolume(wsResponse.length());
                 }
             } else {
@@ -606,7 +617,7 @@ final class PeerImpl implements Peer {
                             String responseValue = byteArrayOutputStream.toString("UTF-8");
                             if (responseValue.length() > 0 && responseStream instanceof GZIPInputStream) {
                                 log += String.format("[length: %d, compression ratio: %.2f]",
-                                              cis.getCount(), (double)cis.getCount()/(double) responseValue.length());
+                                        cis.getCount(), (double) cis.getCount() / (double) responseValue.length());
                             }
                             log += " >>> " + responseValue;
                             showLog = true;
@@ -619,7 +630,7 @@ final class PeerImpl implements Peer {
                             }
                             try (Reader reader = new BufferedReader(new InputStreamReader(responseStream, "UTF-8"))) {
                                 CountingInputReader cir = new CountingInputReader(reader, maxResponseSize);
-                                response = (JSONObject)JSONValue.parseWithException(cir);
+                                response = (JSONObject) JSONValue.parseWithException(cir);
                                 updateDownloadedVolume(cir.getCount());
                             }
                         }
@@ -649,6 +660,12 @@ final class PeerImpl implements Peer {
                     if (connection != null) {
                         connection.disconnect();
                     }
+                    /**
+                     * 新增逻辑处理
+                     *  1. 若返回的信息是：对方将我加入黑名单后，我也应将对方加入黑名单
+                     *  2. 将对方加入黑名单的目的：黑名单有效期内不再与该节点进行通信，有效降低对方节点的网络负载
+                     */
+                    blacklist("Peer " + host + " version " + version + " returned error: " + response.toJSONString());
                 }
             }
         } catch (ConchException.ConchIOException e) {
@@ -656,11 +673,11 @@ final class PeerImpl implements Peer {
             if (connection != null) {
                 connection.disconnect();
             }
-        } catch (RuntimeException|ParseException|IOException e) {
+        } catch (RuntimeException | ParseException | IOException e) {
             if (!(e instanceof UnknownHostException || e instanceof SocketTimeoutException ||
-                                        e instanceof SocketException || Errors.END_OF_FILE.equals(e.getMessage()))) {
+                    e instanceof SocketException || Errors.END_OF_FILE.equals(e.getMessage()))) {
                 Logger.logDebugMessage(String.format("Error sending request to peer %s: %s",
-                                       host, e.getMessage()!=null ? e.getMessage() : e.toString()));
+                        host, e.getMessage() != null ? e.getMessage() : e.toString()));
             }
             if ((communicationLoggingMask & Peers.LOGGING_MASK_EXCEPTIONS) != 0) {
                 log += " >>> " + e.toString();
@@ -753,7 +770,7 @@ final class PeerImpl implements Peer {
                 }
 
                 if (announcedAddress == null) {
-                    if (hallmark == null || hallmark.getPort() == Conch.getPeerPort() ) {
+                    if (hallmark == null || hallmark.getPort() == Conch.getPeerPort()) {
                         Peers.setAnnouncedAddress(this, host);
                         Logger.logDebugMessage("Connected to peer without announced address, setting to " + host);
                     } else {
@@ -761,7 +778,7 @@ final class PeerImpl implements Peer {
                         return;
                     }
                 }
-                
+
                 if (!isOldVersion) {
                     setState(State.CONNECTED);
                     if (services != origServices) {
@@ -776,10 +793,10 @@ final class PeerImpl implements Peer {
             }
         } catch (RuntimeException e) {
             blacklist(e);
-        }finally {
+        } finally {
             // services & [num] should be synchronized to the new Service code(max one)
-            if(this.state == State.CONNECTED && ((services & 64) == 64)){
-                if(peerLoad.getLoad() < Peers.getBestPeerLoad().getLoad()){
+            if (this.state == State.CONNECTED && ((services & 64) == 64)) {
+                if (peerLoad.getLoad() < Peers.getBestPeerLoad().getLoad()) {
                     Peers.setBestPeer(host);
                 }
             }
@@ -808,14 +825,14 @@ final class PeerImpl implements Peer {
                 }
             }
             Logger.logDebugMessage("Announced address " + newAnnouncedAddress + " does not resolve to " + host);
-        } catch (UnknownHostException|URISyntaxException e) {
+        } catch (UnknownHostException | URISyntaxException e) {
             Logger.logDebugMessage(e.toString());
             blacklist(e);
         }
         return false;
     }
 
-    void parsePeerLoad(JSONObject peerLoad){
+    void parsePeerLoad(JSONObject peerLoad) {
         this.peerLoad.setState(State.CONNECTED);
         this.peerLoad.setHost(host);
         this.peerLoad.setPort(apiPort);
@@ -901,7 +918,7 @@ final class PeerImpl implements Peer {
     }
 
     private int getHallmarkWeight(int date) {
-        if (hallmark == null || ! hallmark.isValid() || hallmark.getDate() != date) {
+        if (hallmark == null || !hallmark.isValid() || hallmark.getDate() != date) {
             return 0;
         }
         return hallmark.getWeight();
@@ -1003,7 +1020,7 @@ final class PeerImpl implements Peer {
     public PeerLoad getPeerLoad() {
         return peerLoad;
     }
-    
+
     @Override
     public JSONObject getBlockSummary() {
         return blockSummaryJson;
@@ -1040,16 +1057,16 @@ final class PeerImpl implements Peer {
         json.put("apiServerIdleTimeout", apiServerIdleTimeout);
         json.put("services", Long.toUnsignedString(services));
         json.put("blockchainState", state.ordinal());
-        json.put("peerLoad",peerLoad.toJson());
+        json.put("peerLoad", peerLoad.toJson());
         json.put("bindRsAccount", bindRsAccount);
         json.putAll(blockSummaryJson);
         return json;
     }
 
-    public PeerImpl parseJSONObject(JSONObject json){
-        String servicesString = (String)json.get("services");
+    public PeerImpl parseJSONObject(JSONObject json) {
+        String servicesString = (String) json.get("services");
         services = (servicesString != null ? Long.parseUnsignedLong(servicesString) : 0);
-        setApplication((String)json.get("application"));
+        setApplication((String) json.get("application"));
         apiPort = Integer.parseInt(json.get("apiPort") == null ? "0" : String.valueOf(json.get("apiPort")));
         setApiSSLPort(json.get("apiSSLPort"));
         setDisabledAPIs(json.get("disabledAPIs"));
@@ -1061,16 +1078,16 @@ final class PeerImpl implements Peer {
         setPlatform((String) json.get("platform"));
         shareAddress = Boolean.TRUE.equals(json.get("shareAddress"));
         analyzeHallmark((String) json.get("hallmark"));
-        parsePeerLoad((JSONObject)json.get("peerLoad"));
-        setBindRsAccount((String)json.get("bindRsAccount"));
+        parsePeerLoad((JSONObject) json.get("peerLoad"));
+        setBindRsAccount((String) json.get("bindRsAccount"));
         blockSummaryJson.put("cumulativeDifficulty", json.get("cumulativeDifficulty"));
         blockSummaryJson.put("lastBlockHeight", json.get("lastBlockHeight"));
         blockSummaryJson.put("lastBlockId", json.get("lastBlockId"));
-        blockSummaryJson.put("lastBlockHash",  json.get("lastBlockHash"));
+        blockSummaryJson.put("lastBlockHash", json.get("lastBlockHash"));
         blockSummaryJson.put("lastBlockGenerator", json.get("lastBlockGenerator"));
         blockSummaryJson.put("lastBlockTimestamp", json.get("lastBlockTimestamp"));
         blockSummaryJson.put("currentFork", json.get("currentFork"));
-        
+
         return this;
     }
 }
