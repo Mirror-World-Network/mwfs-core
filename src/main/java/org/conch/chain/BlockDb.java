@@ -240,10 +240,10 @@ public final class BlockDb {
             byte[] payloadHash = rs.getBytes("payload_hash");
             byte[] ext = rs.getBytes("ext");
             long id = rs.getLong("id");
-            boolean hasRewardDistribution = rs.getBoolean("HAS_REWARD_DISTRIBUTION");
+            int rewardDistributionHeight = rs.getInt("REWARD_DISTRIBUTION_HEIGHT");
             return new BlockImpl(version, timestamp, previousBlockId, totalAmountNQT, totalFeeNQT, payloadLength, payloadHash,
                     generatorId, generationSignature, blockSignature, previousBlockHash,
-                    cumulativeDifficulty, baseTarget, nextBlockId, height, id, ext, loadTransactions ? TransactionDb.findBlockTransactions(con, id) : null, hasRewardDistribution);
+                    cumulativeDifficulty, baseTarget, nextBlockId, height, id, ext, loadTransactions ? TransactionDb.findBlockTransactions(con, id) : null, rewardDistributionHeight);
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
         }
@@ -253,7 +253,7 @@ public final class BlockDb {
         try {
             try (PreparedStatement pstmt = con.prepareStatement("INSERT INTO block (id, version, timestamp, previous_block_id, "
                     + "total_amount, total_fee, payload_length, previous_block_hash, cumulative_difficulty, "
-                    + "base_target, height, generation_signature, block_signature, payload_hash, generator_id, ext, HAS_REWARD_DISTRIBUTION) "
+                    + "base_target, height, generation_signature, block_signature, payload_hash, generator_id, ext, REWARD_DISTRIBUTION_HEIGHT) "
                     + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
                 int i = 0;
                 pstmt.setLong(++i, block.getId());
@@ -272,7 +272,7 @@ public final class BlockDb {
                 pstmt.setBytes(++i, block.getPayloadHash());
                 pstmt.setLong(++i, block.getGeneratorId());
                 pstmt.setBytes(++i, block.getExtension());
-                pstmt.setBoolean(++i, block.getHasRewardDistribution());
+                pstmt.setInt(++i, block.getRewardDistributionHeight());
                 pstmt.executeUpdate();
                 TransactionDb.saveTransactions(con, block.getTransactions());
             }
@@ -416,19 +416,19 @@ public final class BlockDb {
      * @return
      */
     public static boolean reachRewardSettlementHeight(int height) {
-        /*try (Connection con = Db.db.getConnection()) {
-            PreparedStatement pstmt = con.prepareStatement("SELECT count(id) num FROM block WHERE HAS_REWARD_DISTRIBUTION = false AND HEIGHT <= " + height);
-
+        try (Connection con = Db.db.getConnection()) {
+            PreparedStatement pstmt = con.prepareStatement("select REWARD_DISTRIBUTION_HEIGHT distributeHeight from BLOCK where HEIGHT <= ? order by distributeHeight desc limit 1");
+            pstmt.setInt(1, height);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt("num") > Constants.SETTLEMENT_INTERVAL_SIZE;
+                    return ((height - rs.getInt("distributeHeight")) > Constants.SETTLEMENT_INTERVAL_SIZE);
                 }
                 return false;
             }
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
-        }*/
-        return (height % Constants.SETTLEMENT_INTERVAL_SIZE) == 0;
+        }
+        //return (height % Constants.SETTLEMENT_INTERVAL_SIZE) == 0;
     }
 
     /**
@@ -438,7 +438,7 @@ public final class BlockDb {
      */
     public static List<? extends Block> getSettlementBlocks(int height) {
         try (Connection con = Db.db.getConnection()) {
-            PreparedStatement pstmt = con.prepareStatement("SELECT * FROM block WHERE HAS_REWARD_DISTRIBUTION = false and Height <= ? order by height asc");
+            PreparedStatement pstmt = con.prepareStatement("SELECT * FROM block WHERE REWARD_DISTRIBUTION_HEIGHT = 0 and Height <= ? order by height asc");
             pstmt.setInt(1, height);
             try (ResultSet rs = pstmt.executeQuery()) {
                 List<BlockImpl> list = new ArrayList<>();
@@ -452,20 +452,20 @@ public final class BlockDb {
         }
     }
 
-    public static void updateDistributionState(List<Long> blockIds) {
-        if(blockIds == null || blockIds.size()== 0) {
+    public static void updateDistributionState(List<Long> blockIds, int height) {
+        if (blockIds == null || blockIds.size() == 0) {
             return;
         }
-        Logger.logDebugMessage("Update the HAS_REWARD_DISTRIBUTION of blocks to true ", Arrays.toString(blockIds.toArray()));
+        Logger.logDebugMessage("Update the REWARD_DISTRIBUTION_HEIGHT of blocks to current height ", Arrays.toString(blockIds.toArray()));
 
         try (Connection con = Db.db.getConnection()) {
             Statement stmt = con.createStatement();
             StringBuilder sqlStringBuilder = new StringBuilder();
-            sqlStringBuilder.append("UPDATE block SET HAS_REWARD_DISTRIBUTION = true WHERE ID in (");
+            sqlStringBuilder.append("UPDATE block SET REWARD_DISTRIBUTION_HEIGHT = " + height + " WHERE ID in (");
             for (Long blockId : blockIds) {
                 sqlStringBuilder.append(blockId + ",");
             }
-            sqlStringBuilder.replace(sqlStringBuilder.length() - 1, sqlStringBuilder.length(),"");
+            sqlStringBuilder.replace(sqlStringBuilder.length() - 1, sqlStringBuilder.length(), "");
             sqlStringBuilder.append(")");
             stmt.execute(sqlStringBuilder.toString());
         } catch (SQLException e) {

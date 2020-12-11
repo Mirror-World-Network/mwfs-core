@@ -336,10 +336,12 @@ public class RewardCalculator {
 
                 // remain amount distribute to creator
                 long remainRewards = (crowdMinerRewards > allocatedRewards) ? (crowdMinerRewards - allocatedRewards) : 0;
-                if (crowdMinerRewardMap.containsKey(minerAccount.getId())) {
-                    remainRewards = remainRewards + crowdMinerRewardMap.get(minerAccount.getId());
+                if (remainRewards != 0) {
+                    if (crowdMinerRewardMap.containsKey(minerAccount.getId())) {
+                        remainRewards = remainRewards + crowdMinerRewardMap.get(minerAccount.getId());
+                    }
+                    crowdMinerRewardMap.put(minerAccount.getId(), remainRewards);
                 }
-                crowdMinerRewardMap.put(minerAccount.getId(), remainRewards);
                 blockIds.add(block.getId());
             }
             String details = "";
@@ -350,9 +352,12 @@ public class RewardCalculator {
                     notExistAccounts += accountId + ",";
                     continue;
                 }
+                if (crowdMinerRewardMap.get(accountId) == 0) {
+                    Logger.logDebugMessage("reward is zero , account is " + accountId);
+                }
                 details += updateBalance(account, tx, crowdMinerRewardMap.get(accountId));
             }
-            BlockDb.updateDistributionState(blockIds);
+            BlockDb.updateDistributionState(blockIds, settlementHeight);
             String tail = "[DEBUG] ----------------------------\n[DEBUG] Total count: " + (crowdMinerRewardMap.size());
             Logger.logDebugMessage("[%d-StageTwo%s] Unfreeze crowdMiners rewards and add it in mined amount. \n[DEBUG] CrowdMiner Reward Detail Format: txid | address: distribution amount\n%s%s\n", settlementHeight, "", details, tail);
             if(notExistAccounts.length() > 0) {
@@ -360,6 +365,7 @@ public class RewardCalculator {
             }
         } catch (Exception e) {
             Logger.logErrorMessage("setCrowdMinerReward occur error", e);
+            throw new RuntimeException("Distribute rewards error");
         }
         return true;
     }

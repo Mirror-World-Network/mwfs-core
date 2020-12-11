@@ -51,7 +51,7 @@ public final class BlockImpl implements Block {
     private final int version;
     private final int timestamp;
     private final long previousBlockId;
-    private boolean hasRewardDistribution = false;
+    private int rewardDistributionHeight;
     private volatile byte[] generatorPublicKey;
     private final byte[] previousBlockHash;
     private final long totalAmountNQT;
@@ -166,8 +166,8 @@ public final class BlockImpl implements Block {
     }
 
     @Override
-    public boolean getHasRewardDistribution() {
-        return hasRewardDistribution;
+    public int getRewardDistributionHeight() {
+        return rewardDistributionHeight;
     }
 
 
@@ -215,11 +215,11 @@ public final class BlockImpl implements Block {
     public BlockImpl(int version, int timestamp, long previousBlockId, long totalAmountNQT, long totalFeeNQT, int payloadLength,
               byte[] payloadHash, long generatorId, byte[] generationSignature, byte[] blockSignature,
               byte[] previousBlockHash, BigInteger cumulativeDifficulty, long baseTarget, long nextBlockId, int height, long id, byte[] extension,
-              List<TransactionImpl> blockTransactions,boolean hasRewardDistribution) {
+              List<TransactionImpl> blockTransactions,int rewardDistributionHeight) {
         this(version, timestamp, previousBlockId, totalAmountNQT, totalFeeNQT, payloadLength, payloadHash,
                 generatorId, generationSignature, blockSignature, previousBlockHash,cumulativeDifficulty,baseTarget,nextBlockId,height,id,blockTransactions);
         this.extension = extension;
-        this.hasRewardDistribution = hasRewardDistribution;
+        this.rewardDistributionHeight = rewardDistributionHeight;
     }
 
     //just for genesis block
@@ -228,7 +228,7 @@ public final class BlockImpl implements Block {
         BlockImpl block = new BlockImpl(version,  timestamp,  previousBlockId,  totalAmountNQT,  totalFeeNQT,  payloadLength, payloadHash,
                 generatorPublicKey, generationSignature, blockSignature, previousBlockHash, transactions);
         block.id = blockId;
-        block.hasRewardDistribution = true;
+        block.rewardDistributionHeight = 1;
         return block;
     }
 
