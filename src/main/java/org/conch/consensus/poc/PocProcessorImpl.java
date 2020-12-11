@@ -251,7 +251,7 @@ public class PocProcessorImpl implements PocProcessor {
         }
 
         boolean reachSyncHeight = height > 0 && height % Constants.SYNC_BLOCK_NUM == 0;
-        if(!reachSyncHeight && !Constants.SYNC_BLOCK_BUTTON){
+        if (!reachSyncHeight && !Constants.MANUAL_SYNC_BUTTON) {
             Logger.logDebugMessage("Dont't sync cache and history tables till height exceed" +
                     "[current height=%d, sync step=%d]", height, Constants.SYNC_BLOCK_NUM);
             return;
@@ -323,27 +323,30 @@ public class PocProcessorImpl implements PocProcessor {
             long t2 = System.currentTimeMillis();
             Logger.logDebugMessage("Sync ACCOUNT_POC_SCORE and ACCOUNT_POC_SCORE_CACHE tables used %d S", (t2 - t1)/1000);
         } catch (Exception e) {
-            Logger.logWarningMessage("Sync ACCOUNT_POC_SCORE and ACCOUNT_POC_SCORE_CACHE tables occur error %s, rollback and wait for next", e.getMessage());
-            if(openNewDbTx) {
+            Logger.logWarningMessage("Sync ACCOUNT_POC_SCORE and ACCOUNT_POC_SCORE_CACHE tables occur error %s, " +
+                    "rollback and wait for next", e.getMessage());
+            if (openNewDbTx) {
                 Db.db.rollbackTransaction();
             }
-        }finally {
-            if(openNewDbTx) {
+        } finally {
+            if (openNewDbTx) {
                 Db.db.endTransaction();
             }
         }
-        if (Constants.SYNC_BLOCK_BUTTON) {
-            Constants.SYNC_BLOCK_BUTTON = false;
+        if (Constants.MANUAL_SYNC_BUTTON) {
+            Constants.MANUAL_SYNC_BUTTON = false;
         }
 
-//        try {
-//            Conch.getBlockchain().updateLock();
-//            long t1 = System.currentTimeMillis();
-//            Db.db.beginTransaction();
-//            Account.syncAccountLedgerTable("ACCOUNT_LEDGER","ACCOUNT_LEDGER_CACHE",Constants.SYNC_WORK_BLOCK_NUM);
-//            Account.syncAccountLedgerTable("ACCOUNT_LEDGER_CACHE","ACCOUNT_LEDGER_HISTORY",Constants.SYNC_CACHE_BLOCK_NUM);
-//            Db.db.commitTransaction();
-//            long t2 = System.currentTimeMillis();
+        //        try {
+        //            Conch.getBlockchain().updateLock();
+        //            long t1 = System.currentTimeMillis();
+        //            Db.db.beginTransaction();
+        //            Account.syncAccountLedgerTable("ACCOUNT_LEDGER","ACCOUNT_LEDGER_CACHE",Constants
+        //            .SYNC_WORK_BLOCK_NUM);
+        //            Account.syncAccountLedgerTable("ACCOUNT_LEDGER_CACHE","ACCOUNT_LEDGER_HISTORY",Constants
+        //            .SYNC_CACHE_BLOCK_NUM);
+        //            Db.db.commitTransaction();
+        //            long t2 = System.currentTimeMillis();
 //            Logger.logDebugMessage("Sync ACCOUNT_LEDGER and ACCOUNT_LEDGER_CACHE tables used %d S", (t2 - t1)/1000);
 //        } catch (Exception e) {
 //            Logger.logWarningMessage("Sync ACCOUNT_LEDGER and ACCOUNT_LEDGER_CACHE tables occur error %s, rollback and wait for next", e.getMessage());
