@@ -264,8 +264,9 @@ public final class Constants {
     public static final Boolean SYNC_BUTTON = Conch.getBooleanProperty("sharder.sync.button", false);
     public static final String HISTORY_RECORD_MODE = Conch.getStringProperty("sharder.historyRecordMode", "update");
     public static final Boolean HISTORY_RECORD_CLEAR = Conch.getBooleanProperty("sharder.historyRecordClear", true);
-    public static Boolean SYNC_BLOCK_BUTTON = Conch.getBooleanProperty("sharder.sync.manualbutton",false);
-    public static Boolean GENERATE_EXPIRED_FILE_BUTTON = Conch.getBooleanProperty("sharder.generateExpiredFileButton",false);
+    public static Boolean SYNC_BLOCK_BUTTON = Conch.getBooleanProperty("sharder.sync.manualButton", false);
+    public static Boolean GENERATE_EXPIRED_FILE_BUTTON = Conch.getBooleanProperty("sharder.generateExpiredFileButton"
+            , false);
 
     public static boolean updateHistoryRecord(){
         if("new".equalsIgnoreCase(HISTORY_RECORD_MODE)){

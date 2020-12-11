@@ -24,26 +24,37 @@ package org.conch.util;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.conch.Conch;
-import org.conch.common.Constants;
-import org.conch.db.Db;
-import org.conch.tools.ClientUpgradeTool;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.FileSystem;
-import java.nio.file.*;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.conch.Conch;
+import org.conch.common.Constants;
+import org.conch.db.Db;
+import org.conch.tools.ClientUpgradeTool;
 
 public class FileUtil {
 
@@ -303,15 +314,21 @@ public class FileUtil {
         if (failedCount > 0) {
             Logger.logDebugMessage(failedDetail);
         }
-        
+
         if (deleteSource) {
             FileUtils.forceDelete(archive);
             Logger.logDebugMessage("[ UPGRADE CLIENT ] delete temp upgrade archive file " + archive.getName());
         }
     }
 
+    /**
+     * Generate a expired file list that start.sh will delete these files
+     *
+     * @param appRootPath
+     * @param removeOldLibFiles
+     */
     private static void deleteList(Path appRootPath, List<String> removeOldLibFiles) {
-        if(removeOldLibFiles.size() > 0) {
+        if (removeOldLibFiles.size() > 0) {
             File deleteList = appRootPath.resolve("lib").resolve("ExpiredFiles.json").toFile();
             // read the content of exist file of deleteList.json
             if (deleteList.exists()) {
