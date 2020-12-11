@@ -297,11 +297,7 @@ public final class PeerServlet extends WebSocketServlet {
      */
     private JSONStreamAware process(PeerImpl peer, Reader inputReader) {
 
-        // 加入IP连接数限制逻辑
-        // 1. 对IP连接数 进行计数
-        // 2. 连接数比对，超过最大值加入黑名单
-        // 3. 连接频次记录，超过阈值加入黑名单
-        Guard.connectFrequencyStatistics(peer.getHost());
+
 
         /**
          * Check for blacklisted peer
@@ -312,6 +308,14 @@ public final class PeerServlet extends WebSocketServlet {
             jsonObject.put("cause", peer.getBlacklistingCause());
             return jsonObject;
         }
+
+        /**
+         *  加入IP连接数限制逻辑
+         *          1. 对IP连接数 进行计数
+         *          2. 连接数比对，超过最大值加入黑名单
+         *          3. 连接频次记录，超过阈值加入黑名单
+         */
+        Guard.connectFrequencyStatistics(peer.getHost());
 
         //
         // Process the request
