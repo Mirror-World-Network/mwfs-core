@@ -42,6 +42,11 @@ public class Guard {
     public static int MAX_THRESHOLD_PER_HOUR = 1 * MULTIPLE;
     public static int MAX_TOTAL_CONNECT_COUNT_PER_DAY = 500 * MULTIPLE;
 
+    /**
+     * Set 0 to close, non-0 to open
+     */
+    public static int OPEN_BLACKLIST_FILTER = 0;
+
     private static Integer threshold = 0;
     private static final Integer ONE_HOUR = 1000 * 60 * 60;
     private static final Integer ONE_MINUTE = 1000 * 60;

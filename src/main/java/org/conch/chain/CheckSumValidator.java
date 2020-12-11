@@ -30,6 +30,8 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static org.conch.security.Guard.MULTIPLE;
+
 /**
  * @author <a href="mailto:xy@sharder.org">Ben</a>
  * @since 2019/1/11
@@ -282,6 +284,15 @@ public class CheckSumValidator {
                     Guard.MAX_THRESHOLD_PER_HOUR = guardSettings.getIntValue("MAX_THRESHOLD_PER_HOUR");
                     Guard.MAX_TOTAL_CONNECT_COUNT_PER_DAY = guardSettings.getIntValue("MAX_TOTAL_CONNECT_COUNT_PER_DAY");
                     Guard.MAX_VICIOUS_COUNT_PER_SAME_HOST = guardSettings.getIntValue("MAX_VICIOUS_COUNT_PER_SAME_HOST");
+                    Guard.OPEN_BLACKLIST_FILTER = guardSettings.getIntValue("OPEN_BLACKLIST_FILTER");
+                    if (Guard.FREQUENCY==0 && Guard.FREQUENCY_TO_BLACK==0 && Guard.MAX_THRESHOLD_PER_HOUR==0 && Guard.MAX_TOTAL_CONNECT_COUNT_PER_DAY==0 && Guard.MAX_VICIOUS_COUNT_PER_SAME_HOST==0) {
+                        // 获取值失效，采用默认值
+                        Guard.MAX_VICIOUS_COUNT_PER_SAME_HOST = 50;
+                        Guard.FREQUENCY = 6 * MULTIPLE;
+                        Guard.FREQUENCY_TO_BLACK = 20 * MULTIPLE;
+                        Guard.MAX_THRESHOLD_PER_HOUR = 1 * MULTIPLE;
+                        Guard.MAX_TOTAL_CONNECT_COUNT_PER_DAY = 500 * MULTIPLE;
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();

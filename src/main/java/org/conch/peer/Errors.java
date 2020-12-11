@@ -24,6 +24,7 @@ package org.conch.peer;
 final class Errors {
 
     final static String BLACKLISTED = "Your peer is blacklisted";
+    final static String BLACKLISTEDTHEM = "You've blacklisted them";
     final static String END_OF_FILE = "Unexpected token END OF FILE at position 0.";
     final static String UNKNOWN_PEER = "Your peer address cannot be resolved";
     final static String UNSUPPORTED_REQUEST_TYPE = "Unsupported request type!";
