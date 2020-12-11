@@ -132,7 +132,6 @@ public class Guard {
 //                JSONObject parseObject = JSONObject.parseObject(JSON.toJSONString(map));
 //                org.conch.util.JSON.JsonAppendAlibaba(parseObject, "conf/guardData.json");
                 // TODO 每日将数据存入数据库
-                // 对 map 置空
                 BLACK_PEERS_MAP_2 = Maps.newConcurrentMap();
             }
             JSONObject accessPeerObj = BLACK_PEERS_MAP_2.get(host);
@@ -155,8 +154,13 @@ public class Guard {
             // 将更新的内容存入MAP
             BLACK_PEERS_MAP_2.put(host, accessPeerObj);
             if (accessPeerObj.getLongValue(LATEST_ACCESS_TIME_KEY) > accessPeerObj.getLongValue(LAST_ACCESS_TIME_KEY)) {
-                // 计算第一次访问到这一次访问的时间段内,IP的平均连接频率
-                long frequency = (accessPeerObj.getLongValue(ACCESS_COUNT_KEY) * 1000 * 60) / (accessPeerObj.getLongValue(LATEST_ACCESS_TIME_KEY) - accessPeerObj.getLongValue(FIRST_ACCESS_TIME_KEY));
+                // 因初期时间间隔不足1min时，会导致分母过小致使frequency的值会过大，设定一个平均频率稳定期 stablePeriod = 1min
+                long frequency = 0;
+                long intervalTime = accessPeerObj.getLongValue(LATEST_ACCESS_TIME_KEY) - accessPeerObj.getLongValue(FIRST_ACCESS_TIME_KEY);
+                if (intervalTime > 1000 * 60) {
+                    // 计算平均连接频率
+                    frequency = (accessPeerObj.getLongValue(ACCESS_COUNT_KEY) * 1000 * 60) / intervalTime;
+                }
                 if (startTime - lastTime > ONE_HOUR) {
                     // 距离上次执行该函数超过一小时
                     threshold = 0;
