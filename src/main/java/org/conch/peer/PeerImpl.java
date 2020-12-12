@@ -435,7 +435,9 @@ final class PeerImpl implements Peer {
 
     @Override
     public void unBlacklist() {
-        if (blacklistingTime == 0) return;
+        if (blacklistingTime == 0) {
+            return;
+        }
 
         Logger.logDebugMessage("Unblacklisting " + host);
         setState(State.NON_CONNECTED);
@@ -444,15 +446,17 @@ final class PeerImpl implements Peer {
         Peers.notifyListeners(this, Peers.Event.UNBLACKLIST);
     }
 
-    void updateBlacklistedStatus(int curTime) {
+    boolean updateBlacklistedStatus(int curTime) {
         if (blacklistingTime > 0
                 && blacklistingTime + Peers.blacklistingPeriod <= curTime) {
             unBlacklist();
+            return true;
         }
         if (isOldVersion
                 && lastUpdated < curTime - 3600) {
             isOldVersion = false;
         }
+        return false;
     }
 
     @Override
@@ -536,13 +540,9 @@ final class PeerImpl implements Peer {
         int communicationLoggingMask = Peers.communicationLoggingMask;
 
         try {
-            /**
-             * Check for blacklisted peer
-             */
-            if (Guard.isOpen() && isBlacklisted()) {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("error", Errors.BLACKLISTEDTHEM);
-                jsonObject.put("cause", getBlacklistingCause());
+
+            JSONObject jsonObject = Guard.isSelfClosingPeer(this.getHost());
+            if ((Boolean) jsonObject.get(Guard.KEY_NEED_CLOSING)) {
                 return jsonObject;
             }
 
@@ -551,7 +551,8 @@ final class PeerImpl implements Peer {
             //
             // [NAT] If the node use NAT, seperate the host(host like 116.89.251.206:10415) to combine the websocket url
             if (useWebSocket && !webSocket.isOpen()) {
-                useWebSocket = webSocket.startClient(URI.create("ws://" + Peers.addressHost(host) + ":" + Peers.addressPort(host) + "/sharder"));
+                useWebSocket =
+                        webSocket.startClient(URI.create("ws://" + Peers.addressHost(host) + ":" + Peers.addressPort(host) + "/sharder"));
             }
             //
             // Send the request and process the response
@@ -654,19 +655,20 @@ final class PeerImpl implements Peer {
                     Logger.logDebugMessage("Sequence error, reconnecting to " + host);
                     connect();
                 } else {
-                    Logger.logDebugMessage("Peer " + host + " version " + version + " returned error: " +
-                            response.toJSONString() + ", request was: " + JSON.toString(request) +
-                            ", disconnecting");
+                    String errorReason = String.format("Peer %s version %s returned error: %s", host, version,
+                            response.toJSONString());
+                    Logger.logDebugMessage("%s, request was: %s, disconnecting", errorReason, JSON.toString(request));
                     if (connection != null) {
                         connection.disconnect();
                     }
                     /**
                      * 新增逻辑处理
-                     *  1. 若返回的信息是：对方将我加入黑名单后，我也应将对方加入黑名单
-                     *  2. 将对方加入黑名单的目的：黑名单有效期内不再与该节点进行通信，有效降低对方节点的网络负载
-                     *  see {@link PeerServlet#process(org.conch.peer.PeerImpl, java.io.Reader)}
+                     *  1. 若返回的信息是：对方将我加入黑名单后，将该节点放入「自闭列表」
+                     *  2. 处于自闭列表期间不再主动与该节点进行通信，有效降低对方节点的网络消耗
+                     *  see {@link org.conch.security.Guard#defense(java.lang.String)}
                      */
-                    blacklist("Peer " + host + " version " + version + " returned error: " + response.toJSONString());
+
+                    Guard.updateSelfClosingPeer(host, errorReason);
                 }
             }
         } catch (ConchException.ConchIOException e) {

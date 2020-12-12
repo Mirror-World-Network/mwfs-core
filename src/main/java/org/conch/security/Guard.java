@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.Map;
 import org.conch.Conch;
 import org.conch.common.Constants;
+import org.conch.peer.Errors;
 import org.conch.peer.Peer;
 import org.conch.peer.Peers;
 import org.conch.util.Logger;
@@ -15,12 +16,20 @@ import sun.net.util.IPAddressUtil;
 /**
  * Used to guard the client to avoid the viciously tcp/ip connect,
  * api request and others resources consumption
+ *
+ * @author bowen, ben
  */
 public class Guard {
 
-    public static boolean isCloseGuard = Conch.getBooleanProperty("sharder.closeGuard");
+    private static boolean forceOpenGuard = Conch.getBooleanProperty("sharder.forceOpenGuard", false);
     /** Set 0 to close, non-0 to open */
-    public static int OPEN_BLACKLIST_FILTER = 0;
+    private static int OPEN_BLACKLIST_FILTER = 0;
+    /** Whether is self closing mode | 是否处于自闭模式 */
+    private static Boolean SELF_CLOSING_MODE = Boolean.TRUE;
+    /** peer host : {"reason":"XXX", "selfCosingTime": 11} */
+    private static String CLOSING_KEY_REASON = "reason";
+    private static String CLOSING_KEY_TIME = "selfCosingTime";
+    private static Map<String, JSONObject> SELF_CLOSING_MAP = Maps.newConcurrentMap();
 
     //TODO time based block list
     // black peer validation in : org.conch.peer.PeerServlet.process
@@ -38,11 +47,11 @@ public class Guard {
     /**
      * Guard策略配置
      */
-    public static int MAX_VICIOUS_COUNT_PER_SAME_HOST = 50;
-    public static int FREQUENCY = 6 * MULTIPLE;
-    public static int FREQUENCY_TO_BLACK = 20 * MULTIPLE;
-    public static int MAX_THRESHOLD_PER_HOUR = 1 * MULTIPLE;
-    public static int MAX_TOTAL_CONNECT_COUNT_PER_DAY = 500 * MULTIPLE;
+    private static int MAX_VICIOUS_COUNT_PER_SAME_HOST = 50;
+    private static int FREQUENCY = 6 * MULTIPLE;
+    private static int FREQUENCY_TO_BLACK = 20 * MULTIPLE;
+    private static int MAX_THRESHOLD_PER_HOUR = 1 * MULTIPLE;
+    private static int MAX_TOTAL_CONNECT_COUNT_PER_DAY = 500 * MULTIPLE;
 
     private static Integer threshold = 0;
     private static final Integer ONE_HOUR = 1000 * 60 * 60;
@@ -50,8 +59,98 @@ public class Guard {
     private static long lastTime = System.currentTimeMillis();
     private static String lastDate = getCurrentDate(new Date());
 
+    public static void init(Integer frequency, Integer frequencyToBack, Integer maxThreshold,
+                            Integer maxTotalConnection, Integer maxViciousCount, Integer openBlacklist,
+                            Boolean openSelfClosingMode) {
+        if (frequency != null && frequency.intValue() > 0) {
+            FREQUENCY = frequency;
+        }
+        if (frequencyToBack != null && frequencyToBack.intValue() > 0) {
+            FREQUENCY_TO_BLACK = frequencyToBack;
+        }
+        if (maxThreshold != null && maxThreshold.intValue() > 0) {
+            MAX_THRESHOLD_PER_HOUR = maxThreshold;
+        }
+        if (maxTotalConnection != null && maxTotalConnection.intValue() > 0) {
+            MAX_TOTAL_CONNECT_COUNT_PER_DAY = maxTotalConnection;
+        }
+        if (maxViciousCount != null && maxViciousCount.intValue() > 0) {
+            MAX_VICIOUS_COUNT_PER_SAME_HOST = maxViciousCount;
+        }
+        if (openBlacklist != null && openBlacklist.intValue() > 0) {
+            OPEN_BLACKLIST_FILTER = openBlacklist;
+        }
+        if (openSelfClosingMode != null) {
+            SELF_CLOSING_MODE = openSelfClosingMode;
+        }
+    }
+
+    /**
+     * OPEN_BLACKLIST_FILTER is a global setting for whole nodes
+     * forceOpenGuard is a local setting that configured in the properties
+     * Priority: forceOpenGuard > OPEN_BLACKLIST_FILTER
+     *
+     * @return
+     */
     public static boolean isOpen() {
-        return OPEN_BLACKLIST_FILTER != 0 && !isCloseGuard;
+        return forceOpenGuard || OPEN_BLACKLIST_FILTER != 0;
+    }
+
+    /**
+     * Whether is self closing mode
+     * 是否处于自闭模式
+     *
+     * @return {"needClosing":true/false,"errorSummary":"XXX","errorReason":"XXX"}
+     */
+    public static final String KEY_NEED_CLOSING = "needClosing";
+    public static final String KEY_ERROR_SUMMARY = "error";
+    public static final String KEY_ERROR_REASON = "cause";
+
+    public static org.json.simple.JSONObject isSelfClosingPeer(String peerHost) {
+        org.json.simple.JSONObject result = new org.json.simple.JSONObject();
+        if (!SELF_CLOSING_MODE) {
+            result.put(KEY_NEED_CLOSING, false);
+            return result;
+        }
+
+        if (SELF_CLOSING_MAP.containsKey(peerHost)) {
+            // peer is the selfClosing peer
+            result.put(KEY_NEED_CLOSING, true);
+            result.put(KEY_ERROR_SUMMARY, Errors.BLACKLISTED_BY_THEM);
+            result.put(KEY_ERROR_REASON, SELF_CLOSING_MAP.get(peerHost).getString(CLOSING_KEY_REASON));
+        } else {
+            result.put(KEY_NEED_CLOSING, false);
+        }
+        return result;
+    }
+
+    public static void updateSelfClosingPeer(String peerHost, String reason) {
+        if (!SELF_CLOSING_MODE) {
+            return;
+        }
+        JSONObject detail = new JSONObject();
+        detail.put(CLOSING_KEY_REASON, reason);
+        detail.put(CLOSING_KEY_TIME, Conch.getEpochTime());
+        SELF_CLOSING_MAP.put(peerHost, detail);
+    }
+
+    /**
+     * Check whether exceed unlock time
+     *
+     * @param peerHost
+     * @param curTime
+     */
+    public static void checkAndRemoveSelfClosingPeer(String peerHost, int curTime) {
+        if (!SELF_CLOSING_MAP.containsKey(peerHost)) {
+            return;
+        }
+
+        JSONObject detail = SELF_CLOSING_MAP.get(peerHost);
+        int closingStarTime = detail.getInteger(CLOSING_KEY_TIME);
+        if (closingStarTime > 0
+                && closingStarTime + Peers.blacklistingPeriod <= curTime) {
+            SELF_CLOSING_MAP.remove(peerHost);
+        }
     }
 
     public static String getCurrentDate(Date date) {
@@ -97,9 +196,6 @@ public class Guard {
         }
     }
 
-    public static void main(String[] args) {
-    }
-
     /**
      * 单个IP连接频率统计 & 防护
      *  * 加入IP连接数限制逻辑
@@ -123,7 +219,7 @@ public class Guard {
      *
      * @param host
      */
-    public static void connectFrequencyStatistics(String host) {
+    public static void defense(String host) {
         long startTime = System.currentTimeMillis();
         String startDate = getCurrentDate(new Date());
         try {
@@ -132,7 +228,8 @@ public class Guard {
                 return;
             }
             if ("127.0.0.1".equals(host)
-                    || "localhost".equals(host) || Constants.isDevnet() ? false : internalIp(host)) {
+                    || "localhost".equals(host)
+                    || Constants.isDevnet() ? false : internalIp(host)) {
                 // don't guard the local request
                 return;
             }
@@ -250,5 +347,8 @@ public class Guard {
      */
     private static void addRejectRuleIntoFirewall(String host) {
         Logger.logInfoMessage("Not implement addRejectRuleIntoFirewall now");
+    }
+
+    public static void main(String[] args) {
     }
 }

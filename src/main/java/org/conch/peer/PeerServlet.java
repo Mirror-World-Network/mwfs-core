@@ -304,17 +304,21 @@ public final class PeerServlet extends WebSocketServlet {
             return jsonObject;
         }
 
-        Guard.connectFrequencyStatistics(peer.getHost());
+        JSONObject jsonObject = Guard.isSelfClosingPeer(peer.getHost());
+        if ((Boolean) jsonObject.get(Guard.KEY_NEED_CLOSING)) {
+            return jsonObject;
+        }
+        Guard.defense(peer.getHost());
 
         //
         // Process the request
         //
         try (CountingInputReader cr = new CountingInputReader(inputReader, Peers.MAX_REQUEST_SIZE)) {
-            JSONObject request = (JSONObject)JSONValue.parseWithException(cr);
+            JSONObject request = (JSONObject) JSONValue.parseWithException(cr);
             //
             //network isolation
             //
-//            String requestType = (String)request.get("requestType");
+            //            String requestType = (String)request.get("requestType");
 //            if("getInfo".equals(requestType) || "addPeers".equals(requestType)){
 //                if(Peers.getPeer(peer.getHost()) == null){
 //                    String url = Conch.getStringProperty("sharder.authenticationServer");
