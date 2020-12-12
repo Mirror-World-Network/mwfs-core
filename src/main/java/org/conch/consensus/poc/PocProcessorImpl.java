@@ -259,69 +259,85 @@ public class PocProcessorImpl implements PocProcessor {
 
         Logger.logInfoMessage("Start to sync cache and history tables at height %d", height);
         boolean openNewDbTx = false;
+        Connection con = null;
         try {
-            if(!Db.db.isInTransaction()) {
-                Db.db.beginTransaction();
+            if (!Db.db.isInTransaction()) {
+                con = Db.db.beginTransaction();
                 openNewDbTx = true;
+            } else {
+                con = Db.db.getConnection();
             }
             long t1 = System.currentTimeMillis();
-            Account.syncAccountTable("ACCOUNT","ACCOUNT_CACHE",Constants.SYNC_WORK_BLOCK_NUM);
-            Account.syncAccountTable("ACCOUNT_CACHE","ACCOUNT_HISTORY",Constants.SYNC_CACHE_BLOCK_NUM);
-            if(openNewDbTx) {
+            Account.syncAccountTable(con, "ACCOUNT", "ACCOUNT_CACHE", Constants.SYNC_WORK_BLOCK_NUM);
+            Account.syncAccountTable(con, "ACCOUNT_CACHE", "ACCOUNT_HISTORY", Constants.SYNC_CACHE_BLOCK_NUM);
+            if (openNewDbTx) {
                 Db.db.commitTransaction();
             }
             long t2 = System.currentTimeMillis();
-            Logger.logDebugMessage("Sync ACCOUNT and ACCOUNT_CACHE tables used %d S", (t2 - t1)/1000);
+            Logger.logDebugMessage("Sync ACCOUNT and ACCOUNT_CACHE tables used %d S", (t2 - t1) / 1000);
         } catch (Exception e) {
             Logger.logWarningMessage("Sync ACCOUNT and ACCOUNT_CACHE tables occur error %s, rollback and wait for next", e.getMessage());
             if(openNewDbTx) {
                 Db.db.rollbackTransaction();
             }
         }finally {
-            if(openNewDbTx) {
+            if (openNewDbTx) {
                 Db.db.endTransaction();
+            } else {
+                DbUtils.close(con);
             }
         }
 
         openNewDbTx = false;
         try {
-            if(!Db.db.isInTransaction()) {
-                Db.db.beginTransaction();
+            if (!Db.db.isInTransaction()) {
+                con = Db.db.beginTransaction();
                 openNewDbTx = true;
+            } else {
+                con = Db.db.getConnection();
             }
             long t1 = System.currentTimeMillis();
-            Account.syncAccountGuaranteedBalanceTable("ACCOUNT_GUARANTEED_BALANCE","ACCOUNT_GUARANTEED_BALANCE_CACHE",Constants.SYNC_WORK_BLOCK_NUM);
-            Account.syncAccountGuaranteedBalanceTable("ACCOUNT_GUARANTEED_BALANCE_CACHE","ACCOUNT_GUARANTEED_BALANCE_HISTORY",Constants.SYNC_CACHE_BLOCK_NUM);
-            if(openNewDbTx) {
+            Account.syncAccountGuaranteedBalanceTable(con, "ACCOUNT_GUARANTEED_BALANCE",
+                    "ACCOUNT_GUARANTEED_BALANCE_CACHE", Constants.SYNC_WORK_BLOCK_NUM);
+            Account.syncAccountGuaranteedBalanceTable(con, "ACCOUNT_GUARANTEED_BALANCE_CACHE",
+                    "ACCOUNT_GUARANTEED_BALANCE_HISTORY", Constants.SYNC_CACHE_BLOCK_NUM);
+            if (openNewDbTx) {
                 Db.db.commitTransaction();
             }
             long t2 = System.currentTimeMillis();
-            Logger.logDebugMessage("sync ACCOUNT_GUARANTEED_BALANCE and ACCOUNT_GUARANTEED_BALANCE_CACHE tables used %d S", (t2 - t1)/1000);
+            Logger.logDebugMessage("sync ACCOUNT_GUARANTEED_BALANCE and ACCOUNT_GUARANTEED_BALANCE_CACHE tables used " +
+                    "%d S", (t2 - t1) / 1000);
         } catch (Exception e) {
             Logger.logWarningMessage("Sync ACCOUNT_GUARANTEED_BALANCE and ACCOUNT_GUARANTEED_BALANCE_CACHE tables occur error %s, rollback and wait for next", e.getMessage());
             if(openNewDbTx) {
                 Db.db.rollbackTransaction();
             }
         }finally {
-            if(openNewDbTx) {
+            if (openNewDbTx) {
                 Db.db.endTransaction();
+            } else {
+                DbUtils.close(con);
             }
         }
 
         openNewDbTx = false;
         try {
-            if(!Db.db.isInTransaction()) {
-                Db.db.beginTransaction();
+            if (!Db.db.isInTransaction()) {
+                con = Db.db.beginTransaction();
                 openNewDbTx = true;
+            } else {
+                con = Db.db.getConnection();
             }
             long t1 = System.currentTimeMillis();
-            Account.syncAccountPocScoreTable("ACCOUNT_POC_SCORE", "ACCOUNT_POC_SCORE_CACHE", Constants.SYNC_WORK_BLOCK_NUM);
-            Account.syncAccountPocScoreTable("ACCOUNT_POC_SCORE_CACHE", "ACCOUNT_POC_SCORE_HISTORY", Constants.SYNC_CACHE_BLOCK_NUM);
-            if(openNewDbTx) {
+            Account.syncAccountPocScoreTable(con, "ACCOUNT_POC_SCORE", "ACCOUNT_POC_SCORE_CACHE",
+                    Constants.SYNC_WORK_BLOCK_NUM);
+            Account.syncAccountPocScoreTable(con, "ACCOUNT_POC_SCORE_CACHE", "ACCOUNT_POC_SCORE_HISTORY",
+                    Constants.SYNC_CACHE_BLOCK_NUM);
+            if (openNewDbTx) {
                 Db.db.commitTransaction();
             }
             long t2 = System.currentTimeMillis();
-            Logger.logDebugMessage("Sync ACCOUNT_POC_SCORE and ACCOUNT_POC_SCORE_CACHE tables used %d S", (t2 - t1)/1000);
+            Logger.logDebugMessage("Sync ACCOUNT_POC_SCORE and ACCOUNT_POC_SCORE_CACHE tables used %d S", (t2 - t1) / 1000);
         } catch (Exception e) {
             Logger.logWarningMessage("Sync ACCOUNT_POC_SCORE and ACCOUNT_POC_SCORE_CACHE tables occur error %s, " +
                     "rollback and wait for next", e.getMessage());
@@ -331,6 +347,8 @@ public class PocProcessorImpl implements PocProcessor {
         } finally {
             if (openNewDbTx) {
                 Db.db.endTransaction();
+            } else {
+                DbUtils.close(con);
             }
         }
         if (Constants.MANUAL_SYNC_BUTTON) {
