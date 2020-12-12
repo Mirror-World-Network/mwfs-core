@@ -31,8 +31,6 @@ import java.util.*;
 
 public final class Constants {
 
-    public static boolean isCloseGuard = Conch.getBooleanProperty("sharder.closeGuard");
-
     /**
      * Network definition
      */

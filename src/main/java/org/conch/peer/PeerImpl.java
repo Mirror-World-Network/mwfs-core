@@ -539,7 +539,7 @@ final class PeerImpl implements Peer {
             /**
              * Check for blacklisted peer
              */
-            if (Guard.OPEN_BLACKLIST_FILTER != 0 && isBlacklisted()) {
+            if (Guard.isOpen() && isBlacklisted()) {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("error", Errors.BLACKLISTEDTHEM);
                 jsonObject.put("cause", getBlacklistingCause());
@@ -664,6 +664,7 @@ final class PeerImpl implements Peer {
                      * 新增逻辑处理
                      *  1. 若返回的信息是：对方将我加入黑名单后，我也应将对方加入黑名单
                      *  2. 将对方加入黑名单的目的：黑名单有效期内不再与该节点进行通信，有效降低对方节点的网络负载
+                     *  see {@link PeerServlet#process(org.conch.peer.PeerImpl, java.io.Reader)}
                      */
                     blacklist("Peer " + host + " version " + version + " returned error: " + response.toJSONString());
                 }

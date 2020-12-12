@@ -2,23 +2,25 @@ package org.conch.security;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
-import org.conch.chain.CheckSumValidator;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Map;
+import org.conch.Conch;
 import org.conch.common.Constants;
 import org.conch.peer.Peer;
 import org.conch.peer.Peers;
 import org.conch.util.Logger;
 import sun.net.util.IPAddressUtil;
 
-import java.text.Format;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Map;
-
 /**
  * Used to guard the client to avoid the viciously tcp/ip connect,
  * api request and others resources consumption
  */
 public class Guard {
+
+    public static boolean isCloseGuard = Conch.getBooleanProperty("sharder.closeGuard");
+    /** Set 0 to close, non-0 to open */
+    public static int OPEN_BLACKLIST_FILTER = 0;
 
     //TODO time based block list
     // black peer validation in : org.conch.peer.PeerServlet.process
@@ -42,16 +44,15 @@ public class Guard {
     public static int MAX_THRESHOLD_PER_HOUR = 1 * MULTIPLE;
     public static int MAX_TOTAL_CONNECT_COUNT_PER_DAY = 500 * MULTIPLE;
 
-    /**
-     * Set 0 to close, non-0 to open
-     */
-    public static int OPEN_BLACKLIST_FILTER = 0;
-
     private static Integer threshold = 0;
     private static final Integer ONE_HOUR = 1000 * 60 * 60;
     private static final Integer ONE_MINUTE = 1000 * 60;
     private static long lastTime = System.currentTimeMillis();
     private static String lastDate = getCurrentDate(new Date());
+
+    public static boolean isOpen() {
+        return OPEN_BLACKLIST_FILTER != 0 && !isCloseGuard;
+    }
 
     public static String getCurrentDate(Date date) {
         SimpleDateFormat ft = new SimpleDateFormat("yyyyMMdd");
@@ -62,7 +63,7 @@ public class Guard {
         if (ip == null) {
             return false;
         }
-        Logger.logDebugMessage("Verify LAN IP: " + ip);
+        //Logger.logDebugMessage("Verify LAN IP: " + ip);
         byte[] addr = IPAddressUtil.textToNumericFormatV4(ip);
         return internalIp(addr);
     }
@@ -101,6 +102,11 @@ public class Guard {
 
     /**
      * 单个IP连接频率统计 & 防护
+     *  * 加入IP连接数限制逻辑
+     *  1. 对IP连接数 进行计数
+     *  2. 连接数比对，超过最大值加入黑名单
+     *  3. 连接频次记录，超过阈值加入黑名单
+     *
      * <p>
      * 定义频率阈值 FREQUENCY = 6次/min, 超过20次/min直接拉入黑名单
      * 每小时可超过阈值次数 threshold <= MAX_THRESHOLD_PER_HOUR
@@ -122,7 +128,7 @@ public class Guard {
         String startDate = getCurrentDate(new Date());
         try {
             // 检查是否 关闭状态
-            if (FREQUENCY == -1 || Constants.isCloseGuard) {
+            if (FREQUENCY == -1 || !isOpen()) {
                 return;
             }
             if ("127.0.0.1".equals(host)
