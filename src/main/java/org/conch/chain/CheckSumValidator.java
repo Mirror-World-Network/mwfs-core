@@ -276,12 +276,32 @@ public class CheckSumValidator {
             // String readJsonFile = org.conch.util.JSON.readJsonFile("conf/settings.json");
             // object = JSON.parseObject(readJsonFile);
 
-            JSONObject guardSettings = (JSONObject) object.get("GuardSettings");
-            JSONObject dirtyPocTxs = (JSONObject) object.get("DirtyPocTxs");
-            JSONObject dirtyPoolAccounts = (JSONObject) object.get("DirtyPoolAccounts");
-            JSONObject ignoreTxs = (JSONObject) object.get("IgnoreTxs");
-            JSONObject IgnoreBlocks = (JSONObject) object.get("IgnoreBlocks");
-            JSONObject pocNodeTypeTxsV1 = (JSONObject) object.get("pocNodeTypeTxsV1");
+            JSONObject guardSettings = null;
+            if (object.containsKey("GuardSettings")) {
+                guardSettings = object.getJSONObject("GuardSettings");
+            }
+            JSONObject dirtyPocTxs = null;
+            if (object.containsKey("DirtyPocTxs")) {
+                dirtyPocTxs = object.getJSONObject("DirtyPocTxs");
+            }
+            JSONObject dirtyPoolAccounts = null;
+            if (object.containsKey("DirtyPoolAccounts")) {
+                dirtyPoolAccounts = object.getJSONObject("DirtyPoolAccounts");
+            }
+            JSONObject ignoreTxs = null;
+            if (object.containsKey("IgnoreTxs")) {
+                ignoreTxs = object.getJSONObject("IgnoreTxs");
+            }
+            JSONObject IgnoreBlocks = null;
+            if (object.containsKey("IgnoreBlocks")) {
+                IgnoreBlocks = object.getJSONObject("IgnoreBlocks");
+            } else if (object.containsKey("IgnoreBlokcs")) {
+                IgnoreBlocks = object.getJSONObject("IgnoreBlokcs");
+            }
+            JSONObject pocNodeTypeTxsV1 = null;
+            if (object.containsKey("pocNodeTypeTxsV1")) {
+                pocNodeTypeTxsV1 = object.getJSONObject("pocNodeTypeTxsV1");
+            }
 
             try {
                 if (guardSettings != null) {
