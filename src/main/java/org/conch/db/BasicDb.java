@@ -203,7 +203,7 @@ public class BasicDb {
     private static final int MAX_DB_CONNECTIONS = Conch.getIntProperty("sharder.maxDbConnections");
     private static boolean DEBUG_DETAIL = true;
 
-    protected Connection getPooledConnection() throws SQLException {
+    protected Connection getPooledConnection() {
         Connection con = null;
         try {
             con = cp.getConnection();
@@ -213,19 +213,21 @@ public class BasicDb {
                 Logger.logDebugMessage("Active db connection pool size is %d after acquire a new connection into pool",
                         maxActiveConnections);
                 if (Logger.isLevel(Logger.Level.DEBUG)) {
-                    String stacks = String.format("Acquire stacks detail is[active conn size=%d]: \n",
-                            activeConnections);
+                    String stacks = String.format("Acquire stacks(thread id=%d, thread name=%s, active conn size=%d) " +
+                                    "detail: \n",
+                            Thread.currentThread().getId(), Thread.currentThread().getName(), activeConnections);
                     for (StackTraceElement ele : Thread.currentThread().getStackTrace()) {
-                        stacks += String.format("[DEBUG] stack in getPooledConnection=> %s$%s$%s#%d\n",
+                        stacks += String.format("[DEBUG] %s$%s$%s#%d\n",
                                 ele.getClassName(), ele.getMethodName(), ele.getFileName(), ele.getLineNumber());
                     }
                     if (DEBUG_DETAIL) {
                         Logger.logDebugMessage(stacks);
+                        Logger.logWarningMessage(stacks);
                     }
                 }
             }
 
-            if (maxActiveConnections >= MAX_DB_CONNECTIONS) {
+            if (exceedMaxConnections()) {
                 Logger.logDebugMessage("Current active db connection pool size is %d larger than max size %d",
                         maxActiveConnections, MAX_DB_CONNECTIONS);
                 checkAndRestart();
@@ -237,6 +239,10 @@ public class BasicDb {
         }
 
         return con;
+    }
+
+    private boolean exceedMaxConnections() {
+        return maxActiveConnections >= MAX_DB_CONNECTIONS;
     }
 
     private static void checkAndRestart() {
