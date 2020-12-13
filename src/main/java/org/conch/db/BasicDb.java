@@ -214,15 +214,9 @@ public class BasicDb {
                                 ". You can see stack detail in the 'warn.log'.",
                         maxActiveConnections);
                 if (Logger.isLevel(Logger.Level.DEBUG)) {
-                    String stacks = String.format("Acquire stacks(thread id=%d, thread name=%s, active conn size=%d) " +
-                                    "detail: \n",
-                            Thread.currentThread().getId(), Thread.currentThread().getName(), activeConnections);
-                    for (StackTraceElement ele : Thread.currentThread().getStackTrace()) {
-                        stacks += String.format("[DEBUG] %s$%s$%s#%d\n",
-                                ele.getClassName(), ele.getMethodName(), ele.getFileName(), ele.getLineNumber());
-                    }
+                    String stacks = String.format("Acquire stacks(active conn size=%d) \n", activeConnections);
                     if (DEBUG_DETAIL) {
-                        Logger.logWarningMessage(stacks);
+                        Logger.logWarningMessage(stacks + Logger.callStack());
                     }
                 }
             }

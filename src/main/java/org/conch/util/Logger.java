@@ -394,19 +394,39 @@ public final class Logger {
     /**
      * Log a debug exception
      *
-     * @param       message             Message
-     * @param       exc                 Exception
+     * @param message Message
+     * @param exc Exception
      */
     public static void logDebugMessage(String message, Throwable exc) {
         doLog(Level.DEBUG, message, exc);
     }
 
     /**
+     * Call stack
+     *
+     * @return
+     */
+    public static String callStack() {
+        String stacks = String.format("[DEBUG] Call stacks detail(thread name=%s, thread id=%d): \n",
+                Thread.currentThread().getName(), Thread.currentThread().getId());
+        StackTraceElement[] elements = Thread.currentThread().getStackTrace();
+        for (int i = 0; i < elements.length; i++) {
+            if (i <= 1) {
+                continue;
+            }
+            stacks += String.format("[DEBUG] %s#%s($%s:%d)\n", elements[i].getClassName(),
+                    elements[i].getMethodName(), elements[i].getFileName(), elements[i].getLineNumber());
+        }
+        return stacks;
+    }
+
+
+    /**
      * Log the event
      *
-     * @param       level               Level
-     * @param       message             Message
-     * @param       exc                 Exception
+     * @param level Level
+     * @param message Message
+     * @param exc Exception
      */
     private static void doLog(Level level, String message, Throwable exc) {
         String logMessage = message;
