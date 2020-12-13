@@ -199,7 +199,7 @@ public class BasicDb {
     }
 
     private static int exceedMaxCount = 0;
-    private static final int RESTART_COUNT = Constants.isDevnet() ? 10 : 500;
+    private static final int RESTART_COUNT = Constants.isDevnet() ? 10 : 30;
     private static final int MAX_DB_CONNECTIONS = Conch.getIntProperty("sharder.maxDbConnections");
     private static boolean DEBUG_DETAIL = true;
 
