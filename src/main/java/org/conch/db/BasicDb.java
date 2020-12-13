@@ -210,7 +210,8 @@ public class BasicDb {
             int activeConnections = cp.getActiveConnections();
             if (activeConnections > maxActiveConnections) {
                 maxActiveConnections = activeConnections;
-                Logger.logDebugMessage("Active db connection pool size is %d after acquire a new connection into pool",
+                Logger.logDebugMessage("Active db connection pool size is %d after acquire a new connection into pool" +
+                                ". You can see stack detail in the 'warn.log'.",
                         maxActiveConnections);
                 if (Logger.isLevel(Logger.Level.DEBUG)) {
                     String stacks = String.format("Acquire stacks(thread id=%d, thread name=%s, active conn size=%d) " +
@@ -221,7 +222,6 @@ public class BasicDb {
                                 ele.getClassName(), ele.getMethodName(), ele.getFileName(), ele.getLineNumber());
                     }
                     if (DEBUG_DETAIL) {
-                        Logger.logDebugMessage(stacks);
                         Logger.logWarningMessage(stacks);
                     }
                 }
