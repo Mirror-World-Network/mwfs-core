@@ -7,7 +7,7 @@ export default {
     sharderFoundationHost: 'mw.run',
     sharderFoundationTestHost: 'test.mw.run',
     apiUrl: '',
-    cfg: {defaultInterval: 300000, soonInterval: 60000, slowInterval: 600000},
+    cfg: {defaultInterval: 300000, soonInterval: 20000, slowInterval: 600000},
     epochBeginning: -1,
     newConsole: null,
     isOpenConsole: false,
@@ -639,7 +639,6 @@ export default {
         return SSO.netWorkType === 'Devnet';
     },
     isOpenApiProxy() {
-        console.log("isOpenApiProxy", SSO.state && SSO.state.apiProxy);
         return SSO.state && SSO.state.apiProxy;
     },
     urlPrefix() {

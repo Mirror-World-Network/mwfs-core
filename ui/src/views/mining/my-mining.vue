@@ -10,7 +10,7 @@
         <div v-if="tabPosition === 'join'">
             <div class="mining-list">
                 <el-row :gutter="0">
-                    <el-col :span="24" v-for="(mining,index) in joinList">
+                    <el-col :span="24" v-for="(mining,index) in joinList" :key="index">
                         <div class="grid-content">
                             <div class="info">
                                 <h2>{{$t('mining.index.pool')}}{{index}}</h2>
@@ -43,7 +43,7 @@
         <div v-if="tabPosition === 'create'">
             <div class="mining-list create">
                 <el-row :gutter="0">
-                    <el-col :span="24" v-for="(mining,index) in createList">
+                    <el-col :span="24" v-for="(mining,index) in createList" :key="index">
                         <div class="grid-content">
                             <div class="info">
                                 <h2>{{$t('mining.index.pool')}}{{index}}</h2>

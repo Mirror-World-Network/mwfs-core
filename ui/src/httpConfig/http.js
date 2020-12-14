@@ -9,7 +9,7 @@ import { Message } from 'element-ui';
 import cookie from "../../static/sso/js/cookie.js";
 
 // axios默认配置
-axios.defaults.timeout = 30000;   // 超时时间
+axios.defaults.timeout = 50000;   // 超时时间
 axios.defaults.baseURL = apiURL;  // 默认地址
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 /**

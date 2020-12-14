@@ -358,10 +358,15 @@
             getData: function () {
                 const _this = this;
                 // if(_this.i%30 === 0){
-                _this.blocksLeft = SSO.blocksLeft;
+                // _this.blocksLeft = SSO.blocksLeft;
+                //后端此处请求的数据未发送变化
                 _this.$global.setBlockchainState(_this).then(res => {
                     _this.blockchainStatus = res.data;
-
+                    
+                    console.log('res.data',res.data)
+                    _this.blocksLeft = res.data.lastBlockchainFeederHeight - res.data.lastBlockHeight;
+                    _this.percentageTotal =  parseInt(res.data.lastBlockHeight/res.data.lastBlockchainFeederHeight *10000)/100;
+                    _this.lastBlockHeight = res.data.lastBlockchainFeederHeight;
                     _this.getLatestHubVersion();
                     /*if(_this.$global.isOpenConsole){
                         _this.$global.addToConsole("/sharder?requestType=getBlockchainStatus",'GET',res);
