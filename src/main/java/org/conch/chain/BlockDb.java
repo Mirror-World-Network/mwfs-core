@@ -21,17 +21,28 @@
 
 package org.conch.chain;
 
+import java.math.BigInteger;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import org.conch.Conch;
-import org.conch.common.Constants;
 import org.conch.db.Db;
 import org.conch.db.DbUtils;
 import org.conch.tx.TransactionDb;
 import org.conch.tx.TransactionImpl;
 import org.conch.util.Logger;
-
-import java.math.BigInteger;
-import java.sql.*;
-import java.util.*;
 
 public final class BlockDb {
 
@@ -409,26 +420,6 @@ public final class BlockDb {
         } finally {
             clearBlockCache();
         }
-    }
-
-    /**
-     *
-     * @return
-     */
-    public static boolean reachRewardSettlementHeight(int height) {
-        /*try (Connection con = Db.db.getConnection()) {
-            PreparedStatement pstmt = con.prepareStatement("SELECT count(id) num FROM block WHERE HAS_REWARD_DISTRIBUTION = false AND HEIGHT <= " + height);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt("num") > Constants.SETTLEMENT_INTERVAL_SIZE;
-                }
-                return false;
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e.toString(), e);
-        }*/
-        return (height % Constants.SETTLEMENT_INTERVAL_SIZE) == 0;
     }
 
     /**

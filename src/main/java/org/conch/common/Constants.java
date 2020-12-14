@@ -250,7 +250,7 @@ public final class Constants {
 
     //Coinbase
     public static final int COINBASE_CROWD_MINER_OPEN_HEIGHT = isTestnetOrDevnet() ? 0 : 0;
-    public static final int SETTLEMENT_INTERVAL_SIZE = Conch.getIntProperty("sharder.rewards.settlementInterval");
+    private static final int SETTLEMENT_INTERVAL_SIZE = Conch.getIntProperty("sharder.rewards.settlementInterval");
 
     //OSS
     public static final String OSS_PREFIX = "https://mwfs.oss-cn-shenzhen.aliyuncs.com/";
@@ -266,12 +266,28 @@ public final class Constants {
     public static Boolean GENERATE_EXPIRED_FILE_BUTTON = Conch.getBooleanProperty("sharder.generateExpiredFileButton"
             , false);
 
-    public static boolean updateHistoryRecord(){
-        if("new".equalsIgnoreCase(HISTORY_RECORD_MODE)){
+    /**
+     * Whether reach crowd reward height
+     *
+     * @param height
+     * @return
+     */
+    public static boolean reachRewardSettlementHeight(int height) {
+        // before 5185 height reward interval is every 432 height
+        int interval = 432;
+        if (height > 5185) {
+            interval = SETTLEMENT_INTERVAL_SIZE;
+        }
+        return (height % interval) == 0;
+    }
+
+    public static boolean updateHistoryRecord() {
+        if ("new".equalsIgnoreCase(HISTORY_RECORD_MODE)) {
             return false;
         }
         return true;
     }
+
     /**
      * chain begin time
      * @param index 0: conch chain, 1: testnet of sharder, otherwise is mainnet of sharder
