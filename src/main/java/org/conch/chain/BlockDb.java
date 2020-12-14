@@ -421,7 +421,7 @@ public final class BlockDb {
             pstmt.setInt(1, height);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    return ((height - rs.getInt("distributeHeight")) > Constants.SETTLEMENT_INTERVAL_SIZE);
+                    return ((height - rs.getInt("distributeHeight")) > Constants.getRewardSettlementHeight(height));
                 }
                 return false;
             }

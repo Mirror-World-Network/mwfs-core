@@ -758,14 +758,16 @@ public class ConchDbVersion extends DbVersion {
                      PreparedStatement pstmtUpdate = con.prepareStatement(
                              "update block set REWARD_DISTRIBUTION_HEIGHT = ? where height <= ? and height > ?");
                      ResultSet rs = pstmt.executeQuery()) {
+                    // original settlement interval size
+                    int settlementIntervalSize = 432;
                     while (rs.next()) {
                         int height = rs.getInt("height");
-                        int i = height / Constants.SETTLEMENT_INTERVAL_SIZE;
+                        int i = height / settlementIntervalSize;
                         if (i > 0) {
                             for (int j = 1; j <= i; j++) {
-                                int rewardDistributionHeight = j * Constants.SETTLEMENT_INTERVAL_SIZE;
+                                int rewardDistributionHeight = j * settlementIntervalSize;
                                 if (rewardDistributionHeight <= maxDistributeHeight) {
-                                    int latestRewardDistributionHeight = (j - 1) * Constants.SETTLEMENT_INTERVAL_SIZE;
+                                    int latestRewardDistributionHeight = (j - 1) * settlementIntervalSize;
                                     pstmtUpdate.setInt(1, rewardDistributionHeight);
                                     pstmtUpdate.setInt(2, rewardDistributionHeight);
                                     pstmtUpdate.setInt(3, latestRewardDistributionHeight);

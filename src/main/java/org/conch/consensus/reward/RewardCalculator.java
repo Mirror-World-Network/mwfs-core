@@ -288,7 +288,8 @@ public class RewardCalculator {
                 return false;
             }
 
-            if (!Constants.reachRewardSettlementHeight(settlementHeight)) {
+            //if (!Constants.reachRewardSettlementHeight(settlementHeight)) {
+            if (!BlockDb.reachRewardSettlementHeight(settlementHeight)) {
                 Logger.logDebugMessage("Current height %d not reach the crowd miner rewards settlement height. Break " +
                         "and wait next turn.", settlementHeight);
                 return false;
