@@ -24,6 +24,7 @@ package org.conch.peer;
 import org.conch.Conch;
 import org.conch.chain.BlockchainProcessor;
 import org.conch.common.Constants;
+import org.conch.security.Guard;
 import org.conch.util.CountingInputReader;
 import org.conch.util.CountingOutputWriter;
 import org.conch.util.JSON;
@@ -295,9 +296,7 @@ public final class PeerServlet extends WebSocketServlet {
      * @return                      JSON response
      */
     private JSONStreamAware process(PeerImpl peer, Reader inputReader) {
-        //
-        // Check for blacklisted peer
-        //
+        /** Check for blacklisted peer */
         if (peer.isBlacklisted()) {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("error", Errors.BLACKLISTED);
@@ -305,15 +304,21 @@ public final class PeerServlet extends WebSocketServlet {
             return jsonObject;
         }
 
+        JSONObject jsonObject = Guard.isSelfClosingPeer(peer.getHost());
+        if ((Boolean) jsonObject.get(Guard.KEY_NEED_CLOSING)) {
+            return jsonObject;
+        }
+        Guard.defense(peer.getHost());
+
         //
         // Process the request
         //
         try (CountingInputReader cr = new CountingInputReader(inputReader, Peers.MAX_REQUEST_SIZE)) {
-            JSONObject request = (JSONObject)JSONValue.parseWithException(cr);
+            JSONObject request = (JSONObject) JSONValue.parseWithException(cr);
             //
             //network isolation
             //
-//            String requestType = (String)request.get("requestType");
+            //            String requestType = (String)request.get("requestType");
 //            if("getInfo".equals(requestType) || "addPeers".equals(requestType)){
 //                if(Peers.getPeer(peer.getHost()) == null){
 //                    String url = Conch.getStringProperty("sharder.authenticationServer");

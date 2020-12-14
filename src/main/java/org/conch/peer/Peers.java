@@ -35,6 +35,7 @@ import org.conch.http.API;
 import org.conch.http.APIEnum;
 import org.conch.http.ForceConverge;
 import org.conch.mint.Generator;
+import org.conch.security.Guard;
 import org.conch.tx.Transaction;
 import org.conch.util.*;
 import org.eclipse.jetty.server.Connector;
@@ -76,7 +77,7 @@ public final class Peers {
 
     static final int connectTimeout;
     static final int readTimeout;
-    static final int blacklistingPeriod;
+    public static final int blacklistingPeriod;
     static final boolean getMorePeers;
     // change 20 -> 400, because one block include more than 2000 txs at 2018.11.21 
     public static final int MAX_REQUEST_SIZE = 400 * 1024 * 1024;
@@ -582,6 +583,7 @@ public final class Peers {
                 int curTime = Conch.getEpochTime();
                 for (PeerImpl peer : peers.values()) {
                     peer.updateBlacklistedStatus(curTime);
+                    Guard.checkAndRemoveSelfClosingPeer(peer.getHost(), curTime);
                 }
 
             } catch (Exception e) {

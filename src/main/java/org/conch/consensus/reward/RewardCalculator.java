@@ -277,27 +277,31 @@ public class RewardCalculator {
      */
     private static boolean checkAndSettleCrowdMinerRewards(Transaction tx) {
         if (!Db.db.isInTransaction()) {
-            throw new IllegalStateException("RewardCalculator#checkAndSettleCrowdMinerRewards method should in a transaction, open the tx before call this method");
+            throw new IllegalStateException("RewardCalculator#checkAndSettleCrowdMinerRewards method should in a " +
+                    "transaction, open the tx before call this method");
         }
         try {
             int settlementHeight = tx.getHeight();
-            if(settlementHeight <= 0) {
-                Logger.logWarningMessage("Can't finish the crowd miner rewards settlement when height %d <= 0. Break and wait next turn.", settlementHeight);
+            if (settlementHeight <= 0) {
+                Logger.logWarningMessage("Can't finish the crowd miner rewards settlement when height %d <= 0. Break " +
+                        "and wait next turn.", settlementHeight);
                 return false;
             }
 
-            if(!BlockDb.reachRewardSettlementHeight(settlementHeight)){
-                Logger.logDebugMessage("Current height %d not reach the crowd miner rewards settlement height. Break and wait next turn.", settlementHeight);
+            if (!Constants.reachRewardSettlementHeight(settlementHeight)) {
+                Logger.logDebugMessage("Current height %d not reach the crowd miner rewards settlement height. Break " +
+                        "and wait next turn.", settlementHeight);
                 return false;
             }
 
             // Settlement
-            Map<Long,Long> crowdMinerRewardMap = Maps.newHashMap();
+            Map<Long, Long> crowdMinerRewardMap = Maps.newHashMap();
             List<Long> blockIds = Lists.newArrayList();
             List<? extends Block> rewardDistributionTxs = BlockDb.getSettlementBlocks(settlementHeight);
-            if(rewardDistributionTxs == null || rewardDistributionTxs.size() == 0){
+            if (rewardDistributionTxs == null || rewardDistributionTxs.size() == 0) {
                 Logger.logDebugMessage("No crowd rewards txs need be settlement at current height %d, " +
-                        "maybe these txs be distributed at settlement height %d already.", Conch.getHeight(), settlementHeight);
+                        "maybe these txs be distributed at settlement height %d already.", Conch.getHeight(),
+                        settlementHeight);
                 return false;
             }
 

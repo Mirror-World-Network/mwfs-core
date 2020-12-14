@@ -92,7 +92,7 @@
                     </div>
                     <div class="navbar_refresh">
                         <el-tooltip class="item csp" :content="$t('header.refresh')" placement="bottom"
-                                    effect="light" v-if="isHubInit">
+                                    effect="light">
                             <i class="el-icon-refresh-right" @click="refreshPage"></i>
                         </el-tooltip>
                     </div>
@@ -142,7 +142,7 @@
                     </div>
                     <div class="navbar_refresh">
                         <el-tooltip class="item csp" :content="$t('header.refresh')" placement="bottom"
-                                    effect="light" v-if="isHubInit">
+                                    effect="light">
                             <i class="el-icon-refresh-right" @click="refreshPage"></i>
                         </el-tooltip>
                     </div>

@@ -2620,19 +2620,23 @@ public final class Account {
     }
 
 
-    public static void syncAccountTable(String sourceTable,String targetTable,int dif) {
-        Connection con = null;
+    public static void syncAccountTable(Connection con, String sourceTable, String targetTable, int dif) {
         try {
-            con = Db.db.getConnection();
+            if (con == null) {
+                con = Db.db.getConnection();
+            }
             long t1 = System.currentTimeMillis();
             Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             String idQuerySql = "SELECT distinct id" + " FROM " + sourceTable;
             ResultSet accountIdRs = statement.executeQuery(idQuerySql);
             while (accountIdRs.next()) {
                 long accountId = accountIdRs.getLong("id");
-                PreparedStatement pstmtSelectWork = con.prepareStatement("SELECT max(HEIGHT) height FROM " + sourceTable + " where id = " + accountId);
-                PreparedStatement pstmtSelectHistory = con.prepareStatement("SELECT max(HEIGHT) height FROM " + targetTable + " where id = " + accountId);
-                PreparedStatement pstmtSelect = con.prepareStatement("SELECT DB_ID,ID,BALANCE,UNCONFIRMED_BALANCE,FORGED_BALANCE," +
+                PreparedStatement pstmtSelectWork =
+                 con.prepareStatement("SELECT max(HEIGHT) height FROM " + sourceTable + " where id = " + accountId);
+                PreparedStatement pstmtSelectHistory =
+                 con.prepareStatement("SELECT max(HEIGHT) height FROM " + targetTable + " where id = " + accountId);
+                PreparedStatement pstmtSelect = con.prepareStatement("SELECT DB_ID,ID,BALANCE,UNCONFIRMED_BALANCE," +
+                 "FORGED_BALANCE," +
                         "ACTIVE_LESSEE_ID,HAS_CONTROL_PHASING,HEIGHT,LATEST,FROZEN_BALANCE FROM " + sourceTable
                         + " WHERE height > ? and height < ? and id = ?");
 
@@ -2648,13 +2652,14 @@ public final class Account {
                 }
                 int workHeight = workHeightRs.getInt("height");
                 int floorHeight = heightRs.next() ? heightRs.getInt("height") : 0;
-                Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
-                if (workHeight - floorHeight < dif) {
+                //Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
+
+                int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
+
+                if (workHeight - floorHeight < dif || ceilingHeight > workHeight) {
 //                    return;
                     continue;
                 }
-                int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
-
                 pstmtSelect.setInt(1, floorHeight);
                 pstmtSelect.setInt(2, ceilingHeight);
                 pstmtSelect.setLong(3, accountId);
@@ -2680,10 +2685,10 @@ public final class Account {
                 PreparedStatement pstmtInsert = con.prepareStatement(sb.toString());
                 pstmtInsert.execute();
                 PreparedStatement pstmtDelete = con.prepareStatement("DELETE FROM " + sourceTable + " "
-                        + "WHERE height < ? and latest = ? and id = ?");
+                        + "WHERE height < ? and id = ?");
                 pstmtDelete.setInt(1, ceilingHeight);
-                pstmtDelete.setBoolean(2, false);
-                pstmtDelete.setLong(3, accountId);
+                //pstmtDelete.setBoolean(2, false);
+                pstmtDelete.setLong(2, accountId);
                 pstmtDelete.execute();
             }
             Logger.logDebugMessage("sync time:" + (System.currentTimeMillis() - t1));
@@ -2693,17 +2698,21 @@ public final class Account {
     }
 
 
-    public static void syncAccountGuaranteedBalanceTable(String sourceTable,String targetTable,int dif) {
-        Connection con = null;
+    public static void syncAccountGuaranteedBalanceTable(Connection con, String sourceTable, String targetTable,
+     int dif) {
         try {
-            con = Db.db.getConnection();
+            if (con == null) {
+                con = Db.db.getConnection();
+            }
             Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             String idQuerySql = "SELECT distinct ACCOUNT_ID" + " FROM " + sourceTable;
             ResultSet accountIdRs = statement.executeQuery(idQuerySql);
             while (accountIdRs.next()) {
                 long accountId = accountIdRs.getLong("ACCOUNT_ID");
-                PreparedStatement pstmtSelectWork = con.prepareStatement("SELECT max(HEIGHT) height FROM " + sourceTable + " where account_id = " + accountId);
-                PreparedStatement pstmtSelectHistory = con.prepareStatement("SELECT max(HEIGHT) height FROM " + targetTable + " where account_id = " + accountId);
+                PreparedStatement pstmtSelectWork =
+                 con.prepareStatement("SELECT max(HEIGHT) height FROM " + sourceTable + " where account_id = " + accountId);
+                PreparedStatement pstmtSelectHistory =
+                 con.prepareStatement("SELECT max(HEIGHT) height FROM " + targetTable + " where account_id = " + accountId);
                 PreparedStatement pstmtSelect = con.prepareStatement("SELECT DB_ID,ACCOUNT_ID,ADDITIONS,HEIGHT,LATEST" +
                         " FROM " + sourceTable + " WHERE height > ? and height < ? and account_id = ?");
 
@@ -2719,13 +2728,13 @@ public final class Account {
                 }
                 int workHeight = workHeightRs.getInt("height");
                 int floorHeight = heightRs.next() ? heightRs.getInt("height") : 0;
-                Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
-                if (workHeight - floorHeight < dif) {
+                //Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
+
+                int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
+                if (workHeight - floorHeight < dif || ceilingHeight > workHeight) {
 //                    return;
                     continue;
                 }
-                int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
-
                 pstmtSelect.setInt(1, floorHeight);
                 pstmtSelect.setInt(2, ceilingHeight);
                 pstmtSelect.setLong(3, accountId);
@@ -2745,10 +2754,10 @@ public final class Account {
                 PreparedStatement pstmtInsert = con.prepareStatement(sb.toString());
                 pstmtInsert.execute();
                 PreparedStatement pstmtDelete = con.prepareStatement("DELETE FROM " + sourceTable
-                        + " WHERE height < ? and latest = ? and account_id = ?");
+                        + " WHERE height < ? and account_id = ?");
                 pstmtDelete.setInt(1, ceilingHeight);
-                pstmtDelete.setBoolean(2, false);
-                pstmtDelete.setLong(3, accountId);
+                //pstmtDelete.setBoolean(2, false);
+                pstmtDelete.setLong(2, accountId);
                 pstmtDelete.execute();
             }
         } catch (SQLException e) {
@@ -2757,18 +2766,22 @@ public final class Account {
     }
 
 
-    public static void syncAccountLedgerTable(String sourceTable,String targetTable,int dif) {
-        Connection con = null;
+    public static void syncAccountLedgerTable(Connection con, String sourceTable, String targetTable, int dif) {
         try {
-            con = Db.db.getConnection();
+            if (con == null) {
+                con = Db.db.getConnection();
+            }
             Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             String idQuerySql = "SELECT distinct ACCOUNT_ID" + " FROM " + sourceTable;
             ResultSet accountIdRs = statement.executeQuery(idQuerySql);
             while (accountIdRs.next()) {
                 long accountId = accountIdRs.getLong("ACCOUNT_ID");
-                PreparedStatement pstmtSelectWork = con.prepareStatement("SELECT max(HEIGHT) height FROM " + sourceTable + " where account_id = " + accountId);
-                PreparedStatement pstmtSelectHistory = con.prepareStatement("SELECT max(HEIGHT) height FROM " + targetTable + " where account_id = " + accountId);
-                PreparedStatement pstmtSelect = con.prepareStatement("SELECT DB_ID,ACCOUNT_ID,EVENT_TYPE,EVENT_ID,HOLDING_TYPE," +
+                PreparedStatement pstmtSelectWork =
+                 con.prepareStatement("SELECT max(HEIGHT) height FROM " + sourceTable + " where account_id = " + accountId);
+                PreparedStatement pstmtSelectHistory =
+                 con.prepareStatement("SELECT max(HEIGHT) height FROM " + targetTable + " where account_id = " + accountId);
+                PreparedStatement pstmtSelect = con.prepareStatement("SELECT DB_ID,ACCOUNT_ID,EVENT_TYPE,EVENT_ID," +
+                 "HOLDING_TYPE," +
                         "HOLDING_ID,CHANGE,BALANCE,BLOCK_ID,HEIGHT,TIMESTAMP,LATEST FROM " + sourceTable
                         + " WHERE height > ? and height < ? and account_id = ?");
 
@@ -2784,13 +2797,14 @@ public final class Account {
                 }
                 int workHeight = workHeightRs.getInt("height");
                 int floorHeight = heightRs.next() ? heightRs.getInt("height") : 0;
-                Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
-                if (workHeight - floorHeight < dif) {
+                //Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
+
+                int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
+
+                if (workHeight - floorHeight < dif || ceilingHeight > workHeight) {
 //                    return;
                     continue;
                 }
-                int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
-
                 pstmtSelect.setInt(1, floorHeight);
                 pstmtSelect.setInt(2, ceilingHeight);
                 pstmtSelect.setLong(3, accountId);
@@ -2818,10 +2832,10 @@ public final class Account {
                 PreparedStatement pstmtInsert = con.prepareStatement(sb.toString());
                 pstmtInsert.execute();
                 PreparedStatement pstmtDelete = con.prepareStatement("DELETE FROM " + sourceTable
-                        + " WHERE height < ? and latest = ? and account_id = ?");
+                        + " WHERE height < ? and account_id = ?");
                 pstmtDelete.setInt(1, ceilingHeight);
-                pstmtDelete.setBoolean(2, false);
-                pstmtDelete.setLong(3, accountId);
+                //pstmtDelete.setBoolean(2, false);
+                pstmtDelete.setLong(2, accountId);
                 pstmtDelete.execute();
             }
         } catch (SQLException e) {
@@ -2830,17 +2844,20 @@ public final class Account {
     }
 
 
-    public static void syncAccountPocScoreTable(String sourceTable,String targetTable,int dif) {
-        Connection con = null;
+    public static void syncAccountPocScoreTable(Connection con, String sourceTable, String targetTable, int dif) {
         try {
-            con = Db.db.getConnection();
+            if (con == null) {
+                con = Db.db.getConnection();
+            }
             Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             String idQuerySql = "SELECT distinct ACCOUNT_ID" + " FROM " + sourceTable;
             ResultSet accountIdRs = statement.executeQuery(idQuerySql);
             while (accountIdRs.next()) {
                 long accountId = accountIdRs.getLong("ACCOUNT_ID");
-                PreparedStatement pstmtSelectWork = con.prepareStatement("SELECT max(HEIGHT) height FROM " + sourceTable + " where account_id = " + accountId);
-                PreparedStatement pstmtSelectHistory = con.prepareStatement("SELECT max(HEIGHT) height FROM " + targetTable + " where account_id = " + accountId);
+                PreparedStatement pstmtSelectWork =
+                 con.prepareStatement("SELECT max(HEIGHT) height FROM " + sourceTable + " where account_id = " + accountId);
+                PreparedStatement pstmtSelectHistory =
+                 con.prepareStatement("SELECT max(HEIGHT) height FROM " + targetTable + " where account_id = " + accountId);
                 PreparedStatement pstmtSelect = con.prepareStatement("SELECT DB_ID,ACCOUNT_ID,POC_SCORE,HEIGHT,POC_DETAIL,LATEST" +
                         " FROM " + sourceTable
                         + " WHERE height > ? and height < ? and account_id = ?");
@@ -2857,13 +2874,13 @@ public final class Account {
                 }
                 int workHeight = workHeightRs.getInt("height");
                 int floorHeight = heightRs.next() ? heightRs.getInt("height") : 0;
-                Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
-                if (workHeight - floorHeight < dif) {
+                //Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
+                int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
+
+                if (workHeight - floorHeight < dif || ceilingHeight > workHeight) {
 //                    return;
                     continue;
                 }
-                int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
-
                 pstmtSelect.setInt(1, floorHeight);
                 pstmtSelect.setInt(2, ceilingHeight);
                 pstmtSelect.setLong(3, accountId);
@@ -2884,10 +2901,10 @@ public final class Account {
                 PreparedStatement pstmtInsert = con.prepareStatement(sb.toString());
                 pstmtInsert.execute();
                 PreparedStatement pstmtDelete = con.prepareStatement("DELETE FROM " + sourceTable
-                        + " WHERE height < ? and latest = ? and account_id = ?");
+                        + " WHERE height < ? and account_id = ?");
                 pstmtDelete.setInt(1, ceilingHeight);
-                pstmtDelete.setBoolean(2, false);
-                pstmtDelete.setLong(3, accountId);
+                //pstmtDelete.setBoolean(2, false);
+                pstmtDelete.setLong(2, accountId);
                 pstmtDelete.execute();
             }
         } catch (SQLException e) {
