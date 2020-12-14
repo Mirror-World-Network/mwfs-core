@@ -169,7 +169,6 @@ public abstract class CreateTransaction extends APIServlet.APIRequestHandler {
         Appendix.Message message = null;
         Appendix.PrunableEncryptedMessage prunableEncryptedMessage = null;
         Attachment.SaveHash saveHash = null;
-        System.out.println(req.toString());
         if (attachment.getTransactionType().canHaveRecipient() && recipientId != 0) {
             Account recipient = Account.getAccount(recipientId);
             if ("true".equalsIgnoreCase(req.getParameter("encryptedMessageIsPrunable"))) {
