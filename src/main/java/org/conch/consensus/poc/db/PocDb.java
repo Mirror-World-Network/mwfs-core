@@ -806,6 +806,7 @@ public class PocDb  {
     }
 
     public static PocTxBody.PocWeightTable findLastWeightTable(){
+
         boolean isInTx = Db.db.isInTransaction();
         Connection con = null;
         try {
@@ -816,19 +817,29 @@ public class PocDb  {
             pstmt.setByte(2, PocTxWrapper.SUBTYPE_POC_WEIGHT_TABLE);
 
             DbIterator<TransactionImpl> transactions = null;
-            transactions = BlockchainImpl.getInstance().getTransactions(con, pstmt);
-            while (transactions.hasNext()) {
-                Transaction tx = transactions.next();
-                return (PocTxBody.PocWeightTable) tx.getAttachment();
+            try {
+                transactions = BlockchainImpl.getInstance().getTransactions(con, pstmt);
+                while (transactions.hasNext()) {
+                    Transaction tx = transactions.next();
+                    return (PocTxBody.PocWeightTable) tx.getAttachment();
+                }
+            } finally {
+                if (!isInTx) {
+                    DbUtils.close(transactions);
+                }
             }
 
         } catch (SQLException e) {
-            Logger.logErrorMessage("can't findLastWeightTable", e);
-        } finally {
             if (!isInTx) {
                 DbUtils.close(con);
             }
+            Logger.logErrorMessage("can't findLastWeightTable", e);
         }
+        //        finally {
+        //            if (!isInTx) {
+        //                DbUtils.close(con);
+        //            }
+        //        }
         return null;
     }
 
