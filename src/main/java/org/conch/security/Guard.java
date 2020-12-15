@@ -39,7 +39,7 @@ public class Guard {
     private static final String LATEST_ACCESS_TIME_KEY = "latestAccessTime";
     private static final String ACCESS_COUNT_KEY = "accessCount";
     private static Map<String, JSONObject> BLACK_PEERS_MAP = Maps.newConcurrentMap();
-    private static Map<String, JSONObject> BLACK_PEERS_MAP_2 = Maps.newConcurrentMap();
+    private static Map<String, JSONObject> PEERS_ACCESS_RECORD_MAP = Maps.newConcurrentMap();
     /**
      * 若读取配置为空，则使用默认配置 * 放大倍率
      */
@@ -234,9 +234,15 @@ public class Guard {
                 return;
             }
             if (!startDate.equals(lastDate)) {
-                BLACK_PEERS_MAP_2.clear();
+                // 将该日数据存储到指定文件
+//                ConcurrentMap<String, JSONObject> map = Maps.newConcurrentMap();
+//                map.put(lastDate, JSONObject.parseObject(JSON.toJSONString(BLACK_PEERS_MAP_2)));
+//                JSONObject parseObject = JSONObject.parseObject(JSON.toJSONString(map));
+//                org.conch.util.JSON.JsonAppendAlibaba(parseObject, "conf/guardData.json");
+                // TODO 每日将数据存入数据库
+                PEERS_ACCESS_RECORD_MAP.clear();
             }
-            JSONObject accessPeerObj = BLACK_PEERS_MAP_2.get(host);
+            JSONObject accessPeerObj = PEERS_ACCESS_RECORD_MAP.get(host);
             if (accessPeerObj == null) {
                 accessPeerObj = new JSONObject();
                 accessPeerObj.put(FIRST_ACCESS_TIME_KEY, System.currentTimeMillis());
@@ -248,7 +254,8 @@ public class Guard {
                 accessPeerObj.put(LATEST_ACCESS_TIME_KEY, System.currentTimeMillis());
                 accessPeerObj.put(ACCESS_COUNT_KEY, accessPeerObj.getIntValue(ACCESS_COUNT_KEY) + 1);
             }
-            BLACK_PEERS_MAP_2.put(host, accessPeerObj);
+            // 将更新的内容存入MAP
+            PEERS_ACCESS_RECORD_MAP.put(host, accessPeerObj);
             long intervalTime = accessPeerObj.getLongValue(LATEST_ACCESS_TIME_KEY) - accessPeerObj.getLongValue(FIRST_ACCESS_TIME_KEY);
             // 因初期时间间隔不足 x min时，会导致分母过小致使frequency的值会过大，设定一个平均频率稳定期 stablePeriod = 5 min
             if (intervalTime > 0 && intervalTime > FIVE_MINUTE) {

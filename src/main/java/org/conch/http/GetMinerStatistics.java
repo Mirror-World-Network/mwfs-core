@@ -10,6 +10,7 @@ import org.conch.chain.BlockImpl;
 import org.conch.common.ConchException;
 import org.conch.db.Db;
 import org.conch.db.DbIterator;
+import org.conch.db.DbUtils;
 import org.conch.mint.MintStatisticsData;
 import org.conch.util.Convert;
 import org.json.simple.JSONStreamAware;
@@ -31,16 +32,17 @@ import java.util.Map;
  * <li>endHeight - height to
  * </ul>
  */
-public class GetMinerStatistics extends APIServlet.APIRequestHandler{
+public class GetMinerStatistics extends APIServlet.APIRequestHandler {
 
     static final GetMinerStatistics instance = new GetMinerStatistics();
 
-    private GetMinerStatistics(){
-        super(new APITag[]{APITag.INFO},"startHeight", "endHeight");
+    private GetMinerStatistics() {
+        super(new APITag[]{APITag.INFO}, "startHeight", "endHeight");
     }
 
     /**
      * http request return the json format of miner mining data
+     *
      * @param request
      * @return
      * @throws ConchException
@@ -58,15 +60,20 @@ public class GetMinerStatistics extends APIServlet.APIRequestHandler{
             endHeight = Integer.parseInt(endHeightValue);
         }
 
-        DbIterator<BlockImpl> blocks = Conch.getBlockchain().getBlocksByHeight(startHeight,endHeight,new String[]{"TIMESTAMP","ASC"});
-
+        DbIterator<BlockImpl> blocks = null;
         Map<Long, MintStatisticsData> data = new HashMap<>();
-        for (Block block : blocks) {
-            if (data.containsKey(block.getGeneratorId())) {
-                data.get(block.getGeneratorId()).updateData(block, startHeight, endHeight);
-            } else {
-                data.put(block.getGeneratorId(), MintStatisticsData.init(block.getGeneratorId(), block.getTimestamp(), startHeight, endHeight));
+        try {
+            blocks = Conch.getBlockchain().getBlocksByHeight(startHeight, endHeight, new String[]{"TIMESTAMP", "ASC"});
+            for (Block block : blocks) {
+                if (data.containsKey(block.getGeneratorId())) {
+                    data.get(block.getGeneratorId()).updateData(block, startHeight, endHeight);
+                } else {
+                    data.put(block.getGeneratorId(), MintStatisticsData.init(block.getGeneratorId(),
+                            block.getTimestamp(), startHeight, endHeight));
+                }
             }
+        } finally {
+            DbUtils.close(blocks);
         }
         //downloadData(data);
         return JSONData.minerStatistics(data);
@@ -77,10 +84,12 @@ public class GetMinerStatistics extends APIServlet.APIRequestHandler{
      *
      * @param data
      */
-    private static void downloadData(Map<Long, MintStatisticsData> data, String savaPath, int startHeight, int endHeight) {
+    private static void downloadData(Map<Long, MintStatisticsData> data, String savaPath, int startHeight,
+                                     int endHeight) {
         HSSFWorkbook wb = new HSSFWorkbook();
         HSSFSheet sheet = wb.createSheet("矿工信息统计");
-        String[] titles = {"账号", "出块总数", "出块比率", "最近一次出块时间", "平均出块时间(天)", "矿机ip", "节点类型", "pocScore", "pocDetail"};
+        String[] titles = {"账号", "出块总数", "出块比率", "最近一次出块时间", "平均出块时间(天)",
+                "矿机ip", "节点类型", "pocScore", "pocDetail"};
         int rowNum = 0;
         HSSFRow row = sheet.createRow(rowNum);
         HSSFCellStyle style = wb.createCellStyle();
@@ -104,7 +113,10 @@ public class GetMinerStatistics extends APIServlet.APIRequestHandler{
                     mintStatisticsData.getGenerateCount().toString(),
                     mintStatisticsData.getGenerateRate().multiply(new BigDecimal("100")).toString() + "%",
                     Convert.dateFromEpochTime(mintStatisticsData.getLatestMiningTime()),
-                    mintStatisticsData.getAvgMiningTime() == null ? "--" : new BigDecimal(mintStatisticsData.getAvgMiningTime() * 1000).divide(new BigDecimal(24 * 60 * 60 * 1000), 2, BigDecimal.ROUND_FLOOR).toString(),
+                    mintStatisticsData.getAvgMiningTime() == null ? "--" :
+                            new BigDecimal(mintStatisticsData.getAvgMiningTime() * 1000)
+                                    .divide(new BigDecimal(24 * 60 * 60 * 1000), 2, BigDecimal.ROUND_FLOOR)
+                                    .toString(),
                     mintStatisticsData.getMiningMachineIP(),
                     mintStatisticsData.getNoteType(),
                     mintStatisticsData.getPocScore().getTotal().toString(),
@@ -140,22 +152,29 @@ public class GetMinerStatistics extends APIServlet.APIRequestHandler{
 
     /**
      * case of download, use it to download a excel, modify savePath with your local path
+     *
      * @param args
      */
     public static void main(String[] args) {
         Db.init();
         int startHeight = 1;
         int endHeight = 4000;
-        DbIterator<BlockImpl> blocks = Conch.getBlockchain().getBlocksByHeight(startHeight, endHeight, new String[]{"TIMESTAMP", "ASC"});
 
+        DbIterator<BlockImpl> blocks = null;
         Map<Long, MintStatisticsData> data = new HashMap<>();
-        for (Block block : blocks) {
-            if (data.containsKey(block.getGeneratorId())) {
-                data.get(block.getGeneratorId()).updateData(block, startHeight, endHeight);
-            } else {
-                data.put(block.getGeneratorId(), MintStatisticsData.init(block.getGeneratorId(), block.getTimestamp(), startHeight, endHeight));
+        try {
+            blocks = Conch.getBlockchain().getBlocksByHeight(startHeight, endHeight, new String[]{"TIMESTAMP", "ASC"});
+            for (Block block : blocks) {
+                if (data.containsKey(block.getGeneratorId())) {
+                    data.get(block.getGeneratorId()).updateData(block, startHeight, endHeight);
+                } else {
+                    data.put(block.getGeneratorId(), MintStatisticsData.init(block.getGeneratorId(),
+                            block.getTimestamp(), startHeight, endHeight));
+                }
             }
+        } finally {
+            DbUtils.close(blocks);
         }
-        downloadData(data,"D:\\data",startHeight,endHeight);
+        downloadData(data, "D:\\data", startHeight, endHeight);
     }
 }
