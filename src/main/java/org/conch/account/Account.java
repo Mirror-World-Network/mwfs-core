@@ -575,8 +575,6 @@ public final class Account {
 
             }catch (SQLException e) {
                 throw new RuntimeException(e.toString(), e);
-            } finally {
-                DbUtils.close(con);
             }
         }
     };
@@ -872,8 +870,6 @@ public final class Account {
 
             }catch (SQLException e) {
                 throw new RuntimeException(e.toString(), e);
-            } finally {
-                DbUtils.close(con);
             }
         }
     };
@@ -1115,7 +1111,7 @@ public final class Account {
                 && height > Conch.getHeight()) {
             throw new IllegalArgumentException("Height " + height + " exceeds blockchain height " + Conch.getHeight());
         }
-
+        boolean isInTx = Db.db.isInTransaction();
         Connection con = null;
         try {
             con = Db.db.getConnection();
@@ -1174,7 +1170,9 @@ public final class Account {
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
         } finally {
-            DbUtils.close(con);
+            if (!isInTx) {
+                DbUtils.close(con);
+            }
         }
 
     }
@@ -1883,6 +1881,7 @@ public final class Account {
 //                    || fromHeight > Conch.getBlockchain().getHeight()) {
 //                throw new IllegalArgumentException("Height " + fromHeight + " not available for guaranteed balance calculation");
 //            }
+            boolean isInTx = Db.db.isInTransaction();
             Connection con = null;
             try {
                 con = Db.db.getConnection();
@@ -1920,7 +1919,9 @@ public final class Account {
             } catch (SQLException e) {
                 throw new RuntimeException(e.toString(), e);
             }finally {
-                DbUtils.close(con);
+                if (!isInTx) {
+                    DbUtils.close(con);
+                }
             }
         } finally {
             Conch.getBlockchain().readUnlock();
@@ -2536,6 +2537,7 @@ public final class Account {
             return;
         }
         int blockchainHeight = Conch.getHeight();
+        boolean isInTx = Db.db.isInTransaction();
         Connection con = null;
         try {
             con = Db.db.getConnection();
@@ -2573,7 +2575,9 @@ public final class Account {
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
         }finally {
-            DbUtils.close(con);
+            if (!isInTx) {
+                DbUtils.close(con);
+            }
         }
     }
 

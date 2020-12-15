@@ -90,10 +90,8 @@ public final class BlockDb {
             }
         }
         // Search the database
-        Connection con = null;
-        try {
-            con = Db.db.getConnection();
-            PreparedStatement pstmt = con.prepareStatement("SELECT * FROM block WHERE id = ?");
+        try (Connection con = Db.db.getConnection();
+             PreparedStatement pstmt = con.prepareStatement("SELECT * FROM block WHERE id = ?")) {
             pstmt.setLong(1, blockId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 BlockImpl block = null;
@@ -104,8 +102,6 @@ public final class BlockDb {
             }
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
-        }finally {
-            DbUtils.close(con);
         }
     }
 
@@ -165,10 +161,8 @@ public final class BlockDb {
             }
         }
         // Search the database
-        Connection con = null;
-        try  {
-            con = Db.db.getConnection();
-            PreparedStatement pstmt = con.prepareStatement("SELECT * FROM block WHERE height = ?");
+        try (Connection con = Db.db.getConnection();
+             PreparedStatement pstmt = con.prepareStatement("SELECT * FROM block WHERE height = ?")) {
             pstmt.setInt(1, height);
             try (ResultSet rs = pstmt.executeQuery()) {
                 BlockImpl block;
@@ -181,8 +175,6 @@ public final class BlockDb {
             }
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
-        }finally {
-            DbUtils.close(con);
         }
     }
 
@@ -202,10 +194,8 @@ public final class BlockDb {
     }
 
     public static BlockImpl findLastBlock(int timestamp) {
-        Connection con = null;
-        try {
-            con = Db.db.getConnection();
-            PreparedStatement pstmt = con.prepareStatement("SELECT * FROM block WHERE timestamp <= ? ORDER BY timestamp DESC LIMIT 1");
+        try (Connection con = Db.db.getConnection();
+             PreparedStatement pstmt = con.prepareStatement("SELECT * FROM block WHERE timestamp <= ? ORDER BY timestamp DESC LIMIT 1")) {
             pstmt.setInt(1, timestamp);
             BlockImpl block = null;
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -216,18 +206,14 @@ public final class BlockDb {
             return block;
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
-        }finally {
-            DbUtils.close(con);
         }
     }
 
     public static Set<Long> getBlockGenerators(int startHeight) {
         Set<Long> generators = new HashSet<>();
-        Connection con = null;
-        try {
-            con = Db.db.getConnection();
-            PreparedStatement pstmt = con.prepareStatement(
-                    "SELECT generator_id, COUNT(generator_id) AS count FROM block WHERE height >= ? GROUP BY generator_id");
+        try (Connection con = Db.db.getConnection();
+                PreparedStatement pstmt = con.prepareStatement(
+                        "SELECT generator_id, COUNT(generator_id) AS count FROM block WHERE height >= ? GROUP BY generator_id")) {
             pstmt.setInt(1, startHeight);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
@@ -238,8 +224,6 @@ public final class BlockDb {
             }
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
-        }finally {
-            DbUtils.close(con);
         }
         return generators;
     }
