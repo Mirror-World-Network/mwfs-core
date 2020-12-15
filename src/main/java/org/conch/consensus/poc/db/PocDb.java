@@ -64,6 +64,7 @@ public class PocDb  {
         public Map<Long,PocScore> reGenerateAllScores() {
             Map<Long,PocScore> scoreMap = Maps.newHashMap();
             Connection con = null;
+            boolean isInTx = Db.db.isInTransaction();
             try {
                 con = Db.db.getConnection();
                 PreparedStatement pstmt = con.prepareStatement("SELECT poc_detail AS detail, db_id, account_id, height FROM account_poc_score ORDER BY height ASC");
@@ -85,22 +86,29 @@ public class PocDb  {
             } catch (SQLException e) {
                 throw new RuntimeException(e.toString(), e);
             }finally {
-                DbUtils.close(con);
+                if (!isInTx) {
+                    DbUtils.close(con);
+                }
             }
             return scoreMap;
         }
 
         public Map<Long,PocScore> listAll() {
-            Map<Long,PocScore> scoreMap = Maps.newHashMap();
+            Map<Long, PocScore> scoreMap = Maps.newHashMap();
+
+            boolean isInTx = Db.db.isInTransaction();
             Connection con = null;
             try {
                 con = Db.db.getConnection();
-//                PreparedStatement pstmt = con.prepareStatement("SELECT poc_detail AS detail, db_id, account_id, height FROM account_poc_score ORDER BY height DESC");
-                PreparedStatement pstmt = con.prepareStatement("SELECT poc_detail AS detail, db_id, account_id, height FROM account_poc_score WHERE latest = TRUE ORDER BY height DESC");
+                //                PreparedStatement pstmt = con.prepareStatement("SELECT poc_detail AS detail, db_id,
+                //                account_id, height FROM account_poc_score ORDER BY height DESC");
+                PreparedStatement pstmt = con.prepareStatement("SELECT poc_detail AS detail, db_id, account_id, " +
+                        "height FROM account_poc_score WHERE latest = TRUE ORDER BY height DESC");
                 ResultSet rs = pstmt.executeQuery();
-                while(rs.next()){
-                    try{
-                        PocScore pocScore = new PocScore(rs.getLong("account_id"), rs.getInt("height"), rs.getString("detail"));
+                while (rs.next()) {
+                    try {
+                        PocScore pocScore = new PocScore(rs.getLong("account_id"), rs.getInt("height"), rs.getString(
+                                "detail"));
                         scoreMap.put(pocScore.getAccountId(), pocScore);
 //                        // compare the height
 //                        if(scoreMap.containsKey(pocScore.getAccountId())){
@@ -123,17 +131,22 @@ public class PocDb  {
             } catch (SQLException e) {
                 throw new RuntimeException(e.toString(), e);
             }finally {
-                DbUtils.close(con);
+                if (!isInTx) {
+                    DbUtils.close(con);
+                }
             }
             return scoreMap;
         }
 
         public PocScore get(long accountId, int height, boolean loadHistory) {
-            if(height < 0) return null;
+            if (height < 0) {
+                return null;
+            }
 
             // close the start height in query
             int appointStart = -1;
 
+            boolean isInTx = Db.db.isInTransaction();
             Connection con = null;
             try {
                 con = Db.db.getConnection();
@@ -189,7 +202,9 @@ public class PocDb  {
             } catch (SQLException e) {
                 throw new RuntimeException(e.toString(), e);
             }finally {
-                DbUtils.close(con);
+                if (!isInTx) {
+                    DbUtils.close(con);
+                }
             }
             return null;
         }
@@ -297,6 +312,7 @@ public class PocDb  {
         }
 
         public void delete(long accountId, int height) {
+            boolean isInTx = Db.db.isInTransaction();
             Connection con = null;
             try {
                 con = Db.db.getConnection();
@@ -308,7 +324,9 @@ public class PocDb  {
             } catch (SQLException e) {
                 throw new RuntimeException(e.toString(), e);
             } finally {
-                DbUtils.close(con);
+                if (!isInTx) {
+                    DbUtils.close(con);
+                }
             }
         }
 
@@ -373,8 +391,6 @@ public class PocDb  {
 
             }catch (SQLException e) {
                 throw new RuntimeException(e.toString(), e);
-            } finally {
-                DbUtils.close(con);
             }
         }
 
@@ -418,15 +434,17 @@ public class PocDb  {
         }
 
         public Map<Long, CertifiedPeer> listAll() {
-            Map<Long,CertifiedPeer> peerMap = Maps.newHashMap();
+            Map<Long, CertifiedPeer> peerMap = Maps.newHashMap();
+
+            boolean isInTx = Db.db.isInTransaction();
             Connection con = null;
             try {
                 con = Db.db.getConnection();
                 PreparedStatement pstmt = con.prepareStatement("SELECT * FROM certified_peer ORDER BY height DESC");
 
                 ResultSet rs = pstmt.executeQuery();
-                while(rs.next()){
-                    try{
+                while (rs.next()) {
+                    try {
                         CertifiedPeer certifiedPeer = _parse(rs);
                         // compare the height
                         if(peerMap.containsKey(certifiedPeer.getBoundAccountId())){
@@ -445,7 +463,9 @@ public class PocDb  {
             } catch (SQLException e) {
                 throw new RuntimeException(e.toString(), e);
             }finally {
-                DbUtils.close(con);
+                if (!isInTx) {
+                    DbUtils.close(con);
+                }
             }
             return peerMap;
         }
@@ -475,6 +495,7 @@ public class PocDb  {
                 // close the start height in query
                 int appointStart = -1;
 
+                boolean isInTx = Db.db.isInTransaction();
                 Connection con = null;
                 try {
                     con = Db.db.getConnection();
@@ -498,7 +519,9 @@ public class PocDb  {
                 } catch (SQLException e) {
                     throw new RuntimeException(e.toString(), e);
                 }finally {
-                    DbUtils.close(con);
+                    if (!isInTx) {
+                        DbUtils.close(con);
+                    }
                 }
             } finally {
                 Conch.getBlockchain().readUnlock();
@@ -514,6 +537,7 @@ public class PocDb  {
                 // close the start height in query
                 int appointStart = -1;
 
+                boolean isInTx = Db.db.isInTransaction();
                 Connection con = null;
                 try {
                     con = Db.db.getConnection();
@@ -537,7 +561,9 @@ public class PocDb  {
                 } catch (SQLException e) {
                     throw new RuntimeException(e.toString(), e);
                 }finally {
-                    DbUtils.close(con);
+                    if (!isInTx) {
+                        DbUtils.close(con);
+                    }
                 }
             } finally {
                 Conch.getBlockchain().readUnlock();
@@ -653,8 +679,10 @@ public class PocDb  {
     }
     private static final CertifiedPeerTable certifiedPeerTable = new CertifiedPeerTable();
 
-    public static int getLastScoreHeight(){
+    public static int getLastScoreHeight() {
         int lastHeight = -1;
+
+        boolean isInTx = Db.db.isInTransaction();
         Connection con = null;
         try {
             con = Db.db.getConnection();
@@ -662,13 +690,15 @@ public class PocDb  {
                     + " ORDER BY height DESC LIMIT 1");
 
             ResultSet rs = pstmt.executeQuery();
-            if(rs !=null && rs.next()){
+            if (rs != null && rs.next()) {
                 lastHeight = rs.getInt("height");
             }
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
         }finally {
-            DbUtils.close(con);
+            if (!isInTx) {
+                DbUtils.close(con);
+            }
         }
         return lastHeight;
     }
@@ -691,6 +721,7 @@ public class PocDb  {
         if (pocScore == null || pocScore.getAccountId() == -1 || pocScore.getHeight() < 0 ) {
             return;
         }
+        boolean isInTx = Db.db.isInTransaction();
         Connection con = null;
         try {
             con = Db.db.getConnection();
@@ -698,7 +729,9 @@ public class PocDb  {
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
         }finally {
-            DbUtils.close(con);
+            if (!isInTx) {
+                DbUtils.close(con);
+            }
         }
     }
 
@@ -742,6 +775,7 @@ public class PocDb  {
             return;
         }
 
+        boolean isInTx = Db.db.isInTransaction();
         Connection con = null;
         try {
             con = Db.db.getConnection();
@@ -749,7 +783,9 @@ public class PocDb  {
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
         }finally {
-            DbUtils.close(con);
+            if (!isInTx) {
+                DbUtils.close(con);
+            }
         }
     }
 
@@ -770,29 +806,28 @@ public class PocDb  {
     }
 
     public static PocTxBody.PocWeightTable findLastWeightTable(){
+        boolean isInTx = Db.db.isInTransaction();
         Connection con = null;
         try {
             con = Db.db.getConnection();
-            PreparedStatement pstmt = con.prepareStatement("SELECT * FROM TRANSACTION t WHERE t.TYPE=? AND t.SUBTYPE=? ORDER BY HEIGHT DESC LIMIT 1");
+            PreparedStatement pstmt = con.prepareStatement("SELECT * FROM TRANSACTION t WHERE t.TYPE=? AND t" +
+                    ".SUBTYPE=? ORDER BY HEIGHT DESC LIMIT 1");
             pstmt.setByte(1, TransactionType.TYPE_POC);
-            pstmt.setByte(2,  PocTxWrapper.SUBTYPE_POC_WEIGHT_TABLE);
+            pstmt.setByte(2, PocTxWrapper.SUBTYPE_POC_WEIGHT_TABLE);
 
             DbIterator<TransactionImpl> transactions = null;
-
-            try {
-                transactions = BlockchainImpl.getInstance().getTransactions(con, pstmt);
-                while (transactions.hasNext()) {
-                    Transaction tx = transactions.next();
-                    return (PocTxBody.PocWeightTable) tx.getAttachment();
-                }
-            } finally {
-                DbUtils.close(transactions);
+            transactions = BlockchainImpl.getInstance().getTransactions(con, pstmt);
+            while (transactions.hasNext()) {
+                Transaction tx = transactions.next();
+                return (PocTxBody.PocWeightTable) tx.getAttachment();
             }
 
         } catch (SQLException e) {
             Logger.logErrorMessage("can't findLastWeightTable", e);
         } finally {
-            DbUtils.close(con);
+            if (!isInTx) {
+                DbUtils.close(con);
+            }
         }
         return null;
     }
