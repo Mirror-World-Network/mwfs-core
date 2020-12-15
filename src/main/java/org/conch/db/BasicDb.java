@@ -201,7 +201,7 @@ public class BasicDb {
     private static int exceedMaxCount = 0;
     private static final int RESTART_COUNT = Constants.isDevnet() ? 10 : 30;
     private static final int MAX_DB_CONNECTIONS = Conch.getIntProperty("sharder.maxDbConnections");
-    private static boolean DEBUG_DETAIL = true;
+    private static final boolean DEBUG_DETAIL = Conch.getBooleanProperty("sharder.debugStackAtAcquireCon", false);
 
     protected Connection getPooledConnection() {
         Connection con = null;
@@ -213,11 +213,10 @@ public class BasicDb {
                 Logger.logDebugMessage("Active db connection pool size is %d after acquire a new connection into pool" +
                                 ". You can see stack detail in the 'warn.log'.",
                         maxActiveConnections);
-                if (Logger.isLevel(Logger.Level.DEBUG)) {
+                if (Logger.isLevel(Logger.Level.DEBUG)
+                        && DEBUG_DETAIL) {
                     String stacks = String.format("Acquire stacks(active conn size=%d) \n", activeConnections);
-                    if (DEBUG_DETAIL) {
-                        Logger.logWarningMessage(stacks + Logger.callStack());
-                    }
+                    Logger.logWarningMessage(stacks + Logger.callStack());
                 }
             }
 

@@ -362,7 +362,7 @@
                 //后端此处请求的数据未发送变化
                 _this.$global.setBlockchainState(_this).then(res => {
                     _this.blockchainStatus = res.data;
-                    
+
                     console.log('res.data',res.data)
                     _this.blocksLeft = res.data.lastBlockchainFeederHeight - res.data.lastBlockHeight;
                     _this.percentageTotal =  parseInt(res.data.lastBlockHeight/res.data.lastBlockchainFeederHeight *10000)/100;
@@ -409,9 +409,9 @@
                         'Content-Type': 'multipart/form-data'
                     }
                 };
-                if (SSO.isPassphraseAtRisk) {
-                    return _this.$message.warn(_this.$t('notification.passphrase_at_risk'));
-                }
+                // if (SSO.isPassphraseAtRisk) {
+                //     return _this.$message.warning(_this.$t('notification.passphrase_at_risk'));
+                // }
                 if (b) {
                     if(SSO.accountInfo.balanceNQT/ _this.$global.unitValue + SSO.accountInfo.frozenBalanceNQT / _this.$global.unitValue < 133){
                         return _this.$message.error(_this.$t('notification.ss_not_enough'));

@@ -81,14 +81,16 @@ public abstract class DerivedDbTable {
     }
 
     protected static void _trim(String tableName, int height, boolean containLatestField) {
+
+        boolean isInTx = db.isInTransaction();
         Connection con = null;
         try {
-            con = Db.db.getConnection();
+            con = db.getConnection();
             // check the deletion count
             PreparedStatement countStatement = con.prepareStatement(
                     "SELECT count(1) as deletion_count FROM " + tableName
-                    + " WHERE height < ?"
-                    + (containLatestField ? " AND latest <> TRUE" : "")
+                            + " WHERE height < ?"
+                            + (containLatestField ? " AND latest <> TRUE" : "")
             );
             countStatement.setInt(1, height);
 
@@ -118,7 +120,9 @@ public abstract class DerivedDbTable {
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
         }finally {
-            DbUtils.close(con);
+            if (!isInTx) {
+                DbUtils.close(con);
+            }
         }
     }
 
