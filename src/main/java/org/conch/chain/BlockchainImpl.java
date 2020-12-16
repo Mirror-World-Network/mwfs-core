@@ -107,8 +107,6 @@ public final class BlockchainImpl implements Blockchain {
             return TransactionDb.countByBlockIncludeType(con, includeType);
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
-        }finally {
-            DbUtils.close(con);
         }
     }
 
@@ -458,8 +456,6 @@ public final class BlockchainImpl implements Blockchain {
             return rs.getInt(1);
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
-        }finally {
-            DbUtils.close(con);
         }
     }
 
@@ -495,8 +491,6 @@ public final class BlockchainImpl implements Blockchain {
             }
         }catch (SQLException e){
             throw new RuntimeException(e.toString(), e);
-        }finally {
-            DbUtils.close(con);
         }
     }
 

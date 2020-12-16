@@ -61,6 +61,7 @@
               <tbody>
                 <tr
                   v-for="(peer,index) in peersList"
+                  :key="index"
                   v-if="index >= ((currentPage - 1) * pageSize) && index <= (currentPage * pageSize -1)"
                 >
                   <td class="image_text linker" @click="openInfo(peer.address)">
@@ -83,7 +84,8 @@
                   <td>{{peer.platform}}</td>
                   <td class="linker service">
                     <el-tooltip
-                      v-for="service in peer.services"
+                      v-for="(service,index) in peer.services"
+                      :key="index"
                       class="item"
                       placement="top"
                       effect="light"

@@ -101,7 +101,7 @@
             <div class="mining-list">
                 <div :class="selectCss" v-loading="loading" id = "miningListInfoId">
                     <el-row :gutter="10">
-                        <el-col :span="8" v-for="(mining,index) in miningList" v-if="index >= ((currentPage - 1) * pageSize) && index <= (currentPage * pageSize -1)">
+                        <el-col :span="8" v-for="(mining,index) in miningList" :key="index" v-if="index >= ((currentPage - 1) * pageSize) && index <= (currentPage * pageSize -1)">
                             <div class="grid-content">
                                 <div class="info" @click="poolAttribute(mining)">
                                     <h2 :class="(mining.creatorRS === accountInfo.accountRS) ? 'my-pool-title' : '' ">

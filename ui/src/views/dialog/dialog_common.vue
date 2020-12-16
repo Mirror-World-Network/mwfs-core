@@ -662,7 +662,7 @@
 </template>
 
 <script>
-    import MessageTxDetail from "./messageTxDetail";
+    import MessageTxDetail from "./MessageTxDetail";
     export default {
         name: "dialog_all",
         components:{MessageTxDetail},

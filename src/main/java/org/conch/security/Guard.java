@@ -39,7 +39,7 @@ public class Guard {
     private static final String LATEST_ACCESS_TIME_KEY = "latestAccessTime";
     private static final String ACCESS_COUNT_KEY = "accessCount";
     private static Map<String, JSONObject> BLACK_PEERS_MAP = Maps.newConcurrentMap();
-    private static Map<String, JSONObject> BLACK_PEERS_MAP_2 = Maps.newConcurrentMap();
+    private static Map<String, JSONObject> PEERS_ACCESS_RECORD_MAP = Maps.newConcurrentMap();
     /**
      * 若读取配置为空，则使用默认配置 * 放大倍率
      */
@@ -56,6 +56,7 @@ public class Guard {
     private static Integer threshold = 0;
     private static final Integer ONE_HOUR = 1000 * 60 * 60;
     private static final Integer ONE_MINUTE = 1000 * 60;
+    private static final Integer FIVE_MINUTE = 1000 * 60 * 5;
     private static long lastTime = System.currentTimeMillis();
     private static String lastDate = getCurrentDate(new Date());
 
@@ -223,7 +224,6 @@ public class Guard {
         long startTime = System.currentTimeMillis();
         String startDate = getCurrentDate(new Date());
         try {
-            // 检查是否 关闭状态
             if (FREQUENCY == -1 || !isOpen()) {
                 return;
             }
@@ -233,7 +233,6 @@ public class Guard {
                 // don't guard the local request
                 return;
             }
-            // 距离上一次执行该函数超过一天
             if (!startDate.equals(lastDate)) {
                 // 将该日数据存储到指定文件
 //                ConcurrentMap<String, JSONObject> map = Maps.newConcurrentMap();
@@ -241,51 +240,42 @@ public class Guard {
 //                JSONObject parseObject = JSONObject.parseObject(JSON.toJSONString(map));
 //                org.conch.util.JSON.JsonAppendAlibaba(parseObject, "conf/guardData.json");
                 // TODO 每日将数据存入数据库
-                BLACK_PEERS_MAP_2 = Maps.newConcurrentMap();
+                PEERS_ACCESS_RECORD_MAP.clear();
             }
-            JSONObject accessPeerObj = BLACK_PEERS_MAP_2.get(host);
+            JSONObject accessPeerObj = PEERS_ACCESS_RECORD_MAP.get(host);
             if (accessPeerObj == null) {
                 accessPeerObj = new JSONObject();
-                // 记录第一次访问时间
                 accessPeerObj.put(FIRST_ACCESS_TIME_KEY, System.currentTimeMillis());
-                // 赋值第一次访问时间
                 accessPeerObj.put(LAST_ACCESS_TIME_KEY, accessPeerObj.getLongValue(FIRST_ACCESS_TIME_KEY));
-                // 赋值第一次访问时间
                 accessPeerObj.put(LATEST_ACCESS_TIME_KEY, accessPeerObj.getLongValue(FIRST_ACCESS_TIME_KEY));
                 accessPeerObj.put(ACCESS_COUNT_KEY, 1);
             } else {
-                // 上一次访问时间
                 accessPeerObj.put(LAST_ACCESS_TIME_KEY, accessPeerObj.getLongValue(LATEST_ACCESS_TIME_KEY));
-                // 更新这一次访问时间
                 accessPeerObj.put(LATEST_ACCESS_TIME_KEY, System.currentTimeMillis());
                 accessPeerObj.put(ACCESS_COUNT_KEY, accessPeerObj.getIntValue(ACCESS_COUNT_KEY) + 1);
             }
             // 将更新的内容存入MAP
-            BLACK_PEERS_MAP_2.put(host, accessPeerObj);
+            PEERS_ACCESS_RECORD_MAP.put(host, accessPeerObj);
             long intervalTime = accessPeerObj.getLongValue(LATEST_ACCESS_TIME_KEY) - accessPeerObj.getLongValue(FIRST_ACCESS_TIME_KEY);
-            // 因初期时间间隔不足1min时，会导致分母过小致使frequency的值会过大，设定一个平均频率稳定期 stablePeriod = 1min
-            if (intervalTime > 0 && intervalTime > ONE_MINUTE) {
+            // 因初期时间间隔不足 x min时，会导致分母过小致使frequency的值会过大，设定一个平均频率稳定期 stablePeriod = 5 min
+            if (intervalTime > 0 && intervalTime > FIVE_MINUTE) {
                 // 计算平均连接频率
                 float frequency = (accessPeerObj.getLongValue(ACCESS_COUNT_KEY) * 1000 * 60) / intervalTime;
                 if (startTime - lastTime > ONE_HOUR) {
-                    // 距离上次执行该函数超过一小时
                     threshold = 0;
                 }
                 int total;
                 if (frequency > FREQUENCY_TO_BLACK) {
-                    // 拉入黑名单
                     blackPeer(host, String.format("Exceed the access max frequency number %d", FREQUENCY_TO_BLACK));
                 } else if (frequency > FREQUENCY) {
                     // 记录 threshold
                     threshold++;
                     if (threshold > MAX_THRESHOLD_PER_HOUR) {
-                        // 拉入黑名单
                         blackPeer(host, String.format("Exceed the access max frequency count %d", threshold));
                     }
                 } else {
                     total = accessPeerObj.getIntValue(ACCESS_COUNT_KEY);
                     if (total > MAX_TOTAL_CONNECT_COUNT_PER_DAY) {
-                        // 拉入黑名单
                         blackPeer(host, String.format("Exceed the access max count %d at one day", MAX_TOTAL_CONNECT_COUNT_PER_DAY));
                     }
                 }
@@ -293,7 +283,6 @@ public class Guard {
         } catch (NumberFormatException e) {
             e.printStackTrace();
         } finally {
-            // 替换上一次执行时间
             lastTime = startTime;
             lastDate = startDate;
         }

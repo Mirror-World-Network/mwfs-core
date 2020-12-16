@@ -575,8 +575,6 @@ public final class Account {
 
             }catch (SQLException e) {
                 throw new RuntimeException(e.toString(), e);
-            } finally {
-                DbUtils.close(con);
             }
         }
     };
@@ -872,8 +870,6 @@ public final class Account {
 
             }catch (SQLException e) {
                 throw new RuntimeException(e.toString(), e);
-            } finally {
-                DbUtils.close(con);
             }
         }
     };
@@ -1115,7 +1111,7 @@ public final class Account {
                 && height > Conch.getHeight()) {
             throw new IllegalArgumentException("Height " + height + " exceeds blockchain height " + Conch.getHeight());
         }
-
+        boolean isInTx = Db.db.isInTransaction();
         Connection con = null;
         try {
             con = Db.db.getConnection();
@@ -1174,7 +1170,9 @@ public final class Account {
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
         } finally {
-            DbUtils.close(con);
+            if (!isInTx) {
+                DbUtils.close(con);
+            }
         }
 
     }
@@ -1883,6 +1881,7 @@ public final class Account {
 //                    || fromHeight > Conch.getBlockchain().getHeight()) {
 //                throw new IllegalArgumentException("Height " + fromHeight + " not available for guaranteed balance calculation");
 //            }
+            boolean isInTx = Db.db.isInTransaction();
             Connection con = null;
             try {
                 con = Db.db.getConnection();
@@ -1920,7 +1919,9 @@ public final class Account {
             } catch (SQLException e) {
                 throw new RuntimeException(e.toString(), e);
             }finally {
-                DbUtils.close(con);
+                if (!isInTx) {
+                    DbUtils.close(con);
+                }
             }
         } finally {
             Conch.getBlockchain().readUnlock();
@@ -2536,6 +2537,7 @@ public final class Account {
             return;
         }
         int blockchainHeight = Conch.getHeight();
+        boolean isInTx = Db.db.isInTransaction();
         Connection con = null;
         try {
             con = Db.db.getConnection();
@@ -2573,7 +2575,9 @@ public final class Account {
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
         }finally {
-            DbUtils.close(con);
+            if (!isInTx) {
+                DbUtils.close(con);
+            }
         }
     }
 
@@ -2621,9 +2625,11 @@ public final class Account {
 
 
     public static void syncAccountTable(Connection con, String sourceTable, String targetTable, int dif) {
+        boolean closeCon = false;
         try {
             if (con == null) {
                 con = Db.db.getConnection();
+                closeCon = true;
             }
             long t1 = System.currentTimeMillis();
             Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -2694,15 +2700,21 @@ public final class Account {
             Logger.logDebugMessage("sync time:" + (System.currentTimeMillis() - t1));
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
+        } finally {
+            if (closeCon) {
+                DbUtils.close(con);
+            }
         }
     }
 
 
     public static void syncAccountGuaranteedBalanceTable(Connection con, String sourceTable, String targetTable,
      int dif) {
+        boolean closeCon = false;
         try {
             if (con == null) {
                 con = Db.db.getConnection();
+                closeCon = true;
             }
             Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             String idQuerySql = "SELECT distinct ACCOUNT_ID" + " FROM " + sourceTable;
@@ -2762,14 +2774,20 @@ public final class Account {
             }
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
+        } finally {
+            if (closeCon) {
+                DbUtils.close(con);
+            }
         }
     }
 
 
     public static void syncAccountLedgerTable(Connection con, String sourceTable, String targetTable, int dif) {
+        boolean closeCon = false;
         try {
             if (con == null) {
                 con = Db.db.getConnection();
+                closeCon = true;
             }
             Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             String idQuerySql = "SELECT distinct ACCOUNT_ID" + " FROM " + sourceTable;
@@ -2840,14 +2858,20 @@ public final class Account {
             }
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
+        } finally {
+            if (closeCon) {
+                DbUtils.close(con);
+            }
         }
     }
 
 
     public static void syncAccountPocScoreTable(Connection con, String sourceTable, String targetTable, int dif) {
+        boolean closeCon = false;
         try {
             if (con == null) {
                 con = Db.db.getConnection();
+                closeCon = true;
             }
             Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             String idQuerySql = "SELECT distinct ACCOUNT_ID" + " FROM " + sourceTable;
@@ -2909,6 +2933,10 @@ public final class Account {
             }
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
+        } finally {
+            if (closeCon) {
+                DbUtils.close(con);
+            }
         }
     }
 
