@@ -78,4 +78,8 @@ public final class GetLatestCosVersion extends APIServlet.APIRequestHandler {
         return false;
     }
 
+    @Override
+    protected boolean startDbTransaction() {
+        return true;
+    }
 }
