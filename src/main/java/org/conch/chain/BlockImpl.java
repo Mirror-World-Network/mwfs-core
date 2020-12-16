@@ -228,7 +228,7 @@ public final class BlockImpl implements Block {
         BlockImpl block = new BlockImpl(version,  timestamp,  previousBlockId,  totalAmountNQT,  totalFeeNQT,  payloadLength, payloadHash,
                 generatorPublicKey, generationSignature, blockSignature, previousBlockHash, transactions);
         block.id = blockId;
-        block.rewardDistributionHeight = 1;
+        block.rewardDistributionHeight = 0;
         return block;
     }
 

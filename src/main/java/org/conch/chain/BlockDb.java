@@ -417,11 +417,11 @@ public final class BlockDb {
      */
     public static boolean reachRewardSettlementHeight(int height) {
         try (Connection con = Db.db.getConnection()) {
-            PreparedStatement pstmt = con.prepareStatement("select REWARD_DISTRIBUTION_HEIGHT distributeHeight from BLOCK where HEIGHT <= ? order by distributeHeight desc limit 1");
+            PreparedStatement pstmt = con.prepareStatement("select REWARD_DISTRIBUTION_HEIGHT from BLOCK where HEIGHT <= ? order by REWARD_DISTRIBUTION_HEIGHT desc limit 1");
             pstmt.setInt(1, height);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    return ((height - rs.getInt("distributeHeight")) > Constants.getRewardSettlementHeight(height));
+                    return ((height - rs.getInt("REWARD_DISTRIBUTION_HEIGHT")) >= Constants.getRewardSettlementHeight(height));
                 }
                 return false;
             }
