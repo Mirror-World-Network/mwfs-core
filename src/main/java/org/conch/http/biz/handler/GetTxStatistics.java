@@ -21,26 +21,22 @@
 
 package org.conch.http.biz.handler;
 
-import org.conch.common.ConchException;
-import org.conch.common.Constants;
-import org.conch.db.Db;
-import org.conch.db.DbUtils;
-import org.conch.http.APIServlet;
-import org.conch.http.APITag;
-import org.conch.tx.Attachment;
-import org.conch.tx.TransactionDb;
-import org.conch.tx.TransactionImpl;
-import org.conch.tx.TransactionType;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONStreamAware;
-
-import javax.servlet.http.HttpServletRequest;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import javax.servlet.http.HttpServletRequest;
+import org.conch.common.ConchException;
+import org.conch.common.Constants;
+import org.conch.db.Db;
+import org.conch.db.DbUtils;
+import org.conch.http.APIServlet;
+import org.conch.http.APITag;
+import org.conch.tx.TransactionType;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONStreamAware;
 
 
 public final class GetTxStatistics extends APIServlet.APIRequestHandler {
@@ -153,17 +149,18 @@ public final class GetTxStatistics extends APIServlet.APIRequestHandler {
      * @throws ConchException.NotValidException
      */
     private long getCoinBaseCrowdMinerJoinersCount(Connection con, int type) throws SQLException, ConchException.NotValidException {
-        PreparedStatement ps = con.prepareStatement("SELECT * FROM TRANSACTION WHERE TYPE = ?");
-        ps.setInt(1, type);
-        ResultSet rs = ps.executeQuery();
-        long count = 0;
-        if (rs.next()) {
-            TransactionImpl transaction = TransactionDb.loadTransaction(con, rs);
-            Attachment.CoinBase coinBase = (Attachment.CoinBase) transaction.getAttachment();
-            count = count + (coinBase.getConsignors() == null ? 0 : coinBase.getConsignors().size())
-                    + (coinBase.getCrowdMiners() == null ? 0 : coinBase.getCrowdMiners().size());
-        }
-        return count;
+        //        PreparedStatement ps = con.prepareStatement("SELECT * FROM TRANSACTION WHERE TYPE = ?");
+        //        ps.setInt(1, type);
+        //        ResultSet rs = ps.executeQuery();
+        //        long count = 0;
+        //        if (rs.next()) {
+        //            TransactionImpl transaction = TransactionDb.loadTransaction(con, rs);
+        //            Attachment.CoinBase coinBase = (Attachment.CoinBase) transaction.getAttachment();
+        //            count = count + (coinBase.getConsignors() == null ? 0 : coinBase.getConsignors().size())
+        //                    + (coinBase.getCrowdMiners() == null ? 0 : coinBase.getCrowdMiners().size());
+        //        }
+        //        return count;
+        return 0;
     }
 
     @Override
