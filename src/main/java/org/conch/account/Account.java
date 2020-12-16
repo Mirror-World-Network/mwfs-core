@@ -1677,6 +1677,7 @@ public final class Account {
 
 
     private long getLessorsGuaranteedBalanceNQT(int height) {
+        boolean inInTx = Db.db.isInTransaction();
         List<Account> lessors = new ArrayList<>();
         DbIterator<Account> iterator = null;
         try {
@@ -1685,7 +1686,9 @@ public final class Account {
                 lessors.add(iterator.next());
             }
         }finally {
-            DbUtils.close(iterator);
+            if (!inInTx) {
+                DbUtils.close(iterator);
+            }
         }
         Long[] lessorIds = new Long[lessors.size()];
         long[] balances = new long[lessors.size()];
@@ -1727,7 +1730,9 @@ public final class Account {
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
         }finally {
-            DbUtils.close(con);
+            if (!inInTx) {
+                DbUtils.close(con);
+            }
         }
     }
 
