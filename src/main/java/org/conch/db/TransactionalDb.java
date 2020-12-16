@@ -22,6 +22,7 @@
 package org.conch.db;
 
 import org.conch.Conch;
+import org.conch.util.LocalDebugTool;
 import org.conch.util.Logger;
 
 import java.sql.*;
@@ -73,6 +74,9 @@ public class TransactionalDb extends BasicDb {
         }
         try {
             Connection con = getPooledConnection();
+            if (con == null && LocalDebugTool.isLocalDebug()) {
+                throw new IllegalStateException("Connection pool is overflowed");
+            }
             con.setAutoCommit(false);
             con = new DbConnection(con);
             ((DbConnection)con).txStart = System.currentTimeMillis();

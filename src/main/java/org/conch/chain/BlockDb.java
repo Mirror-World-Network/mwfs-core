@@ -118,14 +118,21 @@ public final class BlockDb {
             }
         }
         // Search the database
-        try (Connection con = Db.db.getConnection();
-             PreparedStatement pstmt = con.prepareStatement("SELECT height FROM block WHERE id = ?")) {
+        boolean isInTx = Db.db.isInTransaction();
+        Connection con = null;
+        try {
+            con = Db.db.getConnection();
+            PreparedStatement pstmt = con.prepareStatement("SELECT height FROM block WHERE id = ?");
             pstmt.setLong(1, blockId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 return rs.next() && rs.getInt("height") <= height;
             }
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
+        }finally {
+            if (!isInTx) {
+                DbUtils.close(con);
+            }
         }
     }
 

@@ -23,6 +23,7 @@ package org.conch.db;
 
 import org.conch.Conch;
 import org.conch.common.Constants;
+import org.conch.util.LocalDebugTool;
 import org.conch.util.Logger;
 import org.h2.jdbcx.JdbcConnectionPool;
 
@@ -190,6 +191,9 @@ public class BasicDb {
 
     public Connection getConnection() throws SQLException {
         Connection con = getPooledConnection();
+        if (con == null && LocalDebugTool.isLocalDebug()) {
+            throw new IllegalStateException("Connection pool is overflowed");
+        }
         con.setAutoCommit(true);
         return con;
     }
@@ -206,6 +210,15 @@ public class BasicDb {
     protected Connection getPooledConnection() {
         Connection con = null;
         try {
+            if (exceedMaxConnections()) {
+                Logger.logDebugMessage("Current active db connection pool size is %d larger than max size %d",
+                        maxActiveConnections, MAX_DB_CONNECTIONS);
+
+                if(LocalDebugTool.isLocalDebug()){
+                    return null;
+                }
+                checkAndRestart();
+            }
             con = cp.getConnection();
             int activeConnections = cp.getActiveConnections();
             if (activeConnections > maxActiveConnections) {
@@ -220,11 +233,6 @@ public class BasicDb {
                 }
             }
 
-            if (exceedMaxConnections()) {
-                Logger.logDebugMessage("Current active db connection pool size is %d larger than max size %d",
-                        maxActiveConnections, MAX_DB_CONNECTIONS);
-                checkAndRestart();
-            }
 
         } catch (Exception e) {
             Logger.logErrorMessage("can't get connection from pool caused by " + e.getMessage());

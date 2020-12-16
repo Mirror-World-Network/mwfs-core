@@ -1752,6 +1752,7 @@ public final class Account {
 
         try {
             Conch.getBlockchain().readLock();
+            boolean isInTx = Db.db.isInTransaction();
             Connection connDel = Db.db.getConnection();
             try{
                 // delete records which the height larger than the current height
@@ -1762,7 +1763,9 @@ public final class Account {
             }catch (SQLException e) {
                 e.printStackTrace();
             } finally {
-                DbUtils.close(connDel);
+                if (!isInTx) {
+                    DbUtils.close(connDel);
+                }
             }
 
 
@@ -2589,6 +2592,7 @@ public final class Account {
     public void payDividends(final long transactionId, Attachment.ColoredCoinsDividendPayment attachment) {
         long totalDividend = 0;
         List<AccountAsset> accountAssets = new ArrayList<>();
+        boolean isInTx = Db.db.isInTransaction();
         DbIterator<AccountAsset> iterator = null;
         try {
             iterator = getAssetAccounts(attachment.getAssetId(), attachment.getHeight(), 0, -1);
@@ -2596,7 +2600,9 @@ public final class Account {
                 accountAssets.add(iterator.next());
             }
         }finally {
-            DbUtils.close(iterator);
+            if (!isInTx) {
+                DbUtils.close(iterator);
+            }
         }
         final long amountNQTPerQNT = attachment.getAmountNQTPerQNT();
         long numAccounts = 0;
