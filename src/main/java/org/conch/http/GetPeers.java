@@ -122,6 +122,11 @@ public final class GetPeers extends APIServlet.APIRequestHandler {
         return false;
     }
 
+    @Override
+    protected boolean startDbTransaction() {
+        return true;
+    }
+
     public static void main(String[] args){
 
     }

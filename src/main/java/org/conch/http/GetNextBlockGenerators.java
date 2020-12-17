@@ -119,4 +119,9 @@ public final class GetNextBlockGenerators extends APIServlet.APIRequestHandler {
     protected boolean allowRequiredBlockParameters() {
         return false;
     }
+
+    @Override
+    protected boolean startDbTransaction() {
+        return true;
+    }
 }

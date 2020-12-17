@@ -129,4 +129,9 @@ public final class GetUserConfig extends APIServlet.APIRequestHandler {
     protected boolean requireBlockchain() {
         return false;
     }
+
+    @Override
+    protected boolean startDbTransaction() {
+        return true;
+    }
 }

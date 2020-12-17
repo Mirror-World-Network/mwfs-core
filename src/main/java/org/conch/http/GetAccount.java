@@ -198,4 +198,9 @@ public final class GetAccount extends APIServlet.APIRequestHandler {
         }
         return json;
     }
+
+    @Override
+    protected boolean startDbTransaction() {
+        return true;
+    }
 }
