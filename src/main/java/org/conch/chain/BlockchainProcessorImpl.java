@@ -39,6 +39,7 @@ import org.conch.mint.Generator;
 import org.conch.mint.pool.SharderPoolProcessor;
 import org.conch.peer.Peer;
 import org.conch.peer.Peers;
+import org.conch.security.Guard;
 import org.conch.storage.StorageBackup;
 import org.conch.storage.tx.StorageTx;
 import org.conch.storage.tx.StorageTxProcessorImpl;
@@ -216,11 +217,14 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             int limitConnectedSize = Math.min(1, defaultNumberOfForkConfirmations);
 
             boolean needConnectNow = (System.currentTimeMillis() - lastForceConnectMS) > (MAX_DOWNLOAD_TIME / 2);
-            List<Peer> bootNodes = Peers.checkOrConnectAllBootNodes(needConnectNow);
-            if(bootNodes.size() > 0){
-                lastForceConnectMS = System.currentTimeMillis();
+            boolean needConnectBoot = (System.currentTimeMillis() - lastForceConnectMS) > Guard.connectBootInterval();
+            List<Peer> bootNodes = null;
+            if (needConnectBoot) {
+                bootNodes = Peers.checkOrConnectAllBootNodes(needConnectNow);
+                if(bootNodes.size() > 0){
+                    lastForceConnectMS = System.currentTimeMillis();
+                }
             }
-
             connectedPublicPeers = Peers.getPublicPeers(Peer.State.CONNECTED, true);
             int connectedSize = connectedPublicPeers.size();
             if (!Generator.isBootNode

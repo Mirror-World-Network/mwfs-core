@@ -55,14 +55,19 @@ public class Guard {
 
     private static Integer threshold = 0;
     private static final Integer ONE_HOUR = 1000 * 60 * 60;
-    private static final Integer ONE_MINUTE = 1000 * 60;
     private static final Integer FIVE_MINUTE = 1000 * 60 * 5;
+    public static Long CONNETC_BOOT_INTERVAL = 1000L * 60 * 5;
+
     private static long lastTime = System.currentTimeMillis();
     private static String lastDate = getCurrentDate(new Date());
 
+    public static Long connectBootInterval() {
+        return Constants.isDevnet() ? 1000L * 1 : CONNETC_BOOT_INTERVAL;
+    }
+
     public static void init(Integer frequency, Integer frequencyToBack, Integer maxThreshold,
                             Integer maxTotalConnection, Integer maxViciousCount, Integer openBlacklist,
-                            Boolean openSelfClosingMode) {
+                            Boolean openSelfClosingMode, Long bootInterval) {
         if (frequency != null && frequency.intValue() > 0) {
             FREQUENCY = frequency;
         }
@@ -83,6 +88,9 @@ public class Guard {
         }
         if (openSelfClosingMode != null) {
             SELF_CLOSING_MODE = openSelfClosingMode;
+        }
+        if (bootInterval != null && bootInterval.longValue() > 0) {
+            CONNETC_BOOT_INTERVAL = bootInterval;
         }
     }
 
@@ -119,6 +127,8 @@ public class Guard {
             result.put(KEY_NEED_CLOSING, true);
             result.put(KEY_ERROR_SUMMARY, Errors.BLACKLISTED_BY_THEM);
             result.put(KEY_ERROR_REASON, SELF_CLOSING_MAP.get(peerHost).getString(CLOSING_KEY_REASON));
+            String errorReason = String.format("Peer %s returned error: %s", peerHost, Errors.BLACKLISTED_BY_THEM);
+            Logger.logDebugMessage("%s", errorReason);
         } else {
             result.put(KEY_NEED_CLOSING, false);
         }
@@ -163,8 +173,7 @@ public class Guard {
         if (ip == null) {
             return false;
         }
-        //Logger.logDebugMessage("Verify LAN IP: " + ip);
-        byte[] addr = IPAddressUtil.textToNumericFormatV4(ip);
+          byte[] addr = IPAddressUtil.textToNumericFormatV4(ip);
         return internalIp(addr);
     }
 
@@ -271,7 +280,7 @@ public class Guard {
                     // 记录 threshold
                     threshold++;
                     if (threshold > MAX_THRESHOLD_PER_HOUR) {
-                        blackPeer(host, String.format("Exceed the access max frequency count %d", threshold));
+                        blackPeer(host, String.format("Exceed the access max frequency count %d times", threshold));
                     }
                 } else {
                     total = accessPeerObj.getIntValue(ACCESS_COUNT_KEY);
