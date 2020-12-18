@@ -90,7 +90,7 @@ public class Guard {
             SELF_CLOSING_MODE = openSelfClosingMode;
         }
         if (bootInterval != null && bootInterval.longValue() > 0) {
-            CONNETC_BOOT_INTERVAL = bootInterval;
+            CONNETC_BOOT_INTERVAL = bootInterval * 1000 * 60;
         }
     }
 
