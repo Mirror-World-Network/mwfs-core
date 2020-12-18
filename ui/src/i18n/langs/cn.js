@@ -107,6 +107,7 @@ const cn = {
         'income_and_expenditure_details': "收支明细",
         'payout': "支出",
         'income': "收入",
+        'account_inactive': "账户暂未激活，请注册账户名进行激活",
     },
     transaction: {
         'transaction_record': "交易记录",

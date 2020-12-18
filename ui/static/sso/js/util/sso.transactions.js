@@ -36,6 +36,12 @@ var NRS = (function(NRS, $, undefined) {
         NRS.sendRequest("sendMoney", jsonData, callback);
     };
 
+	NRS.setAccountInfo = function (formData, callback) {
+	    var jsonData = {};
+        formData.forEach((value, key) => jsonData[key] = value);
+        NRS.sendRequest("setAccountInfo", jsonData, callback);
+    };
+
 	NRS.handleIncomingTransactions = function(transactions, confirmedTransactionIds) {
 		var oldBlock = (confirmedTransactionIds === false); //we pass false instead of an [] in case there is no new block..
 

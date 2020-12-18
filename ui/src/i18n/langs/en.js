@@ -106,6 +106,7 @@ const en = {
         'income_and_expenditure_details': "Balance Details",
         'payout': "Payouts",
         'income': "Income",
+        'account_inactive': "The account has not been activated yet. Please register your account name to activate it",
     },
     transaction: {
         'transaction_record': "Transaction Records",
