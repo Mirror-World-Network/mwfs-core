@@ -1671,7 +1671,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     || (!Constants.isDevnet() && Conch.getPocProcessor().pocTxsProcessed(Conch.getHeight()));
 
 //            if (Conch.reachLastKnownBlock() && !delayedPocTxsProcessed) {
-            if (!delayedOrOldPocTxsProcessed) {
+            if (!delayedOrOldPocTxsProcessed && !Constants.isDevnet()) {
                 Logger.logInfoMessage("should process delayed or old poc txs <= [ height %d ] before accepting blocks, break block pushing till poc txs processed ", Conch.getHeight());
                 return;
             }
