@@ -304,10 +304,11 @@ public final class PeerServlet extends WebSocketServlet {
             return jsonObject;
         }
 
-        JSONObject jsonObject = Guard.isSelfClosingPeer(peer.getHost());
-        if ((Boolean) jsonObject.get(Guard.KEY_NEED_CLOSING)) {
-            return jsonObject;
-        }
+        // Two-way selfClose, should be closed
+//        JSONObject jsonObject = Guard.isSelfClosingPeer(peer.getHost());
+//        if ((Boolean) jsonObject.get(Guard.KEY_NEED_CLOSING)) {
+//            return jsonObject;
+//        }
         Guard.defense(peer.getHost());
 
         //
