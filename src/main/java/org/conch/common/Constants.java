@@ -275,7 +275,9 @@ public final class Constants {
     public static int getRewardSettlementHeight(int height) {
         // before 5185 height reward interval is every 432 height
         int interval = 432;
-        if (height > 5185) {
+        if (height > 5185 && height < 6050) {
+            interval = 432 * 2;
+        } else if (height > 6049) {
             interval = SETTLEMENT_INTERVAL_SIZE;
         }
         return interval;
