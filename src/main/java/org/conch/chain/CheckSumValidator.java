@@ -311,7 +311,8 @@ public class CheckSumValidator {
                             guardSettings.getIntValue("MAX_TOTAL_CONNECT_COUNT_PER_DAY"),
                             guardSettings.getIntValue("MAX_VICIOUS_COUNT_PER_SAME_HOST"),
                             guardSettings.getIntValue("OPEN_BLACKLIST_FILTER"),
-                            guardSettings.getBooleanValue("OPEN_SELF_CLOSING_MODE")
+                            guardSettings.getBooleanValue("OPEN_SELF_CLOSING_MODE"),
+                            guardSettings.getLongValue("CONNETC_BOOT_INTERVAL")
                     );
                 }
             } catch (Exception e) {
