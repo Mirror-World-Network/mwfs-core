@@ -419,7 +419,7 @@ public final class BlockDb {
     }
 
     /**
-     *
+     * if the latest rewardDistributionHeight more than the height over settlement height, return true.
      * @return
      */
     public static boolean reachRewardSettlementHeight(int height) {
@@ -459,6 +459,11 @@ public final class BlockDb {
         }
     }
 
+    /**
+     * update the rewardDistributionHeight of the block record according the list of blockId
+     * @param blockIds
+     * @param height
+     */
     public static void updateDistributionState(List<Long> blockIds, int height) {
         if (blockIds == null || blockIds.size() == 0) {
             return;
@@ -477,6 +482,48 @@ public final class BlockDb {
             stmt.execute(sqlStringBuilder.toString());
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
+        }
+    }
+
+
+    public static int getLatestRewardHeight() {
+        boolean isInTx = Db.db.isInTransaction();
+        Connection con = null;
+        try {
+            con = Db.db.getConnection();
+            PreparedStatement preparedStatement = con.prepareStatement("SELECT REWARD_DISTRIBUTION_HEIGHT from BLOCK order by REWARD_DISTRIBUTION_HEIGHT desc limit 1");
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt("REWARD_DISTRIBUTION_HEIGHT");
+            }
+            return 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e.toString(), e);
+        }finally {
+            if (!isInTx) {
+                DbUtils.close(con);
+            }
+        }
+    }
+
+    /**
+     * roll back the reward distribution height of block to 0
+     * @param latestRewardHeight
+     */
+    public static void rollBackRewardHeight(int latestRewardHeight) {
+        boolean isInTx = Db.db.isInTransaction();
+        Connection con = null;
+        try {
+            con = Db.db.getConnection();
+            PreparedStatement preparedStatement = con.prepareStatement("update BLOCK set REWARD_DISTRIBUTION_HEIGHT = 0 where REWARD_DISTRIBUTION_HEIGHT = ?");
+            preparedStatement.setInt(1, latestRewardHeight);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.toString(), e);
+        }finally {
+            if (!isInTx) {
+                DbUtils.close(con);
+            }
         }
     }
 }

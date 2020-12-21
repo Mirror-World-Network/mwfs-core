@@ -633,6 +633,33 @@ public class RewardCalculator {
     }
 
     /**
+     * if the commonBlockHeight less than the latest reward height, roll back the reward height of block to 0.
+     * @param commonBlockHeight
+     * @throws RuntimeException
+     */
+    public static void rollBackTo (int commonBlockHeight) throws RuntimeException {
+        if (!Db.db.isInTransaction()) {
+            try {
+                Db.db.beginTransaction();
+                rollBackTo(commonBlockHeight);
+                Db.db.commitTransaction();
+            } catch (Exception e) {
+                Db.db.rollbackTransaction();
+                throw e;
+            } finally {
+                Db.db.endTransaction();
+            }
+        }
+        int latestRewardHeight = BlockDb.getLatestRewardHeight();
+        if (latestRewardHeight <= commonBlockHeight) {
+            return;
+        }
+        BlockDb.rollBackRewardHeight(latestRewardHeight);
+        rollBackTo(commonBlockHeight);
+
+    }
+
+    /**
      * CoinBase tx attachment judgement
      * @param attachment
      * @return
