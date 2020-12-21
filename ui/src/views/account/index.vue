@@ -1435,6 +1435,9 @@ export default {
                 _this.accountInfo.frozenBalanceNQT = res.frozenBalanceNQT;
                 _this.accountInfo.guaranteedBalanceNQT = res.guaranteedBalanceNQT;
                 _this.accountInfo.unconfirmedBalanceNQT = res.unconfirmedBalanceNQT;
+                if (!res.publicKey) {
+                    _this.$message.warning(_this.$t("account.account_inactive"));
+                }
                 if (res.pocScore != null) {
                     _this.accountInfo.pocScore = res.pocScore.total;
                     _this.pocScoreDetail[0].bcScore = res.pocScore.bcScore;
@@ -2670,7 +2673,6 @@ export default {
                             _this.$store.commit("setUnconfirmedNotificationsList", res);
                         });
                     } else {
-                        console.log(res);
                         _this.transfer.fee = res.transactionJSON.feeNQT / _this.$global.unitValue;
                     }
                 } else {
@@ -3075,7 +3077,7 @@ export default {
             formData.append("phasingHashedSecretAlgorithm", "2");
             formData.append("feeNQT", "0");
 
-            _this.$http.post(_this.$global.urlPrefix() + '?requestType=setAccountInfo', formData).then(res => {
+            /*_this.$http.post(_this.$global.urlPrefix() + '?requestType=setAccountInfo', formData).then(res => {
                 if (typeof res.data.errorDescription === "undefined") {
                     _this.$message.success(_this.$t('notification.modify_success'));
                     _this.accountInfo.name = res.data.transactionJSON.attachment.name;
@@ -3086,7 +3088,20 @@ export default {
                     _this.accountInfo.name = "";
                     _this.isShowName = true;
                 }
-            })
+            })*/
+            SSO.setAccountInfo(formData, function (res) {
+                console.log("res", res);
+                if (typeof res.data.errorDescription === "undefined") {
+                    _this.$message.success(_this.$t('notification.modify_success'));
+                    _this.accountInfo.name = res.data.transactionJSON.attachment.name;
+                    _this.isShowName = true;
+                    _this.temporaryName = "";
+                } else {
+                    _this.$message.error(res.data.errorDescription);
+                    _this.accountInfo.name = "";
+                    _this.isShowName = true;
+                }
+            });
         },
         copyError: function () {
             const _this = this;
