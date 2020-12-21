@@ -25,6 +25,7 @@ conf/genesis.json
 conf/airdrop.json
 conf/airdrop*.json
 conf/crowd_miner.json
+src/test/java/org/conch/offline
 
 DestroyForgePool
 ForgePools
