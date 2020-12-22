@@ -1740,32 +1740,38 @@ public final class Peers {
         return myServices.contains(service);
     }
 
-    public static Peer checkOrConnectBootNodeRandom(boolean needConnectNow){
+    public static Peer checkOrConnectBootNodeRandom(boolean needConnectNow) {
         return _connectToPeer(Constants.getBootNodeRandom(), needConnectNow);
     }
 
-    public static List<Peer> checkOrConnectAllBootNodes(boolean needConnectNow){
+    private static final boolean FORCE_CONNECT_BOOT = false;
+
+    public static List<Peer> checkOrConnectAllGuideNodes(boolean needConnectNow) {
         List<Peer> connectedNodes = Lists.newArrayList();
 
         boolean connectedBootNodes = false;
         List<String> needConnectNodes = Lists.newArrayList();
-        for(String nodeHost : Constants.bootNodesHost){
-            if(Conch.matchMyAddress(nodeHost)){
+        for (String nodeHost : Constants.bootNodesHost) {
+            if (Conch.matchMyAddress(nodeHost)) {
                 continue;
             }
+            if (!FORCE_CONNECT_BOOT && nodeHost.contains("boot")) {
+                continue;
+            }
+
             // reconnect to all boot nodes
-            if(needConnectNow) {
+            if (needConnectNow) {
                 needConnectNodes.add(nodeHost);
                 continue;
             }
 
             // check whether connect one of boot nodes
             Peer peer = Peers.getPeer(nodeHost, true);
-            if(peer != null
-            && Peer.State.CONNECTED == peer.getState()) {
+            if (peer != null
+                    && Peer.State.CONNECTED == peer.getState()) {
                 connectedBootNodes = true;
                 connectedNodes.add(peer);
-            }else{
+            } else {
                 needConnectNodes.add(nodeHost);
             }
         }
@@ -1814,7 +1820,7 @@ public final class Peers {
                 connectPeer(peer);
             }
         }
-        checkOrConnectAllBootNodes(true);
+        checkOrConnectAllGuideNodes(true);
     }
 
 }

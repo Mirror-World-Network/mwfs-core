@@ -40,6 +40,7 @@ import org.conch.mint.pool.SharderPoolProcessor;
 import org.conch.peer.CertifiedPeer;
 import org.conch.peer.Peer;
 import org.conch.peer.Peers;
+import org.conch.security.Guard;
 import org.conch.storage.StorageBackup;
 import org.conch.storage.tx.StorageTx;
 import org.conch.storage.tx.StorageTxProcessorImpl;
@@ -216,18 +217,21 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             long startTime = System.currentTimeMillis();
             int limitConnectedSize = Math.min(1, defaultNumberOfForkConfirmations);
 
-            boolean needConnectNow = (System.currentTimeMillis() - lastForceConnectMS) > (MAX_DOWNLOAD_TIME / 2);
-            List<Peer> bootNodes = Peers.checkOrConnectAllBootNodes(needConnectNow);
-            if(bootNodes.size() > 0){
-                lastForceConnectMS = System.currentTimeMillis();
+            List<Peer> bootNodes = null;
+            if (Guard.needConnectBoot(lastForceConnectMS)) {
+                boolean needConnectNow = (System.currentTimeMillis() - lastForceConnectMS) > (MAX_DOWNLOAD_TIME / 2);
+                bootNodes = Peers.checkOrConnectAllGuideNodes(needConnectNow);
+                if (bootNodes.size() > 0) {
+                    lastForceConnectMS = System.currentTimeMillis();
+                }
             }
-
             connectedPublicPeers = Peers.getPublicPeers(Peer.State.CONNECTED, true);
             int connectedSize = connectedPublicPeers.size();
             if (!Generator.isBootNode
-                && connectedSize < limitConnectedSize) {
+                    && connectedSize < limitConnectedSize) {
                 if (Logger.printNow(Logger.BlockchainProcessor_downloadPeer_sizeCheck)) {
-                    Logger.logInfoMessage("No enough connected peers[limit size=" + (limitConnectedSize) + ",current connected size=" + connectedSize + "], break syn blocks...");
+                    Logger.logInfoMessage("No enough connected peers[limit size=" + (limitConnectedSize) + ",current " +
+                            "connected size=" + connectedSize + "], break syn blocks...");
                 }
 
                 if (isExceedUnfinishedDownload(MAX_DOWNLOAD_TIME)) {
@@ -1706,7 +1710,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     || (!Constants.isDevnet() && Conch.getPocProcessor().pocTxsProcessed(Conch.getHeight()));
 
 //            if (Conch.reachLastKnownBlock() && !delayedPocTxsProcessed) {
-            if (!delayedOrOldPocTxsProcessed) {
+            if (!delayedOrOldPocTxsProcessed && !Constants.isDevnet()) {
                 Logger.logInfoMessage("should process delayed or old poc txs <= [ height %d ] before accepting blocks, break block pushing till poc txs processed ", Conch.getHeight());
                 return;
             }
