@@ -140,7 +140,7 @@
                             </tr>
                             </thead>
                             <tbody v-loading="loading">
-                            <tr v-for="block in blocklist" @click="openBlockInfoMobile(block.height)">
+                            <tr v-for="(block,index) in blocklist" :key="index" @click="openBlockInfoMobile(block.height)">
                                 <td class="pl0"><span>{{block.height}}</span></td>
                                 <td>
                                     <span>{{$global.myFormatTime(block.timestamp,'YMDHMS',true)}}</span><br>
