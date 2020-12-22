@@ -363,10 +363,13 @@
                 _this.$global.setBlockchainState(_this).then(res => {
                     _this.blockchainStatus = res.data;
 
-                    console.log('res.data',res.data)
+                    // console.log('res.data',res.data)
                     _this.blocksLeft = res.data.lastBlockchainFeederHeight - res.data.lastBlockHeight;
                     _this.percentageTotal =  parseInt(res.data.lastBlockHeight/res.data.lastBlockchainFeederHeight *10000)/100;
                     _this.lastBlockHeight = res.data.lastBlockchainFeederHeight;
+                    _this.isDownLoadingBlockchain = res.data.isDownloading;
+                    SSO.downloadingBlockchain = res.data.isDownloading;
+                    
                     _this.getLatestHubVersion();
                     /*if(_this.$global.isOpenConsole){
                         _this.$global.addToConsole("/sharder?requestType=getBlockchainStatus",'GET',res);
@@ -397,9 +400,9 @@
                 SSO.downloadingBlockchain = SSO.state.isDownloading;
                 _this.isDownLoadingBlockchain = SSO.state.isDownloading;
                 _this.isDownloadingState = SSO.isDownloadingState;
-                _this.percentageTotal = SSO.percentageTotal;
-                _this.blocksLeft = SSO.blocksLeft;
-                _this.lastBlockHeight = SSO.state.lastBlockchainFeederHeight;
+                // _this.percentageTotal = SSO.percentageTotal;
+                // _this.blocksLeft = SSO.blocksLeft;
+                // _this.lastBlockHeight = SSO.state.lastBlockchainFeederHeight;
             },
             startForging: function (b, pwd) {
                 const _this = this;
@@ -664,7 +667,7 @@
 
     .download_blocks_loading {
         position: fixed;
-        z-index: 9;
+        z-index: 999999;
         right: 20px;
         top: 80px;
         width: 320px;

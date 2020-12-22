@@ -7,7 +7,7 @@ export default {
     sharderFoundationHost: 'mw.run',
     sharderFoundationTestHost: 'test.mw.run',
     apiUrl: '',
-    cfg: {defaultInterval: 300000, soonInterval: 20000, slowInterval: 600000},
+    cfg: {defaultInterval: 300000, soonInterval: 30000, slowInterval: 600000},
     epochBeginning: -1,
     newConsole: null,
     isOpenConsole: false,
