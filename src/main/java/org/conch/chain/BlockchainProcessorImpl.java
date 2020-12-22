@@ -37,6 +37,7 @@ import org.conch.db.*;
 import org.conch.http.ForceConverge;
 import org.conch.mint.Generator;
 import org.conch.mint.pool.SharderPoolProcessor;
+import org.conch.peer.CertifiedPeer;
 import org.conch.peer.Peer;
 import org.conch.peer.Peers;
 import org.conch.storage.StorageBackup;
@@ -710,8 +711,16 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         }
     }
 
+    /**
+     * 处理分叉
+     *
+     * @param peer
+     * @param forkBlocks forkBlockList
+     * @param commonBlock
+     */
     private void processFork(final Peer peer, final List<BlockImpl> forkBlocks, final Block commonBlock) {
         // record the current difficulty and pop-off the chain to common block(genesis block or last known block)
+        //记录当前难度，并回滚到commonBlock(创世区块或上一个公共区块)
         BigInteger curCumulativeDifficulty = blockchain.getLastBlock().getCumulativeDifficulty();
         List<BlockImpl> myPoppedOffBlocks = popOffTo(commonBlock);
 
@@ -719,6 +728,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         String peerHost = peer != null ? peer.getHost() : "HostUndefined";
 
         // push the fork blocks into chain
+        // 上链
         int pushedForkBlocks = 0;
         if (blockchain.getLastBlock().getId() == commonBlock.getId()) {
             for (BlockImpl block : forkBlocks) {
@@ -1168,6 +1178,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             try {
                 //
                 // Locate an archive peer
+                // 查找对等节点
                 //
                 List<Peer> peers =
                         Peers.getPeers(
@@ -1458,8 +1469,17 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 : 0;
     }
 
+    /**
+     * 处理节点区块
+     * @param request
+     * @throws ConchException
+     */
     @Override
     public void processPeerBlock(JSONObject request) throws ConchException {
+        //判断传入的request包含的block(block）是否为该链的下一个区块(block.getPreviousBlockId() == lastBlock.getId())，
+        //是直接push，
+        //不是则判断block的前一个区块是否和chain上的最后一个区块(lastBlock)的前一个区块一致，并且block的出块时间早于lastBlock的出块时间，（block.getPreviousBlockId() == lastBlock.getPreviousBlockId() && block.getTimestamp() < lastBlock.getTimestamp()）
+        //则将链上的lastBlock回滚，再将block push到链上，并把lastBlock的交易加入到交易待确认队列（ PriorityQueue<UnconfirmedTransaction>）中
         BlockImpl block = BlockImpl.parseBlock(request);
         BlockImpl lastBlock = blockchain.getLastBlock();
         if (block.getPreviousBlockId() == lastBlock.getId()) {
@@ -1524,6 +1544,10 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         this.getMoreBlocks = getMoreBlocks;
     }
 
+    /**
+     * 复PrunedData
+     * @return
+     */
     @Override
     public int restorePrunedData() {
         Db.db.beginTransaction();
@@ -1560,6 +1584,11 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         }
     }
 
+    /**
+     * 恢复PrunedTransaction
+     * @param transactionId
+     * @return
+     */
     @Override
     public Transaction restorePrunedTransaction(long transactionId) {
         TransactionImpl transaction = TransactionDb.findTransaction(transactionId);
@@ -1661,8 +1690,14 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         }
     }
 
+    /**
+     * 上链
+     * @param block
+     * @throws BlockNotAcceptedException
+     * @throws GeneratorNotAcceptedException
+     */
     private void pushBlock(final BlockImpl block) throws BlockNotAcceptedException, GeneratorNotAcceptedException {
-
+        //
         int curTime = Conch.getEpochTime();
         blockchain.writeLock();
         try {
@@ -1678,10 +1713,10 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
 
             BlockImpl previousLastBlock = null;
             try {
-                Db.db.beginTransaction();
+                Db.db.beginTransaction();//执行交易
                 previousLastBlock = blockchain.getLastBlock();
 
-                validate(block, previousLastBlock, curTime);
+                validate(block, previousLastBlock, curTime);//验证
 
                 long nextHitTime = Generator.getNextHitTime(previousLastBlock.getId(), curTime);
                 if (nextHitTime > 0 && block.getTimestamp() > nextHitTime + 1) {
@@ -1734,7 +1769,17 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         blockListeners.notify(block, Event.BLOCK_PUSHED);
     }
 
+    /**
+     * 验证PhasedTransactions
+     * @param height
+     * @param validPhasedTransactions
+     * @param invalidPhasedTransactions
+     * @param duplicates
+     */
     private void validatePhasedTransactions(int height, List<TransactionImpl> validPhasedTransactions, List<TransactionImpl> invalidPhasedTransactions, Map<TransactionType, Map<String, Integer>> duplicates) {
+        //找到通过phasingPoll投票，准备被打包的交易
+        //交易验证，通过加入validPhasedTransactions
+        //不通过加入invalidPhasedTransactions
         if (height >= Constants.PHASING_BLOCK_HEIGHT) {
             DbIterator<TransactionImpl> phasedTransactions = null;
             try {
@@ -1815,15 +1860,23 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
     }
 
 
+    /**
+     * 验证Transactions
+     * @param block
+     * @param previousLastBlock
+     * @param curTime
+     * @param duplicates
+     * @throws BlockNotAcceptedException
+     */
     private void validateTransactions(BlockImpl block, BlockImpl previousLastBlock, int curTime, Map<TransactionType, Map<String, Integer>> duplicates) throws BlockNotAcceptedException {
         long payloadLength = 0;
         long calculatedTotalAmount = 0;
         long calculatedTotalFee = 0;
-        MessageDigest digest = Crypto.sha256();
-        boolean hasPrunedTransactions = false;
+        MessageDigest digest = Crypto.sha256();//要
+        boolean hasPrunedTransactions = false;//是否拥有可执行交易
         int coinBaseNum = 0;
-        Map<Long, Transaction> uploadTransactions = new HashMap<>();
-        Map<Long, Map<String, Long>> backupNum = new HashMap<>();
+        Map<Long, Transaction> uploadTransactions = new HashMap<>();//上传交易列表
+        Map<Long, Map<String, Long>> backupNum = new HashMap<>();//备份数据
         for (TransactionImpl transaction : block.getTransactions()) {
 
             if (transaction.getAttachment() instanceof Attachment.CoinBase) {
@@ -1960,6 +2013,14 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
     }
 
 
+    /**
+     * 区块确认
+     * @param block
+     * @param validPhasedTransactions
+     * @param invalidPhasedTransactions
+     * @param duplicates
+     * @throws TransactionNotAcceptedException
+     */
     private void accept(
             BlockImpl block,
             List<TransactionImpl> validPhasedTransactions,
@@ -1969,6 +2030,9 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         try {
             isProcessingBlock = true;
             // unconfirmed balance update
+
+            checkMiner(block);
+
             for (TransactionImpl transaction : block.getTransactions()) {
                 if (!transaction.applyUnconfirmed()) {
                     if (CheckSumValidator.isKnownIgnoreTx(transaction.getId())) {
@@ -2084,6 +2148,56 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         }
     }
 
+    private static long QUALIFIED_CROWD_MINER_HOLDING_AMOUNT_MIN = 32*133L; // 1T-133MW
+
+    private void checkMiner(BlockImpl block){
+        //       条件检查的时间点： 在区块确认时，针对转账交易进行检查
+        //       转出方是否存在于矿工列表，存在进行最新挖矿持仓量检查，不满足移除；
+        //       方案1：
+        //        - 矿工数据做逻辑删除，设置检查状态，处于检查状态的逻辑删除矿工数，每个区块高度仍然按照第一条进行条件检测
+        //        - 回滚和分叉情况下，放回矿工列表
+
+        //得到矿工列表
+        HashMap<Long, Long> crowdMiners = new HashMap<>();
+        for (TransactionImpl transaction : block.getTransactions()) {
+            if(transaction.getType().isType(TransactionType.TYPE_COIN_BASE)){
+                Attachment.CoinBase coinBase = (Attachment.CoinBase) transaction.getAttachment();
+                if(coinBase.isType(Attachment.CoinBase.CoinBaseType.CROWD_BLOCK_REWARD)
+                        && coinBase.getCrowdMiners().size() > 0){
+                    crowdMiners = coinBase.getCrowdMiners();
+                    break;
+                }
+            }
+        }
+
+        for (TransactionImpl transaction : block.getTransactions()) {
+            //检查转账交易
+            if(transaction.getType().isType(TransactionType.TYPE_PAYMENT)){
+                //转出方是否存在于矿工列表
+                for(Long crowdMinerId : crowdMiners.values()){
+                    if(crowdMinerId.equals(transaction.getRecipientId())){
+                        //存在进行最新挖矿持仓量检查
+                        long holdingMwAmount = 0;
+                        try{
+                            holdingMwAmount = Account.getAccount(crowdMinerId).getEffectiveBalanceSS(block.getHeight());
+                        }catch(Exception e){
+                            Logger.logWarningMessage("[QualifiedMiner] not valid miner because can't get balance of account %s at height %d, caused by %s",  Account.getAccount(crowdMinerId).getRsAddress(), block.getHeight(), e.getMessage());
+                            holdingMwAmount = 0;
+                        }
+
+                        if(holdingMwAmount < QUALIFIED_CROWD_MINER_HOLDING_AMOUNT_MIN) {
+                            //不满足移除
+                            //方案一 原表增加deleteTime字段 查询时判断deleteTime == null
+
+                            //方案二 新增一张表backup表 新增自增长id作为id，删除原表Id以及其他字段的唯一约束，新增deleteTime字段
+
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private static final Comparator<Transaction> finishingTransactionsComparator =
             Comparator.comparingInt(Transaction::getHeight)
                     .thenComparingInt(Transaction::getIndex)
@@ -2182,6 +2296,13 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         return previousBlockHeight < Constants.POC_BLOCK_HEIGHT ? 1 : 3;
     }
 
+    /**
+     *
+     * @param duplicates
+     * @param previousBlock
+     * @param blockTimestamp
+     * @return
+     */
     public SortedSet<UnconfirmedTransaction> selectUnconfirmedTransactions(
             Map<TransactionType, Map<String, Integer>> duplicates,
             Block previousBlock,
