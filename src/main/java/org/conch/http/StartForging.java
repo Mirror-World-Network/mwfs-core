@@ -23,6 +23,7 @@ package org.conch.http;
 
 import org.conch.crypto.Crypto;
 import org.conch.mint.Generator;
+import org.conch.util.Convert;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONStreamAware;
 
@@ -34,7 +35,7 @@ public final class StartForging extends APIServlet.APIRequestHandler {
     static final StartForging instance = new StartForging();
 
     private StartForging() {
-        super(new APITag[] {APITag.FORGING}, "secretPhrase");
+        super(new APITag[] {APITag.FORGING}, "signature", "message");
     }
 
     @Override
@@ -51,6 +52,20 @@ public final class StartForging extends APIServlet.APIRequestHandler {
         }
         return response;
 
+    }
+
+    public String verifySignature (HttpServletRequest req) {
+        String signature = req.getParameter("signature");
+        String message = req.getParameter("message");
+        String miningPR = Generator.getAutoMiningPR();
+        if (miningPR != null) {
+            // Signature Validation
+            if (!Crypto.verify(Convert.parseHexString(signature), message.getBytes(), Crypto.getPublicKey(miningPR), true)) {
+                throw new RuntimeException("can't start mining, signature verify failed");
+            }
+            return miningPR;
+        }
+        return null;
     }
 
     @Override
