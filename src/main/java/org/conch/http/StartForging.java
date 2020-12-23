@@ -21,6 +21,7 @@
 
 package org.conch.http;
 
+import org.conch.crypto.Crypto;
 import org.conch.mint.Generator;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONStreamAware;
@@ -39,9 +40,8 @@ public final class StartForging extends APIServlet.APIRequestHandler {
     @Override
     protected JSONStreamAware processRequest(HttpServletRequest req) throws ParameterException {
 
-        String secretPhrase = ParameterParser.getSecretPhrase(req, true);
-        Generator generator = Generator.startMining(secretPhrase);
-
+        String pr = verifySignature(req);
+        Generator generator = Generator.startMining(pr);
         JSONObject response = new JSONObject();
         if(generator != null){
             response.put("deadline", generator.getDeadline());
