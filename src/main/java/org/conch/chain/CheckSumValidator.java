@@ -161,7 +161,7 @@ public class CheckSumValidator {
 
     static Map<Integer, Map<Long, PocTxBody.PocNodeTypeV2>> pocNodeTypeTxsMap = Maps.newHashMap();
 
-    public static final int CHECK_INTERVAL_IN_MINUTES = Conch.getIntProperty("sharder.knownBlockCheckInterval", 30);
+    public static final int CHECK_INTERVAL_IN_MINUTES = Conch.getIntProperty("sharder.fetchConstantsInterval", 60);
 
     private static final Runnable updateKnownIgnoreBlocksThread = () -> {
         try {
@@ -312,7 +312,8 @@ public class CheckSumValidator {
                             guardSettings.getIntValue("MAX_VICIOUS_COUNT_PER_SAME_HOST"),
                             guardSettings.getIntValue("OPEN_BLACKLIST_FILTER"),
                             guardSettings.getBooleanValue("OPEN_SELF_CLOSING_MODE"),
-                            guardSettings.getLongValue("CONNETC_BOOT_INTERVAL")
+                            guardSettings.getIntValue("CONNECT_BOOT_INTERVAL"),
+                            guardSettings.getBooleanValue("FORCE_CONNECT_BOOT_NODE")
                     );
                 }
             } catch (Exception e) {
