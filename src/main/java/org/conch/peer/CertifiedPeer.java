@@ -37,7 +37,6 @@ public class CertifiedPeer implements Serializable {
     String ip;
     boolean useNat = false;
     long boundAccountId;
-//    int
     String boundRS;
     Timestamp updateTime;
 

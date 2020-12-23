@@ -739,8 +739,6 @@ public class ConchDbVersion extends DbVersion {
                     + "CREATE INDEX IF NOT EXISTS ACCOUNT_POC_SCORE_HEIGHT_INDEX ON ACCOUNT_POC_SCORE (HEIGHT DESC);\n"
                 );
             case 66:
-                apply("alter table CERTIFIED_PEER add deleteTime int(50);");
-            case 67:
                 break;
             default:
                 throw new RuntimeException("Blockchain database inconsistent with code, at update " + nextUpdate
