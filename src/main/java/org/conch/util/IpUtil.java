@@ -461,9 +461,9 @@ public class IpUtil {
             String ne = document.select(".table tbody tr:nth-child(2) td:nth-child(2)").text();
             json.put("X", ne.substring(ne.indexOf("(") + 1, ne.indexOf(",")));
             json.put("Y", ne.substring(ne.indexOf(",") + 2, ne.indexOf(")")));
-        } catch (IOException e) {
+        } catch (Exception e) {
             if (geoQueryExceptionSwitch
-            && Logger.printNow(Logger.IpUtil_geoTransformFailed)) {
+                    && Logger.printNow(Logger.IpUtil_geoTransformFailed)) {
                 Logger.logDebugMessage("requestGeoIpTool failed: " + e.getMessage());
             }
         }
@@ -474,18 +474,18 @@ public class IpUtil {
             Document document = Jsoup.connect("https://www.ipip.net/ip.html")
                     .data("ip", ip).post();
             String el = document.select(".inner table:nth-child(2) tbody tr:last-child td:last-child").text();
-            System.out.println("el:"+el);
-            if (el.equals("局域网 产品详情")){
+            System.out.println("el:" + el);
+            if (el.equals("局域网 产品详情")) {
                 json.put("X", "0");
                 json.put("Y", "0");
-            }else{
+            } else {
                 json.put("X", el.split(", ")[0]);
                 json.put("Y", el.split(", ")[1]);
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             if (geoQueryExceptionSwitch
-                && Logger.printNow(Logger.IpUtil_geoTransformFailed)) {
+                    && Logger.printNow(Logger.IpUtil_geoTransformFailed)) {
                 Logger.logDebugMessage("requestGeoIpTool failed: " + e.getMessage());
             }
         }
@@ -493,20 +493,20 @@ public class IpUtil {
 
     private static void requestGeoIpTool(JSONObject json, String ip) {
         try {
-            if (isLanIp(ip)){
+            if (isLanIp(ip)) {
                 json.put("X", "0");
                 json.put("Y", "0");
-            }else{
+            } else {
                 Document document = Jsoup.connect("https://geoiptool.com/zh/?ip=" + ip).get();
                 Elements el = document.select(".sidebar-data.hidden-xs.hidden-sm .data-item");
                 json.put("X", el.eq(8).select("span:nth-child(2)").text());
                 json.put("Y", el.eq(9).select("span:nth-child(2)").text());
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             if (geoQueryExceptionSwitch
-                && Logger.printNow(Logger.IpUtil_geoTransformFailed)) {
-                 Logger.logDebugMessage("requestGeoIpTool failed: " + e.getMessage());
+                    && Logger.printNow(Logger.IpUtil_geoTransformFailed)) {
+                Logger.logDebugMessage("requestGeoIpTool failed: " + e.getMessage());
             }
         }
     }
