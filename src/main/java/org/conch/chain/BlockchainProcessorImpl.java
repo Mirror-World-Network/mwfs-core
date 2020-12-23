@@ -216,7 +216,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             long startTime = System.currentTimeMillis();
             int limitConnectedSize = Math.min(1, defaultNumberOfForkConfirmations);
 
-            List<Peer> bootNodes = null;
+            List<Peer> bootNodes = Lists.newArrayList();
             if (Guard.needConnectBoot(lastForceConnectMS)) {
                 boolean needConnectNow = (System.currentTimeMillis() - lastForceConnectMS) > (MAX_DOWNLOAD_TIME / 2);
                 bootNodes = Peers.checkOrConnectAllGuideNodes(needConnectNow);
