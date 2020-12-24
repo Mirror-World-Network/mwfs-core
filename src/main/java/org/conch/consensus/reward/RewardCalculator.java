@@ -288,7 +288,8 @@ public class RewardCalculator {
                 return false;
             }
 
-            if (!Constants.reachRewardSettlementHeight(settlementHeight)) {
+            //if (!Constants.reachRewardSettlementHeight(settlementHeight)) {
+            if (!BlockDb.reachRewardSettlementHeight(settlementHeight)) {
                 Logger.logDebugMessage("Current height %d not reach the crowd miner rewards settlement height. Break " +
                         "and wait next turn.", settlementHeight);
                 return false;
@@ -340,10 +341,12 @@ public class RewardCalculator {
 
                 // remain amount distribute to creator
                 long remainRewards = (crowdMinerRewards > allocatedRewards) ? (crowdMinerRewards - allocatedRewards) : 0;
-                if (crowdMinerRewardMap.containsKey(minerAccount.getId())) {
-                    remainRewards = remainRewards + crowdMinerRewardMap.get(minerAccount.getId());
+                if (remainRewards != 0) {
+                    if (crowdMinerRewardMap.containsKey(minerAccount.getId())) {
+                        remainRewards = remainRewards + crowdMinerRewardMap.get(minerAccount.getId());
+                    }
+                    crowdMinerRewardMap.put(minerAccount.getId(), remainRewards);
                 }
-                crowdMinerRewardMap.put(minerAccount.getId(), remainRewards);
                 blockIds.add(block.getId());
             }
             String details = "";
@@ -354,9 +357,12 @@ public class RewardCalculator {
                     notExistAccounts += accountId + ",";
                     continue;
                 }
+                if (crowdMinerRewardMap.get(accountId) == 0) {
+                    Logger.logDebugMessage("reward is zero , account is " + accountId);
+                }
                 details += updateBalance(account, tx, crowdMinerRewardMap.get(accountId));
             }
-            BlockDb.updateDistributionState(blockIds);
+            BlockDb.updateDistributionState(blockIds, settlementHeight);
             String tail = "[DEBUG] ----------------------------\n[DEBUG] Total count: " + (crowdMinerRewardMap.size());
             Logger.logDebugMessage("[%d-StageTwo%s] Unfreeze crowdMiners rewards and add it in mined amount. \n[DEBUG] CrowdMiner Reward Detail Format: txid | address: distribution amount\n%s%s\n", settlementHeight, "", details, tail);
             if(notExistAccounts.length() > 0) {
@@ -364,6 +370,7 @@ public class RewardCalculator {
             }
         } catch (Exception e) {
             Logger.logErrorMessage("setCrowdMinerReward occur error", e);
+            throw new RuntimeException("Distribute rewards error");
         }
         return true;
     }
@@ -623,6 +630,33 @@ public class RewardCalculator {
                     , crowdMiners.size(), miningJoinerCount, Conch.getHeight());
         }
         return tx.getAmountNQT();
+    }
+
+    /**
+     * if the commonBlockHeight less than the latest reward height, roll back the reward height of block to 0.
+     * @param commonBlockHeight
+     * @throws RuntimeException
+     */
+    public static void rollBackTo (int commonBlockHeight) throws RuntimeException {
+        if (!Db.db.isInTransaction()) {
+            try {
+                Db.db.beginTransaction();
+                rollBackTo(commonBlockHeight);
+                Db.db.commitTransaction();
+            } catch (Exception e) {
+                Db.db.rollbackTransaction();
+                throw e;
+            } finally {
+                Db.db.endTransaction();
+            }
+        }
+        int latestRewardHeight = BlockDb.getLatestRewardHeight();
+        if (latestRewardHeight <= commonBlockHeight) {
+            return;
+        }
+        BlockDb.rollBackRewardHeight(latestRewardHeight);
+        rollBackTo(commonBlockHeight);
+
     }
 
     /**
