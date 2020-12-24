@@ -56,13 +56,13 @@ public class Guard {
     private static Integer threshold = 0;
     private static final Integer ONE_HOUR = 1000 * 60 * 60;
     private static final Integer FIVE_MINUTE = 1000 * 60 * 5;
-    public static Long CONNETC_BOOT_INTERVAL = 1000L * 60 * 5;
+    private static Long CONNECT_BOOT_INTERVAL = Constants.isDevnet() ? 1000L * 1 : 1000L * 60 * 5;
 
     private static long lastTime = System.currentTimeMillis();
     private static String lastDate = getCurrentDate(new Date());
 
-    public static Long connectBootInterval() {
-        return Constants.isDevnet() ? 1000L * 1 : CONNETC_BOOT_INTERVAL;
+    public static boolean needConnectBoot(long lastForceConnectMS) {
+        return (System.currentTimeMillis() - lastForceConnectMS) > CONNECT_BOOT_INTERVAL;
     }
 
     public static void init(Integer frequency, Integer frequencyToBack, Integer maxThreshold,
@@ -90,7 +90,7 @@ public class Guard {
             SELF_CLOSING_MODE = openSelfClosingMode;
         }
         if (bootInterval != null && bootInterval.longValue() > 0) {
-            CONNETC_BOOT_INTERVAL = bootInterval * 1000 * 60;
+            CONNECT_BOOT_INTERVAL = bootInterval * 1000 * 60;
         }
     }
 

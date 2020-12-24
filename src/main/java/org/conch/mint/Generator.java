@@ -1177,7 +1177,7 @@ public class Generator implements Comparable<Generator> {
      *
      * @return pr of auto mining account
      */
-    private static String getAutoMiningPR() {
+    public static String getAutoMiningPR() {
         if (HUB_IS_BIND && StringUtils.isNotEmpty(HUB_BIND_PR)) {
             return HUB_BIND_PR;
         }

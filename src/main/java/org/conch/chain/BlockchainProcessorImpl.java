@@ -216,21 +216,21 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             long startTime = System.currentTimeMillis();
             int limitConnectedSize = Math.min(1, defaultNumberOfForkConfirmations);
 
-            boolean needConnectNow = (System.currentTimeMillis() - lastForceConnectMS) > (MAX_DOWNLOAD_TIME / 2);
-            boolean needConnectBoot = (System.currentTimeMillis() - lastForceConnectMS) > Guard.connectBootInterval();
             List<Peer> bootNodes = null;
-            if (needConnectBoot) {
-                bootNodes = Peers.checkOrConnectAllBootNodes(needConnectNow);
-                if(bootNodes.size() > 0){
+            if (Guard.needConnectBoot(lastForceConnectMS)) {
+                boolean needConnectNow = (System.currentTimeMillis() - lastForceConnectMS) > (MAX_DOWNLOAD_TIME / 2);
+                bootNodes = Peers.checkOrConnectAllGuideNodes(needConnectNow);
+                if (bootNodes.size() > 0) {
                     lastForceConnectMS = System.currentTimeMillis();
                 }
             }
             connectedPublicPeers = Peers.getPublicPeers(Peer.State.CONNECTED, true);
             int connectedSize = connectedPublicPeers.size();
             if (!Generator.isBootNode
-                && connectedSize < limitConnectedSize) {
+                    && connectedSize < limitConnectedSize) {
                 if (Logger.printNow(Logger.BlockchainProcessor_downloadPeer_sizeCheck)) {
-                    Logger.logInfoMessage("No enough connected peers[limit size=" + (limitConnectedSize) + ",current connected size=" + connectedSize + "], break syn blocks...");
+                    Logger.logInfoMessage("No enough connected peers[limit size=" + (limitConnectedSize) + ",current " +
+                            "connected size=" + connectedSize + "], break syn blocks...");
                 }
 
                 if (isExceedUnfinishedDownload(MAX_DOWNLOAD_TIME)) {
