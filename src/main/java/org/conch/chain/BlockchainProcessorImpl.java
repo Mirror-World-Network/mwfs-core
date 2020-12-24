@@ -2128,6 +2128,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 for (DerivedDbTable table : derivedTables) {
                     table.rollback(commonBlock.getHeight());
                 }
+                RewardCalculator.rollBackTo(commonBlock.getHeight());
                 Conch.getPocProcessor().rollbackTo(commonBlock.getHeight());
 
                 Db.db.clearCache();

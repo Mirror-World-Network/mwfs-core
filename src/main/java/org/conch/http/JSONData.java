@@ -433,7 +433,7 @@ public final class JSONData {
         json.put("version", block.getVersion());
         json.put("baseTarget", Long.toUnsignedString(block.getBaseTarget()));
         json.put("cumulativeDifficulty", block.getCumulativeDifficulty().toString());
-        json.put("hasRewardDistribution", block.getHasRewardDistribution());
+        json.put("hasRewardDistribution", block.getRewardDistributionHeight()>0);
         if (block.getPreviousBlockId() != 0) {
             json.put("previousBlock", Long.toUnsignedString(block.getPreviousBlockId()));
         }

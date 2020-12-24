@@ -1,4 +1,4 @@
-/******************************************************************************
+  /******************************************************************************
  * Copyright © 2017 mwfs.io.                                              *
  *                                                                            *
  * See the LICENSE.txt file at the top-level directory of this distribution   *
@@ -453,7 +453,7 @@ var Sso = (function (NRS, $, undefined) {
                 if (!savedPassphrase) {
                     NRS.showLockscreen();
                 }
-                NRS.setStateInterval(60);
+                // NRS.setStateInterval(60);
 
                 // setInterval(NRS.checkAliasVersions, 1000 * 60 * 60);
 
@@ -640,6 +640,7 @@ var Sso = (function (NRS, $, undefined) {
     };
 
     NRS.getState = function (callback, msg) {
+        console.log("NRS.getState: " + Date.parse(new Date()).toString())
         if (msg) {
             // NRS.logConsole("getState event " + msg);
             console.warn("getState event " + msg);
@@ -1805,44 +1806,44 @@ var Sso = (function (NRS, $, undefined) {
             // downloadingBlockchain.find(".db_active").show();
             // downloadingBlockchain.find(".db_light").hide();
         // if(!NRS.state.isLightClient && NRS.serverConnect && NRS.peerConnect){
-            NRS.percentageTotal = 0;    //进度百分比
-            NRS.blocksLeft = null;      //剩余区块数量
-            NRS.percentageLast = 0;     //
-            if (NRS.state.lastBlockchainFeederHeight && NRS.state.numberOfBlocks <= NRS.state.lastBlockchainFeederHeight) {
-                NRS.percentageTotal = parseInt(Math.round((NRS.state.numberOfBlocks / NRS.state.lastBlockchainFeederHeight) * 100), 10);
-                NRS.blocksLeft = NRS.state.lastBlockchainFeederHeight - NRS.state.numberOfBlocks;
-                if (NRS.blocksLeft <= lastNumBlocks && NRS.state.lastBlockchainFeederHeight > lastNumBlocks) {
-                    NRS.percentageLast = parseInt(Math.round(((lastNumBlocks - NRS.blocksLeft) / lastNumBlocks) * 100), 10);
-                }
-            }
-            if (!NRS.blocksLeft || NRS.blocksLeft < parseInt(lastNumBlocks / 2)) {
-                // downloadingBlockchain.find(".db_progress_total").hide();
-                NRS.isProgressTotalShow = false;
-
-            } else {
-                NRS.isProgressTotalShow = true;
-                // downloadingBlockchain.find(".db_progress_total").show();
-                // downloadingBlockchain.find(".db_progress_total .progress-bar").css("width", NRS.percentageTotal + "%");
-                // downloadingBlockchain.find(".db_progress_total .sr-only").html($.t("sso.percent_complete", {
-                //     "percent": NRS.percentageTotal
-                // }));
-            }
-            if (!NRS.blocksLeft || NRS.blocksLeft >= (lastNumBlocks * 2) || NRS.state.lastBlockchainFeederHeight <= lastNumBlocks) {
-                // downloadingBlockchain.find(".db_progress_last").hide();
-                NRS.isProgressLastShow = false;
-            } else {
-                NRS.isProgressLastShow = true;
-                // downloadingBlockchain.find(".db_progress_last").show();
-                // downloadingBlockchain.find(".db_progress_last .progress-bar").css("width", NRS.percentageLast + "%");
-                // downloadingBlockchain.find(".db_progress_last .sr-only").html($.t("sso.percent_complete", {
-                //     "percent": NRS.percentageLast
-                // }));
-            }
-            if (NRS.blocksLeft) {
-                NRS.isBlockOutLeft = true;
-                // downloadingBlockchain.find(".blocks_left_outer").show();
-                // downloadingBlockchain.find(".blocks_left").html($.t("sso.blocks_left", {"numBlocks": NRS.blocksLeft}));
-            }
+        //     NRS.percentageTotal = 0;    // 进度百分比
+        //     NRS.blocksLeft = null;      // 剩余区块数量
+        //     NRS.percentageLast = 0;     //
+        //     if (NRS.state.lastBlockchainFeederHeight && NRS.state.numberOfBlocks <= NRS.state.lastBlockchainFeederHeight) {
+        //         NRS.percentageTotal = parseInt(Math.round((NRS.state.numberOfBlocks / NRS.state.lastBlockchainFeederHeight) * 100), 10);
+        //         NRS.blocksLeft = NRS.state.lastBlockchainFeederHeight - NRS.state.numberOfBlocks;
+        //         if (NRS.blocksLeft <= lastNumBlocks && NRS.state.lastBlockchainFeederHeight > lastNumBlocks) {
+        //             NRS.percentageLast = parseInt(Math.round(((lastNumBlocks - NRS.blocksLeft) / lastNumBlocks) * 100), 10);
+        //         }
+        //     }
+        //     if (!NRS.blocksLeft || NRS.blocksLeft < parseInt(lastNumBlocks / 2)) {
+        //         // downloadingBlockchain.find(".db_progress_total").hide();
+        //         NRS.isProgressTotalShow = false;
+        //
+        //     } else {
+        //         NRS.isProgressTotalShow = true;
+        //         // downloadingBlockchain.find(".db_progress_total").show();
+        //         // downloadingBlockchain.find(".db_progress_total .progress-bar").css("width", NRS.percentageTotal + "%");
+        //         // downloadingBlockchain.find(".db_progress_total .sr-only").html($.t("sso.percent_complete", {
+        //         //     "percent": NRS.percentageTotal
+        //         // }));
+        //     }
+        //     if (!NRS.blocksLeft || NRS.blocksLeft >= (lastNumBlocks * 2) || NRS.state.lastBlockchainFeederHeight <= lastNumBlocks) {
+        //         // downloadingBlockchain.find(".db_progress_last").hide();
+        //         NRS.isProgressLastShow = false;
+        //     } else {
+        //         NRS.isProgressLastShow = true;
+        //         // downloadingBlockchain.find(".db_progress_last").show();
+        //         // downloadingBlockchain.find(".db_progress_last .progress-bar").css("width", NRS.percentageLast + "%");
+        //         // downloadingBlockchain.find(".db_progress_last .sr-only").html($.t("sso.percent_complete", {
+        //         //     "percent": NRS.percentageLast
+        //         // }));
+        //     }
+        //     if (NRS.blocksLeft) {
+        //         NRS.isBlockOutLeft = true;
+        //         // downloadingBlockchain.find(".blocks_left_outer").show();
+        //         // downloadingBlockchain.find(".blocks_left").html($.t("sso.blocks_left", {"numBlocks": NRS.blocksLeft}));
+        //     }
         }
     };
 
