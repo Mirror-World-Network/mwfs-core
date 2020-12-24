@@ -27,12 +27,14 @@ import org.conch.chain.Blockchain;
 import org.conch.common.ConchException;
 import org.conch.mint.Generator;
 import org.conch.mint.pool.SharderPoolProcessor;
+import org.conch.peer.CertifiedPeer;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONStreamAware;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -88,6 +90,8 @@ public final class GetNextBlockGenerators extends APIServlet.APIRequestHandler {
             response.put("timestamp", lastBlock.getTimestamp());
             response.put("height", lastBlock.getHeight());
             response.put("lastBlock", Long.toUnsignedString(lastBlock.getId()));
+            Map<Long, CertifiedPeer> longCertifiedPeerMap = Conch.getPocProcessor().getCertifiedPeers();
+            response.put("qualifiedActiveCount", longCertifiedPeerMap.size());
             List<Generator.ActiveGenerator> activeGenerators = Generator.getNextGenerators();
             response.put("activeCount", activeGenerators.size());
             JSONArray generators = new JSONArray();

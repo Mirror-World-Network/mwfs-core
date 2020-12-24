@@ -274,6 +274,7 @@ const en = {
         'declared_peers_size': "All Declared Node Size",
         'miner_info': "Trading Summary",
         'miner_volume': "Miners",
+        'qualified_miner_volume': "Qualified Miners",
         'total_trading_volume': "Gross Amount",
         'transfer_transaction': "Transfer Txns",
         'coinbase_transaction': "Pool Txns",
