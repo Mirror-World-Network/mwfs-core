@@ -667,7 +667,8 @@
 
     .download_blocks_loading {
         position: fixed;
-        z-index: 9;
+        z-index: 8888;
+
         right: 20px;
         top: 80px;
         width: 320px;
