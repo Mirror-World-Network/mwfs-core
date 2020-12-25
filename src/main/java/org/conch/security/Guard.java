@@ -136,6 +136,13 @@ public class Guard {
     }
 
     public static void updateSelfClosingPeer(String peerHost, String reason) {
+        // devnet off guard
+        if ("127.0.0.1".equals(peerHost)
+                || "localhost".equals(peerHost)
+                || Constants.isDevnet() ? true : internalIp(peerHost)) {
+            // don't guard the local request
+            return;
+        }
         if (!SELF_CLOSING_MODE) {
             return;
         }
@@ -155,7 +162,6 @@ public class Guard {
         if (!SELF_CLOSING_MAP.containsKey(peerHost)) {
             return;
         }
-
         JSONObject detail = SELF_CLOSING_MAP.get(peerHost);
         int closingStarTime = detail.getInteger(CLOSING_KEY_TIME);
         if (closingStarTime > 0
@@ -236,9 +242,10 @@ public class Guard {
             if (FREQUENCY == -1 || !isOpen()) {
                 return;
             }
+            // devnet off guard
             if ("127.0.0.1".equals(host)
                     || "localhost".equals(host)
-                    || Constants.isDevnet() ? false : internalIp(host)) {
+                    || Constants.isDevnet() ? true : internalIp(host)) {
                 // don't guard the local request
                 return;
             }

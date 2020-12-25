@@ -45,7 +45,8 @@ public class RewardCalculator {
      */
     private enum RewardDef {
         BLOCK_REWARD(1333 * Constants.ONE_SS),
-        CROWD_MINERS_REWARD(667 * Constants.ONE_SS),
+        CROWD_MINERS_REWARD(1200 * Constants.ONE_SS),
+        ROBUST_PHASE_CROWD_MINERS_REWARD(667 * Constants.ONE_SS),
         STABLE_PHASE_BLOCK_REWARD(1 * Constants.ONE_SS),
         STABLE_PHASE_CROWD_MINERS_REWARD(1 * Constants.ONE_SS / 2);
 
@@ -61,9 +62,18 @@ public class RewardCalculator {
         
     }
 
-    // Halve height, -1 means close halve
+    /**
+     * Halve height, -1 means close halve
+     */
     private static final int HALVE_COUNT = -1;
-    public static final int NETWORK_STABLE_PHASE = 2008; // Estimated stable height after network reset
+    /**
+     * Estimated stable height after network reset
+     */
+    public static final int NETWORK_STABLE_PHASE = Constants.isDevnet() ? 5 : 2008;
+    /**
+     * Estimated robust height after network reset
+     */
+    public static final int NETWORK_ROBUST_PHASE = Constants.isDevnet() ? 10 : 8000;
     /**
      * how much one block reward
      * @return
@@ -91,7 +101,9 @@ public class RewardCalculator {
         || LocalDebugTool.isLocalDebugAndBootNodeMode){
             if(height <= NETWORK_STABLE_PHASE) {
                 return RewardDef.STABLE_PHASE_CROWD_MINERS_REWARD.getAmount();
-            }else{
+            } else if (height <= NETWORK_ROBUST_PHASE) {
+                return RewardDef.ROBUST_PHASE_CROWD_MINERS_REWARD.getAmount();
+            } else {
                 return RewardDef.CROWD_MINERS_REWARD.getAmount();
             }
         }
@@ -564,7 +576,7 @@ public class RewardCalculator {
         rewardCalStartMS = System.currentTimeMillis();
 
         String stage = stageTwo ? "Two" : "One";
-        // Crowd Miner Reward
+        // Mining Reward
         long miningRewards =  tx.getAmountNQT();
         Map<Long, Long> crowdMiners = Maps.newHashMap();
         boolean crowdRewardsDistributed = false;
