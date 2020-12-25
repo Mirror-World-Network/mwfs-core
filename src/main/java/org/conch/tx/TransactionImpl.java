@@ -1066,8 +1066,13 @@ final public class TransactionImpl implements Transaction {
         return flags;
     }
 
+    /**
+     * 交易校验
+     * @throws ConchException.ValidationException
+     */
     @Override
     public void validate() throws ConchException.ValidationException {
+        //
         if(CheckSumValidator.isKnownIgnoreTx(this.id)){
             Logger.logWarningMessage("Known ignore tx[id=%d, height=%d] in %s, skip validation", this.id, Conch.getBlockchain().getHeight(), Constants.getNetwork().getName());
             return;

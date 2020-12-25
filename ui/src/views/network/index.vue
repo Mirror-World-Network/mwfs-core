@@ -690,6 +690,7 @@
                 _this.getBlocks(val).then(res => {
                     // _this.blocklist.splice(0,_this.blocklist.length)
                     _this.blocklist = res.blocks
+                    console.log('loading',loading)
                     _this.loading = false;
                 }).catch(err => {
                     console.info('error', err);

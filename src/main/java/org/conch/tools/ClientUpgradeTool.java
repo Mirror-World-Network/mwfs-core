@@ -262,19 +262,36 @@ public class ClientUpgradeTool {
         String updateTime = cosVerObj.getString("updateTime");
 
         File tempPath = new File("temp/");
-        File archive = new File(tempPath, "cos-" + version + ".zip");
+        File archive = null;
+
+        try{
+            archive = new File(tempPath, "cos-" + version + ".7z");
+            Logger.logInfoMessage("[ UPGRADE CLIENT ] Downloading upgrade package:" + archive.getName());
+            if(archive.exists()) {
+                archive.delete();
+            }
+            FileUtils.copyURLToFile(new URL(UrlManager.getPackageDownloadUrlSevenZip(version)), archive);
+        }catch (IOException e){
+            Logger.logInfoMessage("[ UPGRADE CLIENT ] package:" + archive.getName() + "isn't exists,try zip package.");
+            try{
+                archive = new File(tempPath, "cos-" + version + ".zip");
+                if(archive.exists()) {
+                    archive.delete();
+                }
+                FileUtils.copyURLToFile(new URL(UrlManager.getPackageDownloadUrlZip(version)), archive);
+            }catch (IOException ioException){
+                Logger.logErrorMessage("[ UPGRADE CLIENT ] Failed to download upgrade "+version+"package", e);
+            }
+        }
+
         boolean delete = true;
         if(StringUtils.isNotEmpty(bakMode) && BAK_MODE_BACKUP.equalsIgnoreCase(bakMode)) {
             delete = false;
         }
-
-        if(archive.exists()) {
-            archive.delete();
+        if(archive != null && archive.exists()){
+            Logger.logInfoMessage("[ UPGRADE CLIENT ] Decompressing upgrade package:" + archive.getName() + ",mode=" + mode + ",delete source=" + delete);
+            FileUtil.unzipAndReplace(archive, mode, delete);
         }
-        Logger.logInfoMessage("[ UPGRADE CLIENT ] Downloading upgrade package:" + archive.getName());
-        FileUtils.copyURLToFile(new URL(UrlManager.getPackageDownloadUrl(version)), archive);
-        Logger.logInfoMessage("[ UPGRADE CLIENT ] Decompressing upgrade package:" + archive.getName() + ",mode=" + mode + ",delete source=" + delete);
-        FileUtil.unzipAndReplace(archive, mode, delete);
         try {
             if (!SystemUtils.IS_OS_WINDOWS) {
                 Runtime.getRuntime().exec("chmod -R +x " + Conch.getUserHomeDir());
@@ -293,7 +310,7 @@ public class ClientUpgradeTool {
      * @param upgradeDbHeight the height of the archived db file
      */
     public static void restoreDbAtHeight(String upgradeDbHeight) {
-        String dbFileName =  Db.getName() + "_" + upgradeDbHeight + ".zip";
+        String dbFileName =  Db.getName() + "_" + upgradeDbHeight;
         restoreDb(dbFileName);
     }
 
@@ -315,13 +332,22 @@ public class ClientUpgradeTool {
             String urlPrefix = lastDbArchiveObj.getString(ENV_PREFIX + KEY_DB_DOWNLOAD_URL);
             String downloadingUrl = UrlManager.getDbArchiveUrl(urlPrefix + dbFileName);
             try {
-                if(!RestfulHttpClient.findResource(downloadingUrl)) {
-                    Logger.logWarningMessage("[ UPGRADE DB ] db archive %s dose not exist, break.", downloadingUrl);
+                if(!RestfulHttpClient.findResource(downloadingUrl+".7z")) {
+                    Logger.logWarningMessage("[ UPGRADE DB ] db archive %s dose not exist, break.", downloadingUrl+".7z");
+                }
+                downloadingUrl += ".7z";
+                dbFileName += ".7z";
+            }catch(Exception e){
+                try {
+                    if(!RestfulHttpClient.findResource(downloadingUrl+".zip")){
+                        Logger.logWarningMessage("[ UPGRADE DB ] db archive %s dose not exist, break.", downloadingUrl+".zip");
+                    }
+                    downloadingUrl += ".zip";
+                    dbFileName += ".zip";
+                }catch(Exception exception){
+                    Logger.logWarningMessage("[ UPGRADE DB ] db archive exist judgement occur error: %s, break and wait for next check turn.", e.getMessage());
                     return false;
                 }
-            }catch(Exception e){
-                Logger.logWarningMessage("[ UPGRADE DB ] db archive exist judgement occur error: %s, break and wait for next check turn.", e.getMessage());
-                return false;
             }
 
             Logger.logDebugMessage("[ UPGRADE DB ] Start to update the local db, pause the mining and blocks sync firstly");
