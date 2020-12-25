@@ -339,54 +339,73 @@ public class FileUtil {
                 zIn = new SevenZFile(archive);
                 SevenZArchiveEntry entry = null;
                 while ((entry = zIn.getNextEntry()) != null) {
-                    try {
-                        final String name = entry.getName();
-                        final File outputFile = new File(appRootPath.resolve(name).toString());
+                    if (!entry.isDirectory()) {
+                        try {
+                            final String name = entry.getName();
+                            final File outputFile = new File(appRootPath.resolve(name).toString());
 
-                        // get the root folder of unzip
-                        //得到待解压文件目录
-                        if (name.endsWith("/")) {
-                            long fileSeparatorCount = name.chars().filter(c -> c == '/').count();
-                            if (fileSeparatorCount == 1) {
-                                archiveRoot = name;
+                            // get the root folder of unzip
+                            //得到待解压文件目录
+                            if (name.endsWith("/")) {
+                                long fileSeparatorCount = name.chars().filter(c -> c == '/').count();
+                                if (fileSeparatorCount == 1) {
+                                    archiveRoot = name;
+                                }
+                                outputFile.mkdirs();
+                                continue;
                             }
-                            outputFile.mkdirs();
-                            continue;
-                        }
 
-                        //此文件的上级目录
-                        final File parent = outputFile.getParentFile();
+                            //此文件的上级目录
+                            final File parent = outputFile.getParentFile();
 
-                        if (parent != null) {
-                            //目录名称
-                            String folderName = parent.getName();
-                            //System.out.println("found a parent folder -> " + folderName + ", path=" + parent.getPath());
+                            if (parent != null) {
+                                //目录名称
+                                String folderName = parent.getName();
+                                //System.out.println("found a parent folder -> " + folderName + ", path=" + parent.getPath());
 
-                            containDbFolder = dealDbFile(folderName,containDbFolder,appRootPath,deleteSource,archive);
+                                containDbFolder = dealDbFile(folderName, containDbFolder, appRootPath, deleteSource, archive);
 
-                            if(!parent.exists()){
-                                System.out.println(folderName + " mkdirs");
-                                parent.mkdirs();
+                                if (!parent.exists()) {
+                                    System.out.println(folderName + " mkdirs");
+                                    parent.mkdirs();
+                                }
                             }
+
+                            // copy and replae the upgrade files
+                            OutputStream out = null;
+                            BufferedOutputStream bos = null;
+                            try {
+
+                                // lib folder
+                                // Constants.GENERATE_EXPIRED_FILE_BUTTON 是否生成过期文件，默认 false
+                                dealLibFolder(name);
+
+                                String targetName = name;
+                                Path targetPath = appRootPath.resolve(targetName);
+                                out = new FileOutputStream(targetPath.toFile());
+                                bos = new BufferedOutputStream(out);
+                                int len = -1;
+                                byte[] buf = new byte[1024];
+                                while ((len = zIn.read(buf)) != -1) {
+                                    bos.write(buf, 0, len);
+                                }
+
+                                upgradeDetail += "[ OK ] Create or replace " + targetPath.toString() + " \n";
+                                count++;
+                            } catch (IOException e) {
+                                Logger.logErrorMessage(String.format("[ ERROR ] copy and replae the upgrade files %s", name, e.getMessage()));
+                            } finally {
+                                if (out != null) {
+                                    out.close();
+                                }
+                                if (bos != null) {
+                                    bos.close();
+                                }
+                            }
+                        } catch (Exception e) {
+                            failedDetail += "[ ERROR ] Failed to upgrade " + entry.getName() + " caused by [" + e.getMessage() + "] \n";
+                            failedCount++;
                         }
-
-                        // copy and replae the upgrade files
-                        try(InputStream is = new FileInputStream(entry.getName())){
-                            String targetName = name;
-                            Path targetPath = appRootPath.resolve(targetName);
-
-                            // lib folder
-                            // Constants.GENERATE_EXPIRED_FILE_BUTTON 是否生成过期文件，默认 false
-                            dealLibFolder(name);
-
-                            //累加升级文件size，文件数count
-                            size += Files.copy(is, targetPath, StandardCopyOption.REPLACE_EXISTING);
-                            upgradeDetail += "[ OK ] Create or replace " + targetPath.toString() + " \n";
-                            count++;
-                        }
-                    } catch (Exception e) {
-                        failedDetail += "[ ERROR ] Failed to upgrade " + entry.getName() + " caused by [" + e.getMessage() + "] \n";
-                        failedCount++;
                     }
                 }
             }
