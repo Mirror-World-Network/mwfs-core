@@ -1658,9 +1658,10 @@ public final class Account {
             this.publicKey = publicKeyTable.get(accountDbKeyFactory.newKey(this));
         }
 
-        if (this.publicKey == null || this.publicKey.publicKey == null) {
-            return 0;
-        }
+        // Not check the account public key
+//        if (this.publicKey == null || this.publicKey.publicKey == null) {
+//            return 0;
+//        }
 
         try {
             Conch.getBlockchain().readLock();
