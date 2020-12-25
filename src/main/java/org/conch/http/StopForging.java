@@ -39,10 +39,11 @@ public final class StopForging extends APIServlet.APIRequestHandler {
     @Override
     protected JSONStreamAware processRequest(HttpServletRequest req) throws ParameterException {
 
-        String secretPhrase = ParameterParser.getSecretPhrase(req, false);
+        StartForging startForging = StartForging.instance;
+        String pr = startForging.verifySignature(req);
         JSONObject response = new JSONObject();
-        if (secretPhrase != null) {
-            Generator generator = Generator.stopMining(secretPhrase);
+        if (pr != null) {
+            Generator generator = Generator.stopMining(pr);
             response.put("foundAndStopped", generator != null);
             response.put("forgersCount", Generator.getGeneratorCount());
         } else {

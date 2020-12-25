@@ -73,5 +73,5 @@ public interface Block {
 
     <T> T getExtValue(BlockImpl.ExtensionEnum extensionEnum);
 
-    boolean getHasRewardDistribution();
+    int getRewardDistributionHeight();
 }

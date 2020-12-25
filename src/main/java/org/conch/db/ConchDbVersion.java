@@ -739,6 +739,68 @@ public class ConchDbVersion extends DbVersion {
                     + "CREATE INDEX IF NOT EXISTS ACCOUNT_POC_SCORE_HEIGHT_INDEX ON ACCOUNT_POC_SCORE (HEIGHT DESC);\n"
                 );
             case 66:
+                int maxDistributeHeight = 0;
+                Connection con = null;
+                try {
+                    con = db.getConnection();
+                    PreparedStatement pstmt = con.prepareStatement(
+                            "SELECT height FROM block where HAS_REWARD_DISTRIBUTION = true order by height desc limit 1");
+                    ResultSet rs = pstmt.executeQuery();
+                    if (rs.next()) {
+                        maxDistributeHeight = rs.getInt("height");
+                    }
+                    apply("alter table BLOCK alter column HAS_REWARD_DISTRIBUTION rename to REWARD_DISTRIBUTION_HEIGHT;\n" +
+                        "alter table BLOCK alter column REWARD_DISTRIBUTION_HEIGHT int default 0 not null;");
+                    PreparedStatement currentHeightpstmt = con.prepareStatement(
+                             "SELECT height FROM block order by height desc limit 1");
+                    PreparedStatement pstmtUpdate = con.prepareStatement(
+                             "update block set REWARD_DISTRIBUTION_HEIGHT = ? where height <= ? and height > ?");
+                    ResultSet heightRs = currentHeightpstmt.executeQuery();
+                    // original settlement interval size
+                    int settlementIntervalSize = 432;
+                    while (heightRs.next()) {
+                        int height = heightRs.getInt("height");
+                        int i = height / settlementIntervalSize;
+                        if (i > 0) {
+                            for (int j = 1; j <= i; j++) {
+                                int rewardDistributionHeight = j * settlementIntervalSize;
+                                if (rewardDistributionHeight <= maxDistributeHeight) {
+                                    int latestRewardDistributionHeight = (j - 1) * settlementIntervalSize;
+                                    if (rewardDistributionHeight <= 5184) {
+                                        pstmtUpdate.setInt(1, rewardDistributionHeight);
+                                    } else if (rewardDistributionHeight > 5184 && rewardDistributionHeight <= 6048) {
+                                        pstmtUpdate.setInt(1, 6048);
+                                    }
+                                    pstmtUpdate.setInt(2, rewardDistributionHeight);
+                                    pstmtUpdate.setInt(3, latestRewardDistributionHeight);
+                                    pstmtUpdate.executeUpdate();
+                                    if (rewardDistributionHeight > 6048) {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if (height > 6048) {
+                            int intervalNum = height / 1008;
+                            if (intervalNum > 6) {
+                                for (int j = 7; j <= intervalNum; j++) {
+                                    int rewardDistributionHeight = j * settlementIntervalSize;
+                                    if (rewardDistributionHeight <= maxDistributeHeight) {
+                                        int latestRewardDistributionHeight = (j - 1) * settlementIntervalSize;
+                                        pstmtUpdate.setInt(1, rewardDistributionHeight);
+                                        pstmtUpdate.setInt(2, rewardDistributionHeight);
+                                        pstmtUpdate.setInt(3, latestRewardDistributionHeight);
+                                        pstmtUpdate.executeUpdate();
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+                } catch (SQLException e) {
+                    throw new RuntimeException(e.toString(), e);
+                }
+            case 67:
                 break;
             default:
                 throw new RuntimeException("Blockchain database inconsistent with code, at update " + nextUpdate

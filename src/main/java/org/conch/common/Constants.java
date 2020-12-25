@@ -272,13 +272,15 @@ public final class Constants {
      * @param height
      * @return
      */
-    public static boolean reachRewardSettlementHeight(int height) {
+    public static int getRewardSettlementHeight(int height) {
         // before 5185 height reward interval is every 432 height
         int interval = 432;
-        if (height > 5185) {
+        if (height > 5185 && height < 6050) {
+            interval = 432 * 2;
+        } else if (height > 6049) {
             interval = SETTLEMENT_INTERVAL_SIZE;
         }
-        return (height % interval) == 0;
+        return interval;
     }
 
     public static boolean updateHistoryRecord() {
