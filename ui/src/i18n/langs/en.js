@@ -106,7 +106,7 @@ const en = {
         'income_and_expenditure_details': "Balance Details",
         'payout': "Payouts",
         'income': "Income",
-        'account_inactive': "The account has not been activated yet, please click the account details to register the account name to activate",
+        'account_inactive': "The account has not yet bound publicKey, create a tx for automatic binding to improve security",
     },
     transaction: {
         'transaction_record': "Transaction Records",

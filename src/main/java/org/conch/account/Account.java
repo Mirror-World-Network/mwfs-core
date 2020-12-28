@@ -46,6 +46,7 @@ import org.conch.chain.CheckSumValidator;
 import org.conch.common.ConchException;
 import org.conch.common.Constants;
 import org.conch.consensus.genesis.SharderGenesis;
+import org.conch.consensus.reward.RewardCalculator;
 import org.conch.crypto.Crypto;
 import org.conch.crypto.EncryptedData;
 import org.conch.db.Db;
@@ -1658,7 +1659,9 @@ public final class Account {
             this.publicKey = publicKeyTable.get(accountDbKeyFactory.newKey(this));
         }
 
-        if (this.publicKey == null || this.publicKey.publicKey == null) {
+        // adding height judgment logic, not check the account publicKey
+        // TODO Network reset turn off the judgment
+        if (height <= RewardCalculator.NETWORK_ROBUST_PHASE && this.publicKey == null || this.publicKey.publicKey == null) {
             return 0;
         }
 
