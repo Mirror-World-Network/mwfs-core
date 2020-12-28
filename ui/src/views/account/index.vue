@@ -1457,7 +1457,7 @@ export default {
                 _this.accountInfo.frozenBalanceNQT = res.frozenBalanceNQT;
                 _this.accountInfo.guaranteedBalanceNQT = res.guaranteedBalanceNQT;
                 _this.accountInfo.unconfirmedBalanceNQT = res.unconfirmedBalanceNQT;
-                if (!res.publicKey) {
+                if (!res.publicKey && !SSO.downloadingBlockchain) {
                     _this.$message.warning(_this.$t("account.account_inactive"));
                 }
                 if (res.pocScore != null) {
