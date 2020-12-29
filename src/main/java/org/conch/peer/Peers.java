@@ -1744,8 +1744,6 @@ public final class Peers {
         return _connectToPeer(Constants.getBootNodeRandom(), needConnectNow);
     }
 
-    private static final boolean FORCE_CONNECT_BOOT = false;
-
     public static List<Peer> checkOrConnectAllGuideNodes(boolean needConnectNow) {
         List<Peer> connectedNodes = Lists.newArrayList();
 
@@ -1755,7 +1753,7 @@ public final class Peers {
             if (Conch.matchMyAddress(nodeHost)) {
                 continue;
             }
-            if (!FORCE_CONNECT_BOOT && nodeHost.contains("boot")) {
+            if (!Guard.forceConnectToBootNode() && nodeHost.contains("boot")) {
                 continue;
             }
 
