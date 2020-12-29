@@ -267,6 +267,7 @@ public class RewardCalculator {
     }
 
     /**
+     * 核对并结算RowdMinerRewards
      * Check whether reach the settlement height
      * Settle all un-settlement blocks before this height
      * Combine changes of the same account from these blocks
@@ -316,6 +317,7 @@ public class RewardCalculator {
 
                 long totalPocScoreLong = 0;
                 Map<Long, Long> crowdMiners = coinBase.getCrowdMiners();
+
                 for(long pocScore : crowdMiners.values()){
                     totalPocScoreLong += pocScore;
                 }

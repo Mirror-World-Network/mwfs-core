@@ -95,6 +95,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.spring4all.swagger.EnableSwagger2Doc;
+
 public final class Conch {
 
     public static final String VERSION = "0.0.5";
@@ -762,6 +764,7 @@ public final class Conch {
         Conch.time = time;
     }
 
+//    @EnableSwagger2Doc
     public static void main(String[] args) {
         try {
             Runtime.getRuntime().addShutdownHook(new Thread(Conch::shutdown));
