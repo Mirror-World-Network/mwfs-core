@@ -24,6 +24,7 @@ package org.conch.common;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.conch.Conch;
+import org.conch.consensus.reward.RewardCalculator;
 import org.conch.env.RuntimeEnvironment;
 import org.conch.peer.Peer;
 
@@ -277,8 +278,10 @@ public final class Constants {
         int interval = 432;
         if (height > 5185 && height < 6050) {
             interval = 432 * 2;
-        } else if (height > 6049) {
+        } else if (height >= 6050 && height <= RewardCalculator.NETWORK_ROBUST_PHASE) {
             interval = SETTLEMENT_INTERVAL_SIZE;
+        } else if (height > RewardCalculator.NETWORK_ROBUST_PHASE) {
+            interval = 432 * 10;
         }
         return interval;
     }
