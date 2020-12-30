@@ -140,6 +140,17 @@ public class PocCalculator implements Serializable {
         pocScore.hardwareScore = hardwareWeight.multiply(hardwareScore.multiply(SCORE_MULTIPLIER)).divide(PERCENT_DIVISOR);
     }
 
+    /**
+     * get hardware Capacity, unit = PB
+     * @param hardwareScore
+     * @return
+     */
+    public static float hardwareCapacity(BigInteger hardwareScore) {
+        BigInteger hardwareWeight = getWeight(PocTxBody.WeightTableOptions.HARDWARE_CONFIG);
+        Long hardwareCapacity = hardwareScore.multiply(PERCENT_DIVISOR).divide(SCORE_MULTIPLIER).divide(hardwareWeight).longValue();
+        return hardwareCapacity/1024.00f;
+    }
+
     static void nodeConfCal(PocScore pocScore, PocTxBody.PocNodeConf nodeConf) {
 
         BigInteger serverScore = BigInteger.ZERO, networkScore = BigInteger.ZERO , performanceScore = BigInteger.ZERO;

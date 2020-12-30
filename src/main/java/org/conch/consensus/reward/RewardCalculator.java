@@ -10,6 +10,7 @@ import org.conch.account.AccountLedger;
 import org.conch.chain.Block;
 import org.conch.chain.BlockDb;
 import org.conch.common.Constants;
+import org.conch.consensus.poc.PocCalculator;
 import org.conch.consensus.poc.PocHolder;
 import org.conch.consensus.poc.PocScore;
 import org.conch.db.Db;
@@ -30,6 +31,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 
 
@@ -278,8 +280,34 @@ public class RewardCalculator {
 
             crowdMinerPocScoreMap.put(declaredAccount.getId(), pocScore.total().longValue());
         }
-
         return crowdMinerPocScoreMap;
+    }
+
+    /**
+     * Total capacity of qualified miner hardware
+     * @return
+     * @param height
+     * @param boundAccountList
+     */
+    public static float crowdMinerHardwareCapacity(int height, List<Long> boundAccountList) {
+        // TODO add cache, per 10min cache once
+        Long crowdMinerHardwareScoreTotal = 0L;
+        if (boundAccountList != null && !boundAccountList.isEmpty()) {
+            // read the qualified miner list
+            for (Long boundAccountId : boundAccountList) {
+                // poc score judgement
+                PocScore pocScore = PocHolder.getPocScore(height, boundAccountId);
+                crowdMinerHardwareScoreTotal += pocScore.getHardwareScore().longValue();
+            }
+        } else {
+            // generate the poc score map
+            for(Long boundAccountId : Conch.getPocProcessor().getCertifiedPeers().keySet()){
+                // poc score judgement
+                PocScore pocScore = PocHolder.getPocScore(height, boundAccountId);
+                crowdMinerHardwareScoreTotal += pocScore.getHardwareScore().longValue();
+            }
+        }
+        return PocCalculator.hardwareCapacity(new BigInteger(crowdMinerHardwareScoreTotal.toString()));
     }
 
     /**

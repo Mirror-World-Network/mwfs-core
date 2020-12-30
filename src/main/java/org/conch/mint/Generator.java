@@ -29,6 +29,7 @@ import org.conch.Conch;
 import org.conch.account.Account;
 import org.conch.chain.*;
 import org.conch.common.Constants;
+import org.conch.consensus.poc.PocCalculator;
 import org.conch.consensus.poc.PocScore;
 import org.conch.crypto.Crypto;
 import org.conch.db.Db;
@@ -1046,7 +1047,7 @@ public class Generator implements Comparable<Generator> {
                     if(generator.detailedPocScore.getBigInteger("hardwareScore").doubleValue() > 54000){
                         badHardwareScoreStr += generator.toJson(false) + "\n";
                     }
-                    generatorDetailStr += generator.toJson(false) + "\n";;
+                    generatorDetailStr += generator.toJson(false) + "\n";
                 }
                 //Logger.logDebugMessage("\n\rTotal Generator detail is \n\r" + generatorDetailStr);
                 //Logger.logDebugMessage("\n\rTotal Bad Hardware Score detail is \n\r" + badHardwareScoreStr);
@@ -1054,7 +1055,24 @@ public class Generator implements Comparable<Generator> {
         }
         return generatorList;
     }
-    
+
+    /**
+     * Miner hardware total capacity
+     * @return hardware Capacity of all active Miner
+     */
+    public static float hardwareCapacityActive () {
+        List<ActiveGenerator> generators = getNextGenerators();
+        Integer scoreTotal = 0;
+        for (ActiveGenerator generator : generators) {
+            Integer hardwareScore = generator.detailedPocScore.getBigInteger("hardwareScore").intValue();
+            if (hardwareScore == 400) {
+                continue;
+            }
+            scoreTotal += hardwareScore;
+        }
+        return PocCalculator.hardwareCapacity(new BigInteger(scoreTotal.toString()));
+    }
+
 
     /**
      * Active generator
