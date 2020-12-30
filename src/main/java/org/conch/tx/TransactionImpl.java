@@ -930,6 +930,10 @@ final public class TransactionImpl implements Transaction {
             if (transactionType == null) {
                 throw new ConchException.NotValidException("Invalid transaction type: " + type + ", " + subtype);
             }
+//            Attachment.CoinBase coinBase = (Attachment.CoinBase)transactionType.parseAttachment(attachmentData);
+//            if(coinBase != null){
+//                System.out.println(123);
+//            }
             BuilderImpl builder = new BuilderImpl(version, senderPublicKey,
                     amountNQT, feeNQT, deadline,
                     transactionType.parseAttachment(attachmentData))

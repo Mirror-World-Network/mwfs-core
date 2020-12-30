@@ -444,6 +444,7 @@ public class PocDb  {
                 blockchain.readLock();
                 con = Db.db.getConnection();
                 PreparedStatement pstmt = con.prepareStatement("SELECT * FROM certified_peer WHERE delete_height =0 or delete_height >? ORDER BY height DESC;");
+//                SELECT * FROM certified_peer WHERE delete_height =0 or delete_height >? ORDER BY height DESC;
                 pstmt.setInt(1,blockchain.getHeight());
                 ResultSet rs = pstmt.executeQuery();
                 while (rs.next()) {

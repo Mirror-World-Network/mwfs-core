@@ -2164,12 +2164,15 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
 
     private static long QUALIFIED_CROWD_MINER_HOLDING_AMOUNT_MIN = 32*133L; // 1T-133MW
 
+    /**
+     * //       条件检查的时间点： 在区块确认时，针对转账交易进行检查
+     *         转出方是否存在于矿工列表，存在进行最新挖矿持仓量检查，不满足移除；
+     *         方案1：
+     *         - 矿工数据做逻辑删除，设置检查状态，处于检查状态的逻辑删除矿工数，每个区块高度仍然按照第一条进行条件检测
+     *         - 回滚和分叉情况下，放回矿工列表
+     * @param block
+     */
     private void checkMiner(BlockImpl block){
-        //       条件检查的时间点： 在区块确认时，针对转账交易进行检查
-        //       转出方是否存在于矿工列表，存在进行最新挖矿持仓量检查，不满足移除；
-        //       方案1：
-        //        - 矿工数据做逻辑删除，设置检查状态，处于检查状态的逻辑删除矿工数，每个区块高度仍然按照第一条进行条件检测
-        //        - 回滚和分叉情况下，放回矿工列表
 
         //得到矿工列表
         HashMap<Long, Long> crowdMiners = new HashMap<>();
@@ -2213,6 +2216,8 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                                     PocDb.saveOrUpdatePeer(certifiedPeer);
                                 }else if(block.getHeight() - certifiedPeer.getDeleteHeight() >= 10 ){
                                     //移除
+
+
                                 }
                             }
 

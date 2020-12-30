@@ -22,6 +22,7 @@
 package org.conch.http;
 
 import org.conch.Conch;
+import org.conch.account.Account;
 import org.conch.chain.Block;
 import org.conch.chain.Blockchain;
 import org.conch.common.ConchException;
@@ -89,6 +90,11 @@ public final class GetNextBlockGenerators extends APIServlet.APIRequestHandler {
             response.put("height", lastBlock.getHeight());
             response.put("lastBlock", Long.toUnsignedString(lastBlock.getId()));
             List<Generator.ActiveGenerator> activeGenerators = Generator.getNextGenerators();
+            activeGenerators.forEach(activeGenerator -> {
+                if(Account.rsAccount(activeGenerator.getAccountId()).equals("CDW-GTL6-U952-HRKE-66MW2")){
+                    System.out.println(activeGenerator.getAccountId());
+                }
+            });
             response.put("activeCount", activeGenerators.size());
             JSONArray generators = new JSONArray();
             for (Generator.ActiveGenerator generator : activeGenerators) {
