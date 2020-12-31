@@ -50,8 +50,13 @@ public final class GetTxStatistics extends APIServlet.APIRequestHandler {
         super(new APITag[]{APITag.BIZ});
     }
 
+//    private static JSONObject jsonObject = new JSONObject();
+
     @Override
     protected JSONStreamAware processRequest(HttpServletRequest req) throws ConchException {
+
+        // TODO if tNow > lastBlockTime + gasTime => update jsonObject , else indirection return
+
         Long transferCount = 0L;
         Long transferAmount = 0L;
         Long transferCount24H = 0L;
@@ -60,13 +65,13 @@ public final class GetTxStatistics extends APIServlet.APIRequestHandler {
         Long storageDataLength = 0L;
         Long storageCount24H = 0L;
         Long storageDataLength24H = 0L;
-        Long crowdMinerJoinerCount = 0L;
         Long declaredPeerSize24H = 0L;
-        float capacity24H;
-        float capacity;
-        float capacityActive;
-        JSONObject jsonObject = new JSONObject();
+        String capacity24H;
+        String capacity;
+        String capacityActive;
         List<Long> boundAccountList = Lists.newArrayList();
+
+        JSONObject jsonObject = new JSONObject();
 
         Connection con = null;
         PreparedStatement pstmt = null;
@@ -138,14 +143,13 @@ public final class GetTxStatistics extends APIServlet.APIRequestHandler {
             capacity = RewardCalculator.crowdMinerHardwareCapacity(Conch.getHeight(), null);
             capacityActive = Generator.hardwareCapacityActive();
 
-            crowdMinerJoinerCount = getCoinBaseCrowdMinerJoinersCount(con, TransactionType.TYPE_COIN_BASE);
             jsonObject.put("transferCount", transferCount);
             jsonObject.put("transferAmount", transferAmount);
             jsonObject.put("transferCount24H", transferCount24H);
             jsonObject.put("transferAmount24H", transferAmount24H);
             jsonObject.put("storageCount", storageCount);
-            jsonObject.put("poolCount", getTransactionCountByType(con, TransactionType.TYPE_SHARDER_POOL));
-            jsonObject.put("coinBaseCount", getTransactionCountByType(con, TransactionType.TYPE_COIN_BASE) + crowdMinerJoinerCount);
+            jsonObject.put("poolCount", Conch.getBlockchain().getTransactionCountByType(TransactionType.TYPE_SHARDER_POOL));
+            jsonObject.put("coinBaseCount", Conch.getBlockchain().getTransactionCountByType(TransactionType.TYPE_COIN_BASE));
             jsonObject.put("storageDataLength", storageDataLength);
             jsonObject.put("storageCount24H", storageCount24H);
             jsonObject.put("storageDataLength24H", storageDataLength24H);
@@ -162,48 +166,6 @@ public final class GetTxStatistics extends APIServlet.APIRequestHandler {
             DbUtils.close(con, pstmt);
             return jsonObject;
         }
-    }
-
-    /**
-     * 根据交易类型获得交易总数
-     *
-     * @param con
-     * @param type
-     * @return
-     * @throws SQLException
-     */
-    private long getTransactionCountByType(Connection con, int type) throws SQLException {
-        PreparedStatement ps = con.prepareStatement("SELECT COUNT(*) FROM TRANSACTION WHERE TYPE = ?");
-        ps.setInt(1, type);
-        ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            return rs.getLong(1);
-        }
-        return 0L;
-    }
-
-    /**
-     * 获取coinbase中的crowdminer和joiner的数量
-     *
-     * @param con
-     * @param type
-     * @return
-     * @throws SQLException
-     * @throws ConchException.NotValidException
-     */
-    private long getCoinBaseCrowdMinerJoinersCount(Connection con, int type) throws SQLException, ConchException.NotValidException {
-        //        PreparedStatement ps = con.prepareStatement("SELECT * FROM TRANSACTION WHERE TYPE = ?");
-        //        ps.setInt(1, type);
-        //        ResultSet rs = ps.executeQuery();
-        //        long count = 0;
-        //        if (rs.next()) {
-        //            TransactionImpl transaction = TransactionDb.loadTransaction(con, rs);
-        //            Attachment.CoinBase coinBase = (Attachment.CoinBase) transaction.getAttachment();
-        //            count = count + (coinBase.getConsignors() == null ? 0 : coinBase.getConsignors().size())
-        //                    + (coinBase.getCrowdMiners() == null ? 0 : coinBase.getCrowdMiners().size());
-        //        }
-        //        return count;
-        return 0;
     }
 
     @Override

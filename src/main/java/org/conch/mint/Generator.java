@@ -1060,7 +1060,7 @@ public class Generator implements Comparable<Generator> {
      * Miner hardware total capacity
      * @return hardware Capacity of all active Miner
      */
-    public static float hardwareCapacityActive () {
+    public static String hardwareCapacityActive () {
         List<ActiveGenerator> generators = getNextGenerators();
         Integer scoreTotal = 0;
         for (ActiveGenerator generator : generators) {

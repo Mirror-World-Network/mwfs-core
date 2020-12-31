@@ -289,7 +289,7 @@ public class RewardCalculator {
      * @param height
      * @param boundAccountList
      */
-    public static float crowdMinerHardwareCapacity(int height, List<Long> boundAccountList) {
+    public static String crowdMinerHardwareCapacity(int height, List<Long> boundAccountList) {
         // TODO add cache, per 10min cache once
         Long crowdMinerHardwareScoreTotal = 0L;
         if (boundAccountList != null && !boundAccountList.isEmpty()) {
