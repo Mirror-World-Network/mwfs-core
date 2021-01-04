@@ -86,12 +86,10 @@ public class FileUtil {
      */
     public static void unzip(final String zipFilePath, final String outputLocation, boolean deleteSource) throws IOException {
         //根据后缀判断是.zip还是.7z
-        Boolean isZip = zipFilePath.endsWith(".zip");
-
         ZipFile zipFile = null;
         SevenZFile zIn = null;
         try{
-            if(isZip){
+            if(zipFilePath.endsWith(".zip")){
                 zipFile = new ZipFile(zipFilePath);
                 final Enumeration<? extends ZipEntry> enu = zipFile.entries();
                 while (enu.hasMoreElements()) {
@@ -125,7 +123,7 @@ public class FileUtil {
                         }
                     }
                 }
-            }else{
+            }else if(zipFilePath.endsWith(".7z")){
                 zIn = new SevenZFile(new File(zipFilePath));
                 SevenZArchiveEntry entry = null;
                 while ((entry = zIn.getNextEntry()) != null) {
@@ -206,24 +204,6 @@ public class FileUtil {
      *
      * replace the same file in two mode, like: cos.jar.
      *
-     *1.判断是全量还是增量更新
-     *         //全量：将html、lib中所有文件删除
-     *         //增量：deleteSource参数判断
-     *         //	true删除html false备份html之后再删除
-     *         //	得到所有lib下的jar 包 保存于libFileMap(key=commons-compress:value=./lib/commons-compress-1.9.jar)
-     *
-     * 2.迭代压缩文件通过zipFile包装后返回的ZipFile对象的entries
-     *      2.1迭代过程中删除数据库DbFolder(mw_db || mw_test_db),并且只删除一次，控制的方式为：定义初始值为false的containDbFolder,第一层if判断条件为（!containDbFolder）,当解压文件位于（mw_db || mw_test_db ）文件夹下时，containDbFolder  为true；第二层判断条件为（containDbFolder），删除逻辑写在第二层if条件满足时
-     *       2.2 lib文件夹中旧版本的jar添加到removeOldLibFiles中
-     *
-     * 3.把解压完的文件copy到根目录中
-     *
-     * 4.根据 Constants.GENERATE_EXPIRED_FILE_BUTTON （配置文件：sharder.generateExpiredFileButton 默认为false）决定是否
-     * 删除lib中旧版本jar
-     *
-     * 5.替换配置文件（现在代码中被注释掉了）
-     *
-     * 6.删除解压出来的的文件夹  、升级的包
      *
      *
      */
@@ -276,11 +256,10 @@ public class FileUtil {
         String archiveRoot = ""; //文件目录名称
 
         //根据后缀判断是.zip还是.7z
-        Boolean isZip = archive.getName().endsWith(".zip");
         ZipFile zfile = null;
         SevenZFile zIn = null;
         try {
-            if(isZip){
+            if(archive.getName().endsWith(".zip")){
                 zfile = new ZipFile(archive);
                 Enumeration<? extends ZipEntry> entries = zfile.entries();
                 ZipEntry zipEntry = null;
@@ -335,7 +314,7 @@ public class FileUtil {
                         failedCount++;
                     }
                 }
-            }else{
+            }else if(archive.getName().endsWith(".7z")){
                 zIn = new SevenZFile(archive);
                 SevenZArchiveEntry entry = null;
                 while ((entry = zIn.getNextEntry()) != null) {

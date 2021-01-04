@@ -281,6 +281,7 @@ public class ClientUpgradeTool {
                 FileUtils.copyURLToFile(new URL(UrlManager.getPackageDownloadUrlZip(version)), archive);
             }catch (IOException ioException){
                 Logger.logErrorMessage("[ UPGRADE CLIENT ] Failed to download upgrade "+version+"package", e);
+                return;
             }
         }
 
