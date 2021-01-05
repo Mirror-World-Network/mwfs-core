@@ -129,31 +129,30 @@ public class FileUtil {
                 while ((entry = zIn.getNextEntry()) != null) {
                     final String name = entry.getName();
                     final File outputFile = new File(outputLocation + File.separator + name);
-
-                    if (name.endsWith("/")) {
+                    if(entry.isDirectory()){
                         outputFile.mkdirs();
-                        continue;
-                    }
 
-                    final File parent = outputFile.getParentFile();
-                    if (parent != null) {
-                        parent.mkdirs();
-                    }
-
-                    // Extract the file 提取文件
-                    try (final InputStream inputStream = new FileInputStream(new File(entry.getName()));
-                         final FileOutputStream outputStream = new FileOutputStream(outputFile)) {
-                        /*
-                         * The buffer is the max amount of bytes kept in RAM during any given time while
-                         * unzipping. Since most windows disks are aligned to 4096 or 8192, we use a
-                         * multiple of those values for best performance.
-                         */
-                        final byte[] bytes = new byte[8192];
-                        while (inputStream.available() > 0) {
-                            final int length = inputStream.read(bytes);
-                            outputStream.write(bytes, 0, length);
+                        final File parent = outputFile.getParentFile();
+                        if (parent != null) {
+                            parent.mkdirs();
+                        }
+                    }else if(!entry.isDirectory()){
+                        // Extract the file 提取文件
+                        try (final InputStream inputStream = new FileInputStream(new File(entry.getName()));
+                             final FileOutputStream outputStream = new FileOutputStream(outputFile)) {
+                            /*
+                             * The buffer is the max amount of bytes kept in RAM during any given time while
+                             * unzipping. Since most windows disks are aligned to 4096 or 8192, we use a
+                             * multiple of those values for best performance.
+                             */
+                            final byte[] bytes = new byte[8192];
+                            while (inputStream.available() > 0) {
+                                final int length = inputStream.read(bytes);
+                                outputStream.write(bytes, 0, length);
+                            }
                         }
                     }
+
                 }
             }
         }catch (Exception e) {
