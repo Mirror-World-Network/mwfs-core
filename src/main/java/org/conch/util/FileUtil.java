@@ -260,8 +260,9 @@ public class FileUtil {
                 zfile = new ZipFile(archive);
                 Enumeration<? extends ZipEntry> entries = zfile.entries();
                 ZipEntry zipEntry = null;
-                while ((zipEntry = entries.nextElement()) != null) {
+                while (entries.hasMoreElements()) {
                     try {
+                        zipEntry = entries.nextElement();
                         String name = zipEntry.getName();
 
                         File outputFile = new File(appRootPath.resolve(name).toString());
