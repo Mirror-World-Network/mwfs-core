@@ -1157,7 +1157,7 @@ final public class TransactionImpl implements Transaction {
         return senderAccount != null && type.applyUnconfirmed(this, senderAccount);
     }
 
-    public void apply() {
+    public void apply() throws ConchException.StopException {
         if(CheckSumValidator.isKnownIgnoreTx(id)){
             Logger.logWarningMessage("this tx[id=%d, creator=%s, height=%d] is known ignored tx, don't apply and ignore it", id, Account.rsAccount(senderId), height);
             return;

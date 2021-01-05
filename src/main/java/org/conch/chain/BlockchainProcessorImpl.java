@@ -693,6 +693,8 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                         Generator.blackGenerator(e.getGeneratorId());
                     } catch (BlockNotAcceptedException e) {
                         peerBlock.getPeer().blacklist(e);
+                    } catch (ConchException.StopException e) {
+                        throw e;
                     }
                 } else {
                     forkBlocks.add(block);
@@ -714,7 +716,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         }
     }
 
-    private void processFork(final Peer peer, final List<BlockImpl> forkBlocks, final Block commonBlock) {
+    private void processFork(final Peer peer, final List<BlockImpl> forkBlocks, final Block commonBlock) throws ConchException.StopException {
         // record the current difficulty and pop-off the chain to common block(genesis block or last known block)
         BigInteger curCumulativeDifficulty = blockchain.getLastBlock().getCumulativeDifficulty();
         List<BlockImpl> myPoppedOffBlocks = popOffTo(commonBlock);
@@ -736,6 +738,8 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     } catch (GeneratorNotAcceptedException e) {
                         Generator.blackGenerator(e.getGeneratorId());
                         break;
+                    } catch (ConchException.StopException e) {
+                        throw e;
                     }
                 }
             }
@@ -1665,7 +1669,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         }
     }
 
-    private void pushBlock(final BlockImpl block) throws BlockNotAcceptedException, GeneratorNotAcceptedException {
+    private void pushBlock(final BlockImpl block) throws BlockNotAcceptedException, GeneratorNotAcceptedException, ConchException.StopException {
 
         int curTime = Conch.getEpochTime();
         blockchain.writeLock();
@@ -1969,7 +1973,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             List<TransactionImpl> validPhasedTransactions,
             List<TransactionImpl> invalidPhasedTransactions,
             Map<TransactionType, Map<String, Integer>> duplicates)
-            throws TransactionNotAcceptedException {
+            throws TransactionNotAcceptedException, ConchException.StopException {
         try {
             isProcessingBlock = true;
             // unconfirmed balance update
@@ -2522,6 +2526,8 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         } catch (GeneratorNotAcceptedException e) {
             Generator.blackGenerator(e.getGeneratorId());
             throw e;
+        } catch (ConchException.StopException e) {
+            throw e;
         }
     }
 
@@ -2553,15 +2559,35 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
 
     @Override
     public void scan(int height, boolean validate) {
-        scan(height, validate, false);
+        try {
+            scan(height, validate, false);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } catch (ConchException.NotValidException e) {
+            e.printStackTrace();
+        } catch (BlockNotAcceptedException e) {
+            e.printStackTrace();
+        } catch (GeneratorNotAcceptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void fullScanWithShutdown() {
-        scan(0, true, true);
+        try {
+            scan(0, true, true);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } catch (ConchException.NotValidException e) {
+            e.printStackTrace();
+        } catch (BlockNotAcceptedException e) {
+            e.printStackTrace();
+        } catch (GeneratorNotAcceptedException e) {
+            e.printStackTrace();
+        }
     }
 
-    private void scan(int height, boolean validate, boolean shutdown) {
+    private void scan(int height, boolean validate, boolean shutdown) throws SQLException, ConchException.NotValidException, BlockNotAcceptedException, GeneratorNotAcceptedException, ConchException.StopException {
         blockchain.writeLock();
         try {
             if (!Db.db.isInTransaction()) {
@@ -2704,6 +2730,9 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                                 Logger.logDebugMessage(e.toString(), e);
                                 Logger.logDebugMessage("Applying block " + Long.toUnsignedString(currentBlockId) + " at height "
                                         + (currentBlock == null ? 0 : currentBlock.getHeight()) + " failed, deleting from database");
+                                if (e instanceof ConchException.StopException) {
+                                    throw e;
+                                }
                                 BlockImpl lastBlock = BlockDb.deleteBlocksFrom(currentBlockId);
                                 blockchain.setLastBlock(lastBlock);
                                 popOffTo(lastBlock);
@@ -2728,7 +2757,10 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     Logger.logMessage("SUCCESSFULLY PERFORMED FULL RESCAN WITH VALIDATION");
                 }
                 lastRestoreTime = 0;
-            } catch (SQLException e) {
+            } catch (SQLException | ConchException.NotValidException | BlockNotAcceptedException | GeneratorNotAcceptedException | ConchException.StopException e) {
+                if (e instanceof ConchException.StopException) {
+                    throw e;
+                }
                 throw new RuntimeException(e.toString(), e);
             } finally {
                 isScanning = false;

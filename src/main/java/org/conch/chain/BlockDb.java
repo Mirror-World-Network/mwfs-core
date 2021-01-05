@@ -22,6 +22,7 @@
 package org.conch.chain;
 
 import org.conch.Conch;
+import org.conch.common.ConchException;
 import org.conch.common.Constants;
 import org.conch.db.Db;
 import org.conch.db.DbUtils;
@@ -422,18 +423,40 @@ public final class BlockDb {
      * if the latest rewardDistributionHeight more than the height over settlement height, return true.
      * @return
      */
-    public static boolean reachRewardSettlementHeight(int height) {
-        try (Connection con = Db.db.getConnection()) {
+    public static boolean reachRewardSettlementHeight(int height) throws ConchException.StopException {
+        Connection con = null;
+        boolean isIntx = Db.db.isInTransaction();
+        try {
+            con = Db.db.getConnection();
             PreparedStatement pstmt = con.prepareStatement("select REWARD_DISTRIBUTION_HEIGHT from BLOCK where HEIGHT <= ? order by REWARD_DISTRIBUTION_HEIGHT desc limit 1");
             pstmt.setInt(1, height);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    return ((height - rs.getInt("REWARD_DISTRIBUTION_HEIGHT")) >= Constants.getRewardSettlementHeight(height));
+                    int rewardDistributionHeightDifference = height - rs.getInt("REWARD_DISTRIBUTION_HEIGHT");
+                    int rewardSettlementHeight = Constants.getRewardSettlementHeight(height);
+
+                    if (rewardDistributionHeightDifference == rewardSettlementHeight) {
+                        return true;
+                    } else if (rewardDistributionHeightDifference > rewardSettlementHeight) {
+                        Block rollbackHeight = blockchain.getBlockAtHeight(rs.getInt("REWARD_DISTRIBUTION_HEIGHT") + rewardSettlementHeight - 1);
+                        BlockImpl lastBlock = BlockDb.deleteBlocksFrom(rollbackHeight.getId());
+                        blockchain.setLastBlock(lastBlock);
+                        BlockchainProcessorImpl.getInstance().popOffTo(lastBlock);
+                        throw new ConchException.StopException("");
+                    }
                 }
                 return false;
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e.toString(), e);
+        } catch (SQLException | ConchException.StopException e) {
+            if (e instanceof ConchException.StopException){
+                throw new ConchException.StopException("current height over the reward distribution height," +
+                        "roll back to the reward distribution height");
+            }
+            throw new RuntimeException(e);
+        }finally {
+            if (!isIntx) {
+                DbUtils.close(con);
+            }
         }
         //return (height % Constants.SETTLEMENT_INTERVAL_SIZE) == 0;
     }
