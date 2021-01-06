@@ -46,8 +46,9 @@ public class RewardCalculator {
      */
     private enum RewardDef {
         BLOCK_REWARD(1333 * Constants.ONE_SS),
-        CROWD_MINERS_REWARD(1200 * Constants.ONE_SS),
-        ROBUST_PHASE_CROWD_MINERS_REWARD(667 * Constants.ONE_SS),
+        CROWD_MINERS_REWARD(667 * Constants.ONE_SS),
+        ROBUST_PHASE_CROWD_MINERS_REWARD(9 * Constants.ONE_SS / 10),
+        ROBUST_PHASE_BLOCK_REWARD(1 * Constants.ONE_SS),
         STABLE_PHASE_BLOCK_REWARD(1 * Constants.ONE_SS),
         STABLE_PHASE_CROWD_MINERS_REWARD(1 * Constants.ONE_SS / 2);
 
@@ -74,7 +75,7 @@ public class RewardCalculator {
     /**
      * Estimated robust height after network reset
      */
-    public static final int NETWORK_ROBUST_PHASE = Constants.isDevnet() ? 10 : 8000;
+    public static final int NETWORK_ROBUST_PHASE = Constants.isDevnet() ? 10 : 10000;
     /**
      * how much one block reward
      * @return
@@ -93,8 +94,11 @@ public class RewardCalculator {
         // No block rewards in the miner joining phase
         if(height <= NETWORK_STABLE_PHASE) {
             return RewardDef.STABLE_PHASE_BLOCK_REWARD.getAmount();
+        } else if (height <= NETWORK_ROBUST_PHASE) {
+            return RewardDef.BLOCK_REWARD.getAmount();
+        } else {
+            return RewardDef.ROBUST_PHASE_BLOCK_REWARD.getAmount();
         }
-        return RewardDef.BLOCK_REWARD.getAmount();
     }
 
     public static long crowdMinerReward(int height){
@@ -103,9 +107,9 @@ public class RewardCalculator {
             if(height <= NETWORK_STABLE_PHASE) {
                 return RewardDef.STABLE_PHASE_CROWD_MINERS_REWARD.getAmount();
             } else if (height <= NETWORK_ROBUST_PHASE) {
-                return RewardDef.ROBUST_PHASE_CROWD_MINERS_REWARD.getAmount();
-            } else {
                 return RewardDef.CROWD_MINERS_REWARD.getAmount();
+            } else {
+                return RewardDef.ROBUST_PHASE_CROWD_MINERS_REWARD.getAmount();
             }
         }
         return 0L;
