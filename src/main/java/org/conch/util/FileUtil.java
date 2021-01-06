@@ -86,12 +86,10 @@ public class FileUtil {
      */
     public static void unzip(final String zipFilePath, final String outputLocation, boolean deleteSource) throws IOException {
         //根据后缀判断是.zip还是.7z
-        Boolean isZip = zipFilePath.endsWith(".zip");
-
         ZipFile zipFile = null;
         SevenZFile zIn = null;
         try{
-            if(isZip){
+            if(zipFilePath.endsWith(".zip")){
                 zipFile = new ZipFile(zipFilePath);
                 final Enumeration<? extends ZipEntry> enu = zipFile.entries();
                 while (enu.hasMoreElements()) {
@@ -125,46 +123,45 @@ public class FileUtil {
                         }
                     }
                 }
-            }else{
+            }else if(zipFilePath.endsWith(".7z")){
                 zIn = new SevenZFile(new File(zipFilePath));
                 SevenZArchiveEntry entry = null;
                 while ((entry = zIn.getNextEntry()) != null) {
                     final String name = entry.getName();
                     final File outputFile = new File(outputLocation + File.separator + name);
-
-                    if (name.endsWith("/")) {
+                    if(entry.isDirectory()){
                         outputFile.mkdirs();
-                        continue;
-                    }
 
-                    final File parent = outputFile.getParentFile();
-                    if (parent != null) {
-                        parent.mkdirs();
-                    }
-
-                    // Extract the file 提取文件
-                    try (final InputStream inputStream = new FileInputStream(new File(entry.getName()));
-                         final FileOutputStream outputStream = new FileOutputStream(outputFile)) {
-                        /*
-                         * The buffer is the max amount of bytes kept in RAM during any given time while
-                         * unzipping. Since most windows disks are aligned to 4096 or 8192, we use a
-                         * multiple of those values for best performance.
-                         */
-                        final byte[] bytes = new byte[8192];
-                        while (inputStream.available() > 0) {
-                            final int length = inputStream.read(bytes);
-                            outputStream.write(bytes, 0, length);
+                        final File parent = outputFile.getParentFile();
+                        if (parent != null) {
+                            parent.mkdirs();
+                        }
+                    }else if(!entry.isDirectory()){
+                        // Extract the file 提取文件
+                        try (final InputStream inputStream = new FileInputStream(new File(entry.getName()));
+                             final FileOutputStream outputStream = new FileOutputStream(outputFile)) {
+                            /*
+                             * The buffer is the max amount of bytes kept in RAM during any given time while
+                             * unzipping. Since most windows disks are aligned to 4096 or 8192, we use a
+                             * multiple of those values for best performance.
+                             */
+                            final byte[] bytes = new byte[8192];
+                            while (inputStream.available() > 0) {
+                                final int length = inputStream.read(bytes);
+                                outputStream.write(bytes, 0, length);
+                            }
                         }
                     }
+
                 }
             }
         }catch (Exception e) {
             Logger.logErrorMessage(String.format("unzip the file %s -> %s failed caused by %s", zipFilePath, outputLocation, e.getMessage()));
             throw e;
         }finally {
-            if(isZip && zipFile != null){
+            if(zipFile != null){
                 zipFile.close();
-            }else if(!isZip && zIn != null){
+            }else if(zIn != null){
                 zIn.close();
             }
         }
@@ -206,39 +203,19 @@ public class FileUtil {
      *
      * replace the same file in two mode, like: cos.jar.
      *
-     *1.判断是全量还是增量更新
-     *         //全量：将html、lib中所有文件删除
-     *         //增量：deleteSource参数判断
-     *         //	true删除html false备份html之后再删除
-     *         //	得到所有lib下的jar 包 保存于libFileMap(key=commons-compress:value=./lib/commons-compress-1.9.jar)
-     *
-     * 2.迭代压缩文件通过zipFile包装后返回的ZipFile对象的entries
-     *      2.1迭代过程中删除数据库DbFolder(mw_db || mw_test_db),并且只删除一次，控制的方式为：定义初始值为false的containDbFolder,第一层if判断条件为（!containDbFolder）,当解压文件位于（mw_db || mw_test_db ）文件夹下时，containDbFolder  为true；第二层判断条件为（containDbFolder），删除逻辑写在第二层if条件满足时
-     *       2.2 lib文件夹中旧版本的jar添加到removeOldLibFiles中
-     *
-     * 3.把解压完的文件copy到根目录中
-     *
-     * 4.根据 Constants.GENERATE_EXPIRED_FILE_BUTTON （配置文件：sharder.generateExpiredFileButton 默认为false）决定是否
-     * 删除lib中旧版本jar
-     *
-     * 5.替换配置文件（现在代码中被注释掉了）
-     *
-     * 6.删除解压出来的的文件夹  、升级的包
      *
      *
      */
     // lib 包
     private static Map<String, String> libFileMap = Maps.newConcurrentMap();
     //旧版本 lib
-    private static List<String> removeOldLibFiles = Lists.newArrayList();
-
-    public static synchronized void unzipAndReplace(File archive,String mode, boolean deleteSource) throws IOException {
+    private static List<String> oldLibFiles = Lists.newArrayList();
+    public static synchronized void unzipAndReplace(final File archive,String mode, boolean deleteSource) throws IOException {
 
         //unzip files into application catalog 将文件解压到应用程序目录中
         //String uncompressedDirectory = new File(".").getCanonicalPath() + File.separator;
         Path appRootPath = Paths.get(".");
         boolean isFullMode = ClientUpgradeTool.isFullUpgrade(mode); //  FULL || incremental
-
 
         //判断是全量还是增量更新
         //全量：将html、lib中所有文件删除
@@ -259,10 +236,9 @@ public class FileUtil {
             deleteDirectory(Paths.get(htmlFolder,"www"));
            
             // get file lists of current lib folder
+            libFileMap.clear();
             libFileMap = getLibFileMap();
         }
-//        System.out.println("libFileMap => " + JSONObject.toJSON(libFileMap).toString());
-
 
         Logger.logInfoMessage("[UPGRADE CLIENT] start to upgrade...");
         String upgradeDetail = "UPGRADE CLIENT Detail \n\r";
@@ -270,24 +246,25 @@ public class FileUtil {
         int count = 0; //更新文件个数
         int failedCount = 0; //更新失败个数
         long size = 0; //更新大小
-        boolean containDbFolder = false; //是否包含数据库文件
 
         //Iterate over entries 迭代所有的entries
         String archiveRoot = ""; //文件目录名称
 
         //根据后缀判断是.zip还是.7z
-        Boolean isZip = archive.getName().endsWith(".zip");
         ZipFile zfile = null;
         SevenZFile zIn = null;
         try {
-            if(isZip){
+            oldLibFiles.clear();
+            if(archive.getName().endsWith(".zip")){
                 zfile = new ZipFile(archive);
                 Enumeration<? extends ZipEntry> entries = zfile.entries();
                 ZipEntry zipEntry = null;
-                while ((zipEntry = entries.nextElement()) != null) {
+                while (entries.hasMoreElements()) {
                     try {
+                        zipEntry = entries.nextElement();
                         String name = zipEntry.getName();
-                        final File outputFile = new File(appRootPath.resolve(name).toString());
+
+                        File outputFile = new File(appRootPath.resolve(name).toString());
 
                         // get the root folder of unzip
                         //得到待解压文件目录
@@ -306,15 +283,15 @@ public class FileUtil {
                         if (parent != null) {
                             //目录名称
                             String folderName = parent.getName();
-                            //System.out.println("found a parent folder -> " + folderName + ", path=" + parent.getPath());
 
-                            containDbFolder = dealDbFile(folderName,containDbFolder,appRootPath,deleteSource,archive);
+                            dealDbFile(folderName,appRootPath,deleteSource,archive);
 
                             if(!parent.exists()){
                                 System.out.println(folderName + " mkdirs");
                                 parent.mkdirs();
                             }
                         }
+
 
                         // copy and replace the upgrade files
                         try(InputStream is = zfile.getInputStream(zipEntry)){
@@ -323,7 +300,7 @@ public class FileUtil {
 
                             // lib folder
                             // Constants.GENERATE_EXPIRED_FILE_BUTTON 是否生成过期文件，默认 false
-                            dealLibFolder(name);
+                            generteOldLibFileList(name);
 
                             //累加升级文件size，文件数count
                             size += Files.copy(is, targetPath, StandardCopyOption.REPLACE_EXISTING);
@@ -335,50 +312,39 @@ public class FileUtil {
                         failedCount++;
                     }
                 }
-            }else{
+            }else if(archive.getName().endsWith(".7z")){
                 zIn = new SevenZFile(archive);
                 SevenZArchiveEntry entry = null;
                 while ((entry = zIn.getNextEntry()) != null) {
-                    if (!entry.isDirectory()) {
+                    final String name = entry.getName();
+                    if(entry.isDirectory()){
+                        File outputFile = new File(appRootPath.resolve(name).toString());
+                        // get the root folder of unzip
+                        //得到待解压文件目录
+                        System.out.println(name + " mkdirs");
+                        outputFile.mkdirs();
+                        if (name.chars().filter(c -> c == '/').count() == 0 ) {
+                            archiveRoot = name;
+                            continue;
+                        }
+
+                        //此文件的上级目录
+                        final File parent = outputFile.getParentFile();
+
+                        if (parent != null) {
+                            //目录名称
+                            String folderName = parent.getName();
+                            dealDbFile(folderName,appRootPath,deleteSource,archive);
+                        }
+                    }else if (!entry.isDirectory()) {
                         try {
-                            final String name = entry.getName();
-                            final File outputFile = new File(appRootPath.resolve(name).toString());
-
-                            // get the root folder of unzip
-                            //得到待解压文件目录
-                            if (name.endsWith("/")) {
-                                long fileSeparatorCount = name.chars().filter(c -> c == '/').count();
-                                if (fileSeparatorCount == 1) {
-                                    archiveRoot = name;
-                                }
-                                outputFile.mkdirs();
-                                continue;
-                            }
-
-                            //此文件的上级目录
-                            final File parent = outputFile.getParentFile();
-
-                            if (parent != null) {
-                                //目录名称
-                                String folderName = parent.getName();
-                                //System.out.println("found a parent folder -> " + folderName + ", path=" + parent.getPath());
-
-                                containDbFolder = dealDbFile(folderName, containDbFolder, appRootPath, deleteSource, archive);
-
-                                if (!parent.exists()) {
-                                    System.out.println(folderName + " mkdirs");
-                                    parent.mkdirs();
-                                }
-                            }
-
                             // copy and replae the upgrade files
                             OutputStream out = null;
                             BufferedOutputStream bos = null;
                             try {
-
                                 // lib folder
                                 // Constants.GENERATE_EXPIRED_FILE_BUTTON 是否生成过期文件，默认 false
-                                dealLibFolder(name);
+                                generteOldLibFileList(name);
 
                                 String targetName = name;
                                 Path targetPath = appRootPath.resolve(targetName);
@@ -395,11 +361,11 @@ public class FileUtil {
                             } catch (IOException e) {
                                 Logger.logErrorMessage(String.format("[ ERROR ] copy and replae the upgrade files %s", name, e.getMessage()));
                             } finally {
-                                if (out != null) {
-                                    out.close();
-                                }
                                 if (bos != null) {
                                     bos.close();
+                                }
+                                if (out != null) {
+                                    out.close();
                                 }
                             }
                         } catch (Exception e) {
@@ -408,14 +374,16 @@ public class FileUtil {
                         }
                     }
                 }
+            }else{
+                return;
             }
         }catch (Exception e){
             Logger.logErrorMessage(String.format("unzipAndReplace the file %s  failed caused by %s", archive.getName(), e.getMessage()));
             throw e;
         }finally {
-            if(isZip && zfile != null){
+            if(zfile != null){
                 zfile.close();
-            }else if(!isZip && zIn != null){
+            }else if(zIn != null){
                 zIn.close();
             }
         }
@@ -428,7 +396,7 @@ public class FileUtil {
 
         //删除旧lib包
         if (Constants.GENERATE_EXPIRED_FILE_BUTTON) {
-            deleteList(appRootPath, removeOldLibFiles);
+            generateDeleteListFile(appRootPath,oldLibFiles);
         }
         //String deletedOldLibFiles = "";
         // delete old lib files
@@ -463,7 +431,7 @@ public class FileUtil {
         }
     }
 
-    private static void dealLibFolder(String targetName)throws IOException{
+    private static void generteOldLibFileList(String targetName)throws IOException{
         // lib folder
         // Constants.GENERATE_EXPIRED_FILE_BUTTON 是否生成过期文件，默认 false
         if (Constants.GENERATE_EXPIRED_FILE_BUTTON) {
@@ -477,7 +445,7 @@ public class FileUtil {
                     Logger.logDebugMessage("found targetLibFile[full name=" + targetName + ", name=" + targetFile + "]");
                     if (libFileMap.containsKey(targetFile) && !targetName.endsWith(libFileMap.get(targetFile))) {
                         //版本号不一致，旧版本移除
-                        removeOldLibFiles.add(libFileMap.get(targetFile));
+                        oldLibFiles.add(libFileMap.get(targetFile));
                     }
                 }
             } catch (Exception e) {
@@ -486,7 +454,8 @@ public class FileUtil {
         }
     }
 
-    private static Boolean dealDbFile(String folderName, Boolean containDbFolder, Path appRootPath, Boolean deleteSource, File archive) throws IOException {
+    private static  boolean containDbFolder = false;
+    private static void dealDbFile(String folderName,Path appRootPath, Boolean deleteSource, File archive) throws IOException {
         //db folder 数据库目录
         //如果containDbFolder为false(初始值为false)，
         //判断文件夹的名字是否为mw_test_db ||mw_db，
@@ -509,8 +478,6 @@ public class FileUtil {
                 }
             }
         }
-
-        return containDbFolder;
     }
 
     /**
@@ -518,10 +485,10 @@ public class FileUtil {
      * 生成过期文件列表  start.sh将删除这些文件
      *
      * @param appRootPath
-     * @param removeOldLibFiles
+     * @param oldLibFiles
      */
-    private static void deleteList(Path appRootPath, List<String> removeOldLibFiles) {
-        if (removeOldLibFiles.size() > 0) {
+    private static void generateDeleteListFile(Path appRootPath, List<String> oldLibFiles) {
+        if (oldLibFiles.size() > 0) {
             File deleteList = appRootPath.resolve("lib").resolve("ExpiredFiles.data").toFile();
             // read the content of exist file of deleteList.json
             if (deleteList.exists()) {
@@ -539,8 +506,8 @@ public class FileUtil {
                         List<String> oldFileList = JSONObject.parseObject(content, List.class);
                         if (oldFileList != null && oldFileList.size() > 0) {
                             for (String fileName : oldFileList) {
-                                if (!removeOldLibFiles.contains(fileName)) {
-                                    removeOldLibFiles.add(fileName);
+                                if (!oldLibFiles.contains(fileName)) {
+                                    oldLibFiles.add(fileName);
                                 }
                             }
                         }
@@ -557,7 +524,7 @@ public class FileUtil {
                     }
                 }
             }
-            String fileString = JSONObject.toJSONString(removeOldLibFiles);
+            String fileString = JSONObject.toJSONString(oldLibFiles);
             FileOutputStream fos = null;
             try {
                 fos = new FileOutputStream(deleteList);
@@ -574,6 +541,7 @@ public class FileUtil {
                     }
                 }
             }
+            oldLibFiles.clear();
         }
     }
 
