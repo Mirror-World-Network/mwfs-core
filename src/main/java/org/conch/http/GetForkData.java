@@ -52,10 +52,6 @@ public class GetForkData extends APIServlet.APIRequestHandler {
         // 432
         LONG
     }
-    /**
-     * ignore multiple forks, only think of the height and difficulty
-     */
-
 
     static final GetForkData instance = new GetForkData();
 
@@ -65,14 +61,9 @@ public class GetForkData extends APIServlet.APIRequestHandler {
 
     @Override
     protected JSONStreamAware processRequest(HttpServletRequest req) throws ParameterException {
-
-        int latestNum = 144;
         JSONObject response = new JSONObject();
-        // through bootNode get whole network peers that are active and public network IP
-        Set<String> filteredPeerHosts = Peers.getWholeNetActiveAndPublicNetIPPeersByBootNode();
-        // get blocks info of filteredPeers, and blocks data struct convert to forkObj
-        Map<String, ForkObj> forkObjMap = Peers.getForkObjMap(filteredPeerHosts, latestNum);
-        response.put("forkObjs", forkObjMap);
+        List<ForkObj> forkObjs = (List<ForkObj>) Peers.getForkObjMap().values();
+        response.put("forkObjs", forkObjs);
         return response;
     }
 
