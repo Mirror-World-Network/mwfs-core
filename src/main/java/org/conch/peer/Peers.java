@@ -34,6 +34,7 @@ import org.conch.db.Db;
 import org.conch.http.API;
 import org.conch.http.APIEnum;
 import org.conch.http.ForceConverge;
+import org.conch.http.biz.domain.ForkObj;
 import org.conch.mint.Generator;
 import org.conch.security.Guard;
 import org.conch.tx.Transaction;
@@ -869,8 +870,8 @@ public final class Peers {
             UrlManager.PEERS_LIST_PATH
     );
 
-    /** Syn cetified peers from foundation 
-     * 
+    /** Syn cetified peers from foundation
+     *
     public static boolean synCertifiedPeers() throws Exception {
         String peersStr = Https.httpRequest(SC_PEERS_API, "GET", null);
         com.alibaba.fastjson.JSONArray peerArrayJson = new com.alibaba.fastjson.JSONArray();
@@ -924,7 +925,7 @@ public final class Peers {
         return true;
     }
 
-  
+
      // get and update the local bound rs account of certified peer
     private static final Runnable GET_CERTIFIED_PEER_THREAD = () -> {
         try {
@@ -1028,6 +1029,38 @@ public final class Peers {
 
     static void notifyListeners(Peer peer, Event eventType) {
         Peers.listeners.notify(peer, eventType);
+    }
+
+    public static Set<String> getWholeNetActiveAndPublicNetIPPeersByBootNode() {
+        List<String> bootNodesHost = Constants.bootNodesHost;
+        Set<String> addedHosts = new HashSet<>();
+        for (String node : bootNodesHost) {
+            Peer peer = getPeer(node, true);
+            if (peer == null) {
+                continue;
+            }
+            //[NAT] inject useNATService property to the request params
+            JSONObject request = new JSONObject();
+            request.put("requestType", "getPeers");
+            request.put("notFilter", "true");
+            request.put("useNATService", Peers.isUseNATService());
+            request.put("announcedAddress", Conch.getMyAddress());
+            JSONObject response = peer.send(JSON.prepareRequest(request), Peers.MAX_RESPONSE_SIZE);
+            if (response == null) {
+                continue;
+            }
+            JSONArray peers = (JSONArray) response.get("peers");
+            if (peers != null && peers.size() > 0) {
+                for (int i = 0; i < peers.size(); i++) {
+                    String announcedAddress = (String) peers.get(i);
+                    PeerImpl newPeer = findOrCreatePeer(announcedAddress, Peers.isUseNATService(announcedAddress));
+                    if (newPeer != null && !Guard.internalIp(newPeer.getHost())) {
+                        addedHosts.add(newPeer.getHost());
+                    }
+                }
+            }
+        }
+        return addedHosts;
     }
 
     public static Collection<? extends Peer> getAllPeers() {
@@ -1821,6 +1854,52 @@ public final class Peers {
             }
         }
         checkOrConnectAllGuideNodes(true);
+    }
+
+    /**
+     * handler blocks of peer convert to forkObj
+     * @param filteredPeerHosts
+     * @param latestNum
+     * @return
+     */
+    public static Map<String, ForkObj> getForkObjMap(Set<String> filteredPeerHosts, int latestNum) {
+        for (String peerHost : filteredPeerHosts) {
+            Peer peer = Peers.getPeer(peerHost, true);
+            JSONObject request = new JSONObject();
+            request.put("requestType", "getBlocks");
+            request.put("latestNum", latestNum);
+            JSONObject response = peer.send(JSON.prepareRequest(request), Peers.MAX_RESPONSE_SIZE);
+            if (response == null) {
+                continue;
+            }
+            List<JSONObject> blocks = (List<JSONObject>) response.get("blocks");
+
+            processBlocksToForkObj(peer.getAnnouncedAddress(), blocks);
+        }
+        return forkObjMap;
+    }
+
+    // todo Timing reset
+    public static Map<String, ForkObj> forkObjMap;
+
+    /**
+     * Label different forks based on key
+     * @param announcedAddress
+     * @param blocks
+     */
+    private static void processBlocksToForkObj(String announcedAddress, List<JSONObject> blocks) {
+        JSONObject lastBlock = blocks.get(-1);
+        String block =(String) lastBlock.get("block");
+        String height =(String) lastBlock.get("height");
+        String cumulativeDifficulty =(String) lastBlock.get("cumulativeDifficulty");
+        String currentKey = block + "-" + height + "-" + cumulativeDifficulty;
+        // new fork
+        if (!forkObjMap.containsKey(block)) {
+            forkObjMap.put(block, new ForkObj(block, blocks, announcedAddress));
+            return;
+        }
+        // process old fork
+        forkObjMap.get(block).addPeer(announcedAddress);
     }
 
 }

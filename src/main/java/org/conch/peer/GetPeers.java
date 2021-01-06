@@ -36,13 +36,24 @@ final class GetPeers extends PeerServlet.PeerRequestHandler {
         JSONObject response = new JSONObject();
         JSONArray jsonArray = new JSONArray();
         JSONArray services = new JSONArray();
-        Peers.getAllPeers().forEach(otherPeer -> {
-            if (!otherPeer.isBlacklisted() && otherPeer.getAnnouncedAddress() != null
-                    && otherPeer.getState() == Peer.State.CONNECTED && otherPeer.shareAddress()) {
-                jsonArray.add(otherPeer.getAnnouncedAddress());
-                services.add(Long.toUnsignedString(((PeerImpl)otherPeer).getServices()));
-            }
-        });
+        // compatible
+        boolean notFilter = Boolean.getBoolean((String) request.get("notFilter"));
+        if (notFilter) {
+            Peers.getAllPeers().forEach(otherPeer -> {
+                if (otherPeer.getAnnouncedAddress() != null && otherPeer.shareAddress()) {
+                    jsonArray.add(otherPeer.getAnnouncedAddress());
+                    services.add(Long.toUnsignedString(((PeerImpl)otherPeer).getServices()));
+                }
+            });
+        } else {
+            Peers.getAllPeers().forEach(otherPeer -> {
+                if (!otherPeer.isBlacklisted() && otherPeer.getAnnouncedAddress() != null
+                        && otherPeer.getState() == Peer.State.CONNECTED && otherPeer.shareAddress()) {
+                    jsonArray.add(otherPeer.getAnnouncedAddress());
+                    services.add(Long.toUnsignedString(((PeerImpl)otherPeer).getServices()));
+                }
+            });
+        }
         response.put("peers", jsonArray);
         response.put("services", services);         // Separate array for backwards compatibility
         return response;
