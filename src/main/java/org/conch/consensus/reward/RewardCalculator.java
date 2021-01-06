@@ -9,6 +9,7 @@ import org.conch.account.Account;
 import org.conch.account.AccountLedger;
 import org.conch.chain.Block;
 import org.conch.chain.BlockDb;
+import org.conch.common.ConchException;
 import org.conch.common.Constants;
 import org.conch.consensus.poc.PocHolder;
 import org.conch.consensus.poc.PocScore;
@@ -287,7 +288,7 @@ public class RewardCalculator {
      *
      * @param tx coinbase tx of block at the settlement height
      */
-    private static boolean checkAndSettleCrowdMinerRewards(Transaction tx) {
+    private static boolean checkAndSettleCrowdMinerRewards(Transaction tx) throws ConchException.StopException {
         if (!Db.db.isInTransaction()) {
             throw new IllegalStateException("RewardCalculator#checkAndSettleCrowdMinerRewards method should in a " +
                     "transaction, open the tx before call this method");
@@ -381,6 +382,9 @@ public class RewardCalculator {
                 Logger.logDebugMessage("Not exist crowd miners can't distribute the rewards [%s]", settlementHeight, "", details, tail);
             }
         } catch (Exception e) {
+            if (e instanceof ConchException.StopException) {
+                throw e;
+            }
             Logger.logErrorMessage("setCrowdMinerReward occur error", e);
             throw new RuntimeException("Distribute rewards error");
         }
@@ -568,7 +572,7 @@ public class RewardCalculator {
      * @param stageTwo true - stage two; false - stage one
      * @return
      */
-    public static long blockRewardDistribution(Transaction tx, boolean stageTwo) {
+    public static long blockRewardDistribution(Transaction tx, boolean stageTwo) throws ConchException.StopException {
         Attachment.CoinBase coinBase = (Attachment.CoinBase) tx.getAttachment();
         Account senderAccount = Account.getAccount(tx.getSenderId());
         Account minerAccount = Account.getAccount(coinBase.getCreator());

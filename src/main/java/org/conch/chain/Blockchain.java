@@ -118,4 +118,6 @@ public interface Blockchain {
     long countIncludeTypeBlocks(List<String> includeType);
 
     DbIterator<BlockImpl> getBlocksByHeight(int from, int to, String[] orderPair);
+
+    void setLastBlock(BlockImpl block);
 }
