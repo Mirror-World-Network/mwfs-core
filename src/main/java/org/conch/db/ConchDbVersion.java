@@ -765,6 +765,9 @@ public class ConchDbVersion extends DbVersion {
                             if (i > 0) {
                                 for (int j = 1; j <= i; j++) {
                                     int rewardDistributionHeight = j * settlementIntervalSize;
+                                    if (rewardDistributionHeight > 6048) {
+                                        break;
+                                    }
                                     if (rewardDistributionHeight <= maxDistributeHeight) {
                                         int latestRewardDistributionHeight = (j - 1) * settlementIntervalSize;
                                         if (rewardDistributionHeight <= 5184) {
@@ -775,14 +778,12 @@ public class ConchDbVersion extends DbVersion {
                                         pstmtUpdate.setInt(2, rewardDistributionHeight);
                                         pstmtUpdate.setInt(3, latestRewardDistributionHeight);
                                         pstmtUpdate.executeUpdate();
-                                        if (rewardDistributionHeight > 6048) {
-                                            break;
-                                        }
                                     }
                                 }
                             }
                             if (height > 6048) {
-                                int intervalNum = height / 1008;
+                                settlementIntervalSize = 1008;
+                                int intervalNum = height / settlementIntervalSize;
                                 if (intervalNum > 6) {
                                     for (int j = 7; j <= intervalNum; j++) {
                                         int rewardDistributionHeight = j * settlementIntervalSize;
