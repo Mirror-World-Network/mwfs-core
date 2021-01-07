@@ -1,5 +1,6 @@
 package org.conch.http.biz.domain;
 
+import com.google.common.collect.Lists;
 import org.json.simple.JSONObject;
 import java.util.List;
 
@@ -9,7 +10,7 @@ import java.util.List;
  */
 public class ForkObj {
         String key;
-        List<String> peers;
+        List<String> peers = Lists.newArrayList();
         List<JSONObject> blocks;
 
         public String getKey() {

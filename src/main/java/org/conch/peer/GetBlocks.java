@@ -45,26 +45,29 @@ final class GetBlocks extends PeerServlet.PeerRequestHandler {
     JSONStreamAware processRequest(JSONObject request, Peer peer) {
 
         JSONObject response = new JSONObject();
-        String latestNumStr = (String) request.get("latestNum");
-        int latestNum = Integer.parseInt(latestNumStr == null ? "0" : latestNumStr);
-        final int timestamp = 0;
-
-        if (latestNumStr != null && latestNum > 0) {
-            JSONArray blocks = new JSONArray();
-            DbIterator<? extends Block> iterator = null;
-            try {
-                iterator = Conch.getBlockchain().getBlocks(Conch.getHeight() - latestNum, Conch.getHeight());
-                while (iterator.hasNext()) {
-                    Block block = iterator.next();
-                    if (block.getTimestamp() < timestamp) {
-                        break;
+        try {
+            Long latestNum = (Long) request.get("latestNum");
+            final int timestamp = 0;
+            if (latestNum > 0) {
+                JSONArray blocks = new JSONArray();
+                DbIterator<? extends Block> iterator = null;
+                try {
+                    iterator = Conch.getBlockchain().getBlocks(0, Integer.parseInt(latestNum.toString()) - 1);
+                    while (iterator.hasNext()) {
+                        Block block = iterator.next();
+                        if (block.getTimestamp() < timestamp) {
+                            break;
+                        }
+                        blocks.add(JSONData.forkBlock(block));
                     }
-                    blocks.add(JSONData.forkBlock(block));
+                }finally {
+                    DbUtils.close(iterator);
                 }
-            }finally {
-                DbUtils.close(iterator);
+                response.put("blocks", blocks);
             }
-            response.put("blocks", blocks);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            response.put("error", e.getMessage());
         }
         return response;
     }

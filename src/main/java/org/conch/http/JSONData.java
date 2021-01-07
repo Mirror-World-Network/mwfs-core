@@ -497,11 +497,11 @@ public final class JSONData {
             json.put("nextBlock", Long.toUnsignedString(block.getNextBlockId()));
         }
 //        json.put("payloadHash", Convert.toHexString(block.getPayloadHash()));
-        json.put("generationSignature", Convert.toHexString(block.getGenerationSignature()));
+//        json.put("generationSignature", Convert.toHexString(block.getGenerationSignature()));
         if (block.getVersion() > 1) {
-            json.put("previousBlockHash", Convert.toHexString(block.getPreviousBlockHash()));
+//            json.put("previousBlockHash", Convert.toHexString(block.getPreviousBlockHash()));
         }
-        json.put("blockSignature", Convert.toHexString(block.getBlockSignature()));
+//        json.put("blockSignature", Convert.toHexString(block.getBlockSignature()));
         return json;
     }
 

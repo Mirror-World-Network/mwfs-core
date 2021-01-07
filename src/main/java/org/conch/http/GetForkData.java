@@ -21,6 +21,7 @@
 
 package org.conch.http;
 
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 import org.conch.account.Account;
 import org.conch.common.Constants;
@@ -56,14 +57,14 @@ public class GetForkData extends APIServlet.APIRequestHandler {
     static final GetForkData instance = new GetForkData();
 
     private GetForkData() {
-        super(new APITag[] {APITag.ACCOUNTS}, "secretPhrase", "publicKey");
+        super(new APITag[] {APITag.BLOCKS});
     }
 
     @Override
     protected JSONStreamAware processRequest(HttpServletRequest req) throws ParameterException {
         JSONObject response = new JSONObject();
-        List<ForkObj> forkObjs = (List<ForkObj>) Peers.getForkObjMap().values();
-        response.put("forkObjs", forkObjs);
+        Collection<ForkObj> forkObjs = Peers.getForkObjMap().values();
+        response.put("forkObjs", JSON.toJSON(forkObjs));
         return response;
     }
 

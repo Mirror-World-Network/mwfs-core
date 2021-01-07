@@ -165,7 +165,7 @@ public final class BlockchainImpl implements Blockchain {
             sortField = orderPair[0];
             sortDirection = orderPair[1];
         }
-        Connection con = null;
+        Connection con;
         try {
             con = Db.db.getConnection();
             PreparedStatement pstmt = con.prepareStatement("SELECT * FROM block WHERE height <= ? AND height >= ? ORDER BY " + sortField + " " + sortDirection);

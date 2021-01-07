@@ -714,7 +714,7 @@ public final class Peers {
 
     };
 
-    private static Set<Peer> EntireNetPeers = Sets.newConcurrentHashSet();
+    private static Set<String> EntireNetPeerHosts = Sets.newConcurrentHashSet();
     private static Map<String, ForkObj> forkObjMap = Maps.newHashMap();
 
     public static Map<String, ForkObj> getForkObjMap() {
@@ -724,8 +724,17 @@ public final class Peers {
     private static final Runnable generateForkDataThread = () -> {
         try {
             forkObjMap.clear();
-            for (String node : Constants.bootNodesHost) {
-                Peer peer = getPeer(node, true);
+            List<String> bootNodesHost = Constants.bootNodesHost;
+            // add custom node
+            bootNodesHost.add("192.168.0.239");
+            bootNodesHost.add("192.168.0.22");
+
+            EntireNetPeerHosts.addAll(bootNodesHost);
+            for (String peerHost : bootNodesHost) {
+                if (Conch.getMyAddress().equals(peerHost)) {
+                    continue;
+                }
+                Peer peer = getPeer(peerHost, true);
                 if (peer == null) {
                     continue;
                 }
@@ -744,31 +753,37 @@ public final class Peers {
                     for (int i = 0; i < peers.size(); i++) {
                         String announcedAddress = (String) peers.get(i);
                         PeerImpl newPeer = findOrCreatePeer(announcedAddress, Peers.isUseNATService(announcedAddress));
-                        if (newPeer != null && !Guard.internalIp(newPeer.getHost())) {
-                            EntireNetPeers.add(newPeer);
+//                        if (newPeer != null && !Guard.internalIp(newPeer.getHost())) {
+                        if (newPeer != null) {
+                            EntireNetPeerHosts.add(newPeer.getHost());
                         }
                     }
                 }
             }
-            for (Peer peer : EntireNetPeers) {
-                JSONObject request = new JSONObject();
+            JSONObject request = new JSONObject();
+            for (String peerHost : EntireNetPeerHosts) {
+                if (Conch.getMyAddress().equals(peerHost)) {
+                    continue;
+                }
+                Peer peer = Peers.getPeer(peerHost, true);
                 request.put("requestType", "getBlocks");
-                int latestNum = 144;
+                long latestNum = 144;
                 request.put("latestNum", latestNum);
                 JSONObject response = peer.send(JSON.prepareRequest(request), Peers.MAX_RESPONSE_SIZE);
                 if (response == null) {
                     continue;
                 }
-                List<JSONObject> blocks = (List<JSONObject>) response.get("blocks");
-
+                Object blocksObj = response.get("blocks");
+                if (blocksObj == null) {
+                    continue;
+                }
+                List<JSONObject> blocks = (List<JSONObject>) blocksObj;
                 processBlocksToForkObj(peer.getAnnouncedAddress(), blocks);
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            Logger.logDebugMessage("Get fork data process exception ", e);
+            Logger.logDebugMessage("Get fork data process fail");
         }
     };
-
 
     private static final Runnable getMorePeersThread = new Runnable() {
 
@@ -1047,7 +1062,8 @@ public final class Peers {
             ThreadPool.scheduleThread("PeerUnBlacklisting", Peers.peerUnBlacklistingThread, 60);
             if (Peers.getMorePeers) {
                 ThreadPool.scheduleThread("GetMorePeers", Peers.getMorePeersThread, 20);
-                ThreadPool.scheduleThread("GenerateForkData", Peers.generateForkDataThread, 30, TimeUnit.MINUTES);
+                // todo add switch
+                ThreadPool.scheduleThread("GenerateForkData", Peers.generateForkDataThread, 1, TimeUnit.MINUTES);
             }
         }
     }
@@ -1889,11 +1905,11 @@ public final class Peers {
      * @param blocks
      */
     private static void processBlocksToForkObj(String announcedAddress, List<JSONObject> blocks) {
-        JSONObject lastBlock = blocks.get(-1);
+        if (blocks.isEmpty()) {
+            return;
+        }
+        JSONObject lastBlock = blocks.get(0);
         String blockId =(String) lastBlock.get("block");
-        String height =(String) lastBlock.get("height");
-        String cumulativeDifficulty =(String) lastBlock.get("cumulativeDifficulty");
-        String currentKey = blockId + "-" + height + "-" + cumulativeDifficulty;
         // new fork
         if (!forkObjMap.containsKey(blockId)) {
             forkObjMap.put(blockId, new ForkObj(blockId, blocks, announcedAddress));
@@ -1901,7 +1917,6 @@ public final class Peers {
         }
         // process old fork
         forkObjMap.get(blockId).addPeer(announcedAddress);
-
         /**
          * UI： xy axis height，difficulty， forkName（blockId + Miner）
          * click detail => blockDetail + nodeList
