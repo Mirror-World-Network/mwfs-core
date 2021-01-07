@@ -442,8 +442,9 @@ public final class BlockDb {
                         BlockImpl lastBlock = BlockDb.deleteBlocksFrom(rollbackHeight.getId());
                         blockchain.setLastBlock(lastBlock);
                         BlockchainProcessorImpl.getInstance().popOffTo(lastBlock);
-                        height = lastBlock.getHeight();
-                        throw new ConchException.StopException("");
+                        Logger.logWarningMessage("current height over the reward distribution height," +
+                                "roll back to the reward distribution height %d", lastBlock.getHeight());
+                        Conch.restartApplication(null);
                     }
                 }
                 return false;
