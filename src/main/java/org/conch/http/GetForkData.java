@@ -23,13 +23,17 @@ package org.conch.http;
 
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
+import org.conch.Conch;
 import org.conch.account.Account;
+import org.conch.chain.Block;
 import org.conch.common.Constants;
-import org.conch.http.biz.domain.Block;
+import org.conch.db.DbIterator;
+import org.conch.db.DbUtils;
 import org.conch.http.biz.domain.ForkObj;
 import org.conch.http.biz.domain.Peer;
 import org.conch.peer.Peers;
 import org.conch.util.Convert;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONStreamAware;
 
@@ -63,8 +67,7 @@ public class GetForkData extends APIServlet.APIRequestHandler {
     @Override
     protected JSONStreamAware processRequest(HttpServletRequest req) throws ParameterException {
         JSONObject response = new JSONObject();
-        Collection<ForkObj> forkObjs = Peers.getForkObjMap().values();
-        response.put("forkObjs", JSON.toJSON(forkObjs));
+        response.put("forkObjs", JSON.toJSON(Peers.getForkObjMap().values()));
         return response;
     }
 
