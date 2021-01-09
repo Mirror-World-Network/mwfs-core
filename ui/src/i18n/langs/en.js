@@ -273,7 +273,7 @@ const en = {
         'block_peers_volume': "Node Volume",
         'declared_peers_size': "All Declared Node Size",
         'miner_info': "Trading Summary",
-        'miner_volume': "Miners",
+        'miner_volume': "Active Miners",
         'qualified_miner_volume': "Qualified Miners",
         'total_trading_volume': "Gross Amount",
         'transfer_transaction': "Transfer Txns",
