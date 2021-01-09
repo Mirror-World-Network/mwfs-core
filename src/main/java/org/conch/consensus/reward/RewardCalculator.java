@@ -292,7 +292,7 @@ public class RewardCalculator {
     public static String crowdMinerHardwareCapacity(int height, List<Long> boundAccountList) {
         // TODO add cache, per 10min cache once
         Long crowdMinerHardwareScoreTotal = 0L;
-        if (boundAccountList != null && !boundAccountList.isEmpty()) {
+        if (boundAccountList != null) {
             // read the qualified miner list
             for (Long boundAccountId : boundAccountList) {
                 // poc score judgement
