@@ -731,11 +731,12 @@ public final class Peers {
         try {
             forkObjMap.clear();
             List<String> bootNodesHost = Constants.bootNodesHost;
+            bootNodesHost.add(Conch.getMyAddress());
+
             // add custom node
-            bootNodesHost.add("192.168.0.239");
-            bootNodesHost.add("192.168.0.232");
-            bootNodesHost.add("192.168.0.238");
-            bootNodesHost.add("192.168.0.22");
+//            bootNodesHost.add("192.168.0.239");
+//            bootNodesHost.add("192.168.0.232");
+//            bootNodesHost.add("192.168.0.238");
 
             EntireNetPeerHosts.addAll(bootNodesHost);
             for (String peerHost : bootNodesHost) {
@@ -761,14 +762,29 @@ public final class Peers {
                     for (int i = 0; i < peers.size(); i++) {
                         String announcedAddress = (String) peers.get(i);
                         PeerImpl newPeer = findOrCreatePeer(announcedAddress, Peers.isUseNATService(announcedAddress));
-//                        if (newPeer != null && !Guard.internalIp(newPeer.getHost())) {
-                        if (newPeer != null) {
+                        if (newPeer != null && !Guard.internalIp(newPeer.getHost())) {
+//                        if (newPeer != null) {
                             EntireNetPeerHosts.add(newPeer.getHost());
                         }
                     }
                 }
             }
             JSONObject request = new JSONObject();
+            DbIterator<? extends Block> iterator = null;
+            List<JSONObject> blocks = new JSONArray();
+            try {
+                iterator = Conch.getBlockchain().getBlocks(0, latestNum-1);
+                while (iterator.hasNext()) {
+                    Block block = iterator.next();
+                    if (block.getTimestamp() < 0) {
+                        break;
+                    }
+                    blocks.add(JSONData.forkBlock(block));
+                }
+            }finally {
+                DbUtils.close(iterator);
+            }
+            processBlocksToForkObj(Peers.getMyAddress(), blocks);
             for (String peerHost : EntireNetPeerHosts) {
                 if (Conch.getMyAddress().equals(peerHost)) {
                     continue;
@@ -784,25 +800,8 @@ public final class Peers {
                 if (blocksObj == null) {
                     continue;
                 }
-                List<JSONObject> blocks = (List<JSONObject>) blocksObj;
-                processBlocksToForkObj(peer.getAnnouncedAddress(), blocks);
+                processBlocksToForkObj(peer.getAnnouncedAddress(), (List<JSONObject>) blocksObj);
             }
-            DbIterator<? extends Block> iterator = null;
-            JSONArray blocks = new JSONArray();
-
-            try {
-                iterator = Conch.getBlockchain().getBlocks(0, latestNum-1);
-                while (iterator.hasNext()) {
-                    Block block = iterator.next();
-                    if (block.getTimestamp() < 0) {
-                        break;
-                    }
-                    blocks.add(JSONData.forkBlock(block));
-                }
-            }finally {
-                DbUtils.close(iterator);
-            }
-            processBlocksToForkObj(Peers.getMyAddress(), blocks);
             forkAnalyze();
         } catch (Exception e) {
             Logger.logDebugMessage("Get fork data process fail");
@@ -1088,7 +1087,7 @@ public final class Peers {
                 ThreadPool.scheduleThread("GetMorePeers", Peers.getMorePeersThread, 20);
             }
             if (Peers.isOpenForkAnalyze) {
-                ThreadPool.scheduleThread("GenerateForkData", Peers.generateForkDataThread, 1, TimeUnit.MINUTES);
+                ThreadPool.scheduleThread("GenerateForkData", Peers.generateForkDataThread, 10, TimeUnit.MINUTES);
             }
         }
     }
