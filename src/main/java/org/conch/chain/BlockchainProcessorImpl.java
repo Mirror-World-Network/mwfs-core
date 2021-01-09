@@ -634,6 +634,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 GetNextBlocks nextBlocks = it.next();
                 List<BlockImpl> blockList;
                 try {
+                    // todo A {@code Future} represents the result of an asynchronous computation, possible execute to here blockList is null, should wait Future is done
                     blockList = nextBlocks.getFuture().get();
                 } catch (ExecutionException exc) {
                     throw new RuntimeException(exc.getMessage(), exc);
@@ -2097,6 +2098,11 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     .thenComparingInt(Transaction::getIndex)
                     .thenComparingLong(Transaction::getId);
 
+    /**
+     * Rollback to height of commonBlock, and return blocks list of rolled back
+     * @param commonBlock
+     * @return Rolled back blocks
+     */
     public List<BlockImpl> popOffTo(Block commonBlock) {
         blockchain.writeLock();
         try {
