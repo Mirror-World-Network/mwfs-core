@@ -77,7 +77,7 @@ public class RewardCalculator {
     /**
      * Estimated robust height after network reset
      */
-    public static final int NETWORK_ROBUST_PHASE = Constants.isDevnet() ? 10 : 10000;
+    public static final int NETWORK_ROBUST_PHASE = Constants.isDevnet() ? 10 : 15000;
     /**
      * how much one block reward
      * @return
