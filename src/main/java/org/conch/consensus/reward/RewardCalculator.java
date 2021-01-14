@@ -73,11 +73,11 @@ public class RewardCalculator {
     /**
      * Estimated stable height after network reset
      */
-    public static final int NETWORK_STABLE_PHASE = Constants.isDevnet() ? 5 : 2008;
+    public static final int NETWORK_STABLE_PHASE = Constants.isDevnet() ? Constants.heightConf.getIntValue("NETWORK_STABLE_PHASE_IS_DEVNET") : Constants.heightConf.getIntValue("NETWORK_STABLE_PHASE_IS_TESTNET");
     /**
      * Estimated robust height after network reset
      */
-    public static final int NETWORK_ROBUST_PHASE = Constants.isDevnet() ? 10 : 15000;
+    public static final int NETWORK_ROBUST_PHASE = Constants.isDevnet() ? Constants.heightConf.getIntValue("NETWORK_ROBUST_PHASE_IS_DEVNET") : Constants.heightConf.getIntValue("NETWORK_ROBUST_PHASE_IS_TESTNET");
     /**
      * how much one block reward
      * @return
