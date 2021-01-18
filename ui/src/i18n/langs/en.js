@@ -102,6 +102,7 @@ const en = {
         'transfer': "Transfer",
         'send_message': "Message",
         'storage_file':'Data',
+        'assets_across_chains':'Asset cross chain',
         'hub_setting': "Settings",
         'income_and_expenditure_details': "Balance Details",
         'payout': "Payouts",
