@@ -182,6 +182,29 @@
                             </span>
                             <span>{{ $t('login.config_nat_server') }}</span>
                         </button>
+
+                        <button class="common_btn imgBtn "
+                                v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}"
+                                v-if="whetherShowAssetsAcrossChainsBtn()"
+                                @click="openAssetsAcrossChainsDialog" style="width:171px;">
+                            <span class="icon">
+                                <svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                                    viewBox="0 0 150 162.5" style="enable-background:new 0 0 150 162.5;" xml:space="preserve">
+
+                                <path class="st0" d="M131.1,13.7c6.4,0,11.8,5.3,11.8,11.8v111.9c0,6.4-5.3,11.8-11.8,11.8h-112c-6.4,0-11.8-5.3-11.8-11.8V25.5
+                                    c0-6.4,5.3-11.8,11.8-11.8H131.1 M131.1,6.6h-112C8.8,6.6,0.3,15.2,0.3,25.5v111.9c0,10.3,8.6,18.9,18.9,18.9h112
+                                    c10.3,0,18.9-8.5,18.9-18.9V25.5C149.7,15.2,141.1,6.6,131.1,6.6L131.1,6.6z M131.1,6.6"/>
+                                <rect x="0.3" y="6.5" class="st1" width="149.9" height="149.9"/>
+                                <path class="st0" d="M109.7,62.9H51.6l13.2-13.2c1.1-1.1,1.1-2.5,0-3.2l-3.2-3.2c-0.4-1.1-2.5-1.1-3.2,0L38.8,62.9
+                                    c-0.4,0.4-0.7,0.7-0.7,1.4c-0.4,0.4-0.4,0.7-0.4,1.1V70c0,1.4,1.1,2.5,2.5,2.5h70.3c1.4,0,2.5-1.1,2.5-2.5v-4.6
+                                    C112.2,63.6,111.2,62.9,109.7,62.9L109.7,62.9z M109.7,62.9"/>
+                                <path class="st0" d="M110.5,81.4H40.2c-1.4,0-2.5,1.1-2.5,1.8v4.6c0,1.4,0,2.9,4.6,2.9h54.9l-11.8,11.4c-1.1,1.1-1.1,2.5,0,3.2
+                                    l3.2,3.2c1.1,1.1,2.5,1.1,3.2,0l19.3-18.2c1.4-0.7,1.4-1.8,1.4-2.1v-4.6C112.2,82.5,111.2,81.4,110.5,81.4L110.5,81.4z M110.5,81.4"
+                                    />
+                                </svg>
+                            </span>
+                            <span>{{ $t('account.assets_across_chains') }}</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1067,6 +1090,83 @@
                 </el-table>
             </div>
         </div>
+
+        <!-- AssetsAcrossChainsDialog -->
+        <div class="modal" id="assets_across_chains_modal" v-show="AssetsAcrossChainsDialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button class="close" @click="closeDialog"></button>
+                        <h4 class="modal-title">{{ $t('acrossChains.title') }}</h4>
+                    </div>
+                    <div class="modal-body modal-message">
+                        <ul class="title">
+                            <li :class="chainShow==1? 'active':''" @click="showHecoChain"><a>heco chain</a></li>
+                            <li :class="chainShow==2? 'active':''" @click="showOkExChain"><a>OKEx chain</a></li>
+                            <li :class="chainShow==3? 'active':''" @click="showMoreChain"><a>...</a></li>
+                        </ul>
+                         <div id="content">
+                            <el-form class="mod" v-if="chainShow==1">
+                                <el-form-item :label="$t('acrossChains.target_address')" class="item_address">
+                                    <el-input id="acrossChains_target_address" v-model="acrossChains.heco.target_address" :placeholder="$t('acrossChains.address_tip')">
+                                        <el-button slot="append" >{{ $t('acrossChains.bind') }}</el-button>
+                                    </el-input>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.target_balance')" class="item_balance">
+                                    <input class="el-input__inner" id="acrossChains_target_balance"  v-model="acrossChains.heco.target_balance" type="number" disabled="disabled" />
+                                    <label class="input_suffix">{{ $global.hecoUnit }}</label>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.balance')" class="balance">
+                                    <input class="el-input__inner" id="acrossChains_balance" v-model="acrossChains.balance" type="number" disabled="disabled" />
+                                    <label class="input_suffix">{{ $global.unit }}</label>
+                                </el-form-item>
+
+                            </el-form>
+                            <el-form class="mod" v-if="chainShow==2" >
+                                <el-form-item :label="$t('acrossChains.target_address')" class="item_address">
+                                    <el-input id="acrossChains_target_address" v-model="acrossChains.OKEx.target_address" :placeholder="$t('acrossChains.address_tip')">
+                                        <el-button slot="append" >{{ $t('acrossChains.bind') }}</el-button>
+                                    </el-input>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.target_balance')" class="item_balance">
+                                    <input class="el-input__inner" id="acrossChains_target_balance"  v-model="acrossChains.OKEx.target_balance" type="number" disabled="disabled"/>
+                                    <label class="input_suffix">{{ $global.hecoUnit }}</label>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.balance')" class="balance">
+                                    <input class="el-input__inner" id="acrossChains_balance" v-model="acrossChains.balance" type="number" disabled="disabled"/>
+                                    <label class="input_suffix">{{ $global.unit }}</label>
+                                </el-form-item>
+                            </el-form>
+                            <el-form class="mod" v-if="chainShow==3" >
+                                {{$t('acrossChains.more')}}
+                            </el-form>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+
+                        {{$t('acrossChains.tip-0')}}
+                        <br>
+
+                        {{$t('acrossChains.tip-1')}}
+                        <br>
+
+                        {{$t('acrossChains.tip-2')}}
+                        <a>{{MWLockAddress}}</a>
+                        {{$t('acrossChains.tip-3')}}{{chainShow == 1 ? "Heco" : "OKEx"}}
+                        {{$t('acrossChains.tip-4')}}{{chainShow == 1 ? "Heco" : "OKEx"}}
+                        {{$t('acrossChains.tip-5')}}{{chainShow == 1 ? "Heco" : "OKEx"}}
+                        {{$t('acrossChains.tip-6')}}
+                        <a>{{chainShow == 1 ? HecoLockAddress:OKExLockAddress}}</a>
+                        {{$t('acrossChains.tip-7')}}
+                        <br>
+
+                        {{$t('acrossChains.tip-8')}}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <dialogCommon :tradingInfoOpen="tradingInfoDialog" :trading="trading"
                       :accountInfoOpen="accountInfoDialog" :generatorRS="generatorRS"
                       :blockInfoOpen="blockInfoDialog" :height="height" @isClose="isClose"></dialogCommon>
@@ -1094,6 +1194,7 @@ export default {
             requestUrl: "https://mw.run",
             sendSuccess: false, //true验证码发送 false验证码未发送
             time: 60, //时间
+            AssetsAcrossChainsDialog:false,
             sendMessageDialog: false,
             storageFileDialog: false,
             onChainDialog: false,
@@ -1436,7 +1537,25 @@ export default {
                 sharderPwd: [{required: true, message: this.$t('rules.mustRequired')}],
                 sharderAccount: [{required: true, message: this.$t('rules.mustRequired')}],
             },
-            airdropFlag: false
+            airdropFlag: false,
+
+            acrossChains:{
+                heco:{
+                    target_address: '',
+                    target_balance: 0,
+                },
+                OKEx:{
+                    target_address: '',
+                    target_balance: 0,
+                },
+                balance:0
+            },
+
+            chainShow:1,
+
+            MWLockAddress:"CDW-mw",
+            HecoLockAddress:"0x0000",
+            OKExLockAddress:"0x0001",
         };
     },
     created() {
@@ -2838,6 +2957,14 @@ export default {
             this.$store.state.mask = true;
             this.joinNetDialog = true;
         },
+        openAssetsAcrossChainsDialog: function () {
+            if (SSO.downloadingBlockchain) {
+                this.$message.warning(this.$t("account.synchronization_block"));
+                return;
+            }
+            this.$store.state.mask = true;
+            this.AssetsAcrossChainsDialog = true;
+        },
         formatInputDiskCapacity: function (val) {
             return val + " T";
         },
@@ -3029,6 +3156,7 @@ export default {
             this.storageFileDialog = false;
             this.onChainDialog = false;
             this.joinNetDialog = false;
+            this.AssetsAcrossChainsDialog = false;
             this.capacity = 0;
             this.accountSecret = "";
             this.mortgageFee = 0;
@@ -3430,6 +3558,9 @@ export default {
             //     && this.userConfig.natAddress;
             return false;
         },
+        whetherShowAssetsAcrossChainsBtn() {
+            return true;
+        },
         getAccountRsBySecret() {
             let publicKey = global.SSO.getPublicKey(this.hubsetting.modifyMnemonicWord, false);
             let accountRs = global.SSO.getAccountIdFromPublicKey(publicKey, true);
@@ -3461,7 +3592,18 @@ export default {
                     _this[val].publicKey = res.publicKey;
                 }
             });
+        },
+        showHecoChain(){
+            this.chainShow = 1;
+        },
+        showOkExChain(){
+            this.chainShow = 2;
+        },
+        showMoreChain(){
+            this.chainShow = 3;
         }
+
+
     },
     computed: {
         getLang: function () {

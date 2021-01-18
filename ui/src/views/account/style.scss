@@ -265,6 +265,56 @@
     }
 }
 
+#assets_across_chains_modal{
+    width: 750px;
+
+    ul {
+        list-style-type: none;
+    }
+    .tab {
+        width:500px;
+        margin: 10px auto
+    }
+    a {
+        text-decoration: none;
+    }
+    a:link{text-decoration: none;color: gray}
+
+    a:active{text-decoration:blink}
+
+    a:hover{color:#3fb09a}
+
+    a:visited{text-decoration: none;color:#000}
+
+    .title li{
+        display: inline-block;
+        border: 1px solid rgb(158, 158, 158);
+        background:  #ffffff;
+        text-align: center;
+        width: 120px;
+        height: 30px;
+        line-height: 30px;
+        margin-right: -5px;
+        color: #000;
+        cursor:pointer
+    }
+    .title .active{
+        background:  #3fb09a;
+        a:hover{color :#ffffff}
+    }
+    #content{
+        margin-top: 20px;
+        width: 100%;
+        height: 300px;
+    }
+
+    .modal-footer{
+        font-size: 14px;
+        line-height: 20px;
+    }
+
+}
+
 #send_message_modal {
     .modal-content {
         .modal-message {
@@ -286,3 +336,14 @@
         height: 400px;
     }
 }
+
+// .st0{fill:#FFFFFF;}
+.st0{fill:#3FB09A;}
+
+.writeBtn:hover{
+    .st0{
+        fill:#FFFFFF;
+    }
+}
+
+.st1{fill:none;}
