@@ -42,20 +42,21 @@ public final class GetMiners extends APIServlet.APIRequestHandler {
     static final GetMiners instance = new GetMiners();
 
     private GetMiners() {
-        super(new APITag[] {APITag.FORGING}, "secretPhrase", "adminPassword");
+        super(new APITag[] {APITag.FORGING}, "secretPhrase", "adminPassword", "signature", "message");
     }
 
     @Override
     protected JSONStreamAware processRequest(HttpServletRequest req) throws ParameterException {
 
-        String secretPhrase = ParameterParser.getSecretPhrase(req, false);
+        StartForging instance = StartForging.instance;
+        String pr = instance.verifySignature(req);
         boolean loadPoolInfo = ParameterParser.getBoolean(req, "loadPoolInfo");
-        if (secretPhrase != null) {
-            Account account = Account.getAccount(Crypto.getPublicKey(secretPhrase));
+        if (pr != null) {
+            Account account = Account.getAccount(Crypto.getPublicKey(pr));
             if (account == null) {
                 return UNKNOWN_ACCOUNT;
             }
-            Generator generator = Generator.getGenerator(secretPhrase);
+            Generator generator = Generator.getGenerator(pr);
             if (generator == null) {
                 return NOT_FORGING;
             }

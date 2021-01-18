@@ -1070,8 +1070,13 @@ final public class TransactionImpl implements Transaction {
         return flags;
     }
 
+    /**
+     * 交易校验
+     * @throws ConchException.ValidationException
+     */
     @Override
     public void validate() throws ConchException.ValidationException {
+        //
         if(CheckSumValidator.isKnownIgnoreTx(this.id)){
             Logger.logWarningMessage("Known ignore tx[id=%d, height=%d] in %s, skip validation", this.id, Conch.getBlockchain().getHeight(), Constants.getNetwork().getName());
             return;
@@ -1156,7 +1161,7 @@ final public class TransactionImpl implements Transaction {
         return senderAccount != null && type.applyUnconfirmed(this, senderAccount);
     }
 
-    public void apply() {
+    public void apply() throws ConchException.StopException {
         if(CheckSumValidator.isKnownIgnoreTx(id)){
             Logger.logWarningMessage("this tx[id=%d, creator=%s, height=%d] is known ignored tx, don't apply and ignore it", id, Account.rsAccount(senderId), height);
             return;

@@ -9,7 +9,9 @@ import org.conch.account.Account;
 import org.conch.account.AccountLedger;
 import org.conch.chain.Block;
 import org.conch.chain.BlockDb;
+import org.conch.common.ConchException;
 import org.conch.common.Constants;
+import org.conch.consensus.poc.PocCalculator;
 import org.conch.consensus.poc.PocHolder;
 import org.conch.consensus.poc.PocScore;
 import org.conch.db.Db;
@@ -30,6 +32,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 
 
@@ -46,6 +49,8 @@ public class RewardCalculator {
     private enum RewardDef {
         BLOCK_REWARD(1333 * Constants.ONE_SS),
         CROWD_MINERS_REWARD(667 * Constants.ONE_SS),
+        ROBUST_PHASE_CROWD_MINERS_REWARD(9 * Constants.ONE_SS / 10),
+        ROBUST_PHASE_BLOCK_REWARD(1 * Constants.ONE_SS),
         STABLE_PHASE_BLOCK_REWARD(1 * Constants.ONE_SS),
         STABLE_PHASE_CROWD_MINERS_REWARD(1 * Constants.ONE_SS / 2);
 
@@ -61,9 +66,18 @@ public class RewardCalculator {
         
     }
 
-    // Halve height, -1 means close halve
+    /**
+     * Halve height, -1 means close halve
+     */
     private static final int HALVE_COUNT = -1;
-    public static final int NETWORK_STABLE_PHASE = 2008; // Estimated stable height after network reset
+    /**
+     * Estimated stable height after network reset
+     */
+    public static final int NETWORK_STABLE_PHASE = Constants.isDevnet() ? Constants.heightConf.getIntValue("NETWORK_STABLE_PHASE_IS_DEVNET") : Constants.heightConf.getIntValue("NETWORK_STABLE_PHASE_IS_TESTNET");
+    /**
+     * Estimated robust height after network reset
+     */
+    public static final int NETWORK_ROBUST_PHASE = Constants.isDevnet() ? Constants.heightConf.getIntValue("NETWORK_ROBUST_PHASE_IS_DEVNET") : Constants.heightConf.getIntValue("NETWORK_ROBUST_PHASE_IS_TESTNET");
     /**
      * how much one block reward
      * @return
@@ -82,8 +96,11 @@ public class RewardCalculator {
         // No block rewards in the miner joining phase
         if(height <= NETWORK_STABLE_PHASE) {
             return RewardDef.STABLE_PHASE_BLOCK_REWARD.getAmount();
+        } else if (height <= NETWORK_ROBUST_PHASE) {
+            return RewardDef.BLOCK_REWARD.getAmount();
+        } else {
+            return RewardDef.ROBUST_PHASE_BLOCK_REWARD.getAmount();
         }
-        return RewardDef.BLOCK_REWARD.getAmount();
     }
 
     public static long crowdMinerReward(int height){
@@ -91,8 +108,10 @@ public class RewardCalculator {
         || LocalDebugTool.isLocalDebugAndBootNodeMode){
             if(height <= NETWORK_STABLE_PHASE) {
                 return RewardDef.STABLE_PHASE_CROWD_MINERS_REWARD.getAmount();
-            }else{
+            } else if (height <= NETWORK_ROBUST_PHASE) {
                 return RewardDef.CROWD_MINERS_REWARD.getAmount();
+            } else {
+                return RewardDef.ROBUST_PHASE_CROWD_MINERS_REWARD.getAmount();
             }
         }
         return 0L;
@@ -262,12 +281,41 @@ public class RewardCalculator {
 
             crowdMinerPocScoreMap.put(declaredAccount.getId(), pocScore.total().longValue());
         }
-
         return crowdMinerPocScoreMap;
     }
 
     /**
+<<<<<<< HEAD
      * 核对并结算RowdMinerRewards
+=======
+     * Total capacity of qualified miner hardware
+     * @return
+     * @param height
+     * @param boundAccountList
+     */
+    public static String crowdMinerHardwareCapacity(int height, List<Long> boundAccountList) {
+        // TODO add cache, per 10min cache once
+        Long crowdMinerHardwareScoreTotal = 0L;
+        if (boundAccountList != null) {
+            // read the qualified miner list
+            for (Long boundAccountId : boundAccountList) {
+                // poc score judgement
+                PocScore pocScore = PocHolder.getPocScore(height, boundAccountId);
+                crowdMinerHardwareScoreTotal += pocScore.getHardwareScore().longValue();
+            }
+        } else {
+            // generate the poc score map
+            for(Long boundAccountId : Conch.getPocProcessor().getCertifiedPeers().keySet()){
+                // poc score judgement
+                PocScore pocScore = PocHolder.getPocScore(height, boundAccountId);
+                crowdMinerHardwareScoreTotal += pocScore.getHardwareScore().longValue();
+            }
+        }
+        return PocCalculator.hardwareCapacity(new BigInteger(crowdMinerHardwareScoreTotal.toString()));
+    }
+
+    /**
+>>>>>>> 815213fadc95ae89d7196d0b29d2a7377ec8e39d
      * Check whether reach the settlement height
      * Settle all un-settlement blocks before this height
      * Combine changes of the same account from these blocks
@@ -276,7 +324,7 @@ public class RewardCalculator {
      *
      * @param tx coinbase tx of block at the settlement height
      */
-    private static boolean checkAndSettleCrowdMinerRewards(Transaction tx) {
+    private static boolean checkAndSettleCrowdMinerRewards(Transaction tx) throws ConchException.StopException {
         if (!Db.db.isInTransaction()) {
             throw new IllegalStateException("RewardCalculator#checkAndSettleCrowdMinerRewards method should in a " +
                     "transaction, open the tx before call this method");
@@ -289,7 +337,8 @@ public class RewardCalculator {
                 return false;
             }
 
-            if (!Constants.reachRewardSettlementHeight(settlementHeight)) {
+            //if (!Constants.reachRewardSettlementHeight(settlementHeight)) {
+            if (!BlockDb.reachRewardSettlementHeight(settlementHeight)) {
                 Logger.logDebugMessage("Current height %d not reach the crowd miner rewards settlement height. Break " +
                         "and wait next turn.", settlementHeight);
                 return false;
@@ -342,10 +391,12 @@ public class RewardCalculator {
 
                 // remain amount distribute to creator
                 long remainRewards = (crowdMinerRewards > allocatedRewards) ? (crowdMinerRewards - allocatedRewards) : 0;
-                if (crowdMinerRewardMap.containsKey(minerAccount.getId())) {
-                    remainRewards = remainRewards + crowdMinerRewardMap.get(minerAccount.getId());
+                if (remainRewards != 0) {
+                    if (crowdMinerRewardMap.containsKey(minerAccount.getId())) {
+                        remainRewards = remainRewards + crowdMinerRewardMap.get(minerAccount.getId());
+                    }
+                    crowdMinerRewardMap.put(minerAccount.getId(), remainRewards);
                 }
-                crowdMinerRewardMap.put(minerAccount.getId(), remainRewards);
                 blockIds.add(block.getId());
             }
             String details = "";
@@ -356,16 +407,23 @@ public class RewardCalculator {
                     notExistAccounts += accountId + ",";
                     continue;
                 }
+                if (crowdMinerRewardMap.get(accountId) == 0) {
+                    Logger.logDebugMessage("reward is zero , account is " + accountId);
+                }
                 details += updateBalance(account, tx, crowdMinerRewardMap.get(accountId));
             }
-            BlockDb.updateDistributionState(blockIds);
+            BlockDb.updateDistributionState(blockIds, settlementHeight);
             String tail = "[DEBUG] ----------------------------\n[DEBUG] Total count: " + (crowdMinerRewardMap.size());
             Logger.logDebugMessage("[%d-StageTwo%s] Unfreeze crowdMiners rewards and add it in mined amount. \n[DEBUG] CrowdMiner Reward Detail Format: txid | address: distribution amount\n%s%s\n", settlementHeight, "", details, tail);
             if(notExistAccounts.length() > 0) {
                 Logger.logDebugMessage("Not exist crowd miners can't distribute the rewards [%s]", settlementHeight, "", details, tail);
             }
         } catch (Exception e) {
+            if (e instanceof ConchException.StopException) {
+                throw e;
+            }
             Logger.logErrorMessage("setCrowdMinerReward occur error", e);
+            throw new RuntimeException("Distribute rewards error");
         }
         return true;
     }
@@ -551,7 +609,7 @@ public class RewardCalculator {
      * @param stageTwo true - stage two; false - stage one
      * @return
      */
-    public static long blockRewardDistribution(Transaction tx, boolean stageTwo) {
+    public static long blockRewardDistribution(Transaction tx, boolean stageTwo) throws ConchException.StopException {
         Attachment.CoinBase coinBase = (Attachment.CoinBase) tx.getAttachment();
         Account senderAccount = Account.getAccount(tx.getSenderId());
         Account minerAccount = Account.getAccount(coinBase.getCreator());
@@ -559,7 +617,7 @@ public class RewardCalculator {
         rewardCalStartMS = System.currentTimeMillis();
 
         String stage = stageTwo ? "Two" : "One";
-        // Crowd Miner Reward
+        // Mining Reward
         long miningRewards =  tx.getAmountNQT();
         Map<Long, Long> crowdMiners = Maps.newHashMap();
         boolean crowdRewardsDistributed = false;
@@ -625,6 +683,33 @@ public class RewardCalculator {
                     , crowdMiners.size(), miningJoinerCount, Conch.getHeight());
         }
         return tx.getAmountNQT();
+    }
+
+    /**
+     * if the commonBlockHeight less than the latest reward height, roll back the reward height of block to 0.
+     * @param commonBlockHeight
+     * @throws RuntimeException
+     */
+    public static void rollBackTo (int commonBlockHeight) throws RuntimeException {
+        if (!Db.db.isInTransaction()) {
+            try {
+                Db.db.beginTransaction();
+                rollBackTo(commonBlockHeight);
+                Db.db.commitTransaction();
+            } catch (Exception e) {
+                Db.db.rollbackTransaction();
+                throw e;
+            } finally {
+                Db.db.endTransaction();
+            }
+        }
+        int latestRewardHeight = BlockDb.getLatestRewardHeight();
+        if (latestRewardHeight <= commonBlockHeight) {
+            return;
+        }
+        BlockDb.rollBackRewardHeight(latestRewardHeight);
+        rollBackTo(commonBlockHeight);
+
     }
 
     /**

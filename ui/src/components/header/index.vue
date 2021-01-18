@@ -299,15 +299,15 @@
                 _this.selectLan = _this.language[value === 'cn'].label;
                 _this.selectLanValue = _this.language[value === 'cn'].value;
             }
-
-            this.getData();
-            this.getAccountInfo();
+            _this.getState();
+            _this.getData();
+            _this.getAccountInfo();
             _this.$global.getUserConfig(_this).then(res => {
                 _this.userConfig = res;
             });
 
-            let formData = new FormData();
-            formData.append("secretPhrase", _this.secretPhrase);
+            // let formData = new FormData();
+            // formData.append("secretPhrase", _this.secretPhrase);
             let config = {
                 headers: {
                     'Content-Type': 'multipart/form-data'
@@ -316,7 +316,7 @@
 
             if(SSO.accountInfo.balanceNQT/ 100000000 + SSO.accountInfo.frozenBalanceNQT / 100000000 < 20000){
 
-                _this.$http.post('/sharder?requestType=stopMining', formData, config).then(res => {
+                _this.$http.post('/sharder?requestType=stopMining', _this.signInfo(_this.secretPhrase), config).then(res => {
                     _this.forging = res.data;
                     // console.log("forging",_this.forging);
                 }).catch(err => {
@@ -324,7 +324,7 @@
                 });
             }
 
-            _this.$http.post('/sharder?requestType=getForging', formData, config).then(res => {
+            _this.$http.post('/sharder?requestType=getForging', _this.signInfo(_this.secretPhrase), config).then(res => {
                 _this.forging = res.data;
                 // console.log("forging",_this.forging);
             }).catch(err => {
@@ -333,6 +333,9 @@
         },
         mounted() {
             let _this = this;
+            setInterval(() => {
+                _this.getState();
+            }, SSO.downloadingBlockchain ? this.$global.cfg.topSpeedInterval : (this.$global.isOpenApiProxy() ? this.$global.cfg.slowInterval : this.$global.cfg.defaultInterval));
             setInterval(() => {
                 _this.getData();
             }, SSO.downloadingBlockchain ? this.$global.cfg.soonInterval : (this.$global.isOpenApiProxy() ? this.$global.cfg.slowInterval : this.$global.cfg.defaultInterval));
@@ -356,6 +359,7 @@
                 });
             },
             getData: function () {
+                console.log("getData ", Date.parse(new Date()).toString())
                 const _this = this;
                 // if(_this.i%30 === 0){
                 // _this.blocksLeft = SSO.blocksLeft;
@@ -363,7 +367,7 @@
                 _this.$global.setBlockchainState(_this).then(res => {
                     _this.blockchainStatus = res.data;
 
-                    console.log('res.data',res.data)
+                    // console.log('res.data',res.data)
                     _this.blocksLeft = res.data.lastBlockchainFeederHeight - res.data.lastBlockHeight;
                     _this.percentageTotal =  parseInt(res.data.lastBlockHeight/res.data.lastBlockchainFeederHeight *10000)/100;
                     _this.lastBlockHeight = res.data.lastBlockchainFeederHeight;
@@ -390,19 +394,34 @@
                     }*/
                     // SSO.addToConsole("/sharder?requestType=getPeers", 'GET', res.data, res);
                 });
-                // }
-                // _this.getLatestHubVersion();
-                _this.downloadingBlockChain();
             },
-            downloadingBlockChain(){
+            getState: function () {
+                console.log("getState ", Date.parse(new Date()).toString())
                 const _this = this;
-                SSO.updateBlockchainDownloadProgress();
-                SSO.downloadingBlockchain = SSO.state.isDownloading;
-                _this.isDownLoadingBlockchain = SSO.state.isDownloading;
-                _this.isDownloadingState = SSO.isDownloadingState;
-                // _this.percentageTotal = SSO.percentageTotal;
-                // _this.blocksLeft = SSO.blocksLeft;
-                // _this.lastBlockHeight = SSO.state.lastBlockchainFeederHeight;
+                _this.$global.setBlockchainState(_this).then(res => {
+                    _this.blockchainStatus = res.data;
+                    SSO.updateBlockchainDownloadProgress();
+                    SSO.downloadingBlockchain = _this.blockchainStatus.isDownloading;
+                    _this.isDownLoadingBlockchain = _this.blockchainStatus.isDownloading;
+                    _this.isDownloadingState = SSO.isDownloadingState;
+                    _this.blocksLeft = res.data.lastBlockchainFeederHeight - res.data.lastBlockHeight;
+                    _this.percentageTotal =  parseInt(res.data.lastBlockHeight/res.data.lastBlockchainFeederHeight *10000)/100;
+                    _this.lastBlockHeight = res.data.lastBlockchainFeederHeight;
+                    _this.getLatestHubVersion();
+                    /*if(_this.$global.isOpenConsole){
+                        _this.$global.addToConsole("/sharder?requestType=getBlockchainStatus",'GET',res);
+                    }*/
+                    // SSO.addToConsole("/sharder?requestType=getBlockchainStatus", 'GET', res.data, res);
+                });
+            },
+            signInfo: function (secret) {
+                let formData = new FormData();
+                let timestamp = Date.parse(new Date()).toString();
+                let signature = SSO.signBytes(converters.stringToHexString(timestamp), converters.stringToHexString(secret));
+                console.log("[signature] " + signature)
+                formData.append("signature", signature);
+                formData.append("message", timestamp);
+                return formData;
             },
             startForging: function (b, pwd) {
                 const _this = this;
@@ -423,7 +442,7 @@
                     formData.append("secretPhrase", SSO.secretPhrase);
                     _this.$http.post("/sharder?requestType=startForging", formData, config).then(res => {
                         if (!res.data.errorDescription) {
-                            _this.$http.post('/sharder?requestType=getForging', formData, config).then(res => {
+                            _this.$http.post('/sharder?requestType=getForging', _this.signInfo(SSO.secretPhrase), config).then(res => {
                                 _this.forging = res.data;
                                 // console.log("forging",_this.forging);
                             }).catch(err => {
@@ -444,7 +463,7 @@
                     formData.append("secretPhrase", pwd);
                     _this.$http.post("/sharder?requestType=startForging", formData, config).then(res => {
                         if (!res.data.errorDescription) {
-                            _this.$http.post('/sharder?requestType=getForging', formData, config).then(res => {
+                            _this.$http.post('/sharder?requestType=getForging', _this.signInfo(pwd), config).then(res => {
                                 _this.forging = res.data;
                                 // console.log("forging",_this.forging);
                             }).catch(err => {
@@ -667,7 +686,8 @@
 
     .download_blocks_loading {
         position: fixed;
-        z-index: 999999;
+        z-index: 8888;
+
         right: 20px;
         top: 80px;
         width: 320px;

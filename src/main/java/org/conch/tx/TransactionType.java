@@ -318,7 +318,7 @@ public abstract class TransactionType {
 
     public abstract boolean applyAttachmentUnconfirmed(Transaction transaction, Account senderAccount);
 
-    public final void apply(TransactionImpl transaction, Account senderAccount, Account recipientAccount) {
+    public final void apply(TransactionImpl transaction, Account senderAccount, Account recipientAccount) throws ConchException.StopException {
         //transfer processing except coinbase tx (org.conch.tx.TransactionType.CoinBase#applyByType)
         if (transaction.getType().getType() != TYPE_COIN_BASE) {
             long amount = transaction.getAmountNQT();
@@ -605,7 +605,7 @@ public abstract class TransactionType {
 //                }
             }
 
-            private void applyByType(Transaction transaction, Account senderAccount, Account recipientAccount) {
+            private void applyByType(Transaction transaction, Account senderAccount, Account recipientAccount) throws ConchException.StopException {
                 Attachment.CoinBase coinBase = (Attachment.CoinBase) transaction.getAttachment();
                 if (RewardCalculator.isBlockRewardTx(transaction.getAttachment())) {
                     RewardCalculator.blockRewardDistribution(transaction,false);
@@ -627,7 +627,7 @@ public abstract class TransactionType {
             }
 
             @Override
-            public void applyAttachment(Transaction transaction, Account senderAccount, Account recipientAccount) {
+            public void applyAttachment(Transaction transaction, Account senderAccount, Account recipientAccount) throws ConchException.StopException {
                 applyByType(transaction, senderAccount, recipientAccount);
             }
         };

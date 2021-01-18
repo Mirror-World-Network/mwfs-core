@@ -1,13 +1,13 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div>
         <div>
-<!--            <el-row v-if="openApiProxy" class="notice-container">-->
-<!--                <el-col :span="24">-->
-<!--                    <div class="notice" style="background: #ffffff">-->
-<!--                        <div><a>{{$t('sso.light_client')}}</a></div>-->
-<!--                    </div>-->
-<!--                </el-col>-->
-<!--            </el-row>-->
+            <!--            <el-row v-if="openApiProxy" class="notice-container">-->
+            <!--                <el-col :span="24">-->
+            <!--                    <div class="notice" style="background: #ffffff">-->
+            <!--                        <div><a>{{$t('sso.light_client')}}</a></div>-->
+            <!--                    </div>-->
+            <!--                </el-col>-->
+            <!--            </el-row>-->
             <div class="block_account mb20">
                 <p class="block_title">
                     <img src="../../assets/img/account.svg"/>
@@ -24,7 +24,9 @@
                         {{ $t('account.assets') + $global.formatNQTMoney(accountInfo.effectiveBalanceNQT, 2) }}
                     </p>
                     <div class="account_tool">
-                        <button class="common_btn imgBtn " v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}" v-bind:disabled="!isUpToDateOrLight" @click="openTransferDialog">
+                        <button class="common_btn imgBtn "
+                                v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}"
+                                @click="openTransferDialog">
                             <span class="icon">
                                 <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 174.62 174.83">
                                     <path
@@ -34,7 +36,10 @@
                             </span>
                             <span>{{ $t('account.transfer') }}</span>
                         </button>
-                        <button class="common_btn imgBtn " v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}" v-bind:disabled="!isUpToDateOrLight" @click="openBatchTransferDialog" v-if="openAirdrop">
+                        <button class="common_btn imgBtn "
+                                v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}"
+                                @click="openBatchTransferDialog"
+                                v-if="openAirdrop">
                             <span class="icon">
                                 <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 174.62 174.83">
                                     <path
@@ -44,7 +49,9 @@
                             </span>
                             <span>{{ $t('transfer.batch_transfer') }}</span>
                         </button>
-                        <button class="common_btn imgBtn " v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}" v-bind:disabled="!isUpToDateOrLight" v-if="whetherShowSendMsgBtn()"
+                        <button class="common_btn imgBtn "
+                                v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}"
+                                v-if="whetherShowSendMsgBtn()"
                                 @click="openSendMessageDialog">
                             <span class="icon">
                                 <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 171.43 137.08">
@@ -55,7 +62,9 @@
                             </span>
                             <span>{{ $t('account.send_message') }}</span>
                         </button>
-                        <button class="common_btn imgBtn " v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}" v-bind:disabled="!isUpToDateOrLight" v-if="whetherShowStorageBtn()"
+                        <button class="common_btn imgBtn "
+                                v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}"
+                                v-if="whetherShowStorageBtn()"
                                 @click="openStorageFileDialog">
                             <span class="icon">
                                 <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 162.5">
@@ -284,18 +293,26 @@
                                           v-else-if="transaction.type === 8 && transaction.subtype === 3">
                                         <span class="linker" @click="openAccountInfoDialog(transaction.recipientRS)"
                                               v-if="transaction.recipientRS !== accountInfo.accountRS && transaction.type !== 9 && transaction.senderRS === accountInfo.accountRS">
-                                        {{ $t('transaction.transaction_type_forge_pool') }}:{{ transaction.attachment.poolId }}
+                                        {{
+                                                $t('transaction.transaction_type_forge_pool')
+                                            }}:{{ transaction.attachment.poolId }}
                                         </span>
                                         <span class="linker"
-                                              v-else>{{ $t('transaction.transaction_type_forge_pool') }}:{{ transaction.attachment.poolId }}</span>
+                                              v-else>{{
+                                                $t('transaction.transaction_type_forge_pool')
+                                            }}:{{ transaction.attachment.poolId }}</span>
                                     </span>
                                     <span class="linker"
                                           v-else-if="transaction.type === 8 && transaction.subtype === 2">
-                                        {{ $t('transaction.transaction_type_forge_pool') }}:{{ transaction.attachment.poolId }}
+                                        {{
+                                            $t('transaction.transaction_type_forge_pool')
+                                        }}:{{ transaction.attachment.poolId }}
                                     </span>
                                     <span class="linker"
                                           v-else-if="transaction.type === 8 && transaction.subtype === 1">
-                                        {{ $t('transaction.transaction_type_forge_pool') }}:{{ transaction.attachment.poolId }}
+                                        {{
+                                            $t('transaction.transaction_type_forge_pool')
+                                        }}:{{ transaction.attachment.poolId }}
                                     </span>
                                     <span class="linker" @click="openAccountInfoDialog(transaction.recipientRS)"
                                           v-else-if="transaction.recipientRS === accountInfo.accountRS && transaction.type !== 9">
@@ -475,7 +492,7 @@
                         </el-form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn common_btn writeBtn" @click="onChain"  :disabled="isDisable">
+                        <button type="button" class="btn common_btn writeBtn" @click="onChain" :disabled="isDisable">
                             {{ $t('sendMessage.upload_file') }}
                         </button>
                     </div>
@@ -509,7 +526,7 @@
                         </el-form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn common_btn writeBtn" @click="joinNet"  :disabled="isDisable">
+                        <button type="button" class="btn common_btn writeBtn" @click="joinNet" :disabled="isDisable">
                             {{ $t('joinNet.joinNet') }}
                         </button>
                     </div>
@@ -610,14 +627,17 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" v-loading="batch_transfer.executing" class="btn common_btn writeBtn"
-                                @click="sendBatchTransferInfo"  :disabled="isDisable">
+                                @click="sendBatchTransferInfo" :disabled="isDisable">
                             {{ $t('transfer.batch_transfer_send') }}
                         </button>
                         <el-row>
-                            <el-col :span="24"><div style="text-align: center; margin: 5px auto">or</div></el-col>
+                            <el-col :span="24">
+                                <div style="text-align: center; margin: 5px auto">or</div>
+                            </el-col>
                         </el-row>
-                        <button type="button" v-loading="batch_transfer.executingAnother" class="btn common_btn writeBtn"
-                                @click="detectionBatchTransferInfo"  :disabled="isDisable">
+                        <button type="button" v-loading="batch_transfer.executingAnother"
+                                class="btn common_btn writeBtn"
+                                @click="detectionBatchTransferInfo" :disabled="isDisable">
                             {{ $t('transfer.batch_transfer_detection') }}
                         </button>
 
@@ -728,7 +748,7 @@
                 </el-form>
                 <div class="footer-btn">
                     <button class="common_btn writeBtn" v-loading="hubsetting.executing"
-                            @click="verifyHubSetting('init')"  :disabled="isDisable">
+                            @click="verifyHubSetting('init')" :disabled="isDisable">
                         {{ $t('hubsetting.confirm_restart') }}
                     </button>
                     <button class="common_btn writeBtn" @click="closeDialog">{{ $t('hubsetting.cancel') }}</button>
@@ -921,7 +941,9 @@
                             <div class="accountName" v-if="isShowName">
                                 <span v-if="accountInfo.name">{{ accountInfo.name }}</span>
                                 <span v-else
-                                      style="color:#999;font-weight: normal">{{ $t('account_info.account_name_not_set') }}</span>
+                                      style="color:#999;font-weight: normal">{{
+                                        $t('account_info.account_name_not_set')
+                                    }}</span>
                                 <img src="../../assets/img/rewrite.svg" @click="isShowName = false"/>
                             </div>
                             <div class="rewriteName" v-else>
@@ -1435,7 +1457,7 @@ export default {
                 _this.accountInfo.frozenBalanceNQT = res.frozenBalanceNQT;
                 _this.accountInfo.guaranteedBalanceNQT = res.guaranteedBalanceNQT;
                 _this.accountInfo.unconfirmedBalanceNQT = res.unconfirmedBalanceNQT;
-                if (!res.publicKey) {
+                if (!res.publicKey && !SSO.downloadingBlockchain) {
                     _this.$message.warning(_this.$t("account.account_inactive"));
                 }
                 if (res.pocScore != null) {
@@ -3466,8 +3488,9 @@ export default {
         },
         isUpToDateOrLight: function () {
             const _this = this;
-            console.log("isUpToDateOrLight", _this.blockchainState.blockchainState === 'UP_TO_DATE' || _this.blockchainState.blockchainState === 'LIGHT_CLIENT')
-            return _this.blockchainState.blockchainState === 'UP_TO_DATE' || _this.blockchainState.blockchainState === 'LIGHT_CLIENT';
+            console.log("_this.blockchainState", _this.blockchainState)
+            console.log("isUpToDateOrLight", !SSO.downloadingBlockchain || _this.blockchainState.isLightClient == true);
+            return !SSO.downloadingBlockchain || _this.blockchainState.isLightClient == true;
         }
     },
     watch: {

@@ -67,6 +67,7 @@ public final class PeerServlet extends WebSocketServlet {
         map.put("getMilestoneBlockIds", GetMilestoneBlockIds.instance);
         map.put("getNextBlockIds", GetNextBlockIds.instance);
         map.put("getNextBlocks", GetNextBlocks.instance);
+        map.put("getBlocks", GetBlocks.instance);
         map.put("getPeers", GetPeers.instance);
         map.put("getTransactions", GetTransactions.instance);
         map.put("getUnconfirmedTransactions", GetUnconfirmedTransactions.instance);

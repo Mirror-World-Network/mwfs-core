@@ -9,6 +9,7 @@ import org.conch.account.Account;
 import org.conch.account.AccountLedger;
 import org.conch.chain.Block;
 import org.conch.chain.BlockchainProcessor;
+import org.conch.common.ConchException;
 import org.conch.common.Constants;
 import org.conch.consensus.poc.db.PoolDb;
 import org.conch.consensus.reward.RewardCalculator;
@@ -504,20 +505,25 @@ public class SharderPoolProcessor implements Serializable {
         updateHistoricalFees(id, block.getTotalFeeNQT());
 
         //unfreeze the reward
-        if (height > Constants.SHARDER_REWARD_DELAY) {
-            Block pastBlock = Conch.getBlockchain().getBlockAtHeight(height - Constants.SHARDER_REWARD_DELAY);
+        try {
 
-            for (Transaction tx : pastBlock.getTransactions()) {
-                if(!RewardCalculator.isBlockRewardTx(tx.getAttachment())) {
-                    continue;
+            if (height > Constants.SHARDER_REWARD_DELAY) {
+                Block pastBlock = Conch.getBlockchain().getBlockAtHeight(height - Constants.SHARDER_REWARD_DELAY);
+
+                for (Transaction tx : pastBlock.getTransactions()) {
+                    if (!RewardCalculator.isBlockRewardTx(tx.getAttachment())) {
+                        continue;
+                    }
+
+                    long miningRewards = RewardCalculator.blockRewardDistribution(tx, true);
+                    updateHistoricalRewards(id, miningRewards);
                 }
-                
-                long miningRewards = RewardCalculator.blockRewardDistribution(tx, true);
-                updateHistoricalRewards(id, miningRewards);
             }
-        }
 
-        persistence();
+            persistence();
+        } catch (ConchException.StopException e) {
+            Logger.logErrorMessage(e.getMessage());
+        }
     }
 
     /**

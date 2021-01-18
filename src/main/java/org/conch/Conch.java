@@ -95,8 +95,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.spring4all.swagger.EnableSwagger2Doc;
-
 public final class Conch {
 
     public static final String VERSION = "0.0.5";

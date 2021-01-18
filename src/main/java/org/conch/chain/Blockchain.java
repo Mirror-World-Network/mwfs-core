@@ -94,6 +94,8 @@ public interface Blockchain {
 
     int getTransactionCount();
 
+    int getTransactionCountByType(int type);
+
     int getTransactionCountByAccount(long accountId, byte type, byte subtype);
 
     DbIterator<? extends Transaction> getAllTransactions();
@@ -118,4 +120,6 @@ public interface Blockchain {
     long countIncludeTypeBlocks(List<String> includeType);
 
     DbIterator<BlockImpl> getBlocksByHeight(int from, int to, String[] orderPair);
+
+    void setLastBlock(BlockImpl block);
 }
