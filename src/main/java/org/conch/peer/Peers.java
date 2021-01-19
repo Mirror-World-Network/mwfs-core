@@ -902,58 +902,63 @@ public final class Peers {
 
         private void updateSavedPeers() {
             int now = Conch.getEpochTime();
-            //
-            // Load the current database entries and map announced address to database entry
-            //
-            List<PeerDb.Entry> oldPeers = PeerDb.loadPeers();
-            Map<String, PeerDb.Entry> oldMap = new HashMap<>(oldPeers.size());
-            oldPeers.forEach(entry -> oldMap.put(entry.getAddress(), entry));
-            //
-            // Create the current peer map (note that there can be duplicate peer entries with
-            // the same announced address)
-            //
-            Map<String, PeerDb.Entry> currentPeers = new HashMap<>();
-            Peers.peers.values().forEach(peer -> {
-                if (peer.getAnnouncedAddress() != null && !peer.isBlacklisted() && now - peer.getLastUpdated() < 7 * 24 * 3600) {
-                    currentPeers.put(peer.getAnnouncedAddress(),
-                            new PeerDb.Entry(peer.getAnnouncedAddress(), peer.getServices(), peer.getLastUpdated()));
-                }
-            });
-            //
-            // Build toDelete and toUpdate lists
-            //
-            List<PeerDb.Entry> toDelete = new ArrayList<>(oldPeers.size());
-            oldPeers.forEach(entry -> {
-                if (currentPeers.get(entry.getAddress()) == null) {
-                    toDelete.add(entry);
-                }
-            });
-            List<PeerDb.Entry> toUpdate = new ArrayList<>(currentPeers.size());
-            currentPeers.values().forEach(entry -> {
-                PeerDb.Entry oldEntry = oldMap.get(entry.getAddress());
-                if (oldEntry == null || entry.getLastUpdated() - oldEntry.getLastUpdated() > 24 * 3600) {
-                    toUpdate.add(entry);
-                }
-            });
-            //
-            // Nothing to do if all of the lists are empty
-            //
-            if (toDelete.isEmpty() && toUpdate.isEmpty()) {
-                return;
-            }
-            //
-            // Update the peer database
-            //
             try {
-                Db.db.beginTransaction();
-                PeerDb.deletePeers(toDelete);
-                PeerDb.updatePeers(toUpdate);
-                Db.db.commitTransaction();
+                //
+                // Load the current database entries and map announced address to database entry
+                //
+                List<PeerDb.Entry> oldPeers = PeerDb.loadPeers();
+                Map<String, PeerDb.Entry> oldMap = new HashMap<>(oldPeers.size());
+                oldPeers.forEach(entry -> oldMap.put(entry.getAddress(), entry));
+                //
+                // Create the current peer map (note that there can be duplicate peer entries with
+                // the same announced address)
+                //
+                Map<String, PeerDb.Entry> currentPeers = new HashMap<>();
+                Peers.peers.values().forEach(peer -> {
+                    if (peer.getAnnouncedAddress() != null && !peer.isBlacklisted() && now - peer.getLastUpdated() < 7 * 24 * 3600) {
+                        currentPeers.put(peer.getAnnouncedAddress(),
+                                new PeerDb.Entry(peer.getAnnouncedAddress(), peer.getServices(), peer.getLastUpdated()));
+                    }
+                });
+                //
+                // Build toDelete and toUpdate lists
+                //
+                List<PeerDb.Entry> toDelete = new ArrayList<>(oldPeers.size());
+                oldPeers.forEach(entry -> {
+                    if (currentPeers.get(entry.getAddress()) == null) {
+                        toDelete.add(entry);
+                    }
+                });
+                List<PeerDb.Entry> toUpdate = new ArrayList<>(currentPeers.size());
+                currentPeers.values().forEach(entry -> {
+                    PeerDb.Entry oldEntry = oldMap.get(entry.getAddress());
+                    if (oldEntry == null || entry.getLastUpdated() - oldEntry.getLastUpdated() > 24 * 3600) {
+                        toUpdate.add(entry);
+                    }
+                });
+                //
+                // Nothing to do if all of the lists are empty
+                //
+                if (toDelete.isEmpty() && toUpdate.isEmpty()) {
+                    return;
+                }
+                //
+                // Update the peer database
+                //
+                try {
+                    Db.db.beginTransaction();
+                    PeerDb.deletePeers(toDelete);
+                    PeerDb.updatePeers(toUpdate);
+                    Db.db.commitTransaction();
+                } catch (Exception e) {
+                    Db.db.rollbackTransaction();
+                    throw e;
+                } finally {
+                    Db.db.endTransaction();
+                }
             } catch (Exception e) {
-                Db.db.rollbackTransaction();
-                throw e;
-            } finally {
-                Db.db.endTransaction();
+                e.printStackTrace();
+                Logger.logErrorMessage("update saved Peers fail " + e);
             }
         }
 
