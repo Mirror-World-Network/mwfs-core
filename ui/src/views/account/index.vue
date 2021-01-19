@@ -3113,13 +3113,17 @@ export default {
             })*/
             SSO.setAccountInfo(formData, function (res) {
                 console.log("res", res);
-                if (typeof res.data.errorDescription === "undefined") {
+                if (typeof res.errorDescription === "undefined") {
                     _this.$message.success(_this.$t('notification.modify_success'));
                     _this.accountInfo.name = res.data.transactionJSON.attachment.name;
                     _this.isShowName = true;
                     _this.temporaryName = "";
                 } else {
-                    _this.$message.error(res.data.errorDescription);
+                    if (res.errorDescription.indexOf("$.t") != -1) {
+                        _this.$message.error(_this.$global.escape2Html(_this.$t(res.errorDescription.slice(3))));
+                    } else {
+                        _this.$message.error(_this.$global.escape2Html(res.errorDescription));
+                    }
                     _this.accountInfo.name = "";
                     _this.isShowName = true;
                 }
