@@ -797,26 +797,13 @@ public class ConchDbVersion extends DbVersion {
                                     }
                                 }
                             }
-
-<<<<<<< HEAD
-                    "create index IF NOT EXISTS ACCOUNT_POC_SCORE_HEIGHT_INDEX on ACCOUNT_POC_SCORE (HEIGHT desc);\n"
-                    + "create index IF NOT EXISTS ACCOUNT_POC_SCORE_CACHE_HEIGHT_INDEX on ACCOUNT_POC_SCORE_CACHE (HEIGHT desc);"
-                    + "CREATE INDEX IF NOT EXISTS ACCOUNT_HEIGHT_INDEX ON ACCOUNT (HEIGHT DESC);\n"
-                    + "CREATE INDEX IF NOT EXISTS ACCOUNT_POC_SCORE_HEIGHT_INDEX ON ACCOUNT_POC_SCORE (HEIGHT DESC);\n"
-                );
-            case 66:
-                apply("alter table CERTIFIED_PEER add delete_Height int(10) not null default 0;");
-            case 67:
-                break;
-            default:
-                throw new RuntimeException("Blockchain database inconsistent with code, at update " + nextUpdate
-                        + ", probably trying to run older code on newer database[ you can check the code in ConchDbVersion.java firstly]");
-=======
                         }
                     } catch (SQLException e) {
                         throw new RuntimeException(e.toString(), e);
                     }
                 case 67:
+                    apply("alter table CERTIFIED_PEER add delete_Height int(10) not null default 0;");
+                case 68:
                     break;
                 default:
                     throw new RuntimeException("Blockchain database inconsistent with code, at update " + nextUpdate
@@ -826,7 +813,6 @@ public class ConchDbVersion extends DbVersion {
             throw new RuntimeException(e.toString(), e);
         }finally {
             DbUtils.close(con);
->>>>>>> 815213fadc95ae89d7196d0b29d2a7377ec8e39d
         }
     }
 }
