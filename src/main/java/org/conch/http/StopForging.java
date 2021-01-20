@@ -40,7 +40,12 @@ public final class StopForging extends APIServlet.APIRequestHandler {
     protected JSONStreamAware processRequest(HttpServletRequest req) throws ParameterException {
 
         StartForging startForging = StartForging.instance;
-        String pr = startForging.verifySignature(req);
+        String pr = null;
+        try {
+            pr = startForging.verifySignature(req);
+        } catch (Exception e) {
+            return JSONResponses.error(e.getMessage());
+        }
         JSONObject response = new JSONObject();
         if (pr != null) {
             Generator generator = Generator.stopMining(pr);

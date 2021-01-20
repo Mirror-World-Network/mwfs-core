@@ -373,7 +373,7 @@
                     _this.lastBlockHeight = res.data.lastBlockchainFeederHeight;
                     _this.isDownLoadingBlockchain = res.data.isDownloading;
                     SSO.downloadingBlockchain = res.data.isDownloading;
-                    
+
                     _this.getLatestHubVersion();
                     /*if(_this.$global.isOpenConsole){
                         _this.$global.addToConsole("/sharder?requestType=getBlockchainStatus",'GET',res);
@@ -425,7 +425,6 @@
             },
             startForging: function (b, pwd) {
                 const _this = this;
-                let formData = new FormData();
                 let config = {
                     headers: {
                         'Content-Type': 'multipart/form-data'
@@ -438,9 +437,7 @@
                     if(SSO.accountInfo.balanceNQT/ _this.$global.unitValue + SSO.accountInfo.frozenBalanceNQT / _this.$global.unitValue < 133){
                         return _this.$message.error(_this.$t('notification.ss_not_enough'));
                     }
-
-                    formData.append("secretPhrase", SSO.secretPhrase);
-                    _this.$http.post("/sharder?requestType=startForging", formData, config).then(res => {
+                    _this.$http.post("/sharder?requestType=startForging", _this.signInfo(SSO.secretPhrase), config).then(res => {
                         if (!res.data.errorDescription) {
                             _this.$http.post('/sharder?requestType=getForging', _this.signInfo(SSO.secretPhrase), config).then(res => {
                                 _this.forging = res.data;
@@ -460,8 +457,7 @@
                     _this.startForgingDialog = true;
                     _this.$store.state.mask = true;
                 } else {
-                    formData.append("secretPhrase", pwd);
-                    _this.$http.post("/sharder?requestType=startForging", formData, config).then(res => {
+                    _this.$http.post("/sharder?requestType=startForging", _this.signInfo(pwd), config).then(res => {
                         if (!res.data.errorDescription) {
                             _this.$http.post('/sharder?requestType=getForging', _this.signInfo(pwd), config).then(res => {
                                 _this.forging = res.data;
