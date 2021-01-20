@@ -109,7 +109,7 @@ public final class GetNextBlockGenerators extends APIServlet.APIRequestHandler {
                     }
                 }
             }
-            response.put("qualifiedActiveCount", crowdMiners.size());
+            response.put("qualifiedActiveCount", crowdMiners.size() + 1);
             List<Generator.ActiveGenerator> activeGenerators = Generator.getNextGenerators();
             response.put("activeCount", activeGenerators.size());
             JSONArray generators = new JSONArray();
