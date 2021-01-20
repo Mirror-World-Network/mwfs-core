@@ -41,14 +41,19 @@ public final class StartForging extends APIServlet.APIRequestHandler {
     @Override
     protected JSONStreamAware processRequest(HttpServletRequest req) throws ParameterException {
 
-        String pr = verifySignature(req);
+        String pr = null;
+        try {
+            pr = verifySignature(req);
+        } catch (Exception e) {
+            return JSONResponses.error(e.getMessage());
+        }
         Generator generator = Generator.startMining(pr);
         JSONObject response = new JSONObject();
         if(generator != null){
             response.put("deadline", generator.getDeadline());
             response.put("hitTime", generator.getHitTime());
         } else {
-            throw new RuntimeException("can't start mining, check the account balance and other mining conditions");
+            return JSONResponses.error("can't start mining, check the account balance and other mining conditions");
         }
         return response;
 

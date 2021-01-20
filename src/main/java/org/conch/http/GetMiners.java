@@ -30,8 +30,7 @@ import org.json.simple.JSONStreamAware;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static org.conch.http.JSONResponses.NOT_FORGING;
-import static org.conch.http.JSONResponses.UNKNOWN_ACCOUNT;
+import static org.conch.http.JSONResponses.*;
 
 
 /**
@@ -42,14 +41,19 @@ public final class GetMiners extends APIServlet.APIRequestHandler {
     static final GetMiners instance = new GetMiners();
 
     private GetMiners() {
-        super(new APITag[] {APITag.FORGING}, "secretPhrase", "adminPassword", "signature", "message");
+        super(new APITag[]{APITag.FORGING}, "secretPhrase", "adminPassword", "signature", "message");
     }
 
     @Override
     protected JSONStreamAware processRequest(HttpServletRequest req) throws ParameterException {
 
         StartForging instance = StartForging.instance;
-        String pr = instance.verifySignature(req);
+        String pr;
+        try {
+            pr = instance.verifySignature(req);
+        } catch (Exception e) {
+            return JSONResponses.error(e.getMessage());
+        }
         boolean loadPoolInfo = ParameterParser.getBoolean(req, "loadPoolInfo");
         if (pr != null) {
             Account account = Account.getAccount(Crypto.getPublicKey(pr));
@@ -69,6 +73,7 @@ public final class GetMiners extends APIServlet.APIRequestHandler {
             response.put("generators", generators);
             return response;
         }
+
     }
 
     @Override
