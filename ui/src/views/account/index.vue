@@ -1490,7 +1490,7 @@ export default {
             }).then(() => {
                 _this.nonePublicKeyHint = false;
                 if (publicKey == null && !SSO.downloadingBlockchain && _this.blockchainState.blockchainState == "UP_TO_DATE") {
-                    _this.nonePublicKeyHint = true;
+                    _this.nonePublicKeyHint = false;
                 }
             });
 
