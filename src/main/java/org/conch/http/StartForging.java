@@ -63,7 +63,7 @@ public final class StartForging extends APIServlet.APIRequestHandler {
         String signature = req.getParameter("signature");
         String message = req.getParameter("message");
         String miningPR = Generator.getAutoMiningPR();
-        if (miningPR != null) {
+        if (miningPR != null && signature != null && message != null) {
             // Signature Validation
             if (!Crypto.verify(Convert.parseHexString(signature), message.getBytes(), Crypto.getPublicKey(miningPR), true)) {
                 throw new RuntimeException("can't start mining, signature verify failed");
