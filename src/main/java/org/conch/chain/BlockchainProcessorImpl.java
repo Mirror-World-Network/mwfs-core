@@ -1915,6 +1915,13 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 }
             }
 
+            // verify block coinBase tx
+            if(blockchain.getHeight()+1 >= RewardCalculator.BLOCK_REWARD_VERIFY_HEIGHT
+                    && transaction.getType().isType(TransactionType.TYPE_COIN_BASE)
+                    && transaction.getAmountNQT() != RewardCalculator.blockReward(blockchain.getHeight()+1)) {
+                throw new TransactionNotAcceptedException("CoinBaseTx verification failed", transaction);
+            }
+
             if (!hasPrunedTransactions) {
                 for (Appendix.AbstractAppendix appendage : transaction.getAppendages()) {
                     if ((appendage instanceof Appendix.Prunable)
