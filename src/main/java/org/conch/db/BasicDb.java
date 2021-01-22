@@ -203,7 +203,7 @@ public class BasicDb {
     }
 
     private static int exceedMaxCount = 0;
-    private static final int RESTART_COUNT = Constants.isDevnet() ? 10 : 30;
+    private static final int RESTART_COUNT = Constants.isDevnet() ? 10 : 500;
     private static final int MAX_DB_CONNECTIONS = Conch.getIntProperty("sharder.maxDbConnections");
     private static final boolean DEBUG_DETAIL = Conch.getBooleanProperty("sharder.debugStackAtAcquireCon", false);
 
@@ -217,7 +217,7 @@ public class BasicDb {
                 if(LocalDebugTool.isLocalDebug()){
                     return null;
                 }
-                checkAndRestart();
+                // checkAndRestart();
             }
             con = cp.getConnection();
             int activeConnections = cp.getActiveConnections();
@@ -236,7 +236,7 @@ public class BasicDb {
 
         } catch (Exception e) {
             Logger.logErrorMessage("can't get connection from pool caused by " + e.getMessage());
-            checkAndRestart();
+            // checkAndRestart();
         }
 
         return con;
