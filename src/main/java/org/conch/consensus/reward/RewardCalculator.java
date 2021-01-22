@@ -79,6 +79,10 @@ public class RewardCalculator {
      */
     public static final int NETWORK_ROBUST_PHASE = Constants.isDevnet() ? Constants.heightConf.getIntValue("NETWORK_ROBUST_PHASE_IS_DEVNET") : Constants.heightConf.getIntValue("NETWORK_ROBUST_PHASE_IS_TESTNET");
     /**
+     * block reward verify height
+     */
+    public static final int BLOCK_REWARD_VERIFY_HEIGHT = Constants.isDevnet() ? 10 : 11250;
+    /**
      * how much one block reward
      * @return
      */
