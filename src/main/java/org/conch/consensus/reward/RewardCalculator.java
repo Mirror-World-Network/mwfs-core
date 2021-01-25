@@ -63,7 +63,7 @@ public class RewardCalculator {
         RewardDef(long amount) {
             this.amount = amount;
         }
-        
+
     }
 
     /**
@@ -244,21 +244,22 @@ public class RewardCalculator {
 
         HashMap<Long, Long> crowdMinerPocScoreMap = Maps.newHashMap();
         // read the qualified miner list
-        Map<Long, CertifiedPeer>  certifiedPeers = Conch.getPocProcessor().getCertifiedPeers();
-        if(certifiedPeers == null || certifiedPeers.size() == 0) {
+        Map<Long, CertifiedPeer> certifiedPeers = Conch.getPocProcessor().getCertifiedPeers();
+        if (certifiedPeers == null || certifiedPeers.size() == 0) {
             return crowdMinerPocScoreMap;
         }
-
+        long startMS = System.currentTimeMillis();
+        Logger.logDebugMessage("Start to generate crow miner poc-score map [miner size=%d]", certifiedPeers.size());
         // generate the poc score map
-        for(CertifiedPeer certifiedPeer : certifiedPeers.values()){
+        for (CertifiedPeer certifiedPeer : certifiedPeers.values()) {
             // only reward once for same miner
-            if(exceptAccounts != null
-            && exceptAccounts.contains(certifiedPeer.getBoundAccountId())){
+            if (exceptAccounts != null
+                    && exceptAccounts.contains(certifiedPeer.getBoundAccountId())) {
                 continue;
             }
             // qualified miner judgement
             Account declaredAccount = Account.getAccount(certifiedPeer.getBoundAccountId());
-            if(declaredAccount == null) {
+            if (declaredAccount == null) {
                 continue;
             }
 
@@ -275,12 +276,13 @@ public class RewardCalculator {
 
             // poc score judgement
             PocScore pocScore = PocHolder.getPocScore(height, declaredAccount.getId());
-            if(pocScore == null || pocScore.total().longValue() <= 0) {
+            if (pocScore == null || pocScore.total().longValue() <= 0) {
                 continue;
             }
-
             crowdMinerPocScoreMap.put(declaredAccount.getId(), pocScore.total().longValue());
         }
+        long usedTimeMS = System.currentTimeMillis() - startMS;
+        Logger.logDebugMessage("Finish generate crow miner poc-score map[used time≈%dS]", usedTimeMS / 1000);
         return crowdMinerPocScoreMap;
     }
 
