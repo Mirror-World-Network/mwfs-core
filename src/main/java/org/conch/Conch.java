@@ -1083,10 +1083,10 @@ public final class Conch {
     public static void restartApplication(Runnable runBeforeRestart) {
         try {
             pause();
-            
-            Logger.logInfoMessage("Clear the all logs");
-            FileUtil.clearAllLogs();
-            
+
+            //            Logger.logInfoMessage("Clear the all logs");
+            //            FileUtil.clearAllLogs();
+
             // java binary
             String java = System.getProperty("java.home") + "/bin/java";
             // vm arguments

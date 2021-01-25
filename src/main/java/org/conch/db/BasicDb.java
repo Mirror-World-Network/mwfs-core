@@ -203,7 +203,7 @@ public class BasicDb {
     }
 
     private static int exceedMaxCount = 0;
-    private static final int RESTART_COUNT = Constants.isDevnet() ? 10 : 500;
+    private static final int RESTART_COUNT = Constants.isDevnet() ? 10 : 30;
     private static final int MAX_DB_CONNECTIONS = Conch.getIntProperty("sharder.maxDbConnections");
     private static final boolean DEBUG_DETAIL = Conch.getBooleanProperty("sharder.debugStackAtAcquireCon", false);
 
@@ -217,7 +217,7 @@ public class BasicDb {
                 if(LocalDebugTool.isLocalDebug()){
                     return null;
                 }
-                // checkAndRestart();
+                checkAndRestart();
             }
             con = cp.getConnection();
             int activeConnections = cp.getActiveConnections();
@@ -236,7 +236,7 @@ public class BasicDb {
 
         } catch (Exception e) {
             Logger.logErrorMessage("can't get connection from pool caused by " + e.getMessage());
-            // checkAndRestart();
+            checkAndRestart();
         }
 
         return con;
@@ -248,8 +248,10 @@ public class BasicDb {
 
     private static void checkAndRestart() {
         if (exceedMaxCount++ > RESTART_COUNT) {
-            Logger.logErrorMessage(String.format("Exceed max connections[%d] %d times, restart the COS to temporary " +
-                    "fix this problem", MAX_DB_CONNECTIONS, RESTART_COUNT));
+            String msg = String.format("Exceed max connections[%d] %d times, restart the COS to temporary " +
+                    "fix this problem", MAX_DB_CONNECTIONS, RESTART_COUNT);
+            Logger.logWarningMessage(msg);
+            Logger.logErrorMessage(msg);
             new Thread(() -> Conch.restartApplication(null)).start();
             exceedMaxCount = 0;
         }
