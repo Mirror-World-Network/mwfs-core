@@ -88,6 +88,7 @@ public class FileUtil {
         //根据后缀判断是.zip还是.7z
         ZipFile zipFile = null;
         SevenZFile zIn = null;
+        Path appRootPath = Paths.get(".");
         try{
             if(zipFilePath.endsWith(".zip")){
                 zipFile = new ZipFile(zipFilePath);
@@ -125,6 +126,7 @@ public class FileUtil {
                 }
             }else if(zipFilePath.endsWith(".7z")){
                 zIn = new SevenZFile(new File(zipFilePath));
+
                 SevenZArchiveEntry entry = null;
                 while ((entry = zIn.getNextEntry()) != null) {
                     final String name = entry.getName();
@@ -137,22 +139,31 @@ public class FileUtil {
                             parent.mkdirs();
                         }
                     }else if(!entry.isDirectory()){
+
                         // Extract the file 提取文件
-                        try (final InputStream inputStream = new FileInputStream(new File(entry.getName()));
-                             final FileOutputStream outputStream = new FileOutputStream(outputFile)) {
-                            /*
-                             * The buffer is the max amount of bytes kept in RAM during any given time while
-                             * unzipping. Since most windows disks are aligned to 4096 or 8192, we use a
-                             * multiple of those values for best performance.
-                             */
-                            final byte[] bytes = new byte[8192];
-                            while (inputStream.available() > 0) {
-                                final int length = inputStream.read(bytes);
-                                outputStream.write(bytes, 0, length);
+                        OutputStream out = null;
+                        BufferedOutputStream bos = null;
+                        try {
+                            String targetName = name;
+                            Path targetPath = appRootPath.resolve(targetName);
+                            out = new FileOutputStream(targetPath.toFile());
+                            bos = new BufferedOutputStream(out);
+                            int len = -1;
+                            byte[] buf = new byte[1024];
+                            while ((len = zIn.read(buf)) != -1) {
+                                bos.write(buf, 0, len);
+                            }
+                        } catch (IOException e) {
+                            Logger.logErrorMessage(String.format("[ ERROR ] copy and replae the upgrade files %s", name, e.getMessage()));
+                        } finally {
+                            if (bos != null) {
+                                bos.close();
+                            }
+                            if (out != null) {
+                                out.close();
                             }
                         }
                     }
-
                 }
             }
         }catch (Exception e) {
