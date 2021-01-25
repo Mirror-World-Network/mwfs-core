@@ -94,7 +94,7 @@ public interface Blockchain {
 
     int getTransactionCount();
 
-    int getTransactionCountByType(int type);
+    int getTransactionCountByType(int type, Connection con);
 
     int getTransactionCountByAccount(long accountId, byte type, byte subtype);
 

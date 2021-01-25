@@ -450,6 +450,7 @@ public final class BlockchainImpl implements Blockchain {
     @Override
     public int getTransactionCount() {
         Connection con = null;
+        boolean isInTx = Db.db.isInTransaction();
         try {
             con = Db.db.getConnection();
             PreparedStatement pstmt = con.prepareStatement("SELECT COUNT(*) FROM transaction");
@@ -458,14 +459,16 @@ public final class BlockchainImpl implements Blockchain {
             return rs.getInt(1);
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
+        } finally {
+            if (!isInTx) {
+                DbUtils.close(con);
+            }
         }
     }
 
     @Override
-    public int getTransactionCountByType(int type) {
-        Connection con = null;
+    public int getTransactionCountByType(int type, Connection con) {
         try {
-            con = Db.db.getConnection();
             PreparedStatement pstmt = con.prepareStatement("SELECT COUNT(*) FROM transaction WHERE TYPE = ?");
             pstmt.setInt(1, type);
             ResultSet rs = pstmt.executeQuery();

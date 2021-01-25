@@ -149,8 +149,8 @@ public final class GetTxStatistics extends APIServlet.APIRequestHandler {
             jsonObject.put("transferCount24H", transferCount24H);
             jsonObject.put("transferAmount24H", transferAmount24H);
             jsonObject.put("storageCount", storageCount);
-            jsonObject.put("poolCount", Conch.getBlockchain().getTransactionCountByType(TransactionType.TYPE_SHARDER_POOL));
-            jsonObject.put("coinBaseCount", Conch.getBlockchain().getTransactionCountByType(TransactionType.TYPE_COIN_BASE));
+            jsonObject.put("poolCount", Conch.getBlockchain().getTransactionCountByType(TransactionType.TYPE_SHARDER_POOL, con));
+            jsonObject.put("coinBaseCount", Conch.getBlockchain().getTransactionCountByType(TransactionType.TYPE_COIN_BASE, con));
             jsonObject.put("storageDataLength", storageDataLength);
             jsonObject.put("storageCount24H", storageCount24H);
             jsonObject.put("storageDataLength24H", storageDataLength24H);
