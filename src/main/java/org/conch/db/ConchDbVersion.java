@@ -804,7 +804,6 @@ public class ConchDbVersion extends DbVersion {
                     }
                 case 67:
                     apply("ALTER TABLE ACCOUNT_GUARANTEED_BALANCE_HISTORY ADD COLUMN IF NOT EXISTS LATEST BOOLEAN default false NOT NULL");
-                    break;
                 case 68:
                     break;
                 default:
