@@ -2770,7 +2770,7 @@ public final class Account {
 //                    ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
 //                }
 
-                if (workHeight - floorHeight < dif || ceilingHeight > workHeight) {
+                if (workHeight - floorHeight < dif) {
 //                    return;
                     continue;
                 }
@@ -2799,7 +2799,7 @@ public final class Account {
                 PreparedStatement pstmtInsert = con.prepareStatement(sb.toString());
                 pstmtInsert.execute();
                 PreparedStatement pstmtDelete = con.prepareStatement("DELETE FROM " + sourceTable + " "
-                        + "WHERE height < ? and id = ?");
+                        + "WHERE height <= ? and id = ?");
                 pstmtDelete.setInt(1, ceilingHeight);
                 //pstmtDelete.setBoolean(2, false);
                 pstmtDelete.setLong(2, accountId);
@@ -2854,7 +2854,7 @@ public final class Account {
 //                if (workHeight - floorHeight > Constants.SYNC_BLOCK_NUM) {
 //                    ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM - dif;
 //                }
-                if (workHeight - floorHeight < dif || ceilingHeight > workHeight) {
+                if (workHeight - floorHeight < dif) {
 //                    return;
                     continue;
                 }
@@ -2877,7 +2877,7 @@ public final class Account {
                 PreparedStatement pstmtInsert = con.prepareStatement(sb.toString());
                 pstmtInsert.execute();
                 PreparedStatement pstmtDelete = con.prepareStatement("DELETE FROM " + sourceTable
-                        + " WHERE height < ? and account_id = ?");
+                        + " WHERE height <= ? and account_id = ?");
                 pstmtDelete.setInt(1, ceilingHeight);
                 //pstmtDelete.setBoolean(2, false);
                 pstmtDelete.setLong(2, accountId);
@@ -2933,7 +2933,7 @@ public final class Account {
 //                    ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
 //                }
 
-                if (workHeight - floorHeight < dif || ceilingHeight > workHeight) {
+                if (workHeight - floorHeight < dif) {
 //                    return;
                     continue;
                 }
@@ -2964,7 +2964,7 @@ public final class Account {
                 PreparedStatement pstmtInsert = con.prepareStatement(sb.toString());
                 pstmtInsert.execute();
                 PreparedStatement pstmtDelete = con.prepareStatement("DELETE FROM " + sourceTable
-                        + " WHERE height < ? and account_id = ?");
+                        + " WHERE height <= ? and account_id = ?");
                 pstmtDelete.setInt(1, ceilingHeight);
                 //pstmtDelete.setBoolean(2, false);
                 pstmtDelete.setLong(2, accountId);
@@ -3018,7 +3018,7 @@ public final class Account {
 //                    ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
 //                }
 
-                if (workHeight - floorHeight < dif || ceilingHeight > workHeight) {
+                if (workHeight - floorHeight < dif) {
 //                    return;
                     continue;
                 }
@@ -3042,7 +3042,7 @@ public final class Account {
                 PreparedStatement pstmtInsert = con.prepareStatement(sb.toString());
                 pstmtInsert.execute();
                 PreparedStatement pstmtDelete = con.prepareStatement("DELETE FROM " + sourceTable
-                        + " WHERE height < ? and account_id = ?");
+                        + " WHERE height <= ? and account_id = ?");
                 pstmtDelete.setInt(1, ceilingHeight);
                 //pstmtDelete.setBoolean(2, false);
                 pstmtDelete.setLong(2, accountId);
