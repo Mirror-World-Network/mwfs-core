@@ -1995,29 +1995,6 @@ public final class Account {
                 pstmt.setInt(2, fromHeight);
                 pstmt.setInt(3, toHeight);
                 ResultSet workRs = pstmt.executeQuery();
-//                String cacheSql;
-//                if (workRs.next()) {
-//                    toHeight = workRs.getInt("height");
-//                    additions += workRs.getLong("additions");
-//                }
-//                PreparedStatement cachePstmt = con.prepareStatement("SELECT SUM (additions) AS additions, min(height) as height "
-//                        + "FROM account_guaranteed_balance_cache WHERE account_id = ? AND height > ? AND height < ?");
-//                cachePstmt.setLong(1, this.id);
-//                cachePstmt.setInt(2, fromHeight);
-//                cachePstmt.setInt(3, toHeight);
-//                ResultSet cacheRs = cachePstmt.executeQuery();
-//                String historySql;
-//                if (cacheRs.next()) {
-//                    toHeight = cacheRs.getInt("height");
-//                    additions += cacheRs.getLong("additions");
-//                }
-//                PreparedStatement historyPstmt = con.prepareStatement("SELECT SUM (additions) AS additions "
-//                        + "FROM account_guaranteed_balance_history WHERE account_id = ? AND height > ? AND height < ?");
-//                historyPstmt.setLong(1, this.id);
-//                historyPstmt.setInt(2, fromHeight);
-//                historyPstmt.setInt(3, toHeight);
-//                ResultSet historyRs = historyPstmt.executeQuery();
-//                return Math.max(Math.subtractExact(balanceNQT, additions + (historyRs.next() ? historyRs.getLong("additions") : 0)), 0);
                 return Math.max(Math.subtractExact(balanceNQT, additions), 0);
             } catch (SQLException e) {
                 throw new RuntimeException(e.toString(), e);

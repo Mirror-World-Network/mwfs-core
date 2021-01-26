@@ -287,11 +287,6 @@ public class RewardCalculator {
         return crowdMinerPocScoreMap;
     }
 
-    public static void main(String[] args) {
-        Conch.init();
-        generateCrowdMinerPocScoreMap(null, Conch.getHeight());
-    }
-
     /**
      * Total capacity of qualified miner hardware
      * @return
