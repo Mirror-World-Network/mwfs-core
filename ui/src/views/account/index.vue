@@ -2811,12 +2811,20 @@ export default {
                 this.$message.warning(this.$t("account.synchronization_block"));
                 return;
             }
+            if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+                this.$message.warning(this.$t("account.up_to_date"));
+                return;
+            }
             this.$store.state.mask = true;
             this.sendMessageDialog = true;
         },
         openStorageFileDialog: function () {
             if (SSO.downloadingBlockchain) {
                 this.$message.warning(this.$t("account.synchronization_block"));
+                return;
+            }
+            if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+                this.$message.warning(this.$t("account.up_to_date"));
                 return;
             }
             this.$store.state.mask = true;
@@ -2827,12 +2835,20 @@ export default {
                 this.$message.warning(this.$t("account.synchronization_block"));
                 return;
             }
+            if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+                this.$message.warning(this.$t("account.up_to_date"));
+                return;
+            }
             this.$store.state.mask = true;
             this.onChainDialog = true;
         },
         openJoinNetDialog: function () {
             if (SSO.downloadingBlockchain) {
                 this.$message.warning(this.$t("account.synchronization_block"));
+                return;
+            }
+            if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+                this.$message.warning(this.$t("account.up_to_date"));
                 return;
             }
             this.$store.state.mask = true;
@@ -2861,6 +2877,10 @@ export default {
             if (SSO.downloadingBlockchain) {
                 return this.$message.warning(this.$t("account.synchronization_block"));
             }
+            if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+                this.$message.warning(this.$t("account.up_to_date"));
+                return;
+            }
             this.$store.state.mask = true;
             this.tranferAccountsDialog = true;
             this.transfer.executing = false;
@@ -2868,6 +2888,10 @@ export default {
         openBatchTransferDialog: function () {
             if (SSO.downloadingBlockchain) {
                 return this.$message.warning(this.$t("account.synchronization_block"));
+            }
+            if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+                this.$message.warning(this.$t("account.up_to_date"));
+                return;
             }
             this.$store.state.mask = true;
             this.batchTranferAccountsDialog = true;
@@ -2965,6 +2989,10 @@ export default {
             const _this = this;
             if (SSO.downloadingBlockchain) {
                 _this.$message.warning(_this.$t("account.synchronization_block"));
+                return;
+            }
+            if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+                this.$message.warning(this.$t("account.up_to_date"));
                 return;
             }
             _this.isUserInfoDialog(false);
@@ -3375,7 +3403,7 @@ export default {
             4. Hub bind MW address must equals to user account address;
             5. Not a light client;
             */
-            //return true;
+            // return true;
             return this.secretPhrase
                 && !this.initHUb
                 && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center')
@@ -3490,7 +3518,7 @@ export default {
             const _this = this;
             console.log("_this.blockchainState", _this.blockchainState)
             console.log("isUpToDateOrLight", !SSO.downloadingBlockchain || _this.blockchainState.isLightClient == true);
-            return !SSO.downloadingBlockchain || _this.blockchainState.isLightClient == true;
+            return _this.blockchainState.blockchainState == "UP_TO_DATE" && !SSO.downloadingBlockchain || _this.blockchainState.isLightClient == true;
         }
     },
     watch: {
