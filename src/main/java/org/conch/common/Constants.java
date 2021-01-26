@@ -82,6 +82,7 @@ public final class Constants {
     public static final boolean isOffline = Conch.getBooleanProperty("sharder.isOffline");
     public static final boolean isLightClient = Conch.getBooleanProperty("sharder.isLightClient");
     public static final boolean isStorageClient = Conch.getBooleanProperty("sharder.storage.enable");
+    public static final boolean isOpenLessorMode = Conch.getBooleanProperty("sharder.lessorMode.enable", false);
 
     public static final List<String> bootNodesHost = parseBootNodesHost();
     public static final String bootNodeHost = parseBootNodeHost();
