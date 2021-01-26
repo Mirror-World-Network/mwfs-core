@@ -2878,7 +2878,7 @@ public final class Account {
                 pstmtInsert.execute();
                 PreparedStatement pstmtDelete = con.prepareStatement("DELETE FROM " + sourceTable
                         + " WHERE height <= ? and account_id = ?");
-                pstmtDelete.setInt(1, ceilingHeight);
+                pstmtDelete.setInt(1, Math.min(ceilingHeight, Conch.getHeight() - Constants.GUARANTEED_BALANCE_CONFIRMATIONS));
                 //pstmtDelete.setBoolean(2, false);
                 pstmtDelete.setLong(2, accountId);
                 pstmtDelete.execute();
