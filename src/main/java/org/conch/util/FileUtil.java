@@ -78,14 +78,14 @@ public class FileUtil {
 
     /**
      * Unzips a file, placing its contents in the given output location.
-     * 解压文件，将其内容放在给定的输出位置。
+     *
      * @param zipFilePath    input zip file
      * @param outputLocation zip file output folder
      * @param deleteSource   true or false - delete source file
      * @throws IOException if there was an error reading the zip file or writing the unzipped data
      */
     public static void unzip(final String zipFilePath, final String outputLocation, boolean deleteSource) throws IOException {
-        //根据后缀判断是.zip还是.7z
+
         ZipFile zipFile = null;
         SevenZFile zIn = null;
         Path appRootPath = Paths.get(".");
@@ -179,8 +179,7 @@ public class FileUtil {
     }
 
     /**
-     * 删除目录
-     * @param path 文件路径
+     * @param path
      */
     public static void deleteDirectory(Path path){
         if(path == null) return;
@@ -189,7 +188,7 @@ public class FileUtil {
     }
 
     /**
-     * 删除目录
+     *
      * @param delFile
      */
     static void deleteDirectory(File delFile){
