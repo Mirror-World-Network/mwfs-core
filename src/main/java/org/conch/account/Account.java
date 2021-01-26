@@ -1640,6 +1640,32 @@ public final class Account {
     public long getCurrentEffectiveBalanceSS() {
         return getEffectiveBalanceSS(Conch.getHeight());
     }
+
+    public long getConfirmedEffectiveBalanceSS(int height) {
+        if (height != Conch.getHeight()) {
+            throw new RuntimeException("argument height " + height + " not equal blockchain height " + Conch.getHeight());
+        }
+        if (this.publicKey == null) {
+            this.publicKey = publicKeyTable.get(accountDbKeyFactory.newKey(this));
+        }
+
+        // adding height judgment logic, not check the account publicKey
+        // TODO Network reset turn off the judgment
+        if (height <= RewardCalculator.NETWORK_ROBUST_PHASE && this.publicKey == null || this.publicKey.publicKey == null) {
+            return 0;
+        }
+
+        try {
+            Conch.getBlockchain().readLock();
+            long effectiveBalanceNQT = getLessorsGuaranteedBalanceNQT(height);
+            if (activeLesseeId == 0 || Constants.SYNC_BUTTON) {
+                effectiveBalanceNQT += getGuaranteedBalanceNQT(Constants.GUARANTEED_BALANCE_CONFIRMATIONS);
+            }
+            return  effectiveBalanceNQT / Constants.ONE_SS;
+        } finally {
+            Conch.getBlockchain().readUnlock();
+        }
+    }
     /**
      * return the effective balance in the unit MW
      * @param height
@@ -1677,9 +1703,10 @@ public final class Account {
         }
     }
 
-
-
     private long getLessorsGuaranteedBalanceNQT(int height) {
+        if (!Constants.isOpenLessorMode) {
+            return 0;
+        }
         boolean inInTx = Db.db.isInTransaction();
         List<Account> lessors = new ArrayList<>();
         DbIterator<Account> iterator = null;
@@ -1692,6 +1719,9 @@ public final class Account {
             if (!inInTx) {
                 DbUtils.close(iterator);
             }
+        }
+        if (lessors.isEmpty()) {
+            return 0;
         }
         Long[] lessorIds = new Long[lessors.size()];
         long[] balances = new long[lessors.size()];
@@ -1927,6 +1957,67 @@ public final class Account {
                 historyPstmt.setInt(3, toHeight);
                 ResultSet historyRs = historyPstmt.executeQuery();
                 return Math.max(Math.subtractExact(balanceNQT, additions + (historyRs.next() ? historyRs.getLong("additions") : 0)), 0);
+            } catch (SQLException e) {
+                throw new RuntimeException(e.toString(), e);
+            }finally {
+                if (!isInTx) {
+                    DbUtils.close(con);
+                }
+            }
+        } finally {
+            Conch.getBlockchain().readUnlock();
+        }
+    }
+
+    public long getGuaranteedBalanceNQT(final int numberOfConfirmations) {
+
+        try {
+            Conch.getBlockchain().readLock();
+
+            int fromHeight = Conch.getHeight() - numberOfConfirmations;
+            if(fromHeight < 0){
+                fromHeight = 0;
+            }
+//            if (fromHeight + Constants.GUARANTEED_BALANCE_CONFIRMATIONS < Conch.getBlockchainProcessor().getMinRollbackHeight()
+//                    || fromHeight > Conch.getBlockchain().getHeight()) {
+//                throw new IllegalArgumentException("Height " + fromHeight + " not available for guaranteed balance calculation");
+//            }
+            boolean isInTx = Db.db.isInTransaction();
+            Connection con = null;
+            try {
+                con = Db.db.getConnection();
+                Long additions = 0L;
+                int toHeight = Conch.getHeight() + 1;
+                PreparedStatement pstmt = con.prepareStatement("SELECT SUM (additions) AS additions, min(height) as height "
+                        + "FROM account_guaranteed_balance WHERE account_id = ? AND height > ? AND height < ?");
+                pstmt.setLong(1, this.id);
+                pstmt.setInt(2, fromHeight);
+                pstmt.setInt(3, toHeight);
+                ResultSet workRs = pstmt.executeQuery();
+//                String cacheSql;
+//                if (workRs.next()) {
+//                    toHeight = workRs.getInt("height");
+//                    additions += workRs.getLong("additions");
+//                }
+//                PreparedStatement cachePstmt = con.prepareStatement("SELECT SUM (additions) AS additions, min(height) as height "
+//                        + "FROM account_guaranteed_balance_cache WHERE account_id = ? AND height > ? AND height < ?");
+//                cachePstmt.setLong(1, this.id);
+//                cachePstmt.setInt(2, fromHeight);
+//                cachePstmt.setInt(3, toHeight);
+//                ResultSet cacheRs = cachePstmt.executeQuery();
+//                String historySql;
+//                if (cacheRs.next()) {
+//                    toHeight = cacheRs.getInt("height");
+//                    additions += cacheRs.getLong("additions");
+//                }
+//                PreparedStatement historyPstmt = con.prepareStatement("SELECT SUM (additions) AS additions "
+//                        + "FROM account_guaranteed_balance_history WHERE account_id = ? AND height > ? AND height < ?");
+//                historyPstmt.setLong(1, this.id);
+//                historyPstmt.setInt(2, fromHeight);
+//                historyPstmt.setInt(3, toHeight);
+//                ResultSet historyRs = historyPstmt.executeQuery();
+//                return Math.max(Math.subtractExact(balanceNQT, additions + (historyRs.next() ? historyRs.getLong("additions") : 0)), 0);
+                return Math.max(Math.subtractExact(balanceNQT, additions), 0);
             } catch (SQLException e) {
                 throw new RuntimeException(e.toString(), e);
             }finally {

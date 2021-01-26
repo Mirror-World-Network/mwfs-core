@@ -269,7 +269,8 @@ public class RewardCalculator {
 
             long holdingMwAmount = 0;
             try{
-                holdingMwAmount = declaredAccount.getEffectiveBalanceSS(height);
+//                holdingMwAmount = declaredAccount.getEffectiveBalanceSS(height);
+                holdingMwAmount = declaredAccount.getConfirmedEffectiveBalanceSS(height);
             }catch(Exception e){
                 Logger.logWarningMessage("[QualifiedMiner] not valid miner because can't get balance of account %s at height %d, caused by %s",  declaredAccount.getRsAddress(), height, e.getMessage());
                 holdingMwAmount = 0;
@@ -288,6 +289,11 @@ public class RewardCalculator {
         long usedTimeMS = System.currentTimeMillis() - startMS;
         Logger.logDebugMessage("Finish generate crow miner poc-score map[used time≈%dS]", usedTimeMS / 1000);
         return crowdMinerPocScoreMap;
+    }
+
+    public static void main(String[] args) {
+        Conch.init();
+        generateCrowdMinerPocScoreMap(null, Conch.getHeight());
     }
 
     /**
