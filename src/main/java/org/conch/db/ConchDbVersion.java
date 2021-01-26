@@ -803,6 +803,8 @@ public class ConchDbVersion extends DbVersion {
                         throw new RuntimeException(e.toString(), e);
                     }
                 case 67:
+                    apply("ALTER TABLE ACCOUNT_GUARANTEED_BALANCE_HISTORY ADD COLUMN IF NOT EXISTS LATEST BOOLEAN default false NOT NULL");
+                case 68:
                     break;
                 default:
                     throw new RuntimeException("Blockchain database inconsistent with code, at update " + nextUpdate
