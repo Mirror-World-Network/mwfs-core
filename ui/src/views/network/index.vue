@@ -45,10 +45,15 @@
                     <div class="trading_situation_info">
                         <div>
                             <img src="../../assets/img/miner-info1.svg"/>
-                            <div class="section_info">
-                                <span>{{activeCount}}</span>
-                                <span>{{$t('network.miner_volume')}}</span>
-                            </div>
+                        </div>
+                         <div class="section_info" id="activeCount">
+                                <span style="font-size:16px;">{{activeCount}}</span>
+                                <span style="font-size:12px;">{{$t('network.miner_volume')}}</span>
+                        </div>
+                        <!-- <hr id="activeCountLine"/> -->
+                        <div class="section_info" id="qualifiedActiveCount">
+                            <span style="font-size:16px;">{{qualifiedActiveCount}}</span>
+                            <span style="font-size:12px;">{{$t('network.qualified_miner_volume')}}</span>
                         </div>
                     </div>
                     <div class="trading_situation_info">
@@ -530,6 +535,7 @@
                 fetchCoordinates: false,
                 //矿工信息
                 activeCount: '--',
+                qualifiedActiveCount: '--',
                 totalCount: '--',
                 storageCount: '--',
                 transferCount: '--',
@@ -605,6 +611,7 @@
                     limit: 99999
                 }, "getNextBlockGenerators").then(res => {
                     _this.activeCount = res.activeCount;
+                    _this.qualifiedActiveCount = res.qualifiedActiveCount;
                     _this.accountRS = SSO.accountRS;
                     for(let t of res.generators){
                         if(t.accountRS === SSO.accountRS){

@@ -43,7 +43,7 @@ public class Guard {
     /**
      * 若读取配置为空，则使用默认配置 * 放大倍率
      */
-    public static final int MULTIPLE = 2;
+    private static final int MULTIPLE = 2;
     /**
      * Guard策略配置
      */
@@ -56,18 +56,24 @@ public class Guard {
     private static Integer threshold = 0;
     private static final Integer ONE_HOUR = 1000 * 60 * 60;
     private static final Integer FIVE_MINUTE = 1000 * 60 * 5;
-    private static Long CONNECT_BOOT_INTERVAL = Constants.isDevnet() ? 1000L * 1 : 1000L * 60 * 5;
+    /** Interval of force connect to bootstrap nodes | 强制连接引导节点的间隔 */
+    private static Integer FORCE_CONNECT_BOOTSTRAP_INTERVAL = Constants.isDevnet() ? 1000 * 1 : 1000 * 60 * 5;
+    /**
+     * Whether force connect to BootNode before download blocks from peers | 下载区块前是否强制连接Boot节点
+     * NOTE: BootNode means only one node, bootstrap nodes means all bootstrap nodes in the network
+     */
+    private static Boolean FORCE_CONNECT_BOOT_NODE = Boolean.FALSE;
 
     private static long lastTime = System.currentTimeMillis();
     private static String lastDate = getCurrentDate(new Date());
 
     public static boolean needConnectBoot(long lastForceConnectMS) {
-        return (System.currentTimeMillis() - lastForceConnectMS) > CONNECT_BOOT_INTERVAL;
+        return (System.currentTimeMillis() - lastForceConnectMS) > FORCE_CONNECT_BOOTSTRAP_INTERVAL;
     }
 
     public static void init(Integer frequency, Integer frequencyToBack, Integer maxThreshold,
                             Integer maxTotalConnection, Integer maxViciousCount, Integer openBlacklist,
-                            Boolean openSelfClosingMode, Long bootInterval) {
+                            Boolean openSelfClosingMode, Integer connectBootstrapInterval, Boolean forceConnectBoot) {
         if (frequency != null && frequency.intValue() > 0) {
             FREQUENCY = frequency;
         }
@@ -89,9 +95,16 @@ public class Guard {
         if (openSelfClosingMode != null) {
             SELF_CLOSING_MODE = openSelfClosingMode;
         }
-        if (bootInterval != null && bootInterval.longValue() > 0) {
-            CONNECT_BOOT_INTERVAL = bootInterval * 1000 * 60;
+        if (connectBootstrapInterval != null && connectBootstrapInterval.longValue() > 0) {
+            FORCE_CONNECT_BOOTSTRAP_INTERVAL = connectBootstrapInterval * 1000 * 60;
         }
+        if (forceConnectBoot != null) {
+            FORCE_CONNECT_BOOT_NODE = forceConnectBoot;
+        }
+    }
+
+    public static boolean forceConnectToBootNode() {
+        return FORCE_CONNECT_BOOT_NODE;
     }
 
     /**
@@ -136,6 +149,13 @@ public class Guard {
     }
 
     public static void updateSelfClosingPeer(String peerHost, String reason) {
+        // devnet off guard
+        if ("127.0.0.1".equals(peerHost)
+                || "localhost".equals(peerHost)
+                || Constants.isDevnet() ? true : internalIp(peerHost)) {
+            // don't guard the local request
+            return;
+        }
         if (!SELF_CLOSING_MODE) {
             return;
         }
@@ -155,7 +175,6 @@ public class Guard {
         if (!SELF_CLOSING_MAP.containsKey(peerHost)) {
             return;
         }
-
         JSONObject detail = SELF_CLOSING_MAP.get(peerHost);
         int closingStarTime = detail.getInteger(CLOSING_KEY_TIME);
         if (closingStarTime > 0
@@ -236,9 +255,10 @@ public class Guard {
             if (FREQUENCY == -1 || !isOpen()) {
                 return;
             }
+            // devnet off guard
             if ("127.0.0.1".equals(host)
                     || "localhost".equals(host)
-                    || Constants.isDevnet() ? false : internalIp(host)) {
+                    || Constants.isDevnet() ? true : internalIp(host)) {
                 // don't guard the local request
                 return;
             }

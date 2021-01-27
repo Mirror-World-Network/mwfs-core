@@ -406,6 +406,9 @@ var NRS = (function (NRS, $, undefined) {
                 NRS.addToConsole(this.url, this.type, this.data, response);
             }
             addAddressData(data);
+            // if (requestType === "setAccountInfo") {
+            //     debugger
+            // }
             if (secretPhrase && response.unsignedTransactionBytes && !data.doNotSign && !response.errorCode && !response.error) {
                 var publicKey = NRS.generatePublicKey(secretPhrase);
                 var signature = NRS.signBytes(response.unsignedTransactionBytes, converters.stringToHexString(secretPhrase));
@@ -732,7 +735,7 @@ var NRS = (function (NRS, $, undefined) {
                 pos += 2;
                 transaction.description = converters.byteArrayToString(byteArray, pos, length);
                 pos += length;
-                if (transaction.name !== data.name || transaction.description !== data.description) {
+                if (transaction.name !== data.name || data.description !== undefined && transaction.description !== data.description) {
                     return false;
                 }
                 break;

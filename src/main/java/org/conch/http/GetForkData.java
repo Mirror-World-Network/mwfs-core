@@ -21,57 +21,54 @@
 
 package org.conch.http;
 
-import org.conch.mint.Generator;
+import com.alibaba.fastjson.JSON;
+import org.apache.commons.lang3.StringUtils;
+import org.conch.Conch;
+import org.conch.account.Account;
+import org.conch.chain.Block;
+import org.conch.common.Constants;
+import org.conch.db.DbIterator;
+import org.conch.db.DbUtils;
+import org.conch.http.biz.domain.ForkObj;
+import org.conch.http.biz.domain.Peer;
+import org.conch.peer.Peers;
+import org.conch.util.Convert;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONStreamAware;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.*;
 
+/**
+ * GetForkData
+ *
+ * @author bowen
+ * @date 2021/1/5
+ */
 
-public final class StopForging extends APIServlet.APIRequestHandler {
+public class GetForkData extends APIServlet.APIRequestHandler {
 
-    static final StopForging instance = new StopForging();
+    enum Level {
+        // 18
+        SMALL,
+        // 144
+        MEDIUM,
+        // 432
+        LONG
+    }
 
-    private StopForging() {
-        super(new APITag[] {APITag.FORGING}, "secretPhrase", "adminPassword");
+    static final GetForkData instance = new GetForkData();
+
+    private GetForkData() {
+        super(new APITag[] {APITag.BLOCKS});
     }
 
     @Override
     protected JSONStreamAware processRequest(HttpServletRequest req) throws ParameterException {
-
-        StartForging startForging = StartForging.instance;
-        String pr = null;
-        try {
-            pr = startForging.verifySignature(req);
-        } catch (Exception e) {
-            return JSONResponses.error(e.getMessage());
-        }
         JSONObject response = new JSONObject();
-        if (pr != null) {
-            Generator generator = Generator.stopMining(pr);
-            response.put("foundAndStopped", generator != null);
-            response.put("forgersCount", Generator.getGeneratorCount());
-        } else {
-            API.verifyPassword(req);
-            int count = Generator.stopMining();
-            response.put("stopped", count);
-        }
+        response.put("forkObjs", JSON.toJSON(Peers.getForkObjMap().values()));
         return response;
-    }
-
-    @Override
-    protected boolean requirePost() {
-        return true;
-    }
-
-    @Override
-    protected boolean allowRequiredBlockParameters() {
-        return false;
-    }
-
-    @Override
-    protected boolean requireFullClient() {
-        return true;
     }
 
 }

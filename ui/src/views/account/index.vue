@@ -1,13 +1,13 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div>
         <div>
-            <!--            <el-row v-if="openApiProxy" class="notice-container">-->
-            <!--                <el-col :span="24">-->
-            <!--                    <div class="notice" style="background: #ffffff">-->
-            <!--                        <div><a>{{$t('sso.light_client')}}</a></div>-->
-            <!--                    </div>-->
-            <!--                </el-col>-->
-            <!--            </el-row>-->
+            <el-row v-if="nonePublicKeyHint" class="notice-container">
+                <el-col :span="24">
+                    <div class="notice" style="background: #ffffff">
+                        <div><a>{{$t('account.account_inactive')}}</a></div>
+                    </div>
+                </el-col>
+            </el-row>
             <div class="block_account mb20">
                 <p class="block_title">
                     <img src="../../assets/img/account.svg"/>
@@ -1087,6 +1087,7 @@ export default {
             this.$t('rules.mustRequired')
         );
         return {
+            nonePublicKeyHint: false,
             isDisable: false,
             isMobile: false,
             //dialog
@@ -1449,6 +1450,7 @@ export default {
             }
 
             const _this = this;
+            let publicKey = null;
             _this.getAccount(_this.accountInfo.accountRS).then(res => {
                 _this.accountInfo.account = res.account;
                 _this.accountInfo.balanceNQT = res.balanceNQT;
@@ -1457,8 +1459,8 @@ export default {
                 _this.accountInfo.frozenBalanceNQT = res.frozenBalanceNQT;
                 _this.accountInfo.guaranteedBalanceNQT = res.guaranteedBalanceNQT;
                 _this.accountInfo.unconfirmedBalanceNQT = res.unconfirmedBalanceNQT;
-                if (!res.publicKey) {
-                    _this.$message.warning(_this.$t("account.account_inactive"));
+                if (res.publicKey != null) {
+                    publicKey = res.publicKey;
                 }
                 if (res.pocScore != null) {
                     _this.accountInfo.pocScore = res.pocScore.total;
@@ -1485,7 +1487,13 @@ export default {
             _this.$global.setBlockchainState(_this).then(res => {
                 _this.blockchainState = res.data;
                 _this.getLatestHubVersion();
+            }).then(() => {
+                _this.nonePublicKeyHint = false;
+                if (publicKey == null && !SSO.downloadingBlockchain && _this.blockchainState.blockchainState == "UP_TO_DATE") {
+                    _this.nonePublicKeyHint = false;
+                }
             });
+
             // SSO.getState();
             _this.$global.getUserConfig(_this).then(res => {
                 _this.hubsetting.address = res["sharder.NATServiceAddress"];
@@ -3113,13 +3121,17 @@ export default {
             })*/
             SSO.setAccountInfo(formData, function (res) {
                 console.log("res", res);
-                if (typeof res.data.errorDescription === "undefined") {
+                if (typeof res.errorDescription === "undefined") {
                     _this.$message.success(_this.$t('notification.modify_success'));
                     _this.accountInfo.name = res.data.transactionJSON.attachment.name;
                     _this.isShowName = true;
                     _this.temporaryName = "";
                 } else {
-                    _this.$message.error(res.data.errorDescription);
+                    if (res.errorDescription.indexOf("$.t") != -1) {
+                        _this.$message.error(_this.$global.escape2Html(_this.$t(res.errorDescription.slice(3))));
+                    } else {
+                        _this.$message.error(_this.$global.escape2Html(res.errorDescription));
+                    }
                     _this.accountInfo.name = "";
                     _this.isShowName = true;
                 }
@@ -3623,7 +3635,7 @@ export default {
         margin-bottom: 20px;
         text-align: center;
         font-size: 16px;
-        font-weight: 600;
+        font-weight: 400;
         color: #3fb09a;
         line-height: 150%;
         border-radius: 4px;

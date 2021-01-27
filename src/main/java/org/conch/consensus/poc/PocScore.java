@@ -199,7 +199,7 @@ public class PocScore implements Serializable {
      * - own the MW
      */
     public boolean qualifiedMiner(){
-        if(this.ssScore.signum() >= 0 
+        if(this.ssScore.signum() >= 0
         && this.ssScore.longValue() >= 0L
         && total().signum() > 0){
             return true;

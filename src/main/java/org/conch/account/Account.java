@@ -46,6 +46,7 @@ import org.conch.chain.CheckSumValidator;
 import org.conch.common.ConchException;
 import org.conch.common.Constants;
 import org.conch.consensus.genesis.SharderGenesis;
+import org.conch.consensus.reward.RewardCalculator;
 import org.conch.crypto.Crypto;
 import org.conch.crypto.EncryptedData;
 import org.conch.db.Db;
@@ -861,10 +862,11 @@ public final class Account {
                         }
                     }
                     PreparedStatement pstmtUpdate = con.prepareStatement("INSERT INTO ACCOUNT_GUARANTEED_BALANCE (ACCOUNT_ID,"
-                            + " ADDITIONS, HEIGHT) VALUES (?, ?, ?)");
+                            + " ADDITIONS, HEIGHT, LATEST) VALUES (?, ?, ?, ?)");
                     pstmtUpdate.setLong(1, resultSetCache.getLong("ACCOUNT_ID"));
                     pstmtUpdate.setLong(2, resultSetCache.getLong("ADDITIONS"));
                     pstmtUpdate.setInt(3, resultSetCache.getInt("HEIGHT"));
+                    pstmtUpdate.setBoolean(4, false);
                     pstmtUpdate.executeUpdate();
                 }
 
@@ -1658,7 +1660,9 @@ public final class Account {
             this.publicKey = publicKeyTable.get(accountDbKeyFactory.newKey(this));
         }
 
-        if (this.publicKey == null || this.publicKey.publicKey == null) {
+        // adding height judgment logic, not check the account publicKey
+        // TODO Network reset turn off the judgment
+        if (height <= RewardCalculator.NETWORK_ROBUST_PHASE && this.publicKey == null || this.publicKey.publicKey == null) {
             return 0;
         }
 
@@ -2670,8 +2674,10 @@ public final class Account {
                 int workHeight = workHeightRs.getInt("height");
                 int floorHeight = heightRs.next() ? heightRs.getInt("height") : 0;
                 //Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
-
-                int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
+                int ceilingHeight = workHeight - dif;
+//                if (workHeight - floorHeight > Constants.SYNC_BLOCK_NUM) {
+//                    ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
+//                }
 
                 if (workHeight - floorHeight < dif || ceilingHeight > workHeight) {
 //                    return;
@@ -2753,7 +2759,10 @@ public final class Account {
                 int floorHeight = heightRs.next() ? heightRs.getInt("height") : 0;
                 //Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
 
-                int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
+                int ceilingHeight = workHeight - dif;
+//                if (workHeight - floorHeight > Constants.SYNC_BLOCK_NUM) {
+//                    ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM - dif;
+//                }
                 if (workHeight - floorHeight < dif || ceilingHeight > workHeight) {
 //                    return;
                     continue;
@@ -2828,7 +2837,10 @@ public final class Account {
                 int floorHeight = heightRs.next() ? heightRs.getInt("height") : 0;
                 //Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
 
-                int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
+                int ceilingHeight = workHeight - dif;
+//                if (workHeight - floorHeight > Constants.SYNC_BLOCK_NUM) {
+//                    ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
+//                }
 
                 if (workHeight - floorHeight < dif || ceilingHeight > workHeight) {
 //                    return;
@@ -2910,7 +2922,10 @@ public final class Account {
                 int workHeight = workHeightRs.getInt("height");
                 int floorHeight = heightRs.next() ? heightRs.getInt("height") : 0;
                 //Logger.logDebugMessage("table " + targetTable + " sync block height:" + floorHeight);
-                int ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
+                int ceilingHeight = workHeight - dif;
+//                if (workHeight - floorHeight > Constants.SYNC_BLOCK_NUM) {
+//                    ceilingHeight = floorHeight + Constants.SYNC_BLOCK_NUM;
+//                }
 
                 if (workHeight - floorHeight < dif || ceilingHeight > workHeight) {
 //                    return;

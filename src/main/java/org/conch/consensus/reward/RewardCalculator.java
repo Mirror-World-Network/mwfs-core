@@ -9,7 +9,9 @@ import org.conch.account.Account;
 import org.conch.account.AccountLedger;
 import org.conch.chain.Block;
 import org.conch.chain.BlockDb;
+import org.conch.common.ConchException;
 import org.conch.common.Constants;
+import org.conch.consensus.poc.PocCalculator;
 import org.conch.consensus.poc.PocHolder;
 import org.conch.consensus.poc.PocScore;
 import org.conch.db.Db;
@@ -30,6 +32,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 
 
@@ -46,6 +49,8 @@ public class RewardCalculator {
     private enum RewardDef {
         BLOCK_REWARD(1333 * Constants.ONE_SS),
         CROWD_MINERS_REWARD(667 * Constants.ONE_SS),
+        ROBUST_PHASE_CROWD_MINERS_REWARD(9 * Constants.ONE_SS / 10),
+        ROBUST_PHASE_BLOCK_REWARD(1 * Constants.ONE_SS),
         STABLE_PHASE_BLOCK_REWARD(1 * Constants.ONE_SS),
         STABLE_PHASE_CROWD_MINERS_REWARD(1 * Constants.ONE_SS / 2);
 
@@ -58,12 +63,21 @@ public class RewardCalculator {
         RewardDef(long amount) {
             this.amount = amount;
         }
-        
+
     }
 
-    // Halve height, -1 means close halve
+    /**
+     * Halve height, -1 means close halve
+     */
     private static final int HALVE_COUNT = -1;
-    public static final int NETWORK_STABLE_PHASE = 2008; // Estimated stable height after network reset
+    /**
+     * Estimated stable height after network reset
+     */
+    public static final int NETWORK_STABLE_PHASE = Constants.isDevnet() ? 5 : 2008;
+    /**
+     * Estimated robust height after network reset
+     */
+    public static final int NETWORK_ROBUST_PHASE = Constants.isDevnet() ? 10 : 11111;
     /**
      * how much one block reward
      * @return
@@ -82,8 +96,11 @@ public class RewardCalculator {
         // No block rewards in the miner joining phase
         if(height <= NETWORK_STABLE_PHASE) {
             return RewardDef.STABLE_PHASE_BLOCK_REWARD.getAmount();
+        } else if (height <= NETWORK_ROBUST_PHASE) {
+            return RewardDef.BLOCK_REWARD.getAmount();
+        } else {
+            return RewardDef.ROBUST_PHASE_BLOCK_REWARD.getAmount();
         }
-        return RewardDef.BLOCK_REWARD.getAmount();
     }
 
     public static long crowdMinerReward(int height){
@@ -91,8 +108,10 @@ public class RewardCalculator {
         || LocalDebugTool.isLocalDebugAndBootNodeMode){
             if(height <= NETWORK_STABLE_PHASE) {
                 return RewardDef.STABLE_PHASE_CROWD_MINERS_REWARD.getAmount();
-            }else{
+            } else if (height <= NETWORK_ROBUST_PHASE) {
                 return RewardDef.CROWD_MINERS_REWARD.getAmount();
+            } else {
+                return RewardDef.ROBUST_PHASE_CROWD_MINERS_REWARD.getAmount();
             }
         }
         return 0L;
@@ -225,21 +244,22 @@ public class RewardCalculator {
 
         HashMap<Long, Long> crowdMinerPocScoreMap = Maps.newHashMap();
         // read the qualified miner list
-        Map<Long, CertifiedPeer>  certifiedPeers = Conch.getPocProcessor().getCertifiedPeers();
-        if(certifiedPeers == null || certifiedPeers.size() == 0) {
+        Map<Long, CertifiedPeer> certifiedPeers = Conch.getPocProcessor().getCertifiedPeers();
+        if (certifiedPeers == null || certifiedPeers.size() == 0) {
             return crowdMinerPocScoreMap;
         }
-
+        long startMS = System.currentTimeMillis();
+        Logger.logDebugMessage("Start to generate crow miner poc-score map [miner size=%d]", certifiedPeers.size());
         // generate the poc score map
-        for(CertifiedPeer certifiedPeer : certifiedPeers.values()){
+        for (CertifiedPeer certifiedPeer : certifiedPeers.values()) {
             // only reward once for same miner
-            if(exceptAccounts != null
-            && exceptAccounts.contains(certifiedPeer.getBoundAccountId())){
+            if (exceptAccounts != null
+                    && exceptAccounts.contains(certifiedPeer.getBoundAccountId())) {
                 continue;
             }
             // qualified miner judgement
             Account declaredAccount = Account.getAccount(certifiedPeer.getBoundAccountId());
-            if(declaredAccount == null) {
+            if (declaredAccount == null) {
                 continue;
             }
 
@@ -256,14 +276,41 @@ public class RewardCalculator {
 
             // poc score judgement
             PocScore pocScore = PocHolder.getPocScore(height, declaredAccount.getId());
-            if(pocScore == null || pocScore.total().longValue() <= 0) {
+            if (pocScore == null || pocScore.total().longValue() <= 0) {
                 continue;
             }
-
             crowdMinerPocScoreMap.put(declaredAccount.getId(), pocScore.total().longValue());
         }
-
+        long usedTimeMS = System.currentTimeMillis() - startMS;
+        Logger.logDebugMessage("Finish generate crow miner poc-score map[used time≈%dS]", usedTimeMS / 1000);
         return crowdMinerPocScoreMap;
+    }
+
+    /**
+     * Total capacity of qualified miner hardware
+     * @return
+     * @param height
+     * @param boundAccountList
+     */
+    public static String crowdMinerHardwareCapacity(int height, List<Long> boundAccountList) {
+        // TODO add cache, per 10min cache once
+        Long crowdMinerHardwareScoreTotal = 0L;
+        if (boundAccountList != null) {
+            // read the qualified miner list
+            for (Long boundAccountId : boundAccountList) {
+                // poc score judgement
+                PocScore pocScore = PocHolder.getPocScore(height, boundAccountId);
+                crowdMinerHardwareScoreTotal += pocScore.getHardwareScore().longValue();
+            }
+        } else {
+            // generate the poc score map
+            for(Long boundAccountId : Conch.getPocProcessor().getCertifiedPeers().keySet()){
+                // poc score judgement
+                PocScore pocScore = PocHolder.getPocScore(height, boundAccountId);
+                crowdMinerHardwareScoreTotal += pocScore.getHardwareScore().longValue();
+            }
+        }
+        return PocCalculator.hardwareCapacity(new BigInteger(crowdMinerHardwareScoreTotal.toString()));
     }
 
     /**
@@ -275,7 +322,7 @@ public class RewardCalculator {
      *
      * @param tx coinbase tx of block at the settlement height
      */
-    private static boolean checkAndSettleCrowdMinerRewards(Transaction tx) {
+    private static boolean checkAndSettleCrowdMinerRewards(Transaction tx) throws ConchException.StopException {
         if (!Db.db.isInTransaction()) {
             throw new IllegalStateException("RewardCalculator#checkAndSettleCrowdMinerRewards method should in a " +
                     "transaction, open the tx before call this method");
@@ -369,6 +416,9 @@ public class RewardCalculator {
                 Logger.logDebugMessage("Not exist crowd miners can't distribute the rewards [%s]", settlementHeight, "", details, tail);
             }
         } catch (Exception e) {
+            if (e instanceof ConchException.StopException) {
+                throw e;
+            }
             Logger.logErrorMessage("setCrowdMinerReward occur error", e);
             throw new RuntimeException("Distribute rewards error");
         }
@@ -556,7 +606,7 @@ public class RewardCalculator {
      * @param stageTwo true - stage two; false - stage one
      * @return
      */
-    public static long blockRewardDistribution(Transaction tx, boolean stageTwo) {
+    public static long blockRewardDistribution(Transaction tx, boolean stageTwo) throws ConchException.StopException {
         Attachment.CoinBase coinBase = (Attachment.CoinBase) tx.getAttachment();
         Account senderAccount = Account.getAccount(tx.getSenderId());
         Account minerAccount = Account.getAccount(coinBase.getCreator());
@@ -564,7 +614,7 @@ public class RewardCalculator {
         rewardCalStartMS = System.currentTimeMillis();
 
         String stage = stageTwo ? "Two" : "One";
-        // Crowd Miner Reward
+        // Mining Reward
         long miningRewards =  tx.getAmountNQT();
         Map<Long, Long> crowdMiners = Maps.newHashMap();
         boolean crowdRewardsDistributed = false;
