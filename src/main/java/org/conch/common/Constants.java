@@ -82,6 +82,7 @@ public final class Constants {
     public static final boolean isOffline = Conch.getBooleanProperty("sharder.isOffline");
     public static final boolean isLightClient = Conch.getBooleanProperty("sharder.isLightClient");
     public static final boolean isStorageClient = Conch.getBooleanProperty("sharder.storage.enable");
+    public static final boolean isOpenLessorMode = Conch.getBooleanProperty("sharder.lessorMode.enable", false);
 
     public static final List<String> bootNodesHost = parseBootNodesHost();
     public static final String bootNodeHost = parseBootNodeHost();
@@ -257,7 +258,7 @@ public final class Constants {
     public static final String OSS_PREFIX = "https://mwfs.oss-cn-shenzhen.aliyuncs.com/";
 
     //syn
-    public static final int SYNC_BLOCK_NUM = Conch.getIntProperty("sharder.syncblocknum");
+    public static final int SYNC_BLOCK_NUM = Conch.getIntProperty("sharder.sync.blockNum");
     public static final int SYNC_CACHE_BLOCK_NUM = Conch.getIntProperty("sharder.sync.cacheblocknum");
     public static final int SYNC_WORK_BLOCK_NUM = Conch.getIntProperty("sharder.sync.workblocknum");
     public static final Boolean SYNC_BUTTON = Conch.getBooleanProperty("sharder.sync.button", false);

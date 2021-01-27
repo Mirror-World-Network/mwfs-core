@@ -265,7 +265,8 @@ public class RewardCalculator {
 
             long holdingMwAmount = 0;
             try{
-                holdingMwAmount = declaredAccount.getEffectiveBalanceSS(height);
+//                holdingMwAmount = declaredAccount.getEffectiveBalanceSS(height);
+                holdingMwAmount = declaredAccount.getConfirmedEffectiveBalanceSS(height);
             }catch(Exception e){
                 Logger.logWarningMessage("[QualifiedMiner] not valid miner because can't get balance of account %s at height %d, caused by %s",  declaredAccount.getRsAddress(), height, e.getMessage());
                 holdingMwAmount = 0;
