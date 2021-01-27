@@ -1084,8 +1084,10 @@ public final class Conch {
         try {
             pause();
 
+
             //            Logger.logInfoMessage("Clear the all logs");
             //            FileUtil.clearAllLogs();
+
 
             // java binary
             String java = System.getProperty("java.home") + "/bin/java";
