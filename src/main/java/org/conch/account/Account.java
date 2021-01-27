@@ -72,6 +72,8 @@ import org.conch.util.Logger;
 @SuppressWarnings({"UnusedDeclaration", "SuspiciousNameCombination"})
 public final class Account {
 
+    private static final int NONE_PUBLICKEY_ACTIVE_HEIGHT = 12500;
+
     public enum Event {
         BALANCE, UNCONFIRMED_BALANCE, ASSET_BALANCE, UNCONFIRMED_ASSET_BALANCE, CURRENCY_BALANCE, UNCONFIRMED_CURRENCY_BALANCE,
         LEASE_SCHEDULED, LEASE_STARTED, LEASE_ENDED, SET_PROPERTY, DELETE_PROPERTY, POC
@@ -1687,8 +1689,7 @@ public final class Account {
         }
 
         // adding height judgment logic, not check the account publicKey
-        // TODO Network reset turn off the judgment
-        if (height <= RewardCalculator.NETWORK_ROBUST_PHASE && this.publicKey == null || this.publicKey.publicKey == null) {
+        if (height <= NONE_PUBLICKEY_ACTIVE_HEIGHT && (this.publicKey == null || this.publicKey.publicKey == null)) {
             return 0;
         }
 
