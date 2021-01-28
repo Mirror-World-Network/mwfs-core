@@ -258,7 +258,7 @@ public final class Constants {
     public static final String OSS_PREFIX = "https://mwfs.oss-cn-shenzhen.aliyuncs.com/";
 
     //syn
-    public static final int SYNC_BLOCK_NUM = Conch.getIntProperty("sharder.syncblocknum");
+    public static final int SYNC_BLOCK_NUM = Conch.getIntProperty("sharder.sync.blockNum");
     public static final int SYNC_CACHE_BLOCK_NUM = Conch.getIntProperty("sharder.sync.cacheblocknum");
     public static final int SYNC_WORK_BLOCK_NUM = Conch.getIntProperty("sharder.sync.workblocknum");
     public static final Boolean SYNC_BUTTON = Conch.getBooleanProperty("sharder.sync.button", false);
@@ -266,7 +266,7 @@ public final class Constants {
     public static final Boolean HISTORY_RECORD_CLEAR = Conch.getBooleanProperty("sharder.historyRecordClear", true);
     public static Boolean MANUAL_SYNC_BUTTON = Conch.getBooleanProperty("sharder.sync.manualButton", false);
     public static Boolean GENERATE_EXPIRED_FILE_BUTTON = Conch.getBooleanProperty("sharder.generateExpiredFileButton"
-            , false);
+            , true);
 
     /**
      * Whether reach crowd reward height
