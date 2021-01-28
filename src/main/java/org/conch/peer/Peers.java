@@ -607,7 +607,7 @@ public final class Peers {
 
         @Override
         public void run() {
-
+            System.out.println("ThreadId = " + Thread.currentThread().getId() + " | " + System.currentTimeMillis());
             try {
                 try {
 
@@ -727,6 +727,11 @@ public final class Peers {
         return forkObjMap;
     }
 
+    /**
+     * TODO
+     * 收集来自引导节点peersBoot的数据
+     * - 进行整体处理，提供API服务
+     */
     private static final Runnable generateForkDataThread = () -> {
         try {
             forkObjMap.clear();
@@ -1732,6 +1737,14 @@ public final class Peers {
             json.put("lastBlockTimestamp", Convert.dateFromEpochTime(lastBlock.getTimestamp()));
             json.put("currentFork", ForceConverge.currentFork);
         }
+        /**
+         * TODO
+         * 作为普通节点，主动汇报
+         * 判断引导节点 或 配置文件默认连通节点 peersBoot
+         * - if is peersBoot, add forkBlocks(default 144 blocks)
+         * - else is null
+         * ps: 目前调用频率: 600s < P < 620s
+         */
         return json;
     }
     
