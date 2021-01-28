@@ -277,6 +277,7 @@ public enum APIEnum {
     GET_USERCONFIG("getUserConfig", GetUserConfig.INSTANCE),
     GET_LATEST_COS_VERSION("getLatestCosVersion", GetLatestCosVersion.INSTANCE),
     FORCE_CONVERGE("forceConverge", ForceConverge.INSTANCE),
+    HEART_BEAT("heartBeat",HeartBeat.INSTANCE),
 
     TRIM_DERIVED_TABLES("trimDerivedTables", TrimDerivedTables.instance),
     HASH("hash", Hash.instance),

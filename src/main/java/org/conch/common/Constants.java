@@ -453,4 +453,5 @@ public final class Constants {
     public static final boolean hubLinked = Conch.getBooleanProperty("sharder.HubBind");
     public static final boolean initFromArchivedDbFile = Conch.getBooleanProperty("sharder.initFromArchivedDbFile");
 
+    public static final int HeartBeat_Time = Conch.getIntProperty("sharder.heartBeatTime",5*60*1000);
 }
