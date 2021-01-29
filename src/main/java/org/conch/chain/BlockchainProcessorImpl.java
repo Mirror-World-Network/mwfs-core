@@ -1978,10 +1978,12 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             throws TransactionNotAcceptedException, ConchException.StopException {
         try {
             isProcessingBlock = true;
+
+            if(block.getHeight() >= Constants.MINER_REMOVE_HIGHT){
+                checkMiner(block);
+            }
+
             // unconfirmed balance update
-
-            checkMiner(block);
-
             for (TransactionImpl transaction : block.getTransactions()) {
                 if (!transaction.applyUnconfirmed()) {
                     if (CheckSumValidator.isKnownIgnoreTx(transaction.getId())) {
@@ -2192,6 +2194,14 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     crowdMiners = coinBase.getCrowdMiners();
                     break;
                 }
+            }
+        }
+
+        for(Long crowdMinerId : crowdMiners.keySet()){
+            CertifiedPeer certifiedPeer = Conch.getPocProcessor().getCertifiedPeers().get(crowdMinerId);
+            if(certifiedPeer!=null && certifiedPeer.getDeleteHeight() > block.getHeight()){
+                certifiedPeer.setDeleteHeight(0);
+                PocDb.saveOrUpdatePeer(certifiedPeer);
             }
         }
 

@@ -251,8 +251,12 @@ public class RewardCalculator {
 
         // generate the poc score map
         for(CertifiedPeer certifiedPeer : certifiedPeers.values()){
-            //TODO
-            
+            if(height >= Constants.MINER_REMOVE_HIGHT){
+                if(certifiedPeer.getDeleteHeight() !=0 && certifiedPeer.getDeleteHeight() <height){
+                    continue;
+                }
+            }
+
             // only reward once for same miner
             if(exceptAccounts != null
             && exceptAccounts.contains(certifiedPeer.getBoundAccountId())){

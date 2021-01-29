@@ -468,4 +468,5 @@ public final class Constants {
     public static final boolean hubLinked = Conch.getBooleanProperty("sharder.HubBind");
     public static final boolean initFromArchivedDbFile = Conch.getBooleanProperty("sharder.initFromArchivedDbFile");
 
+    public static final int MINER_REMOVE_HIGHT = Conch.getIntProperty("sharder.minerRemoveHight",14400);
 }
