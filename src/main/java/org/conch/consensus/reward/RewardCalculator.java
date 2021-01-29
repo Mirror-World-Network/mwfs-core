@@ -251,6 +251,8 @@ public class RewardCalculator {
 
         // generate the poc score map
         for(CertifiedPeer certifiedPeer : certifiedPeers.values()){
+            //TODO
+            
             // only reward once for same miner
             if(exceptAccounts != null
             && exceptAccounts.contains(certifiedPeer.getBoundAccountId())){
