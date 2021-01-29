@@ -28,6 +28,8 @@ import org.conch.util.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONStreamAware;
 
+import java.util.List;
+
 final class GetInfo extends PeerServlet.PeerRequestHandler {
 
     static final GetInfo instance = new GetInfo();
@@ -124,14 +126,15 @@ final class GetInfo extends PeerServlet.PeerRequestHandler {
         if (peerImpl.getServices() != origServices) {
             Peers.notifyListeners(peerImpl, Peers.Event.CHANGED_SERVICES);
         }
-        /**
-         * TODO
-         * 作为引导节点，处理forkBlocks
-         * - 调取相关方法进行处理
-         * - a.汇报至分叉处理节点 peer-fork
-         * - b.由分叉处理节点调取本节点时，将fork数据带上
-         */
-
+        // bootNode processing forkBlocks
+        if (request.get("forkBlocks") != null && Peers.isCollectForkNode(Conch.getMyAddress())) {
+            List<JSONObject> forkBlocks = (List<JSONObject>) request.get("forkBlocks");
+            Peers.processBlocksToForkObj(peerImpl.getAnnouncedAddress(), forkBlocks);
+        }
+        // ForkData is sent to handlerForkNode when it calls the API
+        if (request.get("handlerForkNode") != null && (boolean) request.get("handlerForkNode") == true && Peers.isCollectForkNode(Conch.getMyAddress())) {
+            return Peers.getMyPeerInfoResponseToProcessForkNode();
+        }
         return Peers.getMyPeerInfoResponse();
 
     }

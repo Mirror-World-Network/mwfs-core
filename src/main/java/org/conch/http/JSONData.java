@@ -479,29 +479,10 @@ public final class JSONData {
         JSONObject json = new JSONObject();
         json.put("block", block.getStringId());
         json.put("height", block.getHeight());
-        putAccount(json, "generator", block.getGeneratorId());
-//        json.put("generatorPublicKey", Convert.toHexString(block.getGeneratorPublicKey()));
+        json.put("generatorRS", Account.rsAccount(block.getGeneratorId()));
         json.put("timestamp", block.getTimestamp());
-//        json.put("numberOfTransactions", block.getTransactions().size());
-//        json.put("totalAmountNQT", String.valueOf(block.getTotalAmountNQT()));
-//        json.put("totalFeeNQT", String.valueOf(block.getTotalFeeNQT()));
-//        json.put("payloadLength", block.getPayloadLength());
         json.put("version", block.getVersion());
-//        json.put("baseTarget", Long.toUnsignedString(block.getBaseTarget()));
         json.put("cumulativeDifficulty", block.getCumulativeDifficulty().toString());
-//        json.put("hasRewardDistribution", block.getRewardDistributionHeight()>0);
-        if (block.getPreviousBlockId() != 0) {
-            json.put("previousBlock", Long.toUnsignedString(block.getPreviousBlockId()));
-        }
-        if (block.getNextBlockId() != 0) {
-            json.put("nextBlock", Long.toUnsignedString(block.getNextBlockId()));
-        }
-//        json.put("payloadHash", Convert.toHexString(block.getPayloadHash()));
-//        json.put("generationSignature", Convert.toHexString(block.getGenerationSignature()));
-        if (block.getVersion() > 1) {
-//            json.put("previousBlockHash", Convert.toHexString(block.getPreviousBlockHash()));
-        }
-//        json.put("blockSignature", Convert.toHexString(block.getBlockSignature()));
         return json;
     }
 

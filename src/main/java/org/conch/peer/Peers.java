@@ -60,6 +60,8 @@ import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
 
+import static org.conch.common.Constants.bootNodesHost;
+
 /**
  * @author ben-xy
  */
@@ -70,6 +72,24 @@ public final class Peers {
         DOWNLOADED_VOLUME, UPLOADED_VOLUME, WEIGHT,
         ADDED_ACTIVE_PEER, CHANGED_ACTIVE_PEER,
         NEW_PEER, ADD_INBOUND, REMOVE_INBOUND, CHANGED_SERVICES
+    }
+    public enum forkBlocksLevel {
+        // 18
+        SMALL(18),
+        // 144
+        MEDIUM(144),
+        // 432
+        LONG(432);
+
+        public final int level;
+
+        forkBlocksLevel(int level) {
+            this.level = level;
+        }
+
+        public int getLevel() {
+            return level;
+        }
     }
 
     static final int LOGGING_MASK_EXCEPTIONS = 1;
@@ -84,7 +104,7 @@ public final class Peers {
     static final int readTimeout;
     public static final int blacklistingPeriod;
     static final boolean getMorePeers;
-    static final boolean isOpenForkAnalyze;
+    static final boolean isProcessForkNode;
     // change 20 -> 400, because one block include more than 2000 txs at 2018.11.21
     public static final int MAX_REQUEST_SIZE = 400 * 1024 * 1024;
     public static final int MAX_RESPONSE_SIZE = 400 * 1024 * 1024;
@@ -419,7 +439,7 @@ public final class Peers {
         usePeersDb = Conch.getBooleanProperty("sharder.usePeersDb") && !Constants.isOffline;
         savePeers = usePeersDb && Conch.getBooleanProperty("sharder.savePeers");
         getMorePeers = Conch.getBooleanProperty("sharder.getMorePeers");
-        isOpenForkAnalyze = Conch.getBooleanProperty("sharder.isOpenForkAnalyze");
+        isProcessForkNode = Conch.getBooleanProperty("sharder.isProcessForkNode");
         cjdnsOnly = Conch.getBooleanProperty("sharder.cjdnsOnly");
         ignorePeerAnnouncedAddress = Conch.getBooleanProperty("sharder.ignorePeerAnnouncedAddress");
         if (useWebSockets && useProxy) {
@@ -607,7 +627,6 @@ public final class Peers {
 
         @Override
         public void run() {
-            System.out.println("ThreadId = " + Thread.currentThread().getId() + " | " + System.currentTimeMillis());
             try {
                 try {
 
@@ -719,97 +738,31 @@ public final class Peers {
 
     };
 
-    private static Set<String> EntireNetPeerHosts = Sets.newConcurrentHashSet();
+    public static void appendForkObjMap(Map<String, ForkObj> forkObjMap) {
+        Peers.forkObjMap.putAll(forkObjMap);
+    }
+
     private static Map<String, ForkObj> forkObjMap = Maps.newHashMap();
-    private static int latestNum = Conch.getIntProperty("sharder.numForkBlocks") != 0 ? Conch.getIntProperty("sharder.numForkBlocks") : 144;
 
     public static Map<String, ForkObj> getForkObjMap() {
         return forkObjMap;
     }
 
-    /**
-     * TODO
-     * 收集来自引导节点peersBoot的数据
-     * - 进行整体处理，提供API服务
-     */
+    public static Map<String, ForkObj> getForkObjMapToAPI() {
+        return forkObjMapToAPI;
+    }
+
+    private static Map<String, ForkObj> forkObjMapToAPI = Maps.newHashMap();
+
     private static final Runnable generateForkDataThread = () -> {
         try {
-            forkObjMap.clear();
-            List<String> bootNodesHost = Constants.bootNodesHost;
-            bootNodesHost.add(Conch.getMyAddress());
-
-            // add custom node
-//            bootNodesHost.add("192.168.0.239");
-//            bootNodesHost.add("192.168.0.232");
-//            bootNodesHost.add("192.168.0.238");
-
-            EntireNetPeerHosts.addAll(bootNodesHost);
-            for (String peerHost : bootNodesHost) {
-                if (Conch.getMyAddress().equals(peerHost)) {
-                    continue;
-                }
-                Peer peer = getPeer(peerHost, true);
-                if (peer == null) {
-                    continue;
-                }
-                //[NAT] inject useNATService property to the request params
-                JSONObject request = new JSONObject();
-                request.put("requestType", "getPeers");
-                request.put("notFilter", "true");
-                request.put("useNATService", Peers.isUseNATService());
-                request.put("announcedAddress", Conch.getMyAddress());
-                JSONObject response = peer.send(JSON.prepareRequest(request), Peers.MAX_RESPONSE_SIZE);
-                if (response == null) {
-                    continue;
-                }
-                JSONArray peers = (JSONArray) response.get("peers");
-                if (peers != null && peers.size() > 0) {
-                    for (int i = 0; i < peers.size(); i++) {
-                        String announcedAddress = (String) peers.get(i);
-                        PeerImpl newPeer = findOrCreatePeer(announcedAddress, Peers.isUseNATService(announcedAddress));
-                        if (newPeer != null && !Guard.internalIp(newPeer.getHost())) {
-//                        if (newPeer != null) {
-                            EntireNetPeerHosts.add(newPeer.getHost());
-                        }
-                    }
-                }
-            }
-            JSONObject request = new JSONObject();
-            DbIterator<? extends Block> iterator = null;
-            List<JSONObject> blocks = new JSONArray();
-            try {
-                iterator = Conch.getBlockchain().getBlocks(0, latestNum-1);
-                while (iterator.hasNext()) {
-                    Block block = iterator.next();
-                    if (block.getTimestamp() < 0) {
-                        break;
-                    }
-                    blocks.add(JSONData.forkBlock(block));
-                }
-            }finally {
-                DbUtils.close(iterator);
-            }
-            processBlocksToForkObj(Peers.getMyAddress(), blocks);
-            for (String peerHost : EntireNetPeerHosts) {
-                if (Conch.getMyAddress().equals(peerHost)) {
-                    continue;
-                }
-                Peer peer = Peers.getPeer(peerHost, true);
-                request.put("requestType", "getBlocks");
-                request.put("latestNum", latestNum);
-                JSONObject response = peer.send(JSON.prepareRequest(request), Peers.MAX_RESPONSE_SIZE);
-                if (response == null) {
-                    continue;
-                }
-                Object blocksObj = response.get("blocks");
-                if (blocksObj == null) {
-                    continue;
-                }
-                processBlocksToForkObj(peer.getAnnouncedAddress(), (List<JSONObject>) blocksObj);
-            }
             forkAnalyze();
+            forkObjMap.clear();
         } catch (Exception e) {
             Logger.logDebugMessage("Get fork data process fail");
+        } finally {
+            forkObjMapToAPI.clear();
+            forkObjMapToAPI = forkObjMap;
         }
     };
 
@@ -1096,7 +1049,7 @@ public final class Peers {
             if (Peers.getMorePeers) {
                 ThreadPool.scheduleThread("GetMorePeers", Peers.getMorePeersThread, 20);
             }
-            if (Peers.isOpenForkAnalyze) {
+            if (Peers.isProcessForkNode) {
                 ThreadPool.scheduleThread("GenerateForkData", Peers.generateForkDataThread, 10, TimeUnit.MINUTES);
             }
         }
@@ -1476,7 +1429,7 @@ public final class Peers {
 
 
     private static Map<String,Integer> weightedPeerCountMap = Maps.newConcurrentMap();
-    private static int MAX_CONNECT_CHECK_COUNT = (Constants.bootNodesHost.size() + 3) * 3;
+    private static int MAX_CONNECT_CHECK_COUNT = (bootNodesHost.size() + 3) * 3;
     /**
      *  true: count < 3
      *  false: 3 =< count <= 6
@@ -1737,22 +1690,67 @@ public final class Peers {
             json.put("lastBlockTimestamp", Convert.dateFromEpochTime(lastBlock.getTimestamp()));
             json.put("currentFork", ForceConverge.currentFork);
         }
-        /**
-         * TODO
-         * 作为普通节点，主动汇报
-         * 判断引导节点 或 配置文件默认连通节点 peersBoot
-         * - if is peersBoot, add forkBlocks(default 144 blocks)
-         * - else is null
-         * ps: 目前调用频率: 600s < P < 620s
-         */
         return json;
     }
-    
-    private static void generateMyPeerInfoRequest(Peer.BlockchainState state){
+
+    public static boolean isCollectForkNode(String address) {
+        ArrayList<Object> collectForkNodes = Lists.newArrayList();
+        collectForkNodes.addAll(bootNodesHost);
+        collectForkNodes.add("192.168.0.22");
+        collectForkNodes.add("192.168.0.232");
+        return collectForkNodes.contains(address);
+    }
+
+    /**
+     * - commonNode: report forkBlocks to the designated node (BootNode)
+     * - collectForkNode: return forkObjMap to handlerForkNode
+     * - handlerForkNode: return identification
+     *
+     * Current call frequency = 600s < f < 620s, have check
+     * @param sendToProcessForkNode
+     * @param sendToCollectForkNode
+     * @return
+     */
+    public static JSONObject getForkBlockSummary(boolean sendToProcessForkNode, boolean sendToCollectForkNode){
+        JSONObject json = new JSONObject();
+        if (!isCollectForkNode(Conch.getMyAddress()) && sendToCollectForkNode) {
+            JSONArray blocks = new JSONArray();
+            DbIterator<? extends Block> iterator = null;
+            final int timestamp = 0;
+            try {
+                iterator = Conch.getBlockchain().getBlocks(0, forkBlocksLevel.SMALL.getLevel() - 1);
+                while (iterator.hasNext()) {
+                    Block block = iterator.next();
+                    if (block.getTimestamp() < timestamp) {
+                        break;
+                    }
+                    blocks.add(JSONData.forkBlock(block));
+                }
+            }finally {
+                DbUtils.close(iterator);
+            }
+            json.put("forkBlocks", blocks);
+        } else if (isCollectForkNode(Conch.getMyAddress()) && sendToProcessForkNode){
+            json.put("forkObjMap", Peers.forkObjMap);
+        }
+        if (Peers.isProcessForkNode) {
+            json.put("handlerForkNode", true);
+        }
+
+        return json;
+    }
+
+    /**
+     * if sendNode not handlerForkNode or BootNode, set as false
+     * @param state
+     * @param sendToProcessForkNode
+     * @param sendToCollectForkNode
+     */
+    private static void generateMyPeerInfoRequest(Peer.BlockchainState state, boolean sendToProcessForkNode, boolean sendToCollectForkNode){
         // generate my peer details and update state
         // generate the request and response api
         if (state != currentBlockchainState) {
-            JSONObject myPeerJson = generateMyPeerJson();
+            JSONObject myPeerJson = generateMyPeerJson(sendToProcessForkNode, sendToCollectForkNode);
             myPeerJson.put("blockchainState", state.ordinal());
             myPeerInfoResponse = JSON.prepare(myPeerJson);
 
@@ -1762,11 +1760,16 @@ public final class Peers {
             currentBlockchainState = state;
         }
     }
+
+    public static JSONObject generateMyPeerJson() {
+        return generateMyPeerJson(false, false);
+    }
     
-    public static JSONObject generateMyPeerJson(){
+    public static JSONObject generateMyPeerJson(boolean sendToProcessForkNode, boolean sendToCollectForkNode){
         JSONObject json = new JSONObject(myPeerInfo);
         json.put("peerLoad", getBestPeerLoad().toJson());
         json.putAll(getBlockchainSummary());
+        json.putAll(getForkBlockSummary(sendToProcessForkNode, sendToCollectForkNode));
         return json;
     }
 
@@ -1775,7 +1778,7 @@ public final class Peers {
      * peer info request used to tell my peer info to other peers when connected
      *
      */
-    private static void checkBlockchainStateAndGenerateMyPeerInfoRequest(Boolean setToUpToDate) {
+    private static void checkBlockchainStateAndGenerateMyPeerInfoRequest(Boolean setToUpToDate, boolean sendToProcessForkNode, boolean sendToCollectForkNode) {
         Peer.BlockchainState state = Peer.BlockchainState.LIGHT_CLIENT;
         if(!Constants.isLightClient) {
             
@@ -1799,16 +1802,26 @@ public final class Peers {
             }
         }
         
-        generateMyPeerInfoRequest(state);
+        generateMyPeerInfoRequest(state, sendToProcessForkNode, sendToCollectForkNode);
     }
 
     public static JSONStreamAware getMyPeerInfoRequest() {
-        checkBlockchainStateAndGenerateMyPeerInfoRequest(null);
+        checkBlockchainStateAndGenerateMyPeerInfoRequest(null, false, false);
         return myPeerInfoRequest;
     }
 
     public static JSONStreamAware getMyPeerInfoResponse() {
-        checkBlockchainStateAndGenerateMyPeerInfoRequest(null);
+        checkBlockchainStateAndGenerateMyPeerInfoRequest(null, false, false);
+        return myPeerInfoResponse;
+    }
+
+    public static JSONStreamAware getMyPeerInfoRequestToCollectForkNode() {
+        checkBlockchainStateAndGenerateMyPeerInfoRequest(null, false, true);
+        return myPeerInfoRequest;
+    }
+
+    public static JSONStreamAware getMyPeerInfoResponseToProcessForkNode() {
+        checkBlockchainStateAndGenerateMyPeerInfoRequest(null, true, false);
         return myPeerInfoResponse;
     }
 
@@ -1822,7 +1835,7 @@ public final class Peers {
     }
 
     public static Peer.BlockchainState checkAndUpdateBlockchainState(Boolean forceSetToUpToDate) {
-        checkBlockchainStateAndGenerateMyPeerInfoRequest(forceSetToUpToDate);
+        checkBlockchainStateAndGenerateMyPeerInfoRequest(forceSetToUpToDate, false, false);
         return currentBlockchainState;
     }
 
@@ -1867,7 +1880,7 @@ public final class Peers {
 
         boolean connectedBootNodes = false;
         List<String> needConnectNodes = Lists.newArrayList();
-        for (String nodeHost : Constants.bootNodesHost) {
+        for (String nodeHost : bootNodesHost) {
             if (Conch.matchMyAddress(nodeHost)) {
                 continue;
             }
@@ -1948,6 +1961,7 @@ public final class Peers {
      * @param blocks
      */
     public static void processBlocksToForkObj(String announcedAddress, List<JSONObject> blocks) {
+        Logger.logDebugMessage("Processing forkBlocks of node[%s]", announcedAddress);
         if (blocks.isEmpty()) {
             return;
         }

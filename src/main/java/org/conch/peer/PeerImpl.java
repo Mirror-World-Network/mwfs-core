@@ -43,6 +43,8 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.zip.GZIPInputStream;
 
+import static org.conch.peer.Peers.isCollectForkNode;
+
 final class PeerImpl implements Peer {
     // ip
     private final String host;
@@ -733,7 +735,13 @@ final class PeerImpl implements Peer {
                 }
             }
             // get peer detail
-            JSONObject response = send(Peers.getMyPeerInfoRequest());
+            JSONObject response;
+            if (isCollectForkNode(this.announcedAddress)) {
+                Logger.logDebugMessage("Send peerInfo to collectForkNode[%s]", this.announcedAddress);
+                response = send(Peers.getMyPeerInfoRequestToCollectForkNode());
+            } else {
+                response = send(Peers.getMyPeerInfoRequest());
+            }
             if (response != null) {
                 if (response.get("error") != null) {
                     setState(State.NON_CONNECTED);
@@ -1090,7 +1098,9 @@ final class PeerImpl implements Peer {
         blockSummaryJson.put("lastBlockGenerator", json.get("lastBlockGenerator"));
         blockSummaryJson.put("lastBlockTimestamp", json.get("lastBlockTimestamp"));
         blockSummaryJson.put("currentFork", json.get("currentFork"));
-
+        if (json.get("forkObjMap") != null) {
+            Peers.appendForkObjMap((Map) json.get("forkObjMap"));
+        }
         return this;
     }
 }

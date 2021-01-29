@@ -67,7 +67,7 @@ public class GetForkData extends APIServlet.APIRequestHandler {
     @Override
     protected JSONStreamAware processRequest(HttpServletRequest req) throws ParameterException {
         JSONObject response = new JSONObject();
-        response.put("forkObjs", JSON.toJSON(Peers.getForkObjMap().values()));
+        response.put("forkObjs", JSON.toJSON(Peers.getForkObjMapToAPI().values()));
         return response;
     }
 
