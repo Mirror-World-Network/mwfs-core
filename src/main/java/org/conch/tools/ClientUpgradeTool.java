@@ -58,9 +58,9 @@ public class ClientUpgradeTool {
             try {
                 Conch.pause();
                 fetchAndInstallUpgradePackage(cosVerObj);
-//                if (restart) {
-//                    Conch.restartApplication(null);
-//                }
+                if (restart) {
+                    Conch.restartApplication(null);
+                }
             } catch (IOException e) {
                 Logger.logErrorMessage("Can't fetch and install the latest version " + cosVerObj.getString("version") + ", ABORT the upgrade thread",e);
                 Thread.currentThread().interrupt();
