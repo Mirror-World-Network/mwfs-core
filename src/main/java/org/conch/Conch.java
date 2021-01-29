@@ -809,6 +809,7 @@ public final class Conch {
                 logSystemProperties();
                 runtimeMode.init();
                 Thread secureRandomInitThread = initSecureRandom();
+                setHeartBeatTimer();
                 ForceConverge.init();
                 setServerStatus(ServerStatus.BEFORE_DATABASE, null);
 //                CompactDatabase.checkAndRestore();
@@ -1289,5 +1290,14 @@ public final class Conch {
     }
     public static String getVersion(){ return VERSION; }
     public static String getCosUpgradeDate(){ return ClientUpgradeTool.cosLastUpdateDate; }
+
+    public static void setHeartBeatTimer() {
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
+                Logger.logInfoMessage("[HeartBeat]:cos is working properly");
+            }
+        }, 3*60*1000, Constants.HeartBeat_Time);
+    }
 
 }
