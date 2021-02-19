@@ -738,11 +738,27 @@ public final class Peers {
 
     };
 
-    public static void appendForkObjMap(Map<String, ForkObj> forkObjMap) {
-        Peers.forkObjMap.putAll(forkObjMap);
+    public static void appendForkBlocksMap(Map<String, List<JSONObject>> forkBlocksMap) {
+        Peers.forkBlocksMap.putAll(forkBlocksMap);
+    }
+
+    /**
+     * clean up invalid data
+     * 1. the latest block is more than 3 hours away from the current time
+     * @param entry
+     */
+    private static boolean clearInvalidForkBlocksMap(Map.Entry<String, List<JSONObject>> entry) {
+        JSONObject lastBlock = entry.getValue().get(0);
+        long timestamp =(long) lastBlock.get("timestamp");
+        if (Conch.getEpochTime() - timestamp > 3 * 60 * 60) {
+            forkBlocksMap.remove(entry);
+            return true;
+        }
+        return false;
     }
 
     private static Map<String, ForkObj> forkObjMap = Maps.newHashMap();
+    private static Map<String, List<JSONObject>> forkBlocksMap = Maps.newHashMap();
 
     public static Map<String, ForkObj> getForkObjMap() {
         return forkObjMap;
@@ -757,12 +773,11 @@ public final class Peers {
     private static final Runnable generateForkDataThread = () -> {
         try {
             forkAnalyze();
-            forkObjMap.clear();
         } catch (Exception e) {
-            Logger.logDebugMessage("Get fork data process fail");
+            Logger.logDebugMessage("Generate fork data process fail");
         } finally {
-            forkObjMapToAPI.clear();
             forkObjMapToAPI = forkObjMap;
+            forkObjMap.clear();
         }
     };
 
@@ -1703,8 +1718,8 @@ public final class Peers {
 
     /**
      * - commonNode: report forkBlocks to the designated node (BootNode)
-     * - collectForkNode: return forkObjMap to handlerForkNode
-     * - handlerForkNode: return identification
+     * - collectForkNode: return forkObjMap to processForkNode
+     * - processForkNode: return identification
      *
      * Current call frequency = 600s < f < 620s, have check
      * @param sendToProcessForkNode
@@ -1731,17 +1746,17 @@ public final class Peers {
             }
             json.put("forkBlocks", blocks);
         } else if (isCollectForkNode(Conch.getMyAddress()) && sendToProcessForkNode){
-            json.put("forkObjMap", Peers.forkObjMap);
+            json.put("forkBlocksMap", Peers.forkBlocksMap);
         }
         if (Peers.isProcessForkNode) {
-            json.put("handlerForkNode", true);
+            json.put("processForkNode", true);
         }
 
         return json;
     }
 
     /**
-     * if sendNode not handlerForkNode or BootNode, set as false
+     * if sendNode not processForkNode or BootNode, set as false
      * @param state
      * @param sendToProcessForkNode
      * @param sendToCollectForkNode
@@ -1954,6 +1969,11 @@ public final class Peers {
 
     private static void forkAnalyze() {
         // todo loop all forks, confirm commonBlock, base on commonBlock to analyze fork length
+        for (Map.Entry<String, List<JSONObject>> entry : forkBlocksMap.entrySet()) {
+            if (!clearInvalidForkBlocksMap(entry)) {
+                processBlocksToForkObj(entry.getKey(), entry.getValue());
+            }
+        }
     }
     /**
      * Label different forks based on key
@@ -1978,6 +1998,19 @@ public final class Peers {
          * UI： xy axis height，difficulty， forkName（blockId + Miner）
          * click detail => blockDetail + nodeList
          */
+    }
+
+    /**
+     * save/update any address forkBlocks,new blocks direct replacement of old blocks
+     * @param announcedAddress
+     * @param blocks
+     */
+    public static void saveOrUpdateForkBlocks(String announcedAddress, List<JSONObject> blocks) {
+        Logger.logDebugMessage("SaveOrUpdate forkBlocks of node[%s]", announcedAddress);
+        if (blocks.isEmpty()) {
+            return;
+        }
+        forkBlocksMap.put(announcedAddress, blocks);
     }
 
 }
