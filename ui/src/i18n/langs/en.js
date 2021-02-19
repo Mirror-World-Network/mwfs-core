@@ -107,7 +107,7 @@ const en = {
         'payout': "Payouts",
         'income': "Income",
         'account_inactive': "The account has not yet bound publicKey, create a tx for automatic binding to improve security",
-        'up_to_date': "Update the client to the latest status. Please try again later"
+        'up_to_date': "Blockchain is not up to date, please try again later"
     },
     transaction: {
         'transaction_record': "Transaction Records",

@@ -25,7 +25,7 @@
                     </p>
                     <div class="account_tool">
                         <button class="common_btn imgBtn "
-                                v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}"
+                                v-bind:class="{'disabledWriteBtn': !nonDownloading,'writeBtn': nonDownloading}"
                                 @click="openTransferDialog">
                             <span class="icon">
                                 <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 174.62 174.83">
@@ -37,7 +37,7 @@
                             <span>{{ $t('account.transfer') }}</span>
                         </button>
                         <button class="common_btn imgBtn "
-                                v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}"
+                                v-bind:class="{'disabledWriteBtn': !nonDownloading,'writeBtn': nonDownloading}"
                                 @click="openBatchTransferDialog"
                                 v-if="openAirdrop">
                             <span class="icon">
@@ -50,7 +50,7 @@
                             <span>{{ $t('transfer.batch_transfer') }}</span>
                         </button>
                         <button class="common_btn imgBtn "
-                                v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}"
+                                v-bind:class="{'disabledWriteBtn': !nonDownloading,'writeBtn': nonDownloading}"
                                 v-if="whetherShowSendMsgBtn()"
                                 @click="openSendMessageDialog">
                             <span class="icon">
@@ -63,7 +63,7 @@
                             <span>{{ $t('account.send_message') }}</span>
                         </button>
                         <button class="common_btn imgBtn "
-                                v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}"
+                                v-bind:class="{'disabledWriteBtn': !nonDownloading,'writeBtn': nonDownloading}"
                                 v-if="whetherShowStorageBtn()"
                                 @click="openStorageFileDialog">
                             <span class="icon">
@@ -2819,10 +2819,10 @@ export default {
                 this.$message.warning(this.$t("account.synchronization_block"));
                 return;
             }
-            if(this.blockchainState.blockchainState != "UP_TO_DATE"){
-                this.$message.warning(this.$t("account.up_to_date"));
-                return;
-            }
+            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+            //     this.$message.warning(this.$t("account.up_to_date"));
+            //     return;
+            // }
             this.$store.state.mask = true;
             this.sendMessageDialog = true;
         },
@@ -2831,10 +2831,10 @@ export default {
                 this.$message.warning(this.$t("account.synchronization_block"));
                 return;
             }
-            if(this.blockchainState.blockchainState != "UP_TO_DATE"){
-                this.$message.warning(this.$t("account.up_to_date"));
-                return;
-            }
+            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+            //     this.$message.warning(this.$t("account.up_to_date"));
+            //     return;
+            // }
             this.$store.state.mask = true;
             this.storageFileDialog = true;
         },
@@ -2843,10 +2843,10 @@ export default {
                 this.$message.warning(this.$t("account.synchronization_block"));
                 return;
             }
-            if(this.blockchainState.blockchainState != "UP_TO_DATE"){
-                this.$message.warning(this.$t("account.up_to_date"));
-                return;
-            }
+            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+            //     this.$message.warning(this.$t("account.up_to_date"));
+            //     return;
+            // }
             this.$store.state.mask = true;
             this.onChainDialog = true;
         },
@@ -2855,10 +2855,10 @@ export default {
                 this.$message.warning(this.$t("account.synchronization_block"));
                 return;
             }
-            if(this.blockchainState.blockchainState != "UP_TO_DATE"){
-                this.$message.warning(this.$t("account.up_to_date"));
-                return;
-            }
+            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+            //     this.$message.warning(this.$t("account.up_to_date"));
+            //     return;
+            // }
             this.$store.state.mask = true;
             this.joinNetDialog = true;
         },
@@ -2885,10 +2885,10 @@ export default {
             if (SSO.downloadingBlockchain) {
                 return this.$message.warning(this.$t("account.synchronization_block"));
             }
-            if(this.blockchainState.blockchainState != "UP_TO_DATE"){
-                this.$message.warning(this.$t("account.up_to_date"));
-                return;
-            }
+            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+            //     this.$message.warning(this.$t("account.up_to_date"));
+            //     return;
+            // }
             this.$store.state.mask = true;
             this.tranferAccountsDialog = true;
             this.transfer.executing = false;
@@ -2897,10 +2897,10 @@ export default {
             if (SSO.downloadingBlockchain) {
                 return this.$message.warning(this.$t("account.synchronization_block"));
             }
-            if(this.blockchainState.blockchainState != "UP_TO_DATE"){
-                this.$message.warning(this.$t("account.up_to_date"));
-                return;
-            }
+            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+            //     this.$message.warning(this.$t("account.up_to_date"));
+            //     return;
+            // }
             this.$store.state.mask = true;
             this.batchTranferAccountsDialog = true;
             this.batch_transfer.executing = false;
@@ -2999,10 +2999,10 @@ export default {
                 _this.$message.warning(_this.$t("account.synchronization_block"));
                 return;
             }
-            if(this.blockchainState.blockchainState != "UP_TO_DATE"){
-                this.$message.warning(this.$t("account.up_to_date"));
-                return;
-            }
+            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+            //     this.$message.warning(this.$t("account.up_to_date"));
+            //     return;
+            // }
             _this.isUserInfoDialog(false);
             _this.secretPhrase ? _this.setName(_this.secretPhrase) : _this.secretPhraseDialog = true;
         },
@@ -3526,11 +3526,8 @@ export default {
             const _this = this;
             return _this.$global.isOpenApiProxy();
         },
-        isUpToDateOrLight: function () {
-            const _this = this;
-            console.log("_this.blockchainState", _this.blockchainState)
-            console.log("isUpToDateOrLight", !SSO.downloadingBlockchain || _this.blockchainState.isLightClient == true);
-            return _this.blockchainState.blockchainState == "UP_TO_DATE" && !SSO.downloadingBlockchain || _this.blockchainState.isLightClient == true;
+        nonDownloading: function () {
+            return !SSO.downloadingBlockchain;
         }
     },
     watch: {

@@ -108,7 +108,7 @@ const cn = {
         'payout': "支出",
         'income': "收入",
         'account_inactive': "账户暂未绑定公钥，请发起一笔转账等交易进行自动绑定以提升安全性",
-        'up_to_date': "更新客户端到最新状态，请稍后再试"
+        'up_to_date': "区块链非最新状态，请稍后再试"
     },
     transaction: {
         'transaction_record': "交易记录",
