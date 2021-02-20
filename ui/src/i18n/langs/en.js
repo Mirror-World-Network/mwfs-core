@@ -126,6 +126,17 @@ const en = {
         'tip-6':"chain in address ( ",
         'tip-7':"), and the transaction can be received within 20 minutes after the transaction is confirmed;",
         'tip-8':"3. Please do not transfer other assets to the lock address. If any loss is caused, you should bear it by yourself.",
+        'sure':"sure",
+        'cancel':"cancel",
+        'tipChian1':"Make sure the binding heco address is:",
+        'tipChian2':"Make sure the binding OKEx address is:",
+        'sameAddress':"the sameAddress than old",
+        'notRightAddress':"Address format error",
+        'bindAddress_success_heco':"Heco address bound successfully",
+        'bindAddress_fail_heco':"Heco address bound failed",
+        'bindAddress_success_OKEx':"OKEx address bound successfully",
+        'bindAddress_fail_OKEx':"OKEx address bound failed",
+        'bindAddress_incomplete':"Heco address binding incomplete"
     },
     transaction: {
         'transaction_record': "Transaction Records",

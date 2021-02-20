@@ -127,6 +127,17 @@ const cn = {
         'tip-6':"链上锁仓地址（",
         'tip-7':"）转账对应数量，在交易被确认之后二十分钟之内即可到帐；",
         'tip-8':"3.请勿向锁仓地址中转入其他资产，如造成损失，自行承担。",
+        'sure':"确定",
+        'cancel':"取消",
+        'tipChian1':"绑定heco地址为:",
+        'tipChian2':"绑定OKEx地址为:",
+        'sameAddress':"此地址与旧地址相同",
+        'notRightAddress':"地址格式错误",
+        'bindAddress_success_heco':"heco地址绑定成功",
+        'bindAddress_fail_heco':"heco地址绑定失败",
+        'bindAddress_success_OKEx':"OKEx地址绑定成功",
+        'bindAddress_fail_OKEx':"OKEx地址绑定失败",
+        'bindAddress_incomplete':"heco地址未绑定"
     },
     transaction: {
         'transaction_record': "交易记录",

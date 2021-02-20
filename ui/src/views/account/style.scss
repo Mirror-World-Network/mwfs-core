@@ -315,6 +315,12 @@
 
 }
 
+.modal-hidden{
+    background: #efefef;
+    -moz-opacity:0.9;
+    opacity:0.9;
+}
+
 #send_message_modal {
     .modal-content {
         .modal-message {
@@ -347,3 +353,45 @@
 }
 
 .st1{fill:none;}
+
+#showChain{
+    top:100px;
+    z-index: 10000;
+    height: 210px;
+    width: 600px;
+    color: #000;
+
+    .content{
+        text-align: center;
+        margin-top: 80px;
+        margin-bottom: 50px;
+    }
+
+    .modal-footer{
+        position: relative;
+    }
+
+    .sureButton{
+        position:absolute;
+        left: 100px;
+    }
+
+    .cancelButton{
+        position:absolute;
+        right: 100px;
+    }
+
+}
+
+.address{
+    a {
+        text-decoration: none;
+    }
+    a:link{text-decoration: none;color: gray}
+
+    a:active{text-decoration:blink}
+
+    a:hover{color:#3fb09a}
+
+    a:visited{text-decoration: none;color:#000}
+}

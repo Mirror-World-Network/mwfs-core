@@ -2086,6 +2086,18 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 TransactionProcessorImpl.getInstance().notifyListeners(block.getTransactions(), TransactionProcessor.Event.ADDED_CONFIRMED_TRANSACTIONS);
             }
             AccountLedger.commitEntries();
+
+            /**
+             * heco chain accossChain
+             *
+             * check Transactions if there is Transaction to the lockAddress, send to gateway
+             *
+             * @Author peifeng
+             */
+            block.getTransactions().forEach(transaction -> {
+                transaction.getType().isType(TransactionType.TYPE_BURN_DEAL);
+            });
+
         } finally {
             isProcessingBlock = false;
             AccountLedger.clearEntries();

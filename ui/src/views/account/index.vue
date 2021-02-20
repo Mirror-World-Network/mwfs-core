@@ -187,9 +187,9 @@
                                 v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}"
                                 v-if="whetherShowAssetsAcrossChainsBtn()"
                                 @click="openAssetsAcrossChainsDialog" style="width:150px;">
-                            <span class="icon">
+                            <span class="icon" style="color:#A6A9AD">
                                 <svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                                    viewBox="0 0 150 162.5" style="enable-background:new 0 0 150 162.5;" xml:space="preserve">
+                                    viewBox="0 0 150 162.5" style="enable-background:new 0 0 150 162.5;" xml:space="preserve" >
 
                                 <path class="st0" d="M131.1,13.7c6.4,0,11.8,5.3,11.8,11.8v111.9c0,6.4-5.3,11.8-11.8,11.8h-112c-6.4,0-11.8-5.3-11.8-11.8V25.5
                                     c0-6.4,5.3-11.8,11.8-11.8H131.1 M131.1,6.6h-112C8.8,6.6,0.3,15.2,0.3,25.5v111.9c0,10.3,8.6,18.9,18.9,18.9h112
@@ -1092,7 +1092,8 @@
         </div>
 
         <!-- AssetsAcrossChainsDialog -->
-        <div class="modal" id="assets_across_chains_modal" v-show="AssetsAcrossChainsDialog">
+        <div class="modal" id="assets_across_chains_modal" v-show="AssetsAcrossChainsDialog"
+            v-bind:class="{'modal-hidden':showChain}">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -1100,16 +1101,22 @@
                         <h4 class="modal-title">{{ $t('acrossChains.title') }}</h4>
                     </div>
                     <div class="modal-body modal-message">
-                        <ul class="title">
-                            <li :class="chainShow==1? 'active':''" @click="showHecoChain"><a>heco chain</a></li>
-                            <li :class="chainShow==2? 'active':''" @click="showOkExChain"><a>OKEx chain</a></li>
-                            <li :class="chainShow==3? 'active':''" @click="showMoreChain"><a>...</a></li>
+                        <ul class="title" v-if="!showChain">
+                            <li :class="chainShow==1? 'active':''" @click="showHecoChain" ><a>heco chain</a></li>
+                            <li :class="chainShow==2? 'active':''" @click="showOkExChain" ><a>OKEx chain</a></li>
+                            <li :class="chainShow==3? 'active':''" @click="showMoreChain" ><a>...</a></li>
                         </ul>
+                        <ul class="title" v-else>
+                            <li :class="chainShow==1? 'active':''" ><a>heco chain</a></li>
+                            <li :class="chainShow==2? 'active':''" ><a>OKEx chain</a></li>
+                            <li :class="chainShow==3? 'active':''" ><a>...</a></li>
+                        </ul>
+                        
                          <div id="content">
                             <el-form class="mod" v-if="chainShow==1">
                                 <el-form-item :label="$t('acrossChains.target_address')" class="item_address">
                                     <el-input id="acrossChains_target_address" v-model="acrossChains.heco.target_address" :placeholder="$t('acrossChains.address_tip')">
-                                        <el-button slot="append" >{{ $t('acrossChains.bind') }}</el-button>
+                                        <el-button  slot="append" style="background: #3fb09a;color:#000" @click="bindAddress(1)" :disabled="showChain">{{ $t('acrossChains.bind') }}</el-button>
                                     </el-input>
                                 </el-form-item>
                                 <el-form-item :label="$t('acrossChains.target_balance')" class="item_balance">
@@ -1125,7 +1132,7 @@
                             <el-form class="mod" v-if="chainShow==2" >
                                 <el-form-item :label="$t('acrossChains.target_address')" class="item_address">
                                     <el-input id="acrossChains_target_address" v-model="acrossChains.OKEx.target_address" :placeholder="$t('acrossChains.address_tip')">
-                                        <el-button slot="append" >{{ $t('acrossChains.bind') }}</el-button>
+                                        <el-button slot="append" style="background: #3fb09a;color:#000" @click="bindAddress(2)" :disabled="showChain">{{ $t('acrossChains.bind') }}</el-button>
                                     </el-input>
                                 </el-form-item>
                                 <el-form-item :label="$t('acrossChains.target_balance')" class="item_balance">
@@ -1163,6 +1170,23 @@
                         {{$t('acrossChains.tip-8')}}
 
                     </div>
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="modal" id="showChain" v-show="showChain">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="content address">
+                        {{this.chainShow==1?$t('acrossChains.tipChian1'):$t('acrossChains.tipChian2')}}
+                        <a>{{this.chainShow==1?this.acrossChains.heco.target_address:this.acrossChains.OKEx.target_address}}</a>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <el-button  class="sureButton" v-if="chainShow==1" slot="append" style="color:#000" @click="bindHecoAddress()">{{ $t('acrossChains.sure') }}</el-button>
+                    <el-button  class="sureButton" v-else slot="append" style="color:#000" @click="bindOKExAddress()">{{ $t('acrossChains.sure') }}</el-button>
+                    <el-button  class="cancelButton" slot="append" style="color:#000" @click="cancel()">{{ $t('acrossChains.cancel') }}</el-button>
                 </div>
             </div>
         </div>
@@ -1543,12 +1567,15 @@ export default {
                 heco:{
                     target_address: '',
                     target_balance: 0,
+                    old_address: '',
                 },
                 OKEx:{
                     target_address: '',
                     target_balance: 0,
+                    old_address: '',
                 },
-                balance:0
+                balance:0,
+                id:''
             },
 
             chainShow:1,
@@ -1556,6 +1583,9 @@ export default {
             MWLockAddress:"CDW-mw",
             HecoLockAddress:"0x0000",
             OKExLockAddress:"0x0001",
+
+            showChain:false,
+            
         };
     },
     created() {
@@ -2958,12 +2988,32 @@ export default {
             this.joinNetDialog = true;
         },
         openAssetsAcrossChainsDialog: function () {
-            if (SSO.downloadingBlockchain) {
-                this.$message.warning(this.$t("account.synchronization_block"));
-                return;
-            }
+            // if (SSO.downloadingBlockchain) {
+            //     this.$message.warning(this.$t("account.synchronization_block"));
+            //     return;
+            // }
             this.$store.state.mask = true;
             this.AssetsAcrossChainsDialog = true;
+
+            //发起网关请求，查找当前帐号绑定的信息
+            const _this = this;
+            var str = _this.$global.formatNQTMoney(_this.accountInfo.effectiveBalanceNQT, 2);
+             _this.acrossChains.balance = parseFloat(str.substring(0,str.length-2));
+            console.log(_this.$global.formatNQTMoney(_this.accountInfo.effectiveBalanceNQT, 2));
+            _this.$http.get(window.api.getAccountInfoUrl,{params:{AccountId:_this.accountInfo.account}}).then(function (res1) {
+                if(res1.data.body){
+                    _this.acrossChains.heco.target_address = res1.data.body.hecoAddress;
+                    _this.acrossChains.heco.old_address = res1.data.body.hecoAddress;
+                    _this.acrossChains.heco.target_balance = res1.data.body.hecoBalance;
+                    _this.acrossChains.OKEx.target_address = res1.data.body.okExAddress;
+                    _this.acrossChains.OKEx.old_address = res1.data.body.okExAddress; 
+                    _this.acrossChains.OKEx.target_balance = res1.data.body.okExBalance;
+                    _this.acrossChains.id = res1.data.body.id;
+                }
+            })
+            .catch(err => {
+                _this.$message.warning(_this.$t('acrossChains.bindAddress_incomplete')); 
+            });
         },
         formatInputDiskCapacity: function (val) {
             return val + " T";
@@ -3601,8 +3651,83 @@ export default {
         },
         showMoreChain(){
             this.chainShow = 3;
-        }
+        },
 
+        bindAddress(){
+            this.$store.state.mask = true;
+            this.showChain = true;
+        },
+
+        cancel(){
+            this.$store.state.mask = false;
+            this.showChain = false;
+        },
+        
+        /**
+         * 绑定heco地址
+         */
+        bindHecoAddress(){
+            this.preventRepeatedClick();
+            this.showChain = false;
+
+            var web3Utils = require("web3-utils");
+            console.log(web3Utils.isAddress(this.acrossChains.heco.target_address))
+            if(!web3Utils.isAddress(this.acrossChains.heco.target_address)){
+                this.$message.warning(this.$t("acrossChains.notRightAddress"));
+                return;
+            }
+            if(this.acrossChains.heco.target_address == this.acrossChains.heco.old_address){
+                this.$message.warning(this.$t("acrossChains.sameAddress"));
+                return;
+            }
+            
+            const _this = this;
+            let formData = new FormData();
+            formData.append("id", _this.acrossChains.id);
+            formData.append("accountId", _this.accountInfo.account);
+            formData.append("hecoAddress", _this.acrossChains.heco.target_address);
+            this.$http.post(window.api.saveOrupdateChainAccountUrl,formData)
+            .then(function (res1) {
+                _this.$message.success(_this.$t('acrossChains.bindAddress_success_heco'));
+                _this.acrossChains.heco.old_address = _this.acrossChains.heco.target_address;
+            })
+            .catch(err => {
+                _this.$message.warning(_this.$t('acrossChains.bindAddress_fail_heco')); 
+            });
+                   
+        },
+        /**
+         * 绑定OKEX地址　
+         */
+        bindOKExAddress(){
+            this.preventRepeatedClick();
+            this.showChain = false;
+
+            var web3Utils = require("web3-utils");
+            if(!web3Utils.isAddress(this.acrossChains.OKEx.target_address)){
+                this.$message.warning(this.$t("acrossChains.notRightAddress"));
+                return;
+            }
+            if(this.acrossChains.OKEx.target_address == this.acrossChains.OKEx.old_address){
+                this.$message.warning(this.$t("acrossChains.sameAddress"));
+                return;
+            }
+
+            const _this = this;
+            let formData = new FormData();
+            formData.append("id", _this.acrossChains.id);
+            formData.append("accountId", _this.accountInfo.account);
+            formData.append("okExAddress", _this.acrossChains.OKEx.target_address);
+            this.$http.post(window.api.saveOrupdateChainAccountUrl,formData)
+            .then(function (res1) {
+                _this.$message.success(_this.$t('acrossChains.bindAddress_success_OKEx'));
+                _this.acrossChains.OKEx.old_address = _this.acrossChains.OKEx.target_address;
+            })
+            .catch(err => {
+                _this.$message.warning(_this.$t('acrossChains.bindAddress_fail_OKEx'));
+            });
+        
+        }
 
     },
     computed: {
