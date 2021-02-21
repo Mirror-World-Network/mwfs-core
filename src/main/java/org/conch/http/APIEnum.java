@@ -277,6 +277,7 @@ public enum APIEnum {
     GET_USERCONFIG("getUserConfig", GetUserConfig.INSTANCE),
     GET_LATEST_COS_VERSION("getLatestCosVersion", GetLatestCosVersion.INSTANCE),
     FORCE_CONVERGE("forceConverge", ForceConverge.INSTANCE),
+    HEART_BEAT("heartBeat",HeartBeat.INSTANCE),
 
     TRIM_DERIVED_TABLES("trimDerivedTables", TrimDerivedTables.instance),
     HASH("hash", Hash.instance),
@@ -329,7 +330,9 @@ public enum APIEnum {
     GET_POC_ONLINE_RATE("getPocOnlineRate", PocTxApi.GetOnlineRate.INSTANCE),
     CREATE_POC_NODE_TYPE("createPocNodeType", PocTxApi.CreateNodeType.INSTANCE),
     RE_PROCESS_POC_TXS("reProcessPocTxs", PocTxApi.ReProcessPocTxs.INSTANCE),
-    RESET_CERTIFIED_PEERS("resetCertifiedPeers", PocTxApi.ResetCertifiedPeers.INSTANCE);
+    RESET_CERTIFIED_PEERS("resetCertifiedPeers", PocTxApi.ResetCertifiedPeers.INSTANCE),
+    // api_html
+    CREATE_API_HTML("createApiHtml", CreateApiHtmlServlet.instance);
 
     private static final Map<String, APIEnum> apiByName = new HashMap<>();
 
