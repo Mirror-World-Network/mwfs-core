@@ -1793,6 +1793,14 @@ public final class Peers {
             myPeerJson.put("bestPeer", getBestPeerUri());
             myPeerInfoRequest = JSON.prepareRequest(myPeerJson);
             currentBlockchainState = state;
+        } else if ((sendToProcessForkNode || sendToCollectForkNode) && state == currentBlockchainState) {
+            JSONObject myPeerJson = generateMyPeerJson(sendToProcessForkNode, sendToCollectForkNode);
+            myPeerJson.put("blockchainState", state.ordinal());
+            myPeerInfoResponse = JSON.prepare(myPeerJson);
+
+            myPeerJson.put("requestType", "getInfo");
+            myPeerJson.put("bestPeer", getBestPeerUri());
+            myPeerInfoRequest = JSON.prepareRequest(myPeerJson);
         }
     }
 

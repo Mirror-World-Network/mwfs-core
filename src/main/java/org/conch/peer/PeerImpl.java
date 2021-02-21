@@ -1098,7 +1098,7 @@ final class PeerImpl implements Peer {
         blockSummaryJson.put("lastBlockGenerator", json.get("lastBlockGenerator"));
         blockSummaryJson.put("lastBlockTimestamp", json.get("lastBlockTimestamp"));
         blockSummaryJson.put("currentFork", json.get("currentFork"));
-        if (Peers.isProcessForkNode && json.get("forkBlocksMap") != null) {
+        if (json.get("forkBlocksMap") != null && Peers.isProcessForkNode) {
             Peers.appendForkBlocksMap((Map) json.get("forkBlocksMap"));
         }
         return this;
