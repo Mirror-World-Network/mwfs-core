@@ -736,7 +736,7 @@ final class PeerImpl implements Peer {
             }
             // get peer detail
             JSONObject response;
-            if (isCollectForkNode(this.announcedAddress)) {
+            if (isCollectForkNode(this.announcedAddress) && Conch.getEpochTime() - this.lastUpdated > 600) {
                 Logger.logDebugMessage("Send peerInfo to collectForkNode[%s]", this.announcedAddress);
                 response = send(Peers.getMyPeerInfoRequestToCollectForkNode());
             } else {
@@ -1099,7 +1099,8 @@ final class PeerImpl implements Peer {
         blockSummaryJson.put("lastBlockTimestamp", json.get("lastBlockTimestamp"));
         blockSummaryJson.put("currentFork", json.get("currentFork"));
         if (json.get("forkBlocksMap") != null && Peers.isProcessForkNode) {
-            Peers.appendForkBlocksMap((Map) json.get("forkBlocksMap"));
+            Logger.logDebugMessage("collectForkNode[%s] append forkBlocksMap to processForkNode", this.announcedAddress);
+            Peers.appendForkBlocksMapToProcessForkNode((Map) json.get("forkBlocksMap"));
         }
         return this;
     }

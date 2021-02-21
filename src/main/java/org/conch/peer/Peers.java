@@ -674,6 +674,11 @@ public final class Peers {
 
                     peers.values().forEach(peer -> {
                         if (peer.getState() == Peer.State.CONNECTED
+                                && isCollectForkNode(peer.getAddress())
+                                && now - peer.getLastUpdated() > 600) {
+                            peersService.submit(peer::connect);
+                        }
+                        if (peer.getState() == Peer.State.CONNECTED
                                 && now - peer.getLastUpdated() > 3600
                                 && now - peer.getLastConnectAttempt() > 600) {
                             peersService.submit(peer::connect);
@@ -738,8 +743,9 @@ public final class Peers {
 
     };
 
-    public static void appendForkBlocksMap(Map<String, List<JSONObject>> forkBlocksMap) {
+    public static void appendForkBlocksMapToProcessForkNode(Map<String, List<JSONObject>> forkBlocksMap) {
         Peers.forkBlocksMap.putAll(forkBlocksMap);
+        processForkBlocks();
     }
 
     /**
@@ -769,18 +775,6 @@ public final class Peers {
     }
 
     private static Map<String, ForkObj> forkObjMapToAPI = Maps.newHashMap();
-
-    private static final Runnable generateForkDataThread = () -> {
-        try {
-            forkAnalyze();
-        } catch (Exception e) {
-            Logger.logDebugMessage("Generate fork data process fail");
-        } finally {
-            forkObjMapToAPI.clear();
-            forkObjMapToAPI.putAll(forkObjMap);
-            forkObjMap.clear();
-        }
-    };
 
     private static final Runnable getMorePeersThread = new Runnable() {
 
@@ -1064,9 +1058,6 @@ public final class Peers {
             ThreadPool.scheduleThread("PeerUnBlacklisting", Peers.peerUnBlacklistingThread, 60);
             if (Peers.getMorePeers) {
                 ThreadPool.scheduleThread("GetMorePeers", Peers.getMorePeersThread, 20);
-            }
-            if (Peers.isProcessForkNode) {
-                ThreadPool.scheduleThread("GenerateForkData", Peers.generateForkDataThread, 1, TimeUnit.MINUTES);
             }
         }
     }
@@ -1995,13 +1986,22 @@ public final class Peers {
         checkOrConnectAllGuideNodes(true);
     }
 
-    private static void forkAnalyze() {
-        // todo loop all forks, confirm commonBlock, base on commonBlock to analyze fork length
-        for (Map.Entry<String, List<JSONObject>> entry : forkBlocksMap.entrySet()) {
-            if (!clearInvalidForkBlocksMap(entry)) {
-                processBlocksToForkObj(entry.getKey(), entry.getValue());
+    private static void processForkBlocks() {
+        try {
+            // todo loop all forks, confirm commonBlock, base on commonBlock to analyze fork length
+            for (Map.Entry<String, List<JSONObject>> entry : forkBlocksMap.entrySet()) {
+                if (!clearInvalidForkBlocksMap(entry)) {
+                    processBlocksToForkObj(entry.getKey(), entry.getValue());
+                }
             }
+        } catch (Exception e) {
+            Logger.logInfoMessage("Processing ForkBlocks data failed");
+        } finally {
+            forkObjMapToAPI.clear();
+            forkObjMapToAPI.putAll(forkObjMap);
+            forkObjMap.clear();
         }
+
     }
     /**
      * Label different forks based on key

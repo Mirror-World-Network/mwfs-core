@@ -132,7 +132,9 @@ final class GetInfo extends PeerServlet.PeerRequestHandler {
             Peers.saveOrUpdateForkBlocks(peerImpl.getAnnouncedAddress(), forkBlocks);
         }
         // ForkData is sent to processForkNode when it calls the API
-        if (request.get("processForkNode") != null && (boolean) request.get("processForkNode") == true && Peers.isCollectForkNode(Conch.getMyAddress())) {
+        if (request.get("processForkNode") != null
+                && (boolean) request.get("processForkNode") == true
+                && Peers.isCollectForkNode(Conch.getMyAddress())) {
             return Peers.getMyPeerInfoResponseToProcessForkNode();
         }
         return Peers.getMyPeerInfoResponse();
