@@ -1712,8 +1712,8 @@ public final class Peers {
     public static boolean isCollectForkNode(String address) {
         ArrayList<Object> collectForkNodes = Lists.newArrayList();
         collectForkNodes.addAll(bootNodesHost);
-        collectForkNodes.add("192.168.0.22");
         collectForkNodes.add("192.168.0.232");
+        collectForkNodes.add("192.168.0.49");
         return collectForkNodes.contains(address);
     }
 
@@ -1729,11 +1729,11 @@ public final class Peers {
      */
     public static JSONObject getForkBlockSummary(boolean sendToProcessForkNode, boolean sendToCollectForkNode){
         JSONObject json = new JSONObject();
-        if (Peers.isProcessForkNode && sendToCollectForkNode) {
-            json.put("processForkNode", true);
-            Logger.logDebugMessage("Report processForkNode Label to collectForkNode");
-        }
-        if (!isCollectForkNode(Conch.getMyAddress()) && sendToCollectForkNode) {
+        if (sendToCollectForkNode) {
+            if (Peers.isProcessForkNode) {
+                json.put("processForkNode", true);
+                Logger.logDebugMessage("Report processForkNode Label to collectForkNode");
+            }
             JSONArray blocks = new JSONArray();
             DbIterator<? extends Block> iterator = null;
             final int timestamp = 0;
@@ -1752,7 +1752,7 @@ public final class Peers {
             json.put("forkBlocks", blocks);
             Logger.logDebugMessage("Generate forkBlocks to collectForkNode");
         }
-        if (isCollectForkNode(Conch.getMyAddress()) && sendToProcessForkNode){
+        if (sendToProcessForkNode){
             JSONArray blocks = new JSONArray();
             DbIterator<? extends Block> iterator = null;
             final int timestamp = 0;
@@ -1772,8 +1772,6 @@ public final class Peers {
             json.put("forkBlocksMap", Peers.forkBlocksMap);
             Logger.logDebugMessage("Report and generate own forkBlocks to processForkNode");
         }
-
-
         return json;
     }
 

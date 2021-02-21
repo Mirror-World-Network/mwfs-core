@@ -126,7 +126,7 @@ final class GetInfo extends PeerServlet.PeerRequestHandler {
         if (peerImpl.getServices() != origServices) {
             Peers.notifyListeners(peerImpl, Peers.Event.CHANGED_SERVICES);
         }
-        // bootNode save or update forkBlocks,make sure blocks is up to date
+        // CollectForkNode save or update forkBlocks,make sure blocks is up to date
         if (request.get("forkBlocks") != null && Peers.isCollectForkNode(Conch.getMyAddress())) {
             List<JSONObject> forkBlocks = (List<JSONObject>) request.get("forkBlocks");
             Peers.saveOrUpdateForkBlocks(peerImpl.getAnnouncedAddress(), forkBlocks);
