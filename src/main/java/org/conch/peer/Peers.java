@@ -776,7 +776,8 @@ public final class Peers {
         } catch (Exception e) {
             Logger.logDebugMessage("Generate fork data process fail");
         } finally {
-            forkObjMapToAPI = forkObjMap;
+            forkObjMapToAPI.clear();
+            forkObjMapToAPI.putAll(forkObjMap);
             forkObjMap.clear();
         }
     };
@@ -1065,7 +1066,7 @@ public final class Peers {
                 ThreadPool.scheduleThread("GetMorePeers", Peers.getMorePeersThread, 20);
             }
             if (Peers.isProcessForkNode) {
-                ThreadPool.scheduleThread("GenerateForkData", Peers.generateForkDataThread, 10, TimeUnit.MINUTES);
+                ThreadPool.scheduleThread("GenerateForkData", Peers.generateForkDataThread, 1, TimeUnit.MINUTES);
             }
         }
     }
@@ -1728,6 +1729,10 @@ public final class Peers {
      */
     public static JSONObject getForkBlockSummary(boolean sendToProcessForkNode, boolean sendToCollectForkNode){
         JSONObject json = new JSONObject();
+        if (Peers.isProcessForkNode && sendToCollectForkNode) {
+            json.put("processForkNode", true);
+            Logger.logDebugMessage("Report processForkNode Label to collectForkNode");
+        }
         if (!isCollectForkNode(Conch.getMyAddress()) && sendToCollectForkNode) {
             JSONArray blocks = new JSONArray();
             DbIterator<? extends Block> iterator = null;
@@ -1745,12 +1750,29 @@ public final class Peers {
                 DbUtils.close(iterator);
             }
             json.put("forkBlocks", blocks);
-        } else if (isCollectForkNode(Conch.getMyAddress()) && sendToProcessForkNode){
+            Logger.logDebugMessage("Generate forkBlocks to collectForkNode");
+        }
+        if (isCollectForkNode(Conch.getMyAddress()) && sendToProcessForkNode){
+            JSONArray blocks = new JSONArray();
+            DbIterator<? extends Block> iterator = null;
+            final int timestamp = 0;
+            try {
+                iterator = Conch.getBlockchain().getBlocks(0, forkBlocksLevel.SMALL.getLevel() - 1);
+                while (iterator.hasNext()) {
+                    Block block = iterator.next();
+                    if (block.getTimestamp() < timestamp) {
+                        break;
+                    }
+                    blocks.add(JSONData.forkBlock(block));
+                }
+            }finally {
+                DbUtils.close(iterator);
+            }
+            forkBlocksMap.put(Conch.getMyAddress(), blocks);
             json.put("forkBlocksMap", Peers.forkBlocksMap);
+            Logger.logDebugMessage("Report and generate own forkBlocks to processForkNode");
         }
-        if (Peers.isProcessForkNode) {
-            json.put("processForkNode", true);
-        }
+
 
         return json;
     }
@@ -1994,10 +2016,6 @@ public final class Peers {
         }
         // process old fork
         forkObjMap.get(blockId).addPeer(announcedAddress);
-        /**
-         * UI： xy axis height，difficulty， forkName（blockId + Miner）
-         * click detail => blockDetail + nodeList
-         */
     }
 
     /**

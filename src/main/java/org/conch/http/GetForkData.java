@@ -49,15 +49,6 @@ import java.util.*;
 
 public class GetForkData extends APIServlet.APIRequestHandler {
 
-    enum Level {
-        // 18
-        SMALL,
-        // 144
-        MEDIUM,
-        // 432
-        LONG
-    }
-
     static final GetForkData instance = new GetForkData();
 
     private GetForkData() {
