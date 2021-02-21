@@ -743,11 +743,6 @@ public final class Peers {
 
     };
 
-    public static void appendForkBlocksMapToProcessForkNode(Map<String, List<JSONObject>> forkBlocksMap) {
-        Peers.forkBlocksMap.putAll(forkBlocksMap);
-        processForkBlocks();
-    }
-
     /**
      * clean up invalid data
      * 1. the latest block is more than 3 hours away from the current time
@@ -1986,8 +1981,9 @@ public final class Peers {
         checkOrConnectAllGuideNodes(true);
     }
 
-    private static void processForkBlocks() {
+    public static void processForkBlocksMap(Map<String, List<JSONObject>> forkBlocksMapData) {
         try {
+            Peers.forkBlocksMap.putAll(forkBlocksMapData);
             // todo loop all forks, confirm commonBlock, base on commonBlock to analyze fork length
             for (Map.Entry<String, List<JSONObject>> entry : forkBlocksMap.entrySet()) {
                 if (!clearInvalidForkBlocksMap(entry)) {

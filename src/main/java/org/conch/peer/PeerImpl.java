@@ -1100,7 +1100,7 @@ final class PeerImpl implements Peer {
         blockSummaryJson.put("currentFork", json.get("currentFork"));
         if (json.get("forkBlocksMap") != null && Peers.isProcessForkNode) {
             Logger.logDebugMessage("collectForkNode[%s] append forkBlocksMap to processForkNode", this.announcedAddress);
-            Peers.appendForkBlocksMapToProcessForkNode((Map) json.get("forkBlocksMap"));
+            Peers.processForkBlocksMap((Map) json.get("forkBlocksMap"));
         }
         return this;
     }
