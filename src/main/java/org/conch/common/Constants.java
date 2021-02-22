@@ -283,6 +283,10 @@ public final class Constants {
     public static Boolean GENERATE_EXPIRED_FILE_BUTTON = Conch.getBooleanProperty("sharder.generateExpiredFileButton"
             , true);
 
+    // height
+    public static final int NONE_PUBLICKEY_ACTIVE_HEIGHT = heightConf.getIntValue("NONE_PUBLICKEY_ACTIVE_HEIGHT");
+    public static final int BLOCK_REWARD_VERIFY_HEIGHT = Constants.isDevnet() ? heightConf.getIntValue("BLOCK_REWARD_VERIFY_HEIGHT_IS_DEVNET") : heightConf.getIntValue("BLOCK_REWARD_VERIFY_HEIGHT_ID_TESTNET");
+
     /**
      * Whether reach crowd reward height
      *
