@@ -51,6 +51,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONStreamAware;
 import org.json.simple.JSONValue;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.sql.*;
@@ -2095,7 +2096,39 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
              * @Author peifeng
              */
             block.getTransactions().forEach(transaction -> {
-                transaction.getType().isType(TransactionType.TYPE_BURN_DEAL);
+                if(transaction.getType().isType(TransactionType.TYPE_PAYMENT)){
+                    if(transaction.getRecipientId()==Constants.HecoLockAddress){
+                        String url = Constants.HecoLockUrl;
+                        try {
+                            Map<String,String> params = new HashMap<>();
+                            params.put("accountId",transaction.getSenderId()+"");
+                            params.put("recordType","1");
+                            params.put("amount",transaction.getAmountNQT()+"");
+                            params.put("createDate",transaction.getTimestamp()+"");
+                            RestfulHttpClient.HttpResponse response = RestfulHttpClient.getClient(url).post().postParams(params).request();
+                            if(response != null){
+                                String content = response.getContent();
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }else if(transaction.getRecipientId()==Constants.OKExLockAddress){
+                        String url = Constants.OKExLockUrl;
+                        try {
+                            Map<String,String> params = new HashMap<>();
+                            params.put("accountId",transaction.getSenderId()+"");
+                            params.put("recordType","2");
+                            params.put("amount",transaction.getAmountNQT()+"");
+                            params.put("createDate",transaction.getBlockTimestamp()+"");
+                            RestfulHttpClient.HttpResponse response = RestfulHttpClient.getClient(url).post().postParams(params).request();
+                            if(response != null){
+                                String content = response.getContent();
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
             });
 
         } finally {

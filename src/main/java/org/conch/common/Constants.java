@@ -453,4 +453,11 @@ public final class Constants {
     public static final boolean hubLinked = Conch.getBooleanProperty("sharder.HubBind");
     public static final boolean initFromArchivedDbFile = Conch.getBooleanProperty("sharder.initFromArchivedDbFile");
 
+
+    public static final long HecoLockAddress = Conch.getIntProperty("sharder.hecoLockAddress");
+    public static final long OKExLockAddress = Conch.getIntProperty("sharder.OKExLockAddress");
+
+    public static final String HecoLockUrl = isDevnet() ?  Conch.getStringProperty("sharder.devnetHecoLockUrl"):Conch.getStringProperty("sharder.HecoLockUrl");
+    public static final String OKExLockUrl = isDevnet() ?  Conch.getStringProperty("sharder.devnetOKExLockUrl"):Conch.getStringProperty("sharder.OKExLockUrl");
+
 }
