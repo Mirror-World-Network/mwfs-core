@@ -2210,7 +2210,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             if(transaction.getType().isType(TransactionType.TYPE_PAYMENT)){
                 //转出方是否存在于矿工列表
                 for(Long crowdMinerId : crowdMiners.keySet()){
-                    if(crowdMinerId.equals(transaction.getRecipientId())){
+                    if(crowdMinerId.equals(transaction.getSenderId())){
                         //存在进行最新挖矿持仓量检查
                         long holdingMwAmount = 0;
                         try{
@@ -2230,6 +2230,28 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                             if(certifiedPeer!=null){
                                 if(certifiedPeer.getDeleteHeight() == 0) {
                                     certifiedPeer.setDeleteHeight(block.getHeight());
+                                    PocDb.saveOrUpdatePeer(certifiedPeer);
+                                }
+                            }
+                        }
+                    }
+                    if(crowdMinerId.equals(transaction.getRecipientId())){
+                        CertifiedPeer certifiedPeer = Conch.getPocProcessor().getCertifiedPeers().get(crowdMinerId);
+                        if(certifiedPeer!=null){
+                            if(certifiedPeer.getDeleteHeight() != 0) {
+                                //存在进行最新挖矿持仓量检查
+                                long holdingMwAmount = 0;
+                                try{
+                                    if(Account.getAccount(crowdMinerId)!=null){
+                                        holdingMwAmount = Account.getAccount(crowdMinerId).getEffectiveBalanceSS(block.getHeight());
+                                    }
+                                }catch(Exception e){
+                                    Logger.logWarningMessage("[QualifiedMiner] not valid miner because can't get balance of account %s at height %d, caused by %s",  Account.getAccount(crowdMinerId).getRsAddress(), block.getHeight(), e.getMessage());
+                                    holdingMwAmount = 0;
+                                }
+
+                                if(holdingMwAmount >= QUALIFIED_CROWD_MINER_HOLDING_AMOUNT_MIN) {
+                                    certifiedPeer.setDeleteHeight(0);
                                     PocDb.saveOrUpdatePeer(certifiedPeer);
                                 }
                             }
