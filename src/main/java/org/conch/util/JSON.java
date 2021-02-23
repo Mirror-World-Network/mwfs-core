@@ -331,7 +331,7 @@ public final class JSON {
 
     /**
      * Json file convert to CSV file
-     * @param sourceJsonPathName
+     * @param sourceJsonPathName Contains only one array
      * @param targetCSVPathName
      */
     public static void JsonToCSV(String sourceJsonPathName, String targetCSVPathName) {
