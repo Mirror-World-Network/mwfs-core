@@ -129,7 +129,8 @@ final class GetInfo extends PeerServlet.PeerRequestHandler {
         // CollectForkNode save or update forkBlocks,make sure blocks is up to date
         if (request.get("forkBlocks") != null && Peers.isCollectForkNode(Conch.getMyAddress())) {
             List<JSONObject> forkBlocks = (List<JSONObject>) request.get("forkBlocks");
-            Peers.saveOrUpdateForkBlocks(peerImpl.getAnnouncedAddress(), forkBlocks);
+            Logger.logDebugMessage("SaveOrUpdate forkBlocks of node[%s] and BindRSAccount[%s]", peerImpl.getAnnouncedAddress(), peerImpl.getBindRsAccount());
+            Peers.saveOrUpdateForkBlocks(peerImpl.getBindRsAccount(), forkBlocks);
         }
         // ForkData is sent to processForkNode when it calls the API
         if (request.get("processForkNode") != null

@@ -105,6 +105,8 @@ public final class Peers {
     public static final int blacklistingPeriod;
     static final boolean getMorePeers;
     static final boolean isProcessForkNode;
+    static final boolean closeCollectFork;
+
     // change 20 -> 400, because one block include more than 2000 txs at 2018.11.21
     public static final int MAX_REQUEST_SIZE = 400 * 1024 * 1024;
     public static final int MAX_RESPONSE_SIZE = 400 * 1024 * 1024;
@@ -440,6 +442,7 @@ public final class Peers {
         savePeers = usePeersDb && Conch.getBooleanProperty("sharder.savePeers");
         getMorePeers = Conch.getBooleanProperty("sharder.getMorePeers");
         isProcessForkNode = Conch.getBooleanProperty("sharder.isProcessForkNode");
+        closeCollectFork = Conch.getBooleanProperty("sharder.closeCollectFork");
         cjdnsOnly = Conch.getBooleanProperty("sharder.cjdnsOnly");
         ignorePeerAnnouncedAddress = Conch.getBooleanProperty("sharder.ignorePeerAnnouncedAddress");
         if (useWebSockets && useProxy) {
@@ -760,6 +763,7 @@ public final class Peers {
 
     private static Map<String, ForkObj> forkObjMap = Maps.newHashMap();
     private static Map<String, List<JSONObject>> forkBlocksMap = Maps.newHashMap();
+    private static Map<String, ArrayList<Long>> missingForkBlocksMap = Maps.newHashMap();
 
     public static Map<String, ForkObj> getForkObjMap() {
         return forkObjMap;
@@ -1700,7 +1704,7 @@ public final class Peers {
         collectForkNodes.addAll(bootNodesHost);
         collectForkNodes.add("192.168.0.232");
         collectForkNodes.add("192.168.0.49");
-        return collectForkNodes.contains(address);
+        return collectForkNodes.contains(address) && !Peers.closeCollectFork;
     }
 
     /**
@@ -1983,13 +1987,17 @@ public final class Peers {
 
     public static void processForkBlocksMap(Map<String, List<JSONObject>> forkBlocksMapData) {
         try {
-            Peers.forkBlocksMap.putAll(forkBlocksMapData);
+            // todo 先判定数据所属的分叉链，同一分叉链只需确保所有节点最终能汇集完所有高度的区块信息即可
+            checkMissingAndAppendForkBlocks(forkBlocksMapData);
             // todo loop all forks, confirm commonBlock, base on commonBlock to analyze fork length
             for (Map.Entry<String, List<JSONObject>> entry : forkBlocksMap.entrySet()) {
                 if (!clearInvalidForkBlocksMap(entry)) {
                     processBlocksToForkObj(entry.getKey(), entry.getValue());
                 }
             }
+            // todo 当分叉大于某个值时（默认18），钉钉机器人通知
+            // todo 持久化节点数据，保存该节点最近 144*3个区块信息。
+
         } catch (Exception e) {
             Logger.logInfoMessage("Processing ForkBlocks data failed");
         } finally {
@@ -1999,6 +2007,7 @@ public final class Peers {
         }
 
     }
+
     /**
      * Label different forks based on key
      * @param announcedAddress
@@ -2021,16 +2030,45 @@ public final class Peers {
     }
 
     /**
-     * save/update any address forkBlocks,new blocks direct replacement of old blocks
-     * @param announcedAddress
+     * save or update any bindRsAccount forkBlocks,new blocks direct replacement of old blocks
+     * @param bindRsAccount
      * @param blocks
      */
-    public static void saveOrUpdateForkBlocks(String announcedAddress, List<JSONObject> blocks) {
-        Logger.logDebugMessage("SaveOrUpdate forkBlocks of node[%s]", announcedAddress);
+    public static void saveOrUpdateForkBlocks(String bindRsAccount, List<JSONObject> blocks) {
         if (blocks.isEmpty()) {
             return;
         }
-        forkBlocksMap.put(announcedAddress, blocks);
+        forkBlocksMap.put(bindRsAccount, blocks);
+        // todo 检测是否存在缺漏的区块
+    }
+
+    /**
+     * Check if the miner node has block omissions
+     * @param forkBlocksMapData
+     * @return
+     */
+    private static void checkMissingAndAppendForkBlocks(Map<String, List<JSONObject>> forkBlocksMapData) {
+        for (Map.Entry<String, List<JSONObject>> entry : forkBlocksMapData.entrySet()) {
+            // todo update forkBlocksMap
+
+            long newEndBlockHeight = (long) entry.getValue().get(0).get("height");
+            long newStartBlockHeight = (long) entry.getValue().get(entry.getValue().size() - 1).get("height");
+            List<JSONObject> forkBlocks = forkBlocksMap.get(entry.getKey());
+            if (forkBlocks == null) {
+                continue;
+            }
+            long oldEndBlockHeight = (long) forkBlocks.get(0).get("height");
+            if (newStartBlockHeight <= oldEndBlockHeight && newEndBlockHeight > oldEndBlockHeight) {
+                missingForkBlocksMap.remove(entry.getKey());
+                continue;
+            } else if (newStartBlockHeight > oldEndBlockHeight){
+                ArrayList<Long> arrayList = new ArrayList<>();
+                arrayList.add(oldEndBlockHeight);
+                arrayList.add(newStartBlockHeight);
+                missingForkBlocksMap.put(entry.getKey(), arrayList);
+            }
+        }
+
     }
 
 }
