@@ -39,6 +39,7 @@
             },
             enter: function () {
                 let _this = this;
+                _this.confirmPassphrase = _this.$global.trimAll(_this.confirmPassphrase);
                 if (_this.confirmPassphrase === "") {
                     return _this.$message.info(_this.$t('notification.login_no_input_error'));
                 }

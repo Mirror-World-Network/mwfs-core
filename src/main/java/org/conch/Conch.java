@@ -97,7 +97,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class Conch {
 
-    public static final String VERSION = "0.0.5";
+    public static final String VERSION = "0.0.6";
     // Phase: Pioneer -> Union -> World
     public static final String STAGE = "Pioneer";
     public static final String APPLICATION = "COS";
@@ -810,6 +810,7 @@ public final class Conch {
                 logSystemProperties();
                 runtimeMode.init();
                 Thread secureRandomInitThread = initSecureRandom();
+                setHeartBeatTimer();
                 ForceConverge.init();
                 setServerStatus(ServerStatus.BEFORE_DATABASE, null);
 //                CompactDatabase.checkAndRestore();
@@ -1084,10 +1085,12 @@ public final class Conch {
     public static void restartApplication(Runnable runBeforeRestart) {
         try {
             pause();
-            
-            Logger.logInfoMessage("Clear the all logs");
-            FileUtil.clearAllLogs();
-            
+
+
+            //            Logger.logInfoMessage("Clear the all logs");
+            //            FileUtil.clearAllLogs();
+
+
             // java binary
             String java = System.getProperty("java.home") + "/bin/java";
             // vm arguments
@@ -1288,5 +1291,14 @@ public final class Conch {
     }
     public static String getVersion(){ return VERSION; }
     public static String getCosUpgradeDate(){ return ClientUpgradeTool.cosLastUpdateDate; }
+
+    public static void setHeartBeatTimer() {
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
+                Logger.logInfoMessage("[HeartBeat]:cos is working properly");
+            }
+        }, 3*60*1000, Constants.HeartBeat_Time);
+    }
 
 }

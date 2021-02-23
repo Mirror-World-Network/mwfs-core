@@ -208,7 +208,7 @@ public class ClientUpgradeTool {
         if(lastDbArchive.containsKey(ENV_PREFIX + KEY_DB_LAST_ARCHIVE)){
             String lastDbArchiveName = lastDbArchive.getString(ENV_PREFIX + KEY_DB_LAST_ARCHIVE);
             try {
-                arry[0] = lastDbArchiveName + ".zip";
+                arry[0] = lastDbArchiveName ;
                 arry[1] = lastDbArchiveName.replace(Db.getName() + "_", "");
             } catch (Exception e) {
                 Logger.logErrorMessage("Can't parse the lastDbArchive attribute caused by ", e.getMessage());
@@ -332,23 +332,17 @@ public class ClientUpgradeTool {
 
             String urlPrefix = lastDbArchiveObj.getString(ENV_PREFIX + KEY_DB_DOWNLOAD_URL);
             String downloadingUrl = UrlManager.getDbArchiveUrl(urlPrefix + dbFileName);
-            try {
-                if(!RestfulHttpClient.findResource(downloadingUrl+".7z")) {
-                    Logger.logWarningMessage("[ UPGRADE DB ] db archive %s dose not exist, break.", downloadingUrl+".7z");
-                }
+//            String downloadingUrl ="4615AS465D1XZC3AS13";
+            if(RestfulHttpClient.findResource(downloadingUrl+".7z")){
                 downloadingUrl += ".7z";
                 dbFileName += ".7z";
-            }catch(Exception e){
-                try {
-                    if(!RestfulHttpClient.findResource(downloadingUrl+".zip")){
-                        Logger.logWarningMessage("[ UPGRADE DB ] db archive %s dose not exist, break.", downloadingUrl+".zip");
-                    }
-                    downloadingUrl += ".zip";
-                    dbFileName += ".zip";
-                }catch(Exception exception){
-                    Logger.logWarningMessage("[ UPGRADE DB ] db archive exist judgement occur error: %s, break and wait for next check turn.", e.getMessage());
-                    return false;
-                }
+            }else if(RestfulHttpClient.findResource(downloadingUrl+".zip")){
+                Logger.logWarningMessage("[ UPGRADE DB ] db archive %s dose not exist, break.", downloadingUrl+".7z");
+                downloadingUrl += ".zip";
+                dbFileName += ".zip";
+            }else{
+                Logger.logWarningMessage("[ UPGRADE DB ] db archive %s dose not exist, break.", downloadingUrl+".zip");
+                return false;
             }
 
             Logger.logDebugMessage("[ UPGRADE DB ] Start to update the local db, pause the mining and blocks sync firstly");

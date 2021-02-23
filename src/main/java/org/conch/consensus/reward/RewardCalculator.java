@@ -63,7 +63,7 @@ public class RewardCalculator {
         RewardDef(long amount) {
             this.amount = amount;
         }
-        
+
     }
 
     /**
