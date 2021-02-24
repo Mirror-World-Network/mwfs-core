@@ -125,6 +125,7 @@
             },
             loginSharder() {
                 let _this = this;
+                _this.secretPhrase.trim();
                 if (!_this.validationInfo()) return;
                 if (_this.tabTitle === "account") {
                     _this.$global.fetch("GET", {account: _this.account}, "getAccount").then(res => {

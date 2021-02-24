@@ -73,11 +73,11 @@ public class RewardCalculator {
     /**
      * Estimated stable height after network reset
      */
-    public static final int NETWORK_STABLE_PHASE = Constants.isDevnet() ? 5 : 2008;
+    public static final int NETWORK_STABLE_PHASE = Constants.isDevnet() ? Constants.heightConf.getIntValue("NETWORK_STABLE_PHASE_IS_DEVNET") : Constants.heightConf.getIntValue("NETWORK_STABLE_PHASE_IS_TESTNET");
     /**
      * Estimated robust height after network reset
      */
-    public static final int NETWORK_ROBUST_PHASE = Constants.isDevnet() ? 10 : 11111;
+    public static final int NETWORK_ROBUST_PHASE = Constants.isDevnet() ? Constants.heightConf.getIntValue("NETWORK_ROBUST_PHASE_IS_DEVNET") : Constants.heightConf.getIntValue("NETWORK_ROBUST_PHASE_IS_TESTNET");
     /**
      * block reward verify height
      */
@@ -248,29 +248,28 @@ public class RewardCalculator {
 
         HashMap<Long, Long> crowdMinerPocScoreMap = Maps.newHashMap();
         // read the qualified miner list
-        Map<Long, CertifiedPeer> certifiedPeers = Conch.getPocProcessor().getCertifiedPeers();
-        if (certifiedPeers == null || certifiedPeers.size() == 0) {
+        Map<Long, CertifiedPeer>  certifiedPeers = Conch.getPocProcessor().getCertifiedPeers();
+        if(certifiedPeers == null || certifiedPeers.size() == 0) {
             return crowdMinerPocScoreMap;
         }
-        long startMS = System.currentTimeMillis();
-        Logger.logDebugMessage("Start to generate crow miner poc-score map [miner size=%d]", certifiedPeers.size());
+
         // generate the poc score map
-        for (CertifiedPeer certifiedPeer : certifiedPeers.values()) {
+        for(CertifiedPeer certifiedPeer : certifiedPeers.values()){
+
             // only reward once for same miner
-            if (exceptAccounts != null
-                    && exceptAccounts.contains(certifiedPeer.getBoundAccountId())) {
+            if(exceptAccounts != null
+            && exceptAccounts.contains(certifiedPeer.getBoundAccountId())){
                 continue;
             }
             // qualified miner judgement
             Account declaredAccount = Account.getAccount(certifiedPeer.getBoundAccountId());
-            if (declaredAccount == null) {
+            if(declaredAccount == null) {
                 continue;
             }
 
             long holdingMwAmount = 0;
             try{
-//                holdingMwAmount = declaredAccount.getEffectiveBalanceSS(height);
-                holdingMwAmount = declaredAccount.getConfirmedEffectiveBalanceSS(height);
+                holdingMwAmount = declaredAccount.getEffectiveBalanceSS(height);
             }catch(Exception e){
                 Logger.logWarningMessage("[QualifiedMiner] not valid miner because can't get balance of account %s at height %d, caused by %s",  declaredAccount.getRsAddress(), height, e.getMessage());
                 holdingMwAmount = 0;
@@ -281,13 +280,12 @@ public class RewardCalculator {
 
             // poc score judgement
             PocScore pocScore = PocHolder.getPocScore(height, declaredAccount.getId());
-            if (pocScore == null || pocScore.total().longValue() <= 0) {
+            if(pocScore == null || pocScore.total().longValue() <= 0) {
                 continue;
             }
+
             crowdMinerPocScoreMap.put(declaredAccount.getId(), pocScore.total().longValue());
         }
-        long usedTimeMS = System.currentTimeMillis() - startMS;
-        Logger.logDebugMessage("Finish generate crow miner poc-score map[used time≈%dS]", usedTimeMS / 1000);
         return crowdMinerPocScoreMap;
     }
 
@@ -297,6 +295,9 @@ public class RewardCalculator {
     }
 
     /**
+<<<<<<< HEAD
+     * 核对并结算RowdMinerRewards
+=======
      * Total capacity of qualified miner hardware
      * @return
      * @param height
@@ -324,6 +325,7 @@ public class RewardCalculator {
     }
 
     /**
+>>>>>>> 815213fadc95ae89d7196d0b29d2a7377ec8e39d
      * Check whether reach the settlement height
      * Settle all un-settlement blocks before this height
      * Combine changes of the same account from these blocks
@@ -374,6 +376,7 @@ public class RewardCalculator {
 
                 long totalPocScoreLong = 0;
                 Map<Long, Long> crowdMiners = coinBase.getCrowdMiners();
+
                 for(long pocScore : crowdMiners.values()){
                     totalPocScoreLong += pocScore;
                 }

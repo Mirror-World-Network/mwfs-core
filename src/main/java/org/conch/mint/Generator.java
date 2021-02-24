@@ -33,6 +33,7 @@ import org.conch.consensus.poc.PocCalculator;
 import org.conch.consensus.poc.PocScore;
 import org.conch.crypto.Crypto;
 import org.conch.db.Db;
+import org.conch.db.DbUtils;
 import org.conch.env.RuntimeEnvironment;
 import org.conch.http.ForceConverge;
 import org.conch.mint.pool.SharderPoolProcessor;
@@ -45,6 +46,10 @@ import org.json.simple.JSONObject;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -1052,6 +1057,32 @@ public class Generator implements Comparable<Generator> {
                 //Logger.logDebugMessage("\n\rTotal Generator detail is \n\r" + generatorDetailStr);
                 //Logger.logDebugMessage("\n\rTotal Bad Hardware Score detail is \n\r" + badHardwareScoreStr);
             }
+
+            if(lastBlock.getHeight() >= Constants.MINER_REMOVE_HIGHT){
+                for(Iterator<ActiveGenerator> it = generatorList.iterator(); it.hasNext();){
+                    ActiveGenerator activeGenerator = it.next();
+                    boolean isInTx = Db.db.isInTransaction();
+                    Connection con = null;
+                    try {
+                        con = Db.db.getConnection();
+                        PreparedStatement pstmt = con.prepareStatement("SELECT * FROM certified_peer WHERE account_id =? and delete_height != 0 and delete_height <= ?;");
+                        pstmt.setString(1,activeGenerator.getAccountId()+"");
+                        pstmt.setInt(2,lastBlock.getHeight());
+                        ResultSet rs = pstmt.executeQuery();
+                        while (rs.next()) {
+                            it.remove();
+                        }
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e.toString(), e);
+                    }finally {
+                        if (!isInTx) {
+                            DbUtils.close(con);
+                        }
+                    }
+                }
+            }
+
+
         }
         return generatorList;
     }

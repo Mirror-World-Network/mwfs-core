@@ -30,6 +30,7 @@ import org.conch.common.Constants;
 import org.conch.consensus.burn.BurnCalculator;
 import org.conch.consensus.genesis.SharderGenesis;
 import org.conch.consensus.poc.PocScore;
+import org.conch.consensus.poc.db.PocDb;
 import org.conch.consensus.poc.tx.PocTxBody;
 import org.conch.consensus.reward.RewardCalculator;
 import org.conch.crypto.Crypto;
@@ -37,6 +38,7 @@ import org.conch.db.*;
 import org.conch.http.ForceConverge;
 import org.conch.mint.Generator;
 import org.conch.mint.pool.SharderPoolProcessor;
+import org.conch.peer.CertifiedPeer;
 import org.conch.peer.Peer;
 import org.conch.peer.Peers;
 import org.conch.security.Guard;
@@ -634,7 +636,6 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 GetNextBlocks nextBlocks = it.next();
                 List<BlockImpl> blockList;
                 try {
-                    // todo A {@code Future} represents the result of an asynchronous computation, possible execute to here blockList is null, should wait Future is done
                     blockList = nextBlocks.getFuture().get();
                 } catch (ExecutionException exc) {
                     throw new RuntimeException(exc.getMessage(), exc);
@@ -1984,6 +1985,11 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             throws TransactionNotAcceptedException, ConchException.StopException {
         try {
             isProcessingBlock = true;
+
+            if(block.getHeight() >= Constants.MINER_REMOVE_HIGHT){
+                checkMiner(block);
+            }
+
             // unconfirmed balance update
             for (TransactionImpl transaction : block.getTransactions()) {
                 if (!transaction.applyUnconfirmed()) {
@@ -2105,11 +2111,6 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     .thenComparingInt(Transaction::getIndex)
                     .thenComparingLong(Transaction::getId);
 
-    /**
-     * Rollback to height of commonBlock, and return blocks list of rolled back
-     * @param commonBlock
-     * @return Rolled back blocks
-     */
     public List<BlockImpl> popOffTo(Block commonBlock) {
         blockchain.writeLock();
         try {
@@ -2176,6 +2177,96 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         blockchain.setLastBlock(previousBlock);
         blockListeners.notify(block, Event.BLOCK_POPPED);
         return previousBlock;
+    }
+
+    private static long QUALIFIED_CROWD_MINER_HOLDING_AMOUNT_MIN = 32*133L; // 1T-133MW
+
+    /**
+     * 条件检查的时间点： 在区块确认时，针对转账交易进行检查
+     * 转出方是否存在于矿工列表，存在进行最新挖矿持仓量检查，不满足移除；
+     * 方案1：
+     *   - 矿工数据做逻辑删除，设置检查状态，处于检查状态的逻辑删除矿工数，每个区块高度仍然按照第一条进行条件检测
+     *   - 回滚和分叉情况下，放回矿工列表
+     * @param block
+     */
+    private void checkMiner(BlockImpl block){
+        //得到矿工列表
+        HashMap<Long, Long> crowdMiners = new HashMap<>();
+        for (TransactionImpl transaction : block.getTransactions()) {
+            if(transaction.getType().isType(TransactionType.TYPE_COIN_BASE)){
+                Attachment.CoinBase coinBase = (Attachment.CoinBase) transaction.getAttachment();
+                if((coinBase.isType(Attachment.CoinBase.CoinBaseType.CROWD_BLOCK_REWARD)
+                        ||coinBase.isType(Attachment.CoinBase.CoinBaseType.BLOCK_REWARD))
+                        && coinBase.getCrowdMiners().size() > 0){
+                    crowdMiners = coinBase.getCrowdMiners();
+                    break;
+                }
+            }
+        }
+
+        for(Long crowdMinerId : crowdMiners.keySet()){
+            CertifiedPeer certifiedPeer = Conch.getPocProcessor().getCertifiedPeers().get(crowdMinerId);
+            if(certifiedPeer!=null && certifiedPeer.getDeleteHeight() > block.getHeight()){
+                certifiedPeer.setDeleteHeight(0);
+                PocDb.saveOrUpdatePeer(certifiedPeer);
+            }
+        }
+
+        for (TransactionImpl transaction : block.getTransactions()) {
+            //检查转账交易
+            if(transaction.getType().isType(TransactionType.TYPE_PAYMENT)){
+                //转出方是否存在于矿工列表
+                for(Long crowdMinerId : crowdMiners.keySet()){
+                    if(crowdMinerId.equals(transaction.getSenderId())){
+                        //存在进行最新挖矿持仓量检查
+                        long holdingMwAmount = 0;
+                        try{
+                            if(Account.getAccount(crowdMinerId)!=null){
+                                holdingMwAmount = Account.getAccount(crowdMinerId).getEffectiveBalanceSS(block.getHeight());
+                            }
+                        }catch(Exception e){
+                            Logger.logWarningMessage("[QualifiedMiner] not valid miner because can't get balance of account %s at height %d, caused by %s",  Account.getAccount(crowdMinerId).getRsAddress(), block.getHeight(), e.getMessage());
+                            holdingMwAmount = 0;
+                        }
+
+                        CertifiedPeer certifiedPeer = null;
+                        if(holdingMwAmount < QUALIFIED_CROWD_MINER_HOLDING_AMOUNT_MIN) {
+                            //不满足移除
+                            //原表增加deleteHeight字段 查询时判断deleteHeight == 0
+                            certifiedPeer = Conch.getPocProcessor().getCertifiedPeers().get(crowdMinerId);
+                            if(certifiedPeer!=null){
+                                if(certifiedPeer.getDeleteHeight() == 0) {
+                                    certifiedPeer.setDeleteHeight(block.getHeight());
+                                    PocDb.saveOrUpdatePeer(certifiedPeer);
+                                }
+                            }
+                        }
+                    }
+                    if(crowdMinerId.equals(transaction.getRecipientId())){
+                        CertifiedPeer certifiedPeer = Conch.getPocProcessor().getCertifiedPeers().get(crowdMinerId);
+                        if(certifiedPeer!=null){
+                            if(certifiedPeer.getDeleteHeight() != 0) {
+                                //存在进行最新挖矿持仓量检查
+                                long holdingMwAmount = 0;
+                                try{
+                                    if(Account.getAccount(crowdMinerId)!=null){
+                                        holdingMwAmount = Account.getAccount(crowdMinerId).getEffectiveBalanceSS(block.getHeight());
+                                    }
+                                }catch(Exception e){
+                                    Logger.logWarningMessage("[QualifiedMiner] not valid miner because can't get balance of account %s at height %d, caused by %s",  Account.getAccount(crowdMinerId).getRsAddress(), block.getHeight(), e.getMessage());
+                                    holdingMwAmount = 0;
+                                }
+
+                                if(holdingMwAmount >= QUALIFIED_CROWD_MINER_HOLDING_AMOUNT_MIN) {
+                                    certifiedPeer.setDeleteHeight(0);
+                                    PocDb.saveOrUpdatePeer(certifiedPeer);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private void popOffWithRescan(int height) {

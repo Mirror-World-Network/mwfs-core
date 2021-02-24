@@ -8,6 +8,7 @@ contrib
 # *.bat
 jre
 .vscode
+*.MF
 
 package-lock.json
 

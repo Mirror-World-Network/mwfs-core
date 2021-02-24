@@ -797,7 +797,6 @@ public class ConchDbVersion extends DbVersion {
                                     }
                                 }
                             }
-
                         }
                     } catch (SQLException e) {
                         throw new RuntimeException(e.toString(), e);
@@ -805,6 +804,8 @@ public class ConchDbVersion extends DbVersion {
                 case 67:
                     apply("ALTER TABLE ACCOUNT_GUARANTEED_BALANCE_HISTORY ADD COLUMN IF NOT EXISTS LATEST BOOLEAN default false NOT NULL");
                 case 68:
+                    apply("alter table CERTIFIED_PEER add delete_Height int(10) not null default 0;");
+                 case 69:
                     break;
                 default:
                     throw new RuntimeException("Blockchain database inconsistent with code, at update " + nextUpdate
