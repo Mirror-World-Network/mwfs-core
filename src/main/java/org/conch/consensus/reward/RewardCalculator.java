@@ -251,6 +251,7 @@ public class RewardCalculator {
 
         // generate the poc score map
         for(CertifiedPeer certifiedPeer : certifiedPeers.values()){
+
             // only reward once for same miner
             if(exceptAccounts != null
             && exceptAccounts.contains(certifiedPeer.getBoundAccountId())){
@@ -285,6 +286,9 @@ public class RewardCalculator {
     }
 
     /**
+<<<<<<< HEAD
+     * 核对并结算RowdMinerRewards
+=======
      * Total capacity of qualified miner hardware
      * @return
      * @param height
@@ -312,6 +316,7 @@ public class RewardCalculator {
     }
 
     /**
+>>>>>>> 815213fadc95ae89d7196d0b29d2a7377ec8e39d
      * Check whether reach the settlement height
      * Settle all un-settlement blocks before this height
      * Combine changes of the same account from these blocks
@@ -362,6 +367,7 @@ public class RewardCalculator {
 
                 long totalPocScoreLong = 0;
                 Map<Long, Long> crowdMiners = coinBase.getCrowdMiners();
+
                 for(long pocScore : crowdMiners.values()){
                     totalPocScoreLong += pocScore;
                 }
