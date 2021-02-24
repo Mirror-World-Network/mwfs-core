@@ -474,7 +474,7 @@ public final class Constants {
     public static final boolean initFromArchivedDbFile = Conch.getBooleanProperty("sharder.initFromArchivedDbFile");
 
 
-    public static final int MINER_REMOVE_HIGHT = Conch.getIntProperty("sharder.minerRemoveHight",14400);
+    public static final int MINER_REMOVE_HIGHT = heightConf.getIntValue("MINER_REMOVE_HEIGHT");
 
     public static final int HeartBeat_Time = Conch.getIntProperty("sharder.heartBeatTime",5*60*1000);
 
