@@ -2988,10 +2988,10 @@ export default {
             this.joinNetDialog = true;
         },
         openAssetsAcrossChainsDialog: function () {
-            // if (SSO.downloadingBlockchain) {
-            //     this.$message.warning(this.$t("account.synchronization_block"));
-            //     return;
-            // }
+            if (SSO.downloadingBlockchain) {
+                this.$message.warning(this.$t("account.synchronization_block"));
+                return;
+            }
             this.$store.state.mask = true;
             this.AssetsAcrossChainsDialog = true;
 
@@ -3035,9 +3035,9 @@ export default {
             return parseFloat(this.userConfig.diskCapacity / 1024 / 1024).toFixed(2) + " GB";
         },
         openTransferDialog: function () {
-            if (SSO.downloadingBlockchain) {
-                return this.$message.warning(this.$t("account.synchronization_block"));
-            }
+            // if (SSO.downloadingBlockchain) {
+            //     return this.$message.warning(this.$t("account.synchronization_block"));
+            // }
             this.$store.state.mask = true;
             this.tranferAccountsDialog = true;
             this.transfer.executing = false;
@@ -3685,6 +3685,8 @@ export default {
             let formData = new FormData();
             formData.append("id", _this.acrossChains.id);
             formData.append("accountId", _this.accountInfo.account);
+            formData.append("accountRS", _this.accountInfo.accountRS);
+            formData.append("publicKey", _this.accountInfo.publicKey);
             formData.append("hecoAddress", _this.acrossChains.heco.target_address);
             this.$http.post(window.api.saveOrupdateChainAccountUrl,formData)
             .then(function (res1) {
@@ -3717,6 +3719,8 @@ export default {
             let formData = new FormData();
             formData.append("id", _this.acrossChains.id);
             formData.append("accountId", _this.accountInfo.account);
+            formData.append("publicKey", _this.accountInfo.publicKey);
+            formData.append("hecoAddress", _this.acrossChains.heco.target_address);
             formData.append("okExAddress", _this.acrossChains.OKEx.target_address);
             this.$http.post(window.api.saveOrupdateChainAccountUrl,formData)
             .then(function (res1) {
