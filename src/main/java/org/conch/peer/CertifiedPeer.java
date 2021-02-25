@@ -39,6 +39,7 @@ public class CertifiedPeer implements Serializable {
     long boundAccountId;
     String boundRS;
     Timestamp updateTime;
+    int deleteHeight = 0;
 
 
     public CertifiedPeer(Peer.Type type, String host, long accountId, long lastUpdateMS) {
@@ -130,7 +131,16 @@ public class CertifiedPeer implements Serializable {
     public void setHeight(int height) {
         this.height = height;
     }
-    
+
+    public int getDeleteHeight() {
+        return deleteHeight;
+    }
+
+    public void setDeleteHeight(int deleteHeight) {
+        this.deleteHeight = deleteHeight;
+    }
+
+
     public boolean isType(Peer.Type type){
         return (type == null || this.type == null)  ? false : this.type.equals(type);
     }

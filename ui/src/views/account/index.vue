@@ -25,7 +25,7 @@
                     </p>
                     <div class="account_tool">
                         <button class="common_btn imgBtn "
-                                v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}"
+                                v-bind:class="{'disabledWriteBtn': !nonDownloading,'writeBtn': nonDownloading}"
                                 @click="openTransferDialog">
                             <span class="icon">
                                 <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 174.62 174.83">
@@ -37,7 +37,7 @@
                             <span>{{ $t('account.transfer') }}</span>
                         </button>
                         <button class="common_btn imgBtn "
-                                v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}"
+                                v-bind:class="{'disabledWriteBtn': !nonDownloading,'writeBtn': nonDownloading}"
                                 @click="openBatchTransferDialog"
                                 v-if="openAirdrop">
                             <span class="icon">
@@ -50,7 +50,7 @@
                             <span>{{ $t('transfer.batch_transfer') }}</span>
                         </button>
                         <button class="common_btn imgBtn "
-                                v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}"
+                                v-bind:class="{'disabledWriteBtn': !nonDownloading,'writeBtn': nonDownloading}"
                                 v-if="whetherShowSendMsgBtn()"
                                 @click="openSendMessageDialog">
                             <span class="icon">
@@ -63,7 +63,7 @@
                             <span>{{ $t('account.send_message') }}</span>
                         </button>
                         <button class="common_btn imgBtn "
-                                v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}"
+                                v-bind:class="{'disabledWriteBtn': !nonDownloading,'writeBtn': nonDownloading}"
                                 v-if="whetherShowStorageBtn()"
                                 @click="openStorageFileDialog">
                             <span class="icon">
@@ -408,7 +408,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" v-loading="messageForm.executing" class="btn common_btn writeBtn"
-                                @click="sendMessageInfo" :disabled="isDisable">
+                                @click="sendMessageInfo" :disabled="messageForm.executing">
                             {{ $t('sendMessage.send_message') }}
                         </button>
                     </div>
@@ -584,7 +584,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" v-loading="transfer.executing" class="btn common_btn writeBtn"
-                                @click="sendTransferInfo" :disabled="isDisable">
+                                @click="sendTransferInfo" :disabled="transfer.executing">
                             {{ $t('transfer.transfer_send') }}
                         </button>
                     </div>
@@ -627,7 +627,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" v-loading="batch_transfer.executing" class="btn common_btn writeBtn"
-                                @click="sendBatchTransferInfo" :disabled="isDisable">
+                                @click="sendBatchTransferInfo" :disabled="batch_transfer.executing">
                             {{ $t('transfer.batch_transfer_send') }}
                         </button>
                         <el-row>
@@ -637,10 +637,9 @@
                         </el-row>
                         <button type="button" v-loading="batch_transfer.executingAnother"
                                 class="btn common_btn writeBtn"
-                                @click="detectionBatchTransferInfo" :disabled="isDisable">
+                                @click="detectionBatchTransferInfo" :disabled="batch_transfer.executingAnother">
                             {{ $t('transfer.batch_transfer_detection') }}
                         </button>
-
                     </div>
                 </div>
             </div>
@@ -748,7 +747,7 @@
                 </el-form>
                 <div class="footer-btn">
                     <button class="common_btn writeBtn" v-loading="hubsetting.executing"
-                            @click="verifyHubSetting('init')" :disabled="isDisable">
+                            @click="verifyHubSetting('init')" :disabled="hubsetting.executing">
                         {{ $t('hubsetting.confirm_restart') }}
                     </button>
                     <button class="common_btn writeBtn" @click="closeDialog">{{ $t('hubsetting.cancel') }}</button>
@@ -1929,12 +1928,10 @@ export default {
         verifyHubSetting: function (type) {
             this.hubsetting.executing = true;
             const _this = this;
-            _this.preventRepeatedClick();
             let reConfigFormData = _this.verifyAndGenerateHubSettingFormData();
             if (reConfigFormData !== false) {
                 reConfigFormData.append("isInit", "true");
             }
-
             if (type === 'init') {
                 this.operationType = 'init';
                 _this.$refs['initForm'].validate((valid) => {
@@ -2282,7 +2279,6 @@ export default {
         },
         uploadFile: function () {
             const _this = this;
-            _this.preventRepeatedClick();
             let formData = new FormData();
             formData.append("feeNQT", _this.messageForm.fee * _this.$global.unitValue);
             formData.append("secretPhrase", _this.messageForm.password || _this.secretPhrase);
@@ -2365,7 +2361,6 @@ export default {
         },
         sendMessageInfo: function () {
             const _this = this;
-            _this.preventRepeatedClick();
             _this.messageForm.executing = true;
             let options = {};
             let encrypted = {};
@@ -2445,7 +2440,6 @@ export default {
                     });
                 }
             }
-            _this.messageForm.executing = false;
         },
         sendMessage: function (formData) {
             const _this = this;
@@ -2469,6 +2463,7 @@ export default {
                         _this.$message.error(_this.$global.escape2Html(res.errorDescription));
                     }
                 }
+                _this.messageForm.executing = false;
             });
             /*return new Promise(function (resolve, reject) {
                 let config = {
@@ -2536,7 +2531,6 @@ export default {
         },
         sendBatchTransferInfo: function () {
             const _this = this;
-            _this.preventRepeatedClick();
             if (_this.batch_transfer.fileName === "") {
                 _this.$message.warning(_this.$t('sso.error_no_file_chosen'));
                 return;
@@ -2573,7 +2567,6 @@ export default {
         },
         detectionBatchTransferInfo: function () {
             const _this = this;
-            _this.preventRepeatedClick();
             if (_this.batch_transfer.fileName === "") {
                 _this.$message.warning(_this.$t('sso.error_no_file_chosen'));
                 return;
@@ -2604,7 +2597,6 @@ export default {
         },
         sendTransferInfo: function () {
             const _this = this;
-            _this.preventRepeatedClick();
             _this.transfer.executing = true;
             let options = {};
             let encrypted = {};
@@ -2628,18 +2620,16 @@ export default {
                 _this.transfer.executing = false;
                 return;
             }
-            if (_this.transfer.number === 0) {
+            if (parseFloat(_this.transfer.number, 10) === 0 || _this.transfer.number === "") {
                 _this.$message.warning(_this.$t('notification.transfer_amount_error'));
                 _this.transfer.executing = false;
                 return;
             }
             _this.getAccount(_this.accountInfo.accountRS).then(res => {
-                if (typeof res.errorDescription === 'undefined') {
-                    if (res.errorDescription === "Unknown account") {
-                        _this.$message.warning(_this.$t('notification.new_account_warning'));
-                        _this.transfer.executing = false;
-                        return;
-                    }
+                if (res.errorDescription === "Unknown account") {
+                    _this.$message.warning(_this.$t('notification.new_account_warning'));
+                    _this.transfer.executing = false;
+                    return;
                 }
                 _this.accountInfo = res;
 
@@ -2687,7 +2677,6 @@ export default {
                     }
                 }
                 _this.sendTransfer(formData);
-                _this.transfer.executing = false;
             });
 
         },
@@ -2712,6 +2701,7 @@ export default {
                         _this.$message.error(_this.$global.escape2Html(res.errorDescription));
                     }
                 }
+                _this.transfer.executing = false;
             });
 
             /*return new Promise(function (resolve, reject) {
@@ -2819,10 +2809,10 @@ export default {
                 this.$message.warning(this.$t("account.synchronization_block"));
                 return;
             }
-            if(this.blockchainState.blockchainState != "UP_TO_DATE"){
-                this.$message.warning(this.$t("account.up_to_date"));
-                return;
-            }
+            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+            //     this.$message.warning(this.$t("account.up_to_date"));
+            //     return;
+            // }
             this.$store.state.mask = true;
             this.sendMessageDialog = true;
         },
@@ -2831,10 +2821,10 @@ export default {
                 this.$message.warning(this.$t("account.synchronization_block"));
                 return;
             }
-            if(this.blockchainState.blockchainState != "UP_TO_DATE"){
-                this.$message.warning(this.$t("account.up_to_date"));
-                return;
-            }
+            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+            //     this.$message.warning(this.$t("account.up_to_date"));
+            //     return;
+            // }
             this.$store.state.mask = true;
             this.storageFileDialog = true;
         },
@@ -2843,10 +2833,10 @@ export default {
                 this.$message.warning(this.$t("account.synchronization_block"));
                 return;
             }
-            if(this.blockchainState.blockchainState != "UP_TO_DATE"){
-                this.$message.warning(this.$t("account.up_to_date"));
-                return;
-            }
+            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+            //     this.$message.warning(this.$t("account.up_to_date"));
+            //     return;
+            // }
             this.$store.state.mask = true;
             this.onChainDialog = true;
         },
@@ -2855,10 +2845,10 @@ export default {
                 this.$message.warning(this.$t("account.synchronization_block"));
                 return;
             }
-            if(this.blockchainState.blockchainState != "UP_TO_DATE"){
-                this.$message.warning(this.$t("account.up_to_date"));
-                return;
-            }
+            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+            //     this.$message.warning(this.$t("account.up_to_date"));
+            //     return;
+            // }
             this.$store.state.mask = true;
             this.joinNetDialog = true;
         },
@@ -2885,10 +2875,10 @@ export default {
             if (SSO.downloadingBlockchain) {
                 return this.$message.warning(this.$t("account.synchronization_block"));
             }
-            if(this.blockchainState.blockchainState != "UP_TO_DATE"){
-                this.$message.warning(this.$t("account.up_to_date"));
-                return;
-            }
+            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+            //     this.$message.warning(this.$t("account.up_to_date"));
+            //     return;
+            // }
             this.$store.state.mask = true;
             this.tranferAccountsDialog = true;
             this.transfer.executing = false;
@@ -2897,10 +2887,10 @@ export default {
             if (SSO.downloadingBlockchain) {
                 return this.$message.warning(this.$t("account.synchronization_block"));
             }
-            if(this.blockchainState.blockchainState != "UP_TO_DATE"){
-                this.$message.warning(this.$t("account.up_to_date"));
-                return;
-            }
+            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+            //     this.$message.warning(this.$t("account.up_to_date"));
+            //     return;
+            // }
             this.$store.state.mask = true;
             this.batchTranferAccountsDialog = true;
             this.batch_transfer.executing = false;
@@ -2999,10 +2989,10 @@ export default {
                 _this.$message.warning(_this.$t("account.synchronization_block"));
                 return;
             }
-            if(this.blockchainState.blockchainState != "UP_TO_DATE"){
-                this.$message.warning(this.$t("account.up_to_date"));
-                return;
-            }
+            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+            //     this.$message.warning(this.$t("account.up_to_date"));
+            //     return;
+            // }
             _this.isUserInfoDialog(false);
             _this.secretPhrase ? _this.setName(_this.secretPhrase) : _this.secretPhraseDialog = true;
         },
@@ -3526,11 +3516,8 @@ export default {
             const _this = this;
             return _this.$global.isOpenApiProxy();
         },
-        isUpToDateOrLight: function () {
-            const _this = this;
-            console.log("_this.blockchainState", _this.blockchainState)
-            console.log("isUpToDateOrLight", !SSO.downloadingBlockchain || _this.blockchainState.isLightClient == true);
-            return _this.blockchainState.blockchainState == "UP_TO_DATE" && !SSO.downloadingBlockchain || _this.blockchainState.isLightClient == true;
+        nonDownloading: function () {
+            return !SSO.downloadingBlockchain;
         }
     },
     watch: {
