@@ -483,6 +483,9 @@ public final class JSONData {
         json.put("timestamp", block.getTimestamp());
         json.put("version", block.getVersion());
         json.put("cumulativeDifficulty", block.getCumulativeDifficulty().toString());
+//        if (block.getNextBlockId() != 0) {
+//            json.put("nextBlock", Long.toUnsignedString(block.getNextBlockId()));
+//        }
         return json;
     }
 

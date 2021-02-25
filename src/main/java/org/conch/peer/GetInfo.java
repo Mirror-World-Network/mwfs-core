@@ -28,7 +28,9 @@ import org.conch.util.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONStreamAware;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 final class GetInfo extends PeerServlet.PeerRequestHandler {
 
@@ -131,11 +133,20 @@ final class GetInfo extends PeerServlet.PeerRequestHandler {
             List<JSONObject> forkBlocks = (List<JSONObject>) request.get("forkBlocks");
             Logger.logDebugMessage("SaveOrUpdate forkBlocks of node[%s] and BindRSAccount[%s]", peerImpl.getAnnouncedAddress(), peerImpl.getBindRsAccount());
             Peers.saveOrUpdateForkBlocks(peerImpl.getBindRsAccount(), forkBlocks);
+            if (Peers.missingForkBlocksMap.get(peerImpl.getBindRsAccount()) != null && request.get("processForkNode") == null) {
+                return Peers.getMyPeerInfoResponseToCommonNode(peerImpl.getBindRsAccount());
+            }
         }
         // ForkData is sent to processForkNode when it calls the API
         if (request.get("processForkNode") != null
                 && (boolean) request.get("processForkNode") == true
                 && Peers.isCollectForkNode(Conch.getMyAddress())) {
+            if (request.get("missedBlocks") != null) {
+                Map<String, ArrayList<Integer>> missedBlocks = (Map<String, ArrayList<Integer>>) request.get("missedBlocks");
+                if (!missedBlocks.isEmpty()) {
+                    Peers.missingForkBlocksMap.putAll(missedBlocks);
+                }
+            }
             return Peers.getMyPeerInfoResponseToProcessForkNode();
         }
         return Peers.getMyPeerInfoResponse();
