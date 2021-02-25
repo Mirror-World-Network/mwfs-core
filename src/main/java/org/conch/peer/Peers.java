@@ -1726,6 +1726,9 @@ public final class Peers {
      */
     public static JSONObject getForkBlockSummary(JSONObject conditionObj){
         JSONObject json = new JSONObject();
+        if (conditionObj == null) {
+            return json;
+        }
         if (conditionObj.get("sendToCollectForkNode") != null) {
             if (isProcessForkNode) {
                 json.put("processForkNode", true);
@@ -1770,7 +1773,7 @@ public final class Peers {
             myPeerJson.put("bestPeer", getBestPeerUri());
             myPeerInfoRequest = JSON.prepareRequest(myPeerJson);
             currentBlockchainState = state;
-        } else if ((!conditionObj.isEmpty()) && state == currentBlockchainState) {
+        } else if (conditionObj != null && state == currentBlockchainState) {
             JSONObject myPeerJson = generateMyPeerJson(conditionObj);
             myPeerJson.put("blockchainState", state.ordinal());
             myPeerInfoResponse = JSON.prepare(myPeerJson);
@@ -2068,6 +2071,7 @@ public final class Peers {
             for (Map.Entry<String, List<JSONObject>> entry : forkBlocksMapByProcessNode.entrySet()) {
                 processBlocksToForkObj(entry.getKey(), entry.getValue());
             }
+            processBlocksToForkObj(Conch.getStringProperty("sharder.HubBindAddress"), getForkBlocks(Conch.getHeight()-forkBlocksLevel.SMALL.getLevel(), Conch.getHeight()));
             // todo 持久化节点数据，保存该节点最近 144*3个区块信息
 
         } catch (Exception e) {
