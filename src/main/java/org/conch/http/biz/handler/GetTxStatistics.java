@@ -38,6 +38,7 @@ import org.conch.http.APIServlet;
 import org.conch.http.APITag;
 import org.conch.mint.Generator;
 import org.conch.tx.TransactionType;
+import org.conch.util.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONStreamAware;
 
@@ -172,5 +173,10 @@ public final class GetTxStatistics extends APIServlet.APIRequestHandler {
     @Override
     protected boolean allowRequiredBlockParameters() {
         return false;
+    }
+
+    @Override
+    protected boolean requireRequestControl() {
+        return true;
     }
 }
