@@ -1991,6 +1991,9 @@ public final class Peers {
     public static Map<Integer, JSONObject> blocksMap = Maps.newHashMap();
     public static JSONObject commonBlock;
     public static Integer forkSize;
+    public static Integer maxHeight = 0;
+    public static Integer minHeight = Conch.getHeight();
+    private static long lastTime = System.currentTimeMillis();
 
     /**
      * loop all forks, confirm commonBlock, base on commonBlock to analyze fork size and report to DingTalk
@@ -1998,9 +2001,11 @@ public final class Peers {
      */
     public static void processForkBlocksMap(Map<String, List<JSONObject>> forkBlocksMapData) {
         try {
-            Integer maxHeight = 0;
-            Integer minHeight = 0;
-            commonBlock = null;
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - lastTime > 3 * 60 * 60 * 1000) {
+                commonBlock = null;
+                lastTime = currentTime;
+            }
             for (Map.Entry<String, List<JSONObject>> entry : forkBlocksMapData.entrySet()) {
                 List<JSONObject> blocks = entry.getValue();
                 Collections.reverse(blocks);
@@ -2024,7 +2029,7 @@ public final class Peers {
                                     blocksMap.remove(currentHeight);
                                 }
                             }
-                            updateCommonBlocksMap(minHeight, maxHeight);
+                            updateCommonBlocksMap();
                             break;
                         }
                     }
@@ -2035,9 +2040,9 @@ public final class Peers {
                     String generatorRS = entry.getKey();
                     List<JSONObject> blocks = entry.getValue();
                     Collections.reverse(blocks);
-                    // 汇集各矿工节点数据
+                    // Collect data of each miner node
                     List<JSONObject> myBlocks = forkBlocksMapByProcessNode.get(generatorRS);
-                    // 更新矿工节点区块数据：剔除commonBlock之前的区块，添加commonBlock之后的区块
+                    // Update Miner Block Data: Remove blocks before CommonBlock and add blocks after CommonBlock
                     for (JSONObject myBlock : myBlocks) {
                         if ((Integer) myBlock.get("height") < (Integer) commonBlock.get("height")) {
                             myBlocks.remove(myBlock);
@@ -2066,7 +2071,7 @@ public final class Peers {
                     reportToDingTalk();
                 }
             } else {
-                updateCommonBlocksMap(minHeight, maxHeight);
+                updateCommonBlocksMap();
             }
             for (Map.Entry<String, List<JSONObject>> entry : forkBlocksMapByProcessNode.entrySet()) {
                 processBlocksToForkObj(entry.getKey(), entry.getValue());
@@ -2087,10 +2092,8 @@ public final class Peers {
     /**
      * clean up invalid data, and update
      * the latest block is more than 3 * 144 away from the current height
-     * @param minHeight
-     * @param maxHeight
      */
-    private static void updateCommonBlocksMap(Integer minHeight, Integer maxHeight) {
+    private static void updateCommonBlocksMap() {
         if (maxHeight - minHeight > forkBlocksLevel.LONG.getLevel()) {
             Integer startHeight = maxHeight - forkBlocksLevel.LONG.getLevel();
             for (Integer height : blocksMap.keySet()) {
@@ -2098,6 +2101,7 @@ public final class Peers {
                     blocksMap.remove(height);
                 }
             }
+            minHeight = startHeight;
         }
         forkBlocksMapByProcessNode.put("commonBlock", (List<JSONObject>) blocksMap.values());
     }
