@@ -1688,7 +1688,7 @@ public final class Peers {
         ArrayList<Object> collectForkNodes = Lists.newArrayList();
         collectForkNodes.addAll(bootNodesHost);
         collectForkNodes.add("192.168.0.232");
-        collectForkNodes.add("192.168.0.49");
+        collectForkNodes.add("192.168.0.122");
         return collectForkNodes.contains(address) && !Peers.closeCollectFork;
     }
 
@@ -1745,13 +1745,15 @@ public final class Peers {
             }
         }
         if (conditionObj.get("sendToProcessForkNode") != null){
-            forkBlocksMap.put(Conch.getMyAddress(), getForkBlocks(Conch.getHeight()-forkBlocksLevel.SMALL.getLevel(), Conch.getHeight()));
-            json.put("forkBlocksMap", Peers.forkBlocksMap);
-            Logger.logDebugMessage("Report and generate own forkBlocks to processForkNode");
+            if (Generator.HUB_BIND_ADDRESS != null) {
+                forkBlocksMap.put(Generator.HUB_BIND_ADDRESS, getForkBlocks(Conch.getHeight()-forkBlocksLevel.SMALL.getLevel(), Conch.getHeight()));
+            }
+            if (!Peers.forkBlocksMap.isEmpty()) {
+                json.put("forkBlocksMap", Peers.forkBlocksMap);
+            }
         }
         if (conditionObj.get("sendToCommonNode") != null) {
             json.put("missedBlocks", missingForkBlocksMap.get(conditionObj.get("sendToCommonNode")));
-            Logger.logDebugMessage("Report missedBlocks to commonNode");
         }
         return json;
     }
@@ -2001,7 +2003,7 @@ public final class Peers {
      */
     public static void processForkBlocksMap(Map<String, List<JSONObject>> forkBlocksMapData) {
         try {
-            long currentTime = System.currentTimeMillis();
+             long currentTime = System.currentTimeMillis();
             if (currentTime - lastTime > 3 * 60 * 60 * 1000) {
                 commonBlock = null;
                 lastTime = currentTime;
@@ -2076,7 +2078,9 @@ public final class Peers {
             for (Map.Entry<String, List<JSONObject>> entry : forkBlocksMapByProcessNode.entrySet()) {
                 processBlocksToForkObj(entry.getKey(), entry.getValue());
             }
-            processBlocksToForkObj(Conch.getStringProperty("sharder.HubBindAddress"), getForkBlocks(Conch.getHeight()-forkBlocksLevel.SMALL.getLevel(), Conch.getHeight()));
+            if (Generator.HUB_BIND_ADDRESS != null) {
+                processBlocksToForkObj(Generator.HUB_BIND_ADDRESS, getForkBlocks(Conch.getHeight()-forkBlocksLevel.SMALL.getLevel(), Conch.getHeight()));
+            }
             // todo 持久化节点数据，保存该节点最近 144*3个区块信息
 
         } catch (Exception e) {
@@ -2103,7 +2107,8 @@ public final class Peers {
             }
             minHeight = startHeight;
         }
-        forkBlocksMapByProcessNode.put("commonBlock", (List<JSONObject>) blocksMap.values());
+        List<JSONObject> blocks = new ArrayList<>(blocksMap.values());
+        forkBlocksMapByProcessNode.put("commonBlock", blocks);
     }
 
     /**

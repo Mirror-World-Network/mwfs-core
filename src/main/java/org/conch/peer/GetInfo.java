@@ -131,9 +131,10 @@ final class GetInfo extends PeerServlet.PeerRequestHandler {
         // CollectForkNode save or update forkBlocks,make sure blocks is up to date
         if (request.get("forkBlocks") != null && Peers.isCollectForkNode(Conch.getMyAddress())) {
             List<JSONObject> forkBlocks = (List<JSONObject>) request.get("forkBlocks");
-            Logger.logDebugMessage("SaveOrUpdate forkBlocks of node[%s] and BindRSAccount[%s]", peerImpl.getAnnouncedAddress(), peerImpl.getBindRsAccount());
+            Logger.logDebugMessage("SaveOrUpdate forkBlocks of commonNode[%s] and BindRSAccount[%s]", peerImpl.getAnnouncedAddress(), peerImpl.getBindRsAccount());
             Peers.saveOrUpdateForkBlocks(peerImpl.getBindRsAccount(), forkBlocks);
             if (Peers.missingForkBlocksMap.get(peerImpl.getBindRsAccount()) != null && request.get("processForkNode") == null) {
+                Logger.logDebugMessage("Report missedBlocks to commonNode[%s]", peerImpl.getAnnouncedAddress());
                 return Peers.getMyPeerInfoResponseToCommonNode(peerImpl.getBindRsAccount());
             }
         }
@@ -147,6 +148,7 @@ final class GetInfo extends PeerServlet.PeerRequestHandler {
                     Peers.missingForkBlocksMap.putAll(missedBlocks);
                 }
             }
+            Logger.logDebugMessage("Report and generate own forkBlocks to processForkNode[%s] and BindRSAccount[%s]", peerImpl.getAnnouncedAddress(), peerImpl.getBindRsAccount());
             return Peers.getMyPeerInfoResponseToProcessForkNode();
         }
         return Peers.getMyPeerInfoResponse();

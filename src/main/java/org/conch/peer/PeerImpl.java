@@ -738,7 +738,7 @@ final class PeerImpl implements Peer {
             }
             // get peer detail
             JSONObject response;
-            if (isCollectForkNode(this.announcedAddress) && Conch.getEpochTime() - this.lastUpdated > 600 && !isProcessForkNode) {
+            if (isCollectForkNode(this.announcedAddress) && Conch.getEpochTime() - this.lastUpdated > 600) {
                 Logger.logDebugMessage("Send peerInfo to collectForkNode[%s]", this.announcedAddress);
                 response = send(Peers.getMyPeerInfoRequestToCollectForkNode());
             } else {
