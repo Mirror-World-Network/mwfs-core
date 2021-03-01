@@ -1687,8 +1687,7 @@ public final class Peers {
     public static boolean isCollectForkNode(String address) {
         ArrayList<Object> collectForkNodes = Lists.newArrayList();
         collectForkNodes.addAll(bootNodesHost);
-        collectForkNodes.add("192.168.0.232");
-        collectForkNodes.add("192.168.0.122");
+        collectForkNodes.add("192.168.31.53");
         return collectForkNodes.contains(address) && !Peers.closeCollectFork;
     }
 
@@ -1696,10 +1695,8 @@ public final class Peers {
         JSONArray blocks = new JSONArray();
         DbIterator<? extends Block> iterator = null;
         final int timestamp = 0;
-        Integer from = Conch.getHeight() - endNum;
-        Integer to = Conch.getHeight() - startNum;
         try {
-            iterator = Conch.getBlockchain().getBlocks(to, from - 1);
+            iterator = Conch.getBlockchain().getBlocksByHeight(startNum + 1, endNum, null);
             while (iterator.hasNext()) {
                 Block block = iterator.next();
                 if (block.getTimestamp() < timestamp) {
