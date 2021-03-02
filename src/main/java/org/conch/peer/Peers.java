@@ -748,7 +748,7 @@ public final class Peers {
     private static Map<String, ForkObj> forkObjMap = Maps.newHashMap();
     private static Map<String, List<JSONObject>> forkBlocksMap = Maps.newHashMap();
     private static Map<String, List<JSONObject>> forkBlocksMapByProcessNode = Maps.newHashMap();
-    public static Map<String, ArrayList<Integer>> missingForkBlocksMap = Maps.newHashMap();
+    public static Map<String, ArrayList<Long>> missingForkBlocksMap = Maps.newHashMap();
 
     public static Map<String, ForkObj> getForkObjMap() {
         return forkObjMap;
@@ -1987,11 +1987,12 @@ public final class Peers {
         checkOrConnectAllGuideNodes(true);
     }
     
-    public static Map<Integer, JSONObject> blocksMap = Maps.newHashMap();
+    public static Map<Long, JSONObject> blocksMap = Maps.newHashMap();
     public static JSONObject commonBlock;
-    public static Integer forkSize;
-    public static Integer maxHeight = 0;
-    public static Integer minHeight = Conch.getHeight();
+    public static Long forkSize;
+    public static Long maxHeight = 0L;
+    public static Integer currentHeight = Conch.getHeight();
+    public static Long minHeight = currentHeight.longValue();
     private static long lastTime = System.currentTimeMillis();
 
     /**
@@ -2005,12 +2006,16 @@ public final class Peers {
                 commonBlock = null;
                 lastTime = currentTime;
             }
+
+            if (Generator.HUB_BIND_ADDRESS != null) {
+                forkBlocksMapData.put(Generator.HUB_BIND_ADDRESS, getForkBlocks(Conch.getHeight()-forkBlocksLevel.SMALL.getLevel(), Conch.getHeight()));
+            }
             for (Map.Entry<String, List<JSONObject>> entry : forkBlocksMapData.entrySet()) {
                 List<JSONObject> blocks = entry.getValue();
                 Collections.reverse(blocks);
                 for (JSONObject currentBlock : blocks) {
                     String blockId =(String) currentBlock.get("block");
-                    Integer height =(Integer) currentBlock.get("height");
+                    Long height =(Long) currentBlock.get("height");
                     if (blocksMap.get(height) == null) {
                         blocksMap.put(height, currentBlock);
                         if (height > maxHeight) {
@@ -2023,8 +2028,8 @@ public final class Peers {
                         if (blocksMap.get(height).get("block") != blockId) {
                             commonBlock = currentBlock;
                             // Remove blocks of blocksMap with height greater than commonBlock
-                            for (Integer currentHeight : blocksMap.keySet()) {
-                                if (currentHeight >= (Integer) commonBlock.get("height")) {
+                            for (Long currentHeight : blocksMap.keySet()) {
+                                if (currentHeight >= (Long) commonBlock.get("height")) {
                                     blocksMap.remove(currentHeight);
                                 }
                             }
@@ -2043,20 +2048,20 @@ public final class Peers {
                     List<JSONObject> myBlocks = forkBlocksMapByProcessNode.get(generatorRS);
                     // Update Miner Block Data: Remove blocks before CommonBlock and add blocks after CommonBlock
                     for (JSONObject myBlock : myBlocks) {
-                        if ((Integer) myBlock.get("height") < (Integer) commonBlock.get("height")) {
+                        if ((Long) myBlock.get("height") < (Long) commonBlock.get("height")) {
                             myBlocks.remove(myBlock);
                         }
                     }
                     for (JSONObject block : blocks) {
-                        if ((Integer) block.get("height") < (Integer) commonBlock.get("height")) {
+                        if ((Long) block.get("height") < (Long) commonBlock.get("height")) {
                             continue;
                         }
                         myBlocks.add(block);
                     }
-                    Integer currentMaxHeight = (Integer) myBlocks.get(myBlocks.size() - 1).get("height");
-                    Integer currentMinHeight = (Integer) myBlocks.get(0).get("height");
+                    Long currentMaxHeight = (Long) myBlocks.get(myBlocks.size() - 1).get("height");
+                    Long currentMinHeight = (Long) myBlocks.get(0).get("height");
                     if (myBlocks.size() < currentMaxHeight - currentMinHeight) {
-                        ArrayList<Integer> list = Lists.newArrayList();
+                        ArrayList<Long> list = Lists.newArrayList();
                         list.add(currentMinHeight);
                         list.add(currentMaxHeight);
                         missingForkBlocksMap.put(generatorRS, list);
@@ -2065,8 +2070,8 @@ public final class Peers {
                     }
                     forkBlocksMapByProcessNode.put(generatorRS, myBlocks);
                 }
-                forkSize = maxHeight - (Integer) commonBlock.get("height");
-                if (forkSize >= 18) {
+                forkSize = maxHeight - (Long) commonBlock.get("height");
+                if (forkSize >= 18L) {
                     reportToDingTalk();
                 }
             } else {
@@ -2074,9 +2079,6 @@ public final class Peers {
             }
             for (Map.Entry<String, List<JSONObject>> entry : forkBlocksMapByProcessNode.entrySet()) {
                 processBlocksToForkObj(entry.getKey(), entry.getValue());
-            }
-            if (Generator.HUB_BIND_ADDRESS != null) {
-                processBlocksToForkObj(Generator.HUB_BIND_ADDRESS, getForkBlocks(Conch.getHeight()-forkBlocksLevel.SMALL.getLevel(), Conch.getHeight()));
             }
             // todo 持久化节点数据，保存该节点最近 144*3个区块信息
 
@@ -2096,8 +2098,8 @@ public final class Peers {
      */
     private static void updateCommonBlocksMap() {
         if (maxHeight - minHeight > forkBlocksLevel.LONG.getLevel()) {
-            Integer startHeight = maxHeight - forkBlocksLevel.LONG.getLevel();
-            for (Integer height : blocksMap.keySet()) {
+            Long startHeight = maxHeight - forkBlocksLevel.LONG.getLevel();
+            for (Long height : blocksMap.keySet()) {
                 if (height < startHeight) {
                     blocksMap.remove(height);
                 }

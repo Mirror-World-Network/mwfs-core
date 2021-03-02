@@ -143,7 +143,7 @@ final class GetInfo extends PeerServlet.PeerRequestHandler {
                 && (boolean) request.get("processForkNode") == true
                 && Peers.isCollectForkNode(Conch.getMyAddress())) {
             if (request.get("missedBlocks") != null) {
-                Map<String, ArrayList<Integer>> missedBlocks = (Map<String, ArrayList<Integer>>) request.get("missedBlocks");
+                Map<String, ArrayList<Long>> missedBlocks = (Map<String, ArrayList<Long>>) request.get("missedBlocks");
                 if (!missedBlocks.isEmpty()) {
                     Peers.missingForkBlocksMap.putAll(missedBlocks);
                 }

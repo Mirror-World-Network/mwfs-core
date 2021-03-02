@@ -1106,8 +1106,8 @@ final class PeerImpl implements Peer {
         }
         if (json.get("missedBlocks") != null && !Peers.isProcessForkNode) {
             Logger.logDebugMessage("collectForkNode[%s] report missedBlocks to here", this.announcedAddress);
-            ArrayList<Integer> missedBlocks = (ArrayList<Integer>) json.get("missedBlocks");
-            Peers.additionalBlocks.addAll(Peers.getForkBlocks(missedBlocks.get(0), missedBlocks.get(1)));
+            ArrayList<Long> missedBlocks = (ArrayList<Long>) json.get("missedBlocks");
+            Peers.additionalBlocks.addAll(Peers.getForkBlocks(missedBlocks.get(0).intValue(), missedBlocks.get(1).intValue()));
         }
         return this;
     }
