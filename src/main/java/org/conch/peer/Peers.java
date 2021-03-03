@@ -23,6 +23,7 @@ package org.conch.peer;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.conch.Conch;
 import org.conch.account.Account;
@@ -105,6 +106,7 @@ public final class Peers {
     static final boolean getMorePeers;
     static final boolean isProcessForkNode;
     static final boolean closeCollectFork;
+    static final boolean isCommonNode;
 
     // change 20 -> 400, because one block include more than 2000 txs at 2018.11.21
     public static final int MAX_REQUEST_SIZE = 400 * 1024 * 1024;
@@ -440,13 +442,14 @@ public final class Peers {
         usePeersDb = Conch.getBooleanProperty("sharder.usePeersDb") && !Constants.isOffline;
         savePeers = usePeersDb && Conch.getBooleanProperty("sharder.savePeers");
         getMorePeers = Conch.getBooleanProperty("sharder.getMorePeers");
-        isProcessForkNode = Conch.getBooleanProperty("sharder.isProcessForkNode");
-        closeCollectFork = Conch.getBooleanProperty("sharder.closeCollectFork");
         cjdnsOnly = Conch.getBooleanProperty("sharder.cjdnsOnly");
         ignorePeerAnnouncedAddress = Conch.getBooleanProperty("sharder.ignorePeerAnnouncedAddress");
         if (useWebSockets && useProxy) {
             Logger.logMessage("Using a proxy, will not create outbound websockets.");
         }
+        closeCollectFork = Conch.getBooleanProperty("sharder.closeCollectFork");
+        isProcessForkNode = Conch.getBooleanProperty("sharder.isProcessForkNode");
+        isCommonNode = !isProcessForkNode && isCollectForkNode(getMyAddress());
 
         final List<Future<String>> unresolvedPeers = Collections.synchronizedList(new ArrayList<>());
 
@@ -748,7 +751,7 @@ public final class Peers {
     private static Map<String, ForkObj> forkObjMap = Maps.newHashMap();
     private static Map<String, List<JSONObject>> forkBlocksMap = Maps.newHashMap();
     private static Map<String, List<JSONObject>> forkBlocksMapByProcessNode = Maps.newHashMap();
-    public static Map<String, ArrayList<Long>> missingForkBlocksMap = Maps.newHashMap();
+    public static Map<String, Long[]> missingForkBlocksMap = Maps.newHashMap();
 
     public static Map<String, ForkObj> getForkObjMap() {
         return forkObjMap;
@@ -1710,7 +1713,7 @@ public final class Peers {
         return blocks;
     }
 
-    public static JSONArray additionalBlocks = new JSONArray();
+    public static Long[] additionalBlockHeightArray = null;
 
     /**
      * - commonNode: report forkBlocks to the designated node (BootNode)
@@ -1729,21 +1732,31 @@ public final class Peers {
         if (conditionObj.get("sendToCollectForkNode") != null) {
             if (isProcessForkNode) {
                 json.put("processForkNode", true);
-                json.put("missedBlocks", missingForkBlocksMap);
+                json.put("missedBlocksMap", missingForkBlocksMap);
                 Logger.logDebugMessage("Report processForkNode Label to collectForkNode");
             } else {
-                JSONArray forkBlocks = getForkBlocks(Conch.getHeight() - forkBlocksLevel.SMALL.getLevel(), Conch.getHeight());
-                json.put("forkBlocks", forkBlocks);
-                if (!additionalBlocks.isEmpty()) {
-                    json.put("forkBlocks", forkBlocks.addAll(additionalBlocks));
-                    additionalBlocks.clear();
+                if (additionalBlockHeightArray != null) {
+                    Integer[] maxAndMinArray = getMaxAndMinArray();
+                    JSONArray forkBlocks = getForkBlocks(maxAndMinArray[0], maxAndMinArray[1]);
+                    json.put("forkBlocks", forkBlocks);
+                } else {
+                    JSONArray forkBlocks = getForkBlocks(Conch.getHeight() - forkBlocksLevel.SMALL.getLevel(), Conch.getHeight());
+                    json.put("forkBlocks", forkBlocks);
                 }
+
                 Logger.logDebugMessage("Generate forkBlocks to collectForkNode");
             }
         }
         if (conditionObj.get("sendToProcessForkNode") != null){
             if (Generator.HUB_BIND_ADDRESS != null) {
-                forkBlocksMap.put(Generator.HUB_BIND_ADDRESS, getForkBlocks(Conch.getHeight()-forkBlocksLevel.SMALL.getLevel(), Conch.getHeight()));
+                if (missingForkBlocksMap.get(Generator.HUB_BIND_ADDRESS) != null) {
+                    additionalBlockHeightArray = missingForkBlocksMap.get(Generator.HUB_BIND_ADDRESS).clone();
+                    Integer[] maxAndMinArray = getMaxAndMinArray();
+                    forkBlocksMap.put(Generator.HUB_BIND_ADDRESS, Peers.getForkBlocks(maxAndMinArray[0], maxAndMinArray[1]));
+                } else {
+                    forkBlocksMap.put(Generator.HUB_BIND_ADDRESS, getForkBlocks(Conch.getHeight()-forkBlocksLevel.SMALL.getLevel(), Conch.getHeight()));
+                }
+
             }
             if (!Peers.forkBlocksMap.isEmpty()) {
                 json.put("forkBlocksMap", Peers.forkBlocksMap);
@@ -1753,6 +1766,27 @@ public final class Peers {
             json.put("missedBlocks", missingForkBlocksMap.get(conditionObj.get("sendToCommonNode")));
         }
         return json;
+    }
+
+    private static Integer[] getMaxAndMinArray() {
+        Integer[] ints = new Integer[2];
+        if (additionalBlockHeightArray.length == 2) {
+            int startHeight = additionalBlockHeightArray[0].intValue();
+            int endHeight = additionalBlockHeightArray[1].intValue();
+            if (startHeight > Conch.getHeight() - forkBlocksLevel.SMALL.getLevel()) {
+                startHeight = Conch.getHeight() - forkBlocksLevel.SMALL.getLevel();
+            }
+            if (endHeight <= Conch.getHeight()) {
+                endHeight = Conch.getHeight();
+            }
+            ints[0] = startHeight;
+            ints[1] = endHeight;
+        } else {
+            ints[0] = Conch.getHeight() - forkBlocksLevel.SMALL.getLevel();
+            ints[1] = Conch.getHeight();
+        }
+        additionalBlockHeightArray = null;
+        return ints;
     }
 
     /**
@@ -1991,9 +2025,9 @@ public final class Peers {
     public static JSONObject commonBlock;
     public static Long forkSize;
     public static Long maxHeight = 0L;
-    public static Integer currentHeight = Conch.getHeight();
-    public static Long minHeight = currentHeight.longValue();
+    public static Long minHeight = 0L;
     private static long lastTime = System.currentTimeMillis();
+    public static Set<String> allNodeSet = Sets.newHashSet();
 
     /**
      * loop all forks, confirm commonBlock, base on commonBlock to analyze fork size and report to DingTalk
@@ -2001,16 +2035,17 @@ public final class Peers {
      */
     public static void processForkBlocksMap(Map<String, List<JSONObject>> forkBlocksMapData) {
         try {
-             long currentTime = System.currentTimeMillis();
-            if (currentTime - lastTime > 3 * 60 * 60 * 1000) {
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - lastTime > 30 * 60 * 1000) {
                 commonBlock = null;
+                allNodeSet.clear();
                 lastTime = currentTime;
             }
-
             if (Generator.HUB_BIND_ADDRESS != null) {
                 forkBlocksMapData.put(Generator.HUB_BIND_ADDRESS, getForkBlocks(Conch.getHeight()-forkBlocksLevel.SMALL.getLevel(), Conch.getHeight()));
             }
             for (Map.Entry<String, List<JSONObject>> entry : forkBlocksMapData.entrySet()) {
+                allNodeSet.add(entry.getKey());
                 List<JSONObject> blocks = entry.getValue();
                 Collections.reverse(blocks);
                 for (JSONObject currentBlock : blocks) {
@@ -2025,8 +2060,12 @@ public final class Peers {
                             minHeight = height;
                         }
                     } else {
-                        if (blocksMap.get(height).get("block") != blockId) {
+                        if (!blocksMap.get(height).get("block").equals(blockId)) {
+                            if (commonBlock != null && height >= (Long) commonBlock.get("height")) {
+                                continue;
+                            }
                             commonBlock = currentBlock;
+                            lastTime = System.currentTimeMillis();
                             // Remove blocks of blocksMap with height greater than commonBlock
                             for (Long currentHeight : blocksMap.keySet()) {
                                 if (currentHeight >= (Long) commonBlock.get("height")) {
@@ -2061,9 +2100,9 @@ public final class Peers {
                     Long currentMaxHeight = (Long) myBlocks.get(myBlocks.size() - 1).get("height");
                     Long currentMinHeight = (Long) myBlocks.get(0).get("height");
                     if (myBlocks.size() < currentMaxHeight - currentMinHeight) {
-                        ArrayList<Long> list = Lists.newArrayList();
-                        list.add(currentMinHeight);
-                        list.add(currentMaxHeight);
+                        Long[] list = new Long[2];
+                        list[0] = currentMinHeight;
+                        list[1] = currentMaxHeight;
                         missingForkBlocksMap.put(generatorRS, list);
                     } else {
                         missingForkBlocksMap.remove(generatorRS);
@@ -2077,13 +2116,14 @@ public final class Peers {
             } else {
                 updateCommonBlocksMap();
             }
+            // todo
             for (Map.Entry<String, List<JSONObject>> entry : forkBlocksMapByProcessNode.entrySet()) {
                 processBlocksToForkObj(entry.getKey(), entry.getValue());
             }
             // todo 持久化节点数据，保存该节点最近 144*3个区块信息
 
         } catch (Exception e) {
-            Logger.logInfoMessage("Processing ForkBlocks data failed");
+            Logger.logInfoMessage("Processing ForkBlocks data failed, error: " + e);
         } finally {
             forkObjMapToAPI.clear();
             forkObjMapToAPI.putAll(forkObjMap);
@@ -2107,7 +2147,7 @@ public final class Peers {
             minHeight = startHeight;
         }
         List<JSONObject> blocks = new ArrayList<>(blocksMap.values());
-        forkBlocksMapByProcessNode.put("commonBlock", blocks);
+        forkBlocksMapByProcessNode.put("common_" + allNodeSet.size(), blocks);
     }
 
     /**
@@ -2127,14 +2167,28 @@ public final class Peers {
             return;
         }
         JSONObject lastBlock = blocks.get(0);
-        String blockGeneratorRS =(String) lastBlock.get("generatorRS");
+        String blockId =(String) lastBlock.get("block");
         // new fork
-        if (!forkObjMap.containsKey(blockGeneratorRS)) {
-            forkObjMap.put(blockGeneratorRS, new ForkObj(blockGeneratorRS, blocks, generatorRS));
+        if (!forkObjMap.containsKey(blockId)) {
+            // loop blocks, Compare the existence of an item equal to blockId
+            /*for (Map.Entry<String, ForkObj> entry : forkObjMap.entrySet()) {
+                int flag = 0;
+                for (JSONObject block : entry.getValue().getBlocks()) {
+                    if (blockId.equals(block.get("block"))) {
+                        forkObjMap.get(entry.getKey()).addGenerator(generatorRS);
+                        flag = 1;
+                        break;
+                    }
+                }
+                if (flag != 0) {
+                    break;
+                }
+            }*/
+            forkObjMap.put(blockId, new ForkObj(blockId, blocks, generatorRS));
             return;
         }
         // process old fork
-        forkObjMap.get(blockGeneratorRS).addGenerator(generatorRS);
+        forkObjMap.get(blockId).addGenerator(generatorRS);
     }
 
     /**

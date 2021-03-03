@@ -32,7 +32,6 @@ import org.conch.http.API;
 import org.conch.http.APIEnum;
 import org.conch.security.Guard;
 import org.conch.util.*;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONStreamAware;
 import org.json.simple.JSONValue;
@@ -45,7 +44,6 @@ import java.util.*;
 import java.util.zip.GZIPInputStream;
 
 import static org.conch.peer.Peers.isCollectForkNode;
-import static org.conch.peer.Peers.isProcessForkNode;
 
 final class PeerImpl implements Peer {
     // ip
@@ -1100,14 +1098,14 @@ final class PeerImpl implements Peer {
         blockSummaryJson.put("lastBlockGenerator", json.get("lastBlockGenerator"));
         blockSummaryJson.put("lastBlockTimestamp", json.get("lastBlockTimestamp"));
         blockSummaryJson.put("currentFork", json.get("currentFork"));
-        if (json.get("forkBlocksMap") != null && Peers.isProcessForkNode) {
+        if (Peers.isProcessForkNode && json.get("forkBlocksMap") != null) {
             Logger.logDebugMessage("collectForkNode[%s] append forkBlocksMap to processForkNode", this.announcedAddress);
             Peers.processForkBlocksMap((Map) json.get("forkBlocksMap"));
         }
-        if (json.get("missedBlocks") != null && !Peers.isProcessForkNode) {
+        if (Peers.isCommonNode && json.get("missedBlocks") != null) {
             Logger.logDebugMessage("collectForkNode[%s] report missedBlocks to here", this.announcedAddress);
-            ArrayList<Long> missedBlocks = (ArrayList<Long>) json.get("missedBlocks");
-            Peers.additionalBlocks.addAll(Peers.getForkBlocks(missedBlocks.get(0).intValue(), missedBlocks.get(1).intValue()));
+            Long[] missedBlocks = (Long[]) json.get("missedBlocks");
+            Peers.additionalBlockHeightArray = missedBlocks.clone();
         }
         return this;
     }

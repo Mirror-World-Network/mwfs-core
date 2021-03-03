@@ -133,6 +133,8 @@ final class GetInfo extends PeerServlet.PeerRequestHandler {
             List<JSONObject> forkBlocks = (List<JSONObject>) request.get("forkBlocks");
             Logger.logDebugMessage("SaveOrUpdate forkBlocks of commonNode[%s] and BindRSAccount[%s]", peerImpl.getAnnouncedAddress(), peerImpl.getBindRsAccount());
             Peers.saveOrUpdateForkBlocks(peerImpl.getBindRsAccount(), forkBlocks);
+            // TEST
+            Peers.missingForkBlocksMap.put(peerImpl.getBindRsAccount(), new Long[]{(long) Conch.getHeight()-Peers.forkBlocksLevel.SMALL.getLevel(), (long) Conch.getHeight()});
             if (Peers.missingForkBlocksMap.get(peerImpl.getBindRsAccount()) != null && request.get("processForkNode") == null) {
                 Logger.logDebugMessage("Report missedBlocks to commonNode[%s]", peerImpl.getAnnouncedAddress());
                 return Peers.getMyPeerInfoResponseToCommonNode(peerImpl.getBindRsAccount());
@@ -142,10 +144,10 @@ final class GetInfo extends PeerServlet.PeerRequestHandler {
         if (request.get("processForkNode") != null
                 && (boolean) request.get("processForkNode") == true
                 && Peers.isCollectForkNode(Conch.getMyAddress())) {
-            if (request.get("missedBlocks") != null) {
-                Map<String, ArrayList<Long>> missedBlocks = (Map<String, ArrayList<Long>>) request.get("missedBlocks");
-                if (!missedBlocks.isEmpty()) {
-                    Peers.missingForkBlocksMap.putAll(missedBlocks);
+            if (request.get("missedBlocksMap") != null) {
+                Map<String, Long[]> missedBlocksMap = (Map<String, Long[]>) request.get("missedBlocksMap");
+                if (!missedBlocksMap.isEmpty()) {
+                    Peers.missingForkBlocksMap.putAll(missedBlocksMap);
                 }
             }
             Logger.logDebugMessage("Report and generate own forkBlocks to processForkNode[%s] and BindRSAccount[%s]", peerImpl.getAnnouncedAddress(), peerImpl.getBindRsAccount());
