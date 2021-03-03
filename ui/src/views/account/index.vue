@@ -1076,7 +1076,7 @@
 <script>
 import rules from "../../utils/rules";
 import {FoundationApiUrls, getCommonFoundationApiUrl} from "../../utils/apiUrl";
-import {Decimal} from "decimal.js";
+import { BigNumber } from "bignumber.js";
 
 export default {
     name: "Network",
@@ -2242,7 +2242,7 @@ export default {
                 formData.append("calculateFee", "true");
                 formData.append("broadcast", "false");
                 formData.append("feeNQT", "0");
-                formData.append("amountNQT", new Decimal(_this.transfer.number).times(_this.$global.unitValue));
+                formData.append("amountNQT", new BigNumber(_this.transfer.number).times(_this.$global.unitValue));
 
 
                 if (_this.transfer.hasMessage && _this.transfer.message !== "") {
@@ -2282,7 +2282,7 @@ export default {
         uploadFile: function () {
             const _this = this;
             let formData = new FormData();
-            formData.append("feeNQT", new Decimal(_this.messageForm.fee).times(_this.$global.unitValue));
+            formData.append("feeNQT", new BigNumber(_this.messageForm.fee).times(_this.$global.unitValue));
             formData.append("secretPhrase", _this.messageForm.password || _this.secretPhrase);
             formData.append("name", _this.messageForm.fileName);
             formData.append("file", _this.storagefile);
@@ -2313,7 +2313,7 @@ export default {
             const _this = this;
             _this.preventRepeatedClick();
             let formData = new FormData();
-            formData.append("feeNQT", new Decimal(_this.messageForm.fee).items(_this.$global.unitValue));
+            formData.append("feeNQT", new BigNumber(_this.messageForm.fee).items(_this.$global.unitValue));
             formData.append("secretPhrase", _this.messageForm.password || _this.secretPhrase);
             formData.append("phased", 'false');
             formData.append("phasingLinkedFullHash", '');
@@ -2400,7 +2400,7 @@ export default {
             formData.append("phasingLinkedFullHash", '');
             formData.append("phasingHashedSecret", '');
             formData.append("phasingHashedSecretAlgorithm", '2');
-            formData.append("feeNQT", new Decimal(_this.messageForm.fee).items(_this.$global.unitValue));
+            formData.append("feeNQT", new BigNumber(_this.messageForm.fee).items(_this.$global.unitValue));
             formData.append("secretPhrase", _this.messageForm.password || _this.secretPhrase);
             formData.append("deadline", '1440');
 
@@ -2658,10 +2658,10 @@ export default {
                 formData.append("phasingHashedSecret", '');
                 formData.append("phasingHashedSecretAlgorithm", '2');
                 formData.append("publicKey", "");
-                formData.append("feeNQT", new Decimal(_this.transfer.fee).times(_this.$global.unitValue));
-                formData.append("amountNQT", new Decimal(_this.transfer.number).times(_this.$global.unitValue));
+                formData.append("feeNQT", new BigNumber(_this.transfer.fee).times(_this.$global.unitValue));
+                formData.append("amountNQT", new BigNumber(_this.transfer.number).times(_this.$global.unitValue));
                 formData.append("secretPhrase", _this.secretPhrase || _this.transfer.password);
-
+                debugger
                 if (_this.transfer.hasMessage && _this.transfer.message !== "") {
                     if (_this.transfer.isEncrypted) {
 
