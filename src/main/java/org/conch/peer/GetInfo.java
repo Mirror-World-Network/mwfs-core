@@ -28,7 +28,6 @@ import org.conch.util.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONStreamAware;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -133,8 +132,12 @@ final class GetInfo extends PeerServlet.PeerRequestHandler {
             List<JSONObject> forkBlocks = (List<JSONObject>) request.get("forkBlocks");
             Logger.logDebugMessage("SaveOrUpdate forkBlocks of commonNode[%s] and BindRSAccount[%s]", peerImpl.getAnnouncedAddress(), peerImpl.getBindRsAccount());
             Peers.saveOrUpdateForkBlocks(peerImpl.getBindRsAccount(), forkBlocks);
-            // TEST
-            Peers.missingForkBlocksMap.put(peerImpl.getBindRsAccount(), new Long[]{(long) Conch.getHeight()-Peers.forkBlocksLevel.SMALL.getLevel(), (long) Conch.getHeight()});
+            // TEST Start return missedForkBlocks to commonNode
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("startHeight", Conch.getHeight()-Peers.forkBlocksLevel.MINI.getLevel());
+            jsonObject.put("endHeight", Conch.getHeight());
+            Peers.missingForkBlocksMap.put(peerImpl.getBindRsAccount(), jsonObject);
+            // TEST End
             if (Peers.missingForkBlocksMap.get(peerImpl.getBindRsAccount()) != null && request.get("processForkNode") == null) {
                 Logger.logDebugMessage("Report missedBlocks to commonNode[%s]", peerImpl.getAnnouncedAddress());
                 return Peers.getMyPeerInfoResponseToCommonNode(peerImpl.getBindRsAccount());
@@ -145,7 +148,7 @@ final class GetInfo extends PeerServlet.PeerRequestHandler {
                 && (boolean) request.get("processForkNode") == true
                 && Peers.isCollectForkNode(Conch.getMyAddress())) {
             if (request.get("missedBlocksMap") != null) {
-                Map<String, Long[]> missedBlocksMap = (Map<String, Long[]>) request.get("missedBlocksMap");
+                Map<String, JSONObject> missedBlocksMap = (Map<String, JSONObject>) request.get("missedBlocksMap");
                 if (!missedBlocksMap.isEmpty()) {
                     Peers.missingForkBlocksMap.putAll(missedBlocksMap);
                 }

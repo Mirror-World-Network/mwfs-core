@@ -477,11 +477,11 @@ public final class JSONData {
 
     public static JSONObject forkBlock(Block block) {
         JSONObject json = new JSONObject();
-        json.put("block", block.getStringId());
-        json.put("height", (long) block.getHeight());
+        json.put("block", block.getId());
+        json.put("height", block.getHeight());
         json.put("generatorRS", Account.rsAccount(block.getGeneratorId()));
-        json.put("timestamp", (long) block.getTimestamp());
-        json.put("version", (long) block.getVersion());
+        json.put("timestamp", block.getTimestamp());
+        json.put("version", block.getVersion());
         json.put("cumulativeDifficulty", block.getCumulativeDifficulty().toString());
 //        if (block.getNextBlockId() != 0) {
 //            json.put("nextBlock", Long.toUnsignedString(block.getNextBlockId()));
