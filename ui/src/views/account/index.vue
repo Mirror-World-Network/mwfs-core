@@ -1598,6 +1598,7 @@ export default {
             }
 
             const _this = this;
+            console.log("----------------SSO.accountRS",SSO.accountRS);
             _this.getAccount(_this.accountInfo.accountRS).then(res => {
                 _this.accountInfo.account = res.account;
                 _this.accountInfo.balanceNQT = res.balanceNQT;
@@ -3692,6 +3693,8 @@ export default {
             .then(function (res1) {
                 _this.$message.success(_this.$t('acrossChains.bindAddress_success_heco'));
                 _this.acrossChains.heco.old_address = _this.acrossChains.heco.target_address;
+                console.log(res1.data)
+                _this.acrossChains.id = res1.data.body;
             })
             .catch(err => {
                 _this.$message.warning(_this.$t('acrossChains.bindAddress_fail_heco')); 
@@ -3720,12 +3723,13 @@ export default {
             formData.append("id", _this.acrossChains.id);
             formData.append("accountId", _this.accountInfo.account);
             formData.append("publicKey", _this.accountInfo.publicKey);
-            formData.append("hecoAddress", _this.acrossChains.heco.target_address);
+            formData.append("accountRS", _this.accountInfo.accountRS);
             formData.append("okExAddress", _this.acrossChains.OKEx.target_address);
             this.$http.post(window.api.saveOrupdateChainAccountUrl,formData)
             .then(function (res1) {
                 _this.$message.success(_this.$t('acrossChains.bindAddress_success_OKEx'));
                 _this.acrossChains.OKEx.old_address = _this.acrossChains.OKEx.target_address;
+                _this.acrossChains.id = res1.data.body;
             })
             .catch(err => {
                 _this.$message.warning(_this.$t('acrossChains.bindAddress_fail_OKEx'));

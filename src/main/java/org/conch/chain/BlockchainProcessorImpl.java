@@ -2105,6 +2105,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                             params.put("recordType","1");
                             params.put("amount",transaction.getAmountNQT()+"");
                             params.put("createDate",transaction.getTimestamp()+"");
+                            params.put("SourceTransactionHash",transaction.getFullHash());
                             RestfulHttpClient.HttpResponse response = RestfulHttpClient.getClient(url).post().postParams(params).request();
                             if(response != null){
                                 String content = response.getContent();
@@ -2117,7 +2118,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                         try {
                             Map<String,String> params = new HashMap<>();
                             params.put("accountId",transaction.getSenderId()+"");
-                            params.put("recordType","2");
+                            params.put("recordType","3");
                             params.put("amount",transaction.getAmountNQT()+"");
                             params.put("createDate",transaction.getBlockTimestamp()+"");
                             RestfulHttpClient.HttpResponse response = RestfulHttpClient.getClient(url).post().postParams(params).request();
