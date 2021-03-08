@@ -47,13 +47,13 @@
                             <img src="../../assets/img/miner-info1.svg"/>
                         </div>
                          <div class="section_info" id="activeCount">
-                                <span>{{activeCount}}</span>
-                                <span>{{$t('network.miner_volume')}}</span>
+                                <span style="font-size:16px;">{{activeCount}}</span>
+                                <span style="font-size:12px;">{{$t('network.miner_volume')}}</span>
                         </div>
                         <!-- <hr id="activeCountLine"/> -->
                         <div class="section_info" id="qualifiedActiveCount">
-                            <span>{{qualifiedActiveCount}}</span>
-                            <span>{{$t('network.qualified_miner_volume')}}</span>
+                            <span style="font-size:16px;">{{qualifiedActiveCount}}</span>
+                            <span style="font-size:12px;">{{$t('network.qualified_miner_volume')}}</span>
                         </div>
                     </div>
                     <div class="trading_situation_info">

@@ -109,6 +109,7 @@ const cn = {
         'payout': "支出",
         'income': "收入",
         'account_inactive': "账户暂未绑定公钥，请发起一笔转账等交易进行自动绑定以提升安全性",
+        'up_to_date': "区块链非最新状态，请稍后再试"
     },
     acrossChains:{
         'title': "资产跨链",
@@ -303,7 +304,7 @@ const cn = {
         'block_peers_volume': "节点数量",
         'declared_peers_size': "历史声明节点数",
         'miner_info': "交易概况",
-        'miner_volume': "矿工数量",
+        'miner_volume': "活跃矿工数量",
         'qualified_miner_volume': "合格矿工数量",
         'total_trading_volume': "交易总额",
         'transfer_transaction': "转账交易数",

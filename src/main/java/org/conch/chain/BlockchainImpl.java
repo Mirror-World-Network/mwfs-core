@@ -166,7 +166,7 @@ public final class BlockchainImpl implements Blockchain {
             sortField = orderPair[0];
             sortDirection = orderPair[1];
         }
-        Connection con = null;
+        Connection con;
         try {
             con = Db.db.getConnection();
             PreparedStatement pstmt = con.prepareStatement("SELECT * FROM block WHERE height <= ? AND height >= ? ORDER BY " + sortField + " " + sortDirection);
@@ -450,8 +450,27 @@ public final class BlockchainImpl implements Blockchain {
     @Override
     public int getTransactionCount() {
         Connection con = null;
+        boolean isInTx = Db.db.isInTransaction();
         try {
-            con = Db.db.getConnection(); PreparedStatement pstmt = con.prepareStatement("SELECT COUNT(*) FROM transaction");
+            con = Db.db.getConnection();
+            PreparedStatement pstmt = con.prepareStatement("SELECT COUNT(*) FROM transaction");
+            ResultSet rs = pstmt.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+        } catch (SQLException e) {
+            throw new RuntimeException(e.toString(), e);
+        } finally {
+            if (!isInTx) {
+                DbUtils.close(con);
+            }
+        }
+    }
+
+    @Override
+    public int getTransactionCountByType(int type, Connection con) {
+        try {
+            PreparedStatement pstmt = con.prepareStatement("SELECT COUNT(*) FROM transaction WHERE TYPE = ?");
+            pstmt.setInt(1, type);
             ResultSet rs = pstmt.executeQuery();
             rs.next();
             return rs.getInt(1);

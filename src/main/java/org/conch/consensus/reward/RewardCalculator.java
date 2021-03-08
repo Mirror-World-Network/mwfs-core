@@ -11,6 +11,7 @@ import org.conch.chain.Block;
 import org.conch.chain.BlockDb;
 import org.conch.common.ConchException;
 import org.conch.common.Constants;
+import org.conch.consensus.poc.PocCalculator;
 import org.conch.consensus.poc.PocHolder;
 import org.conch.consensus.poc.PocScore;
 import org.conch.db.Db;
@@ -31,6 +32,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 
 
@@ -61,7 +63,7 @@ public class RewardCalculator {
         RewardDef(long amount) {
             this.amount = amount;
         }
-        
+
     }
 
     /**
@@ -71,11 +73,11 @@ public class RewardCalculator {
     /**
      * Estimated stable height after network reset
      */
-    public static final int NETWORK_STABLE_PHASE = Constants.isDevnet() ? 5 : 2008;
+    public static final int NETWORK_STABLE_PHASE = Constants.isDevnet() ? Constants.heightConf.getIntValue("NETWORK_STABLE_PHASE_IS_DEVNET") : Constants.heightConf.getIntValue("NETWORK_STABLE_PHASE_IS_TESTNET");
     /**
      * Estimated robust height after network reset
      */
-    public static final int NETWORK_ROBUST_PHASE = Constants.isDevnet() ? 10 : 10000;
+    public static final int NETWORK_ROBUST_PHASE = Constants.isDevnet() ? Constants.heightConf.getIntValue("NETWORK_ROBUST_PHASE_IS_DEVNET") : Constants.heightConf.getIntValue("NETWORK_ROBUST_PHASE_IS_TESTNET");
     /**
      * how much one block reward
      * @return
@@ -249,6 +251,7 @@ public class RewardCalculator {
 
         // generate the poc score map
         for(CertifiedPeer certifiedPeer : certifiedPeers.values()){
+
             // only reward once for same miner
             if(exceptAccounts != null
             && exceptAccounts.contains(certifiedPeer.getBoundAccountId())){
@@ -279,8 +282,34 @@ public class RewardCalculator {
 
             crowdMinerPocScoreMap.put(declaredAccount.getId(), pocScore.total().longValue());
         }
-
         return crowdMinerPocScoreMap;
+    }
+
+    /**
+     * Total capacity of qualified miner hardware
+     * @return
+     * @param height
+     * @param boundAccountList
+     */
+    public static String crowdMinerHardwareCapacity(int height, List<Long> boundAccountList) {
+        // TODO add cache, per 10min cache once
+        Long crowdMinerHardwareScoreTotal = 0L;
+        if (boundAccountList != null) {
+            // read the qualified miner list
+            for (Long boundAccountId : boundAccountList) {
+                // poc score judgement
+                PocScore pocScore = PocHolder.getPocScore(height, boundAccountId);
+                crowdMinerHardwareScoreTotal += pocScore.getHardwareScore().longValue();
+            }
+        } else {
+            // generate the poc score map
+            for(Long boundAccountId : Conch.getPocProcessor().getCertifiedPeers().keySet()){
+                // poc score judgement
+                PocScore pocScore = PocHolder.getPocScore(height, boundAccountId);
+                crowdMinerHardwareScoreTotal += pocScore.getHardwareScore().longValue();
+            }
+        }
+        return PocCalculator.hardwareCapacity(new BigInteger(crowdMinerHardwareScoreTotal.toString()));
     }
 
     /**
@@ -334,6 +363,7 @@ public class RewardCalculator {
 
                 long totalPocScoreLong = 0;
                 Map<Long, Long> crowdMiners = coinBase.getCrowdMiners();
+
                 for(long pocScore : crowdMiners.values()){
                     totalPocScoreLong += pocScore;
                 }

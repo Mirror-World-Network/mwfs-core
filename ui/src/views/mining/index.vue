@@ -467,19 +467,39 @@
             },
             setAccountInfo() {
                 let _this = this;
-                _this.$global.fetch("POST", {
-                    name: _this.accountName,
-                    secretPhrase: SSO.secretPhrase,
-                    deadline: 1440,
-                    phased: false,
-                    phasingHashedSecretAlgorithm: 2,
-                    feeNQT: 0
-                }, "setAccountInfo").then(res => {
-                    if (!res.errorDescription) {
-                        _this.accountInfo.name = res.transactionJSON.attachment.name;
+                let formData = new FormData();
+                formData.append("name", _this.accountName);
+                formData.append("secretPhrase", SSO.secretPhrase);
+                formData.append("deadline", "1440");
+                formData.append("phased", "false");
+                formData.append("phasingHashedSecretAlgorithm", "2");
+                formData.append("feeNQT", "0");
+                // _this.$global.fetch("POST", {
+                //     name: _this.accountName,
+                //     secretPhrase: SSO.secretPhrase,
+                //     deadline: 1440,
+                //     phased: false,
+                //     phasingHashedSecretAlgorithm: 2,
+                //     feeNQT: 0
+                // }, "setAccountInfo").then(res => {
+                //     if (!res.errorDescription) {
+                //         _this.accountInfo.name = res.transactionJSON.attachment.name;
+                //         _this.$message.success(_this.$t('notification.modify_success'));
+                //     } else {
+                //         _this.$message.error(res.errorDescription);
+                //     }
+                //     _this.isVisible('isSetName');
+                // });
+                SSO.setAccountInfo(formData, function (res) {
+                    if (typeof res.errorDescription === "undefined") {
                         _this.$message.success(_this.$t('notification.modify_success'));
+                        _this.accountInfo.name = res.data.transactionJSON.attachment.name;
                     } else {
-                        _this.$message.error(res.errorDescription);
+                        if (res.errorDescription.indexOf("$.t") != -1) {
+                            _this.$message.error(_this.$global.escape2Html(_this.$t(res.errorDescription.slice(3))));
+                        } else {
+                            _this.$message.error(_this.$global.escape2Html(res.errorDescription));
+                        }
                     }
                     _this.isVisible('isSetName');
                 });

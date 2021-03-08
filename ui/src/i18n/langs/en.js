@@ -108,6 +108,7 @@ const en = {
         'payout': "Payouts",
         'income': "Income",
         'account_inactive': "The account has not yet bound publicKey, create a tx for automatic binding to improve security",
+        'up_to_date': "Blockchain is not up to date, please try again later"
     },
     acrossChains:{
         'title': "Asset cross chain",
@@ -303,7 +304,7 @@ const en = {
         'block_peers_volume': "Node Volume",
         'declared_peers_size': "All Declared Node Size",
         'miner_info': "Trading Summary",
-        'miner_volume': "Miners",
+        'miner_volume': "Active Miners",
         'qualified_miner_volume': "Qualified Miners",
         'total_trading_volume': "Gross Amount",
         'transfer_transaction': "Transfer Txns",

@@ -248,8 +248,10 @@ public class BasicDb {
 
     private static void checkAndRestart() {
         if (exceedMaxCount++ > RESTART_COUNT) {
-            Logger.logErrorMessage(String.format("Exceed max connections[%d] %d times, restart the COS to temporary " +
-                    "fix this problem", MAX_DB_CONNECTIONS, RESTART_COUNT));
+            String msg = String.format("Exceed max connections[%d] %d times, restart the COS to temporary " +
+                    "fix this problem", MAX_DB_CONNECTIONS, RESTART_COUNT);
+            Logger.logWarningMessage(msg);
+            Logger.logErrorMessage(msg);
             new Thread(() -> Conch.restartApplication(null)).start();
             exceedMaxCount = 0;
         }

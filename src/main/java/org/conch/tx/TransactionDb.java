@@ -256,10 +256,17 @@ public final class TransactionDb {
             }
         }
         // Search the database
-        try (Connection con = Db.db.getConnection()) {
+        Connection con = null;
+        boolean isInTx = Db.db.isInTransaction();
+        try {
+            con = Db.db.getConnection();
             return findBlockTransactions(con, blockId);
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
+        } finally {
+            if (!isInTx) {
+                DbUtils.close(con);
+            }
         }
     }
 

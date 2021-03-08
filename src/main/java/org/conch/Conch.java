@@ -762,6 +762,7 @@ public final class Conch {
         Conch.time = time;
     }
 
+//    @EnableSwagger2Doc
     public static void main(String[] args) {
         try {
             Runtime.getRuntime().addShutdownHook(new Thread(Conch::shutdown));
@@ -809,6 +810,7 @@ public final class Conch {
                 logSystemProperties();
                 runtimeMode.init();
                 Thread secureRandomInitThread = initSecureRandom();
+                setHeartBeatTimer();
                 ForceConverge.init();
                 setServerStatus(ServerStatus.BEFORE_DATABASE, null);
 //                CompactDatabase.checkAndRestore();
@@ -1083,10 +1085,12 @@ public final class Conch {
     public static void restartApplication(Runnable runBeforeRestart) {
         try {
             pause();
-            
-            Logger.logInfoMessage("Clear the all logs");
-            FileUtil.clearAllLogs();
-            
+
+
+            //            Logger.logInfoMessage("Clear the all logs");
+            //            FileUtil.clearAllLogs();
+
+
             // java binary
             String java = System.getProperty("java.home") + "/bin/java";
             // vm arguments
@@ -1287,5 +1291,14 @@ public final class Conch {
     }
     public static String getVersion(){ return VERSION; }
     public static String getCosUpgradeDate(){ return ClientUpgradeTool.cosLastUpdateDate; }
+
+    public static void setHeartBeatTimer() {
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
+                Logger.logInfoMessage("[HeartBeat]:cos is working properly");
+            }
+        }, 3*60*1000, Constants.HeartBeat_Time);
+    }
 
 }
