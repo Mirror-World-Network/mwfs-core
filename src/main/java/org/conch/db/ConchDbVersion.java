@@ -807,40 +807,32 @@ public class ConchDbVersion extends DbVersion {
                 case 68:
                     apply("alter table CERTIFIED_PEER add delete_Height int(10) not null default 0;");
                 case 69:
-                    if (Peers.isProcessForkNode) {
-                        apply("CREATE TABLE IF NOT EXISTS fork_block (\n" +
-                                "    DB_ID                 BIGINT auto_increment\n" +
-                                "        primary key,\n" +
-                                "    ID                    BIGINT    not null,\n" +
-                                "    VERSION               INT       not null,\n" +
-                                "    TIMESTAMP             INT       not null,\n" +
-                                "    PREVIOUS_BLOCK_ID     BIGINT,\n" +
-                                "    CUMULATIVE_DIFFICULTY VARBINARY not null,\n" +
-                                "    NEXT_BLOCK_ID         BIGINT,\n" +
-                                "    HEIGHT                INT       not null,\n" +
-                                "    GENERATOR_ID          BIGINT    not null\n" +
-                                ");\n" +
-                                "\n" +
-                                "create unique index IF NOT EXISTS FORK_BLOCK_ID_IDX\n" +
-                                "    on FORK_BLOCK (ID);" +
-                                "CREATE TABLE IF NOT EXISTS fork_block_linked_account\n" +
-                                "(\n" +
-                                "    DB_ID      BIGINT auto_increment\n" +
-                                "        primary key,\n" +
-                                "    BLOCK_ID   BIGINT not null,\n" +
-                                "    ACCOUNT_ID BIGINT not null,\n" +
-                                "    HEIGHT     INT    not null\n" +
-                                ");\n" +
-                                "create unique index IF NOT EXISTS FORK_BLOCK_LINKED_ACCOUNT_ACCOUNT_ID_BLOCK_ID_UINDEX\n" +
-                                "    on FORK_BLOCK_LINKED_ACCOUNT (ACCOUNT_ID, BLOCK_ID);"
-                        );
-                    } else {
-                        apply("DROP TABLE IF EXISTS fork_block;" +
-                                "DROP TABLE IF EXISTS fork_block_linked_account;" +
-                                "DROP INDEX IF EXISTS FORK_BLOCK_ID_IDX;" +
-                                "DROP INDEX IF EXISTS FORK_BLOCK_LINKED_ACCOUNT_IDX;"
-                        );
-                    }
+                    apply("CREATE TABLE IF NOT EXISTS fork_block (\n" +
+                            "    DB_ID                 BIGINT auto_increment\n" +
+                            "        primary key,\n" +
+                            "    ID                    BIGINT    not null,\n" +
+                            "    VERSION               INT       not null,\n" +
+                            "    TIMESTAMP             INT       not null,\n" +
+                            "    PREVIOUS_BLOCK_ID     BIGINT,\n" +
+                            "    CUMULATIVE_DIFFICULTY VARBINARY not null,\n" +
+                            "    NEXT_BLOCK_ID         BIGINT,\n" +
+                            "    HEIGHT                INT       not null,\n" +
+                            "    GENERATOR_ID          BIGINT    not null\n" +
+                            ");\n" +
+                            "\n" +
+                            "create unique index IF NOT EXISTS FORK_BLOCK_ID_IDX\n" +
+                            "    on FORK_BLOCK (ID);" +
+                            "CREATE TABLE IF NOT EXISTS fork_block_linked_account\n" +
+                            "(\n" +
+                            "    DB_ID      BIGINT auto_increment\n" +
+                            "        primary key,\n" +
+                            "    BLOCK_ID   BIGINT not null,\n" +
+                            "    ACCOUNT_ID BIGINT not null,\n" +
+                            "    HEIGHT     INT    not null\n" +
+                            ");\n" +
+                            "create unique index IF NOT EXISTS FORK_BLOCK_LINKED_ACCOUNT_ACCOUNT_ID_BLOCK_ID_UINDEX\n" +
+                            "    on FORK_BLOCK_LINKED_ACCOUNT (ACCOUNT_ID, BLOCK_ID);"
+                    );
                 case 70:
                     break;
                 default:
