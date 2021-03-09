@@ -50,6 +50,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -828,6 +829,26 @@ public class Generator implements Comparable<Generator> {
         return json;
     }
     
+    public JSONObject toBlockExplorerJson() {
+        int elapsedTime = Conch.getEpochTime() - Conch.getBlockchain().getLastBlock().getTimestamp();
+        JSONObject json = new JSONObject();
+        json.put("account", Long.toUnsignedString(accountId));
+        json.put("accountRS", StringUtils.isNotEmpty(rsAddress) ? rsAddress : Account.rsAccount(accountId));
+        json.put("effectiveBalanceSS",  effectiveBalance);
+        json.put("pocScore", pocScore);
+        json.put("detailedPocScore", detailedPocScore);
+        json.put("deadline", deadline);
+        json.put("hitTime", hitTime);
+        json.put("remaining", Math.max(deadline - elapsedTime, 0));
+        CertifiedPeer boundedPeer = Conch.getPocProcessor().getBoundedPeer(accountId, Conch.getHeight());
+        Peer.Type type = (boundedPeer != null) ? boundedPeer.getType() : Peer.Type.NORMAL;
+        json.put("bindPeerType", type.getName());
+        json.put("totalBlockCount", Conch.getHeight());
+        json.put("minerBlockCount", BlockDb.getAmountByGenerator(accountId));
+        json.put("percentage", new DecimalFormat("0.00").format((float) (BlockDb.getAmountByGenerator(accountId)*100)/Conch.getHeight()).toString() + "%");
+        return json;
+    }
+
     public static void updatePocScore(PocScore pocScore){
         if(sortedMiners != null) {
             synchronized (sortedMiners) {
@@ -1295,4 +1316,5 @@ public class Generator implements Comparable<Generator> {
     public static void main(String[] args) {
         System.out.println(Account.rsAccount(2792673654720227339L));
     }
+
 }
