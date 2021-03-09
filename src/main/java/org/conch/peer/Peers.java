@@ -1743,7 +1743,7 @@ public final class Peers {
     public static boolean isCollectForkNode(String address) {
         ArrayList<Object> collectForkNodes = Lists.newArrayList();
         collectForkNodes.addAll(bootNodesHost);
-        collectForkNodes.add("192.168.31.53");
+        collectForkNodes.add("testnc.mw.run");
         return collectForkNodes.contains(address) && !Peers.closeCollectFork;
     }
 
