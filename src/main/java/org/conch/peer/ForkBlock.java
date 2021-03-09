@@ -65,7 +65,12 @@ public final class ForkBlock {
         }
 
         public void setForkBlocks(List<ForkBlock> forkBlocks) {
-            this.forkBlocks = forkBlocks;
+            ArrayList<ForkBlock> list = Lists.newArrayList();
+            for (ForkBlock forkBlock : forkBlocks) {
+                forkBlock.setGeneratorRS(Account.rsAccount(forkBlock.getGeneratorId()));
+                list.add(forkBlock);
+            }
+            this.forkBlocks = list;
         }
 
         public List<String> getGenerators() {

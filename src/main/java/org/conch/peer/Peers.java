@@ -107,7 +107,7 @@ public final class Peers {
     static final int readTimeout;
     public static final int blacklistingPeriod;
     static final boolean getMorePeers;
-    static final boolean isProcessForkNode;
+    public static final boolean isProcessForkNode;
     static final boolean closeCollectFork;
     static final boolean isCommonNode;
 
@@ -1810,7 +1810,6 @@ public final class Peers {
             }
             if (!Peers.forkBlocksMap.isEmpty()) {
                 json.put("forkBlocksMap", Peers.forkBlocksMap);
-                json.put("forkBlocksMap", Peers.forkBlocksMap);
             }
         }
         if (conditionObj.get("sendToCommonNode") != null) {
@@ -2085,7 +2084,6 @@ public final class Peers {
      */
     public static Map<String, HashSet<ForkBlock.ForkBlockLinkedAccount>> blockLinkedGeneratorMap = Maps.newHashMap();
     public static Map<String, TreeSet<Integer>> blockLinkedGeneratorHeightMap = Maps.newHashMap();
-    public static Map<String, Set<ForkBlock.ForkBlockLinkedAccount>> newBlockLinkedGeneratorMap = Maps.newHashMap();
     public static Set<ForkBlock.ForkBlockLinkedAccount> newBlockLinkedGeneratorSet = Sets.newHashSet();
     public static int commonBlockHeight = 0;
     public static int forkSize;
@@ -2093,11 +2091,6 @@ public final class Peers {
     public static int minHeight = 0;
     private static long lastTime = System.currentTimeMillis();
     public static Set<String> allNodeSet = Sets.newHashSet();
-
-    /**
-     * 1. fork处理完毕时将区块数据写入数据库
-     * 2. 重启时将数据库数据写入map
-     */
 
     /**
      * loop all forks, confirm commonBlockHeight, base on commonBlockHeight to analyze fork size and report to DingTalk
@@ -2219,7 +2212,15 @@ public final class Peers {
 
             // Collect latest forkBlocks data of all nodes
             if (Generator.HUB_BIND_ADDRESS != null) {
-                forkBlocksMapData.put(Generator.HUB_BIND_ADDRESS, getForkBlocks(Conch.getHeight()-forkBlocksLevel.MINI.getLevel(), Conch.getHeight()));
+                if (missingForkBlocksMap.get(Generator.HUB_BIND_ADDRESS) != null) {
+                    JSONObject jsonObject = missingForkBlocksMap.get(Generator.HUB_BIND_ADDRESS);
+                    int startHeight = (int) jsonObject.get("startHeight");
+                    int endHeight = (int) jsonObject.get("endHeight");
+                    forkBlocksMapData.put(Generator.HUB_BIND_ADDRESS, getForkBlocks(startHeight, endHeight));
+                    missingForkBlocksMap.remove(Generator.HUB_BIND_ADDRESS);
+                } else {
+                    forkBlocksMapData.put(Generator.HUB_BIND_ADDRESS, getForkBlocks(Conch.getHeight()-forkBlocksLevel.MINI.getLevel(), Conch.getHeight()));
+                }
             }
             for (Map.Entry<String, List<JSONObject>> entry : forkBlocksMapData.entrySet()) {
                 String generator = entry.getKey();
@@ -2287,7 +2288,7 @@ public final class Peers {
                 PeerDb.saveForkBlockLinkedAccounts(newBlockLinkedGeneratorSet);
                 Db.db.commitTransaction();
                 newBlockSet.clear();
-                newBlockLinkedGeneratorMap.clear();
+                newBlockLinkedGeneratorSet.clear();
             } catch (Exception e) {
                 Logger.logErrorMessage(e.toString(), e);
                 Db.db.rollbackTransaction();
@@ -2304,6 +2305,7 @@ public final class Peers {
                 if (value.isEmpty()) {
                     jsonObject.put("startHeight", maxHeight - forkBlocksLevel.LONG.getLevel());
                     jsonObject.put("endHeight", maxHeight);
+                    missingForkBlocksMap.put(generator, jsonObject);
                 } else {
                     if (Math.abs(value.first() - value.last()) + 1 > value.size()) {
                         int cursorMin = value.first();
@@ -2317,9 +2319,11 @@ public final class Peers {
                         }
                         jsonObject.put("startHeight", cursorMin);
                         jsonObject.put("endHeight", cursorMax);
+                        missingForkBlocksMap.put(generator, jsonObject);
+                    } else {
+                        missingForkBlocksMap.remove(generator);
                     }
                 }
-                missingForkBlocksMap.put(generator, jsonObject);
             }
 
             ArrayList<Integer> linkedAllHeights = Lists.newArrayList();
@@ -2402,10 +2406,16 @@ public final class Peers {
                 }
             }*/
             forkBlockObjMap.put(blockId, new ForkBlock.ForkBlockObj(blockId, blocks, generator));
-            return;
+        } else {
+            // process old fork
+            if (blocks.size() > forkBlockObjMap.get(blockId).getForkBlocks().size()) {
+                ForkBlock.ForkBlockObj forkBlockObj = forkBlockObjMap.get(blockId);
+                // replace forkBlocks
+                forkBlockObj.setForkBlocks(blocks);
+                forkBlockObjMap.put(blockId, forkBlockObj);
+            }
+            forkBlockObjMap.get(blockId).addGenerator(generator);
         }
-        // process old fork
-        forkBlockObjMap.get(blockId).addGenerator(generator);
     }
 
     /**

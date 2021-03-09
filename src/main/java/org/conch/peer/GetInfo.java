@@ -132,12 +132,12 @@ final class GetInfo extends PeerServlet.PeerRequestHandler {
             List<JSONObject> forkBlocks = (List<JSONObject>) request.get("forkBlocks");
             Logger.logDebugMessage("SaveOrUpdate forkBlocks of commonNode[%s] and BindRSAccount[%s]", peerImpl.getAnnouncedAddress(), peerImpl.getBindRsAccount());
             Peers.saveOrUpdateForkBlocks(peerImpl.getBindRsAccount(), forkBlocks);
-            // TEST Start return missedForkBlocks to commonNode
-            JSONObject jsonObject = new JSONObject();
+            // TEST-Start return missedForkBlocks to commonNode
+            /*JSONObject jsonObject = new JSONObject();
             jsonObject.put("startHeight", Conch.getHeight()-Peers.forkBlocksLevel.MINI.getLevel());
             jsonObject.put("endHeight", Conch.getHeight());
-            Peers.missingForkBlocksMap.put(peerImpl.getBindRsAccount(), jsonObject);
-            // TEST End
+            Peers.missingForkBlocksMap.put(peerImpl.getBindRsAccount(), jsonObject);*/
+            // TEST-End
             if (Peers.missingForkBlocksMap.get(peerImpl.getBindRsAccount()) != null && request.get("processForkNode") == null) {
                 Logger.logDebugMessage("Report missedBlocks to commonNode[%s]", peerImpl.getAnnouncedAddress());
                 return Peers.getMyPeerInfoResponseToCommonNode(peerImpl.getBindRsAccount());

@@ -558,4 +558,26 @@ public final class BlockDb {
             }
         }
     }
+
+    public static int getAmountByGenerator(long generatorId) {
+        boolean isInTx = Db.db.isInTransaction();
+        Connection con = null;
+        try {
+            con = Db.db.getConnection();
+            try (PreparedStatement pstmt = con.prepareStatement("SELECT COUNT(*) as count from BLOCK where GENERATOR_ID = ?")) {
+                pstmt.setLong(1, generatorId);
+                ResultSet resultSet = pstmt.executeQuery();
+                if (resultSet.next()) {
+                    return resultSet.getInt("count");
+                }
+                return 0;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.toString(), e);
+        }finally {
+            if (!isInTx) {
+                DbUtils.close(con);
+            }
+        }
+    }
 }

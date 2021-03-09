@@ -249,6 +249,7 @@ final class PeerDb {
 
     public static void saveForkBlocks(Set<ForkBlock> forkBlocks) {
         Connection con = null;
+        boolean isInTx = Db.db.isInTransaction();
         try {
             con = Db.db.getConnection();
             for (ForkBlock forkBlock : forkBlocks) {
@@ -268,13 +269,16 @@ final class PeerDb {
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
         } finally {
-            DbUtils.close(con);
+            if (!isInTx) {
+                DbUtils.close(con);
+            }
         }
     }
 
 
     public static void saveForkBlockLinkedAccounts(Set<ForkBlock.ForkBlockLinkedAccount> forkBlocks) {
         Connection con = null;
+        boolean isInTx = Db.db.isInTransaction();
         try {
             con = Db.db.getConnection();
             for (ForkBlock.ForkBlockLinkedAccount forkBlock : forkBlocks) {
@@ -291,7 +295,9 @@ final class PeerDb {
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
         } finally {
-            DbUtils.close(con);
+            if (!isInTx) {
+                DbUtils.close(con);
+            }
         }
     }
 
@@ -333,7 +339,7 @@ final class PeerDb {
         Connection con = null;
         try {
             con = Db.db.getConnection();
-            PreparedStatement pstmt = con.prepareStatement("DELETE FROM fork_block WHERE account_id = ?");
+            PreparedStatement pstmt = con.prepareStatement("DELETE FROM fork_block_linked_account WHERE account_id = ?");
             pstmt.setLong(1, Account.rsAccountToId(generator));
             pstmt.executeUpdate();
         } catch (SQLException e) {
