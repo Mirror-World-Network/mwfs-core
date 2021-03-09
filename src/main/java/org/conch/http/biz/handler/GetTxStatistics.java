@@ -51,15 +51,14 @@ public final class GetTxStatistics extends APIServlet.APIRequestHandler {
     }
 
     private static JSONObject jsonObject = new JSONObject();
-    private static int height = 0;
+    private static long blockId = 0;
 
     @Override
     protected JSONStreamAware processRequest(HttpServletRequest req) throws ConchException {
-        // if curTime > lastBlockTime + gapTime => update jsonObject , else return
-        if (height == Conch.getHeight() && Constants.GAP_SECONDS > Conch.getEpochTime() - Conch.getBlockchain().getLastBlockTimestamp()) {
+        if (blockId == Conch.getBlockchain().getLastBlock().getId()) {
             return jsonObject;
         }
-        height = Conch.getHeight();
+        blockId = Conch.getBlockchain().getLastBlock().getId();
         Long transferCount = 0L;
         Long transferAmount = 0L;
         Long transferCount24H = 0L;
