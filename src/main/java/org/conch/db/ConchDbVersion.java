@@ -22,6 +22,7 @@
 package org.conch.db;
 
 import org.conch.common.Constants;
+import org.conch.peer.Peers;
 import org.conch.util.Convert;
 
 import java.sql.*;
@@ -805,7 +806,34 @@ public class ConchDbVersion extends DbVersion {
                     apply("ALTER TABLE ACCOUNT_GUARANTEED_BALANCE_HISTORY ADD COLUMN IF NOT EXISTS LATEST BOOLEAN default false NOT NULL");
                 case 68:
                     apply("alter table CERTIFIED_PEER add delete_Height int(10) not null default 0;");
-                 case 69:
+                case 69:
+                    apply("CREATE TABLE IF NOT EXISTS fork_block (\n" +
+                            "    DB_ID                 BIGINT auto_increment\n" +
+                            "        primary key,\n" +
+                            "    ID                    BIGINT    not null,\n" +
+                            "    VERSION               INT       not null,\n" +
+                            "    TIMESTAMP             INT       not null,\n" +
+                            "    PREVIOUS_BLOCK_ID     BIGINT,\n" +
+                            "    CUMULATIVE_DIFFICULTY VARBINARY not null,\n" +
+                            "    NEXT_BLOCK_ID         BIGINT,\n" +
+                            "    HEIGHT                INT       not null,\n" +
+                            "    GENERATOR_ID          BIGINT    not null\n" +
+                            ");\n" +
+                            "\n" +
+                            "create unique index IF NOT EXISTS FORK_BLOCK_ID_IDX\n" +
+                            "    on FORK_BLOCK (ID);" +
+                            "CREATE TABLE IF NOT EXISTS fork_block_linked_account\n" +
+                            "(\n" +
+                            "    DB_ID      BIGINT auto_increment\n" +
+                            "        primary key,\n" +
+                            "    BLOCK_ID   BIGINT not null,\n" +
+                            "    ACCOUNT_ID BIGINT not null,\n" +
+                            "    HEIGHT     INT    not null\n" +
+                            ");\n" +
+                            "create unique index IF NOT EXISTS FORK_BLOCK_LINKED_ACCOUNT_ACCOUNT_ID_BLOCK_ID_UINDEX\n" +
+                            "    on FORK_BLOCK_LINKED_ACCOUNT (ACCOUNT_ID, BLOCK_ID);"
+                    );
+                case 70:
                     break;
                 default:
                     throw new RuntimeException("Blockchain database inconsistent with code, at update " + nextUpdate
@@ -813,7 +841,7 @@ public class ConchDbVersion extends DbVersion {
             }
         } catch (Exception e) {
             throw new RuntimeException(e.toString(), e);
-        }finally {
+        } finally {
             DbUtils.close(con);
         }
     }

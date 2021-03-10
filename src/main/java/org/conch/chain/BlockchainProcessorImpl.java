@@ -636,6 +636,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 GetNextBlocks nextBlocks = it.next();
                 List<BlockImpl> blockList;
                 try {
+                    // todo A {@code Future} represents the result of an asynchronous computation, possible execute to here blockList is null, should wait Future is done
                     blockList = nextBlocks.getFuture().get();
                 } catch (ExecutionException exc) {
                     throw new RuntimeException(exc.getMessage(), exc);
@@ -1916,6 +1917,20 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 }
             }
 
+            // verify block coinBase tx
+            if(blockchain.getHeight()+1 >= Constants.BLOCK_REWARD_VERIFY_HEIGHT
+                    && transaction.getType().isType(TransactionType.TYPE_COIN_BASE)
+                    && transaction.getAmountNQT() != RewardCalculator.blockReward(blockchain.getHeight()+1)) {
+                throw new TransactionNotAcceptedException("CoinBaseTx verification failed", transaction);
+            }
+
+            // verify block coinBase tx
+            if(blockchain.getHeight()+1 >= RewardCalculator.BLOCK_REWARD_VERIFY_HEIGHT
+                    && transaction.getType().isType(TransactionType.TYPE_COIN_BASE)
+                    && transaction.getAmountNQT() != RewardCalculator.blockReward(blockchain.getHeight()+1)) {
+                throw new TransactionNotAcceptedException("CoinBaseTx verification failed", transaction);
+            }
+
             if (!hasPrunedTransactions) {
                 for (Appendix.AbstractAppendix appendage : transaction.getAppendages()) {
                     if ((appendage instanceof Appendix.Prunable)
@@ -2104,6 +2119,11 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                     .thenComparingInt(Transaction::getIndex)
                     .thenComparingLong(Transaction::getId);
 
+    /**
+     * Rollback to height of commonBlock, and return blocks list of rolled back
+     * @param commonBlock
+     * @return Rolled back blocks
+     */
     public List<BlockImpl> popOffTo(Block commonBlock) {
         blockchain.writeLock();
         try {

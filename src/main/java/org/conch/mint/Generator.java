@@ -1180,7 +1180,7 @@ public class Generator implements Comparable<Generator> {
     }
 
     // Hub auto mining setting
-    private static final String HUB_BIND_ADDRESS = Conch.getStringProperty("sharder.HubBindAddress");
+    public static final String HUB_BIND_ADDRESS = Conch.getStringProperty("sharder.HubBindAddress");
     public static final Boolean HUB_IS_BIND = Conch.getBooleanProperty("sharder.HubBind");
     private static final String HUB_BIND_PR = Conch.getStringProperty("sharder.HubBindPassPhrase", "", true).trim();
     private static final String AUTO_MINT_ADDRESS = autoMintAccountRs();
