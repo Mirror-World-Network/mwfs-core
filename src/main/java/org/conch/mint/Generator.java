@@ -487,7 +487,7 @@ public class Generator implements Comparable<Generator> {
         && height > Constants.LAST_KNOWN_BLOCK) {
             if(Logger.printNow(Logger.Generator_startMining)
                 || Logger.isLevel(Logger.Level.DEBUG)) {
-                Logger.logWarningMessage("Invalid miner %s can't start auto mining or mint block. Because the MW holding limit of the mining is %d and current balance is %d",
+                Logger.logWarningMessage("Invalid miner %s can't start auto mining or mint block. Because the "+ Conch.COIN_UNIT +" holding limit of the mining is %d and current balance is %d",
                         minerRs,
                         (Constants.MINING_HOLDING_LIMIT / Constants.ONE_SS),
                         (accountBalanceNQT / Constants.ONE_SS));
@@ -844,8 +844,9 @@ public class Generator implements Comparable<Generator> {
         Peer.Type type = (boundedPeer != null) ? boundedPeer.getType() : Peer.Type.NORMAL;
         json.put("bindPeerType", type.getName());
         json.put("totalBlockCount", Conch.getHeight());
-        json.put("minerBlockCount", BlockDb.getAmountByGenerator(accountId));
-        json.put("percentage", new DecimalFormat("0.00").format((float) (BlockDb.getAmountByGenerator(accountId)*100)/Conch.getHeight()).toString() + "%");
+        int amount = BlockDb.getAmountByGenerator(accountId);
+        json.put("minerBlockCount", amount);
+        json.put("percentage", new DecimalFormat("0.00").format((float) (amount*100)/Conch.getHeight()).toString() + "%");
         return json;
     }
 

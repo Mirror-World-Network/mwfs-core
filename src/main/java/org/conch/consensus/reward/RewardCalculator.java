@@ -79,10 +79,6 @@ public class RewardCalculator {
      */
     public static final int NETWORK_ROBUST_PHASE = Constants.isDevnet() ? Constants.heightConf.getIntValue("NETWORK_ROBUST_PHASE_IS_DEVNET") : Constants.heightConf.getIntValue("NETWORK_ROBUST_PHASE_IS_TESTNET");
     /**
-     * block reward verify height
-     */
-    public static final int BLOCK_REWARD_VERIFY_HEIGHT = Constants.isDevnet() ? 10 : 11250;
-    /**
      * how much one block reward
      * @return
      */
@@ -267,14 +263,14 @@ public class RewardCalculator {
                 continue;
             }
 
-            long holdingMwAmount = 0;
+            long holdingAmount = 0;
             try{
-                holdingMwAmount = declaredAccount.getEffectiveBalanceSS(height);
+                holdingAmount = declaredAccount.getEffectiveBalanceSS(height);
             }catch(Exception e){
                 Logger.logWarningMessage("[QualifiedMiner] not valid miner because can't get balance of account %s at height %d, caused by %s",  declaredAccount.getRsAddress(), height, e.getMessage());
-                holdingMwAmount = 0;
+                holdingAmount = 0;
             }
-            if(holdingMwAmount < QUALIFIED_CROWD_MINER_HOLDING_AMOUNT_MIN) {
+            if(holdingAmount < QUALIFIED_CROWD_MINER_HOLDING_AMOUNT_MIN) {
                 continue;
             }
 
@@ -295,9 +291,6 @@ public class RewardCalculator {
     }
 
     /**
-<<<<<<< HEAD
-     * 核对并结算RowdMinerRewards
-=======
      * Total capacity of qualified miner hardware
      * @return
      * @param height
@@ -325,7 +318,6 @@ public class RewardCalculator {
     }
 
     /**
->>>>>>> 815213fadc95ae89d7196d0b29d2a7377ec8e39d
      * Check whether reach the settlement height
      * Settle all un-settlement blocks before this height
      * Combine changes of the same account from these blocks

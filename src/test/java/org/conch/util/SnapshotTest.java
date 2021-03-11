@@ -35,8 +35,8 @@ import java.util.stream.Collectors;
  */
 public class SnapshotTest {
 
-    private static final String AMOUNT_400_MW = "40000000000";
-    private static final String AMOUNT_100_MW = "10000000000";
+    private static final String AMOUNT_400 = "40000000000";
+    private static final String AMOUNT_100 = "10000000000";
 
     static class TransferInfo {
         public String recipientRS;
@@ -211,7 +211,7 @@ public class SnapshotTest {
                 if (type == 1) {
                     for (Miner miner : newList) {
                         if (strList.contains(miner.accountRS)) {
-                            miner.setAmountNQT(AMOUNT_400_MW);
+                            miner.setAmountNQT(AMOUNT_400);
                             miner.setRecipientPublicKey("");
                             list.add(miner);
                         }
@@ -225,7 +225,7 @@ public class SnapshotTest {
                     }
                     // strList 转为 List<Miner>
                     for (String s : strList) {
-                        list.add(new Miner(s, AMOUNT_100_MW));
+                        list.add(new Miner(s, AMOUNT_100));
                     }
                 }
                 // 将list存入complexList第一项
@@ -372,8 +372,8 @@ public class SnapshotTest {
             statis += "----------------------" + "\n";
             statis += String.format("Account Count: %d \n", airdropSize);
             statis += String.format("Max Amount: %d | Min Amount: %d | Avg Amount: %d\n", maxSingleAmount / Constants.ONE_SS, minSingleAmount / Constants.ONE_SS, avgSingleAmountBD.longValue());
-            statis += String.format("Total Amount: %d MW (%d NQT) \n", totalAmountBD.longValue(), totalAmount);
-            statis += String.format("Suggest airdrop out account balance: %d MW (Estimated Fees %d MW) \n", (totalAmountBD.longValue() + airdropSize), airdropSize);
+            statis += String.format("Total Amount: %d %s (%d NQT) \n", totalAmountBD.longValue(), Conch.COIN_UNIT, totalAmount);
+            statis += String.format("Suggest airdrop out account balance: %d %s (Estimated Fees %d %s) \n", (totalAmountBD.longValue() + airdropSize), Conch.COIN_UNIT, airdropSize, Conch.COIN_UNIT);
         }catch(Exception e){
            // System.out.println(e.getMessage());
             statis = null;

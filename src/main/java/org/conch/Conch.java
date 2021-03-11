@@ -95,12 +95,22 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.conch.util.JSON.readJsonFile;
+
 public final class Conch {
 
     public static final String VERSION = "0.0.6";
     // Phase: Pioneer -> Union -> World
     public static final String STAGE = "Pioneer";
-    public static final String APPLICATION = "COS";
+
+    public static final com.alibaba.fastjson.JSONObject constantsJsonObj = loadConstantsSettings();
+    public static final com.alibaba.fastjson.JSONObject basicConf = (com.alibaba.fastjson.JSONObject) constantsJsonObj.get("basic");
+    public static final com.alibaba.fastjson.JSONObject portConf = (com.alibaba.fastjson.JSONObject) constantsJsonObj.get("port");
+    public static final com.alibaba.fastjson.JSONObject networkTypeConf = (com.alibaba.fastjson.JSONObject) constantsJsonObj.get("networkType");
+
+    public static final String APPLICATION = basicConf.getString("APPLICATION");
+    public static final String COIN_UNIT = basicConf.getString("COIN_UNIT");
+    public static final String PROJECT_NAME = basicConf.getString("PROJECT_NAME");
 
     private static volatile Time time = new Time.EpochTime();
 
@@ -112,16 +122,25 @@ public final class Conch {
     public static final DirProvider dirProvider;
 
     private static final Properties DEFAULT_PROPERTIES = new Properties();
-    private static final String FOUNDATION_URL = "mw.run";
-    private static final String FOUNDATION_TEST_URL = "test.mw.run";
+    private static final String FOUNDATION_URL = basicConf.getString("FOUNDATION_URL");
+    private static final String FOUNDATION_TEST_URL = basicConf.getString("FOUNDATION_TEST_URL");
 
     public static final Peer.RunningMode runningMode;
     //TODO refactor myAddress, serialNum, nodeIp and nodeType into systemInfo
     private static final String myAddress;
-    private static String serialNum = "";
+    private static String serialNum = basicConf.getString("SERIAL_NUM");
     private static String nodeType = Peer.Type.NORMAL.getSimpleName();
     public static String nodeIp = IpUtil.getNetworkIp();
     public static Map<Integer, Boolean> airdropHeightMap = Maps.newHashMap();
+
+    /**
+     * Load the JSON configuration with respect to Constants
+     */
+    public static com.alibaba.fastjson.JSONObject loadConstantsSettings() {
+        String pathName = "conf/constants.json";
+        String jsonStr = readJsonFile(pathName);
+        return JSON.parseObject(jsonStr);
+    }
 
     public static boolean getAirdropHeighStatus(int height) {
         if (airdropHeightMap.get(height) != null) {
@@ -141,9 +160,8 @@ public final class Conch {
     }
 
     public static String getNetworkType() {
-        return Constants.isMainnet() ? "beta" : Constants.isTestnet() ? "alpha" : "dev";
+        return Constants.isMainnet() ? networkTypeConf.getString("MAINNET") : Constants.isTestnet() ? networkTypeConf.getString("TESTNET") : networkTypeConf.getString("DEVNET");
     }
-
     
     public static String getNodeType(){
         CertifiedPeer boundedPeer = Conch.getPocProcessor().getBoundedPeer(Account.rsAccountToId(Generator.getAutoMiningRS()), getHeight());
@@ -247,9 +265,9 @@ public final class Conch {
      * Preset parameters
      */
     public static class PresetParam {
-        public static final int DEFAULT_PEER_PORT=3218;
-        public static final int DEFAULT_API_PORT=8215;
-        public static final int DEFAULT_API_SSL_PORT=8217;
+        public static final int DEFAULT_PEER_PORT = portConf.getIntValue("DEFAULT_PEER_PORT");
+        public static final int DEFAULT_API_PORT = portConf.getIntValue("DEFAULT_API_PORT");
+        public static final int DEFAULT_API_SSL_PORT = portConf.getIntValue("DEFAULT_API_SSL_PORT");
 
         public Constants.Network network;
         public int peerPort;
@@ -267,9 +285,9 @@ public final class Conch {
         static {
             //preset params
             presetMap.clear();
-            presetMap.put(Constants.Network.DEVNET, new PresetParam(Constants.Network.DEVNET, 9219, 9216, 9218));
-            presetMap.put(Constants.Network.TESTNET, new PresetParam(Constants.Network.TESTNET, 7219, 7216, 7218));
-            presetMap.put(Constants.Network.MAINNET, new PresetParam(Constants.Network.MAINNET, 3219, 3216, 3218));
+            presetMap.put(Constants.Network.DEVNET, new PresetParam(Constants.Network.DEVNET, portConf.getIntValue("DEVNET_PEER"), portConf.getIntValue("DEVNET_API"), portConf.getIntValue("DEVNET_API_SSL")));
+            presetMap.put(Constants.Network.TESTNET, new PresetParam(Constants.Network.TESTNET, portConf.getIntValue("TESTNET_PEER"), portConf.getIntValue("TESTNET_API"), portConf.getIntValue("TESTNET_API_SSL")));
+            presetMap.put(Constants.Network.MAINNET, new PresetParam(Constants.Network.MAINNET, portConf.getIntValue("MAINNET_PEER"), portConf.getIntValue("MAINNET_API"), portConf.getIntValue("MAINNET_API_SSL")));
         }
 
         public static void print(){
@@ -895,7 +913,7 @@ public final class Conch {
                 long currentTime = System.currentTimeMillis();
                 Logger.logMessage("Initialization took " + (currentTime - startTime) / 1000 + " seconds");
                 Logger.logMessage("COS server " + getFullVersion() + " " + getCosUpgradeDate() + " started successfully");
-                Logger.logMessage("Copyright © 2019 mw.run");
+                Logger.logMessage("Copyright © 2019 " + Conch.FOUNDATION_URL);
                 Logger.logMessage("Distributed under MIT");
                 if (API.getWelcomePageUri() != null) Logger.logMessage("Client UI URL is " + API.getWelcomePageUri());
 

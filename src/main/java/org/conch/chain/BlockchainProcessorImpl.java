@@ -2226,18 +2226,18 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 for(Long crowdMinerId : crowdMiners.keySet()){
                     if(crowdMinerId.equals(transaction.getSenderId())){
                         //存在进行最新挖矿持仓量检查
-                        long holdingMwAmount = 0;
+                        long holdingAmount = 0;
                         try{
                             if(Account.getAccount(crowdMinerId)!=null){
-                                holdingMwAmount = Account.getAccount(crowdMinerId).getEffectiveBalanceSS(block.getHeight());
+                                holdingAmount = Account.getAccount(crowdMinerId).getEffectiveBalanceSS(block.getHeight());
                             }
                         }catch(Exception e){
                             Logger.logWarningMessage("[QualifiedMiner] not valid miner because can't get balance of account %s at height %d, caused by %s",  Account.getAccount(crowdMinerId).getRsAddress(), block.getHeight(), e.getMessage());
-                            holdingMwAmount = 0;
+                            holdingAmount = 0;
                         }
 
                         CertifiedPeer certifiedPeer = null;
-                        if(holdingMwAmount < QUALIFIED_CROWD_MINER_HOLDING_AMOUNT_MIN) {
+                        if(holdingAmount < QUALIFIED_CROWD_MINER_HOLDING_AMOUNT_MIN) {
                             //不满足移除
                             //原表增加deleteHeight字段 查询时判断deleteHeight == 0
                             certifiedPeer = Conch.getPocProcessor().getCertifiedPeers().get(crowdMinerId);
@@ -2254,17 +2254,17 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                         if(certifiedPeer!=null){
                             if(certifiedPeer.getDeleteHeight() != 0) {
                                 //存在进行最新挖矿持仓量检查
-                                long holdingMwAmount = 0;
+                                long holdingAmount = 0;
                                 try{
                                     if(Account.getAccount(crowdMinerId)!=null){
-                                        holdingMwAmount = Account.getAccount(crowdMinerId).getEffectiveBalanceSS(block.getHeight());
+                                        holdingAmount = Account.getAccount(crowdMinerId).getEffectiveBalanceSS(block.getHeight());
                                     }
                                 }catch(Exception e){
                                     Logger.logWarningMessage("[QualifiedMiner] not valid miner because can't get balance of account %s at height %d, caused by %s",  Account.getAccount(crowdMinerId).getRsAddress(), block.getHeight(), e.getMessage());
-                                    holdingMwAmount = 0;
+                                    holdingAmount = 0;
                                 }
 
-                                if(holdingMwAmount >= QUALIFIED_CROWD_MINER_HOLDING_AMOUNT_MIN) {
+                                if(holdingAmount >= QUALIFIED_CROWD_MINER_HOLDING_AMOUNT_MIN) {
                                     certifiedPeer.setDeleteHeight(0);
                                     PocDb.saveOrUpdatePeer(certifiedPeer);
                                 }

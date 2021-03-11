@@ -21,6 +21,7 @@
 
 package org.conch.asset.token;
 
+import org.conch.Conch;
 import org.conch.asset.MonetaryTx;
 import org.conch.common.ConchException;
 import org.conch.common.Constants;
@@ -272,7 +273,7 @@ public enum CurrencyType {
 
     private static void validate(Currency currency, int type, Transaction transaction) throws ConchException.ValidationException {
         if (transaction.getAmountNQT() != 0) {
-            throw new ConchException.NotValidException("Currency transaction MW amount must be 0");
+            throw new ConchException.NotValidException("Currency transaction " + Conch.COIN_UNIT + " amount must be 0");
         }
 
         final EnumSet<CurrencyType> validators = EnumSet.noneOf(CurrencyType.class);

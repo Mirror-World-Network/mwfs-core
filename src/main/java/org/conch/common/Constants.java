@@ -80,16 +80,7 @@ public final class Constants {
         }
     }
 
-    /**
-     * Load the JSON configuration with respect to Constants
-     */
-    private static JSONObject loadConstantsSettings() {
-        String pathName = Conch.getStringProperty("sharder.constants.pathName", "conf/constants.json");
-        String jsonStr = readJsonFile(pathName);
-        return JSON.parseObject(jsonStr);
-    }
-    protected static final JSONObject constantsJsonObj = loadConstantsSettings();
-    public static final JSONObject heightConf = (JSONObject) constantsJsonObj.get("height");
+    public static final JSONObject heightConf = (JSONObject) Conch.constantsJsonObj.get("height");
 
     private static final String networkInProperties = Conch.getStringProperty("sharder.network");
     public static final String NetworkDef = loadNetworkDefinition();
