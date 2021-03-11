@@ -132,14 +132,13 @@ public final class Conch {
     private static String nodeType = Peer.Type.NORMAL.getSimpleName();
     public static String nodeIp = IpUtil.getNetworkIp();
     public static Map<Integer, Boolean> airdropHeightMap = Maps.newHashMap();
+    public static String CONSTANT_CONFIG_PATH = "conf/constants.json";
 
     /**
      * Load the JSON configuration with respect to Constants
      */
     public static com.alibaba.fastjson.JSONObject loadConstantsSettings() {
-        String pathName = "conf/constants.json";
-        String jsonStr = readJsonFile(pathName);
-        return JSON.parseObject(jsonStr);
+        return JSON.parseObject(readJsonFile(CONSTANT_CONFIG_PATH));
     }
 
     public static boolean getAirdropHeighStatus(int height) {

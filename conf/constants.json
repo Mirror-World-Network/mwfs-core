@@ -55,6 +55,17 @@
     "DEVNET": "dev",
     "TESTNET": "alpha",
     "MAINNET": "beta"
+  },
+  "bootNodeHost": {
+    "MAIN_BOOT": "boot.mw.run",
+    "MAIN_NA": "",
+    "MAIN_NB": "",
+    "TEST_BOOT": "testboot.mw.run",
+    "TEST_NA": "testna.mw.run",
+    "TEST_NB": "testnb.mw.run",
+    "DEV_BOOT": "devboot.mw.run",
+    "DEV_NA": "",
+    "DEV_NB": ""
   }
 
 }

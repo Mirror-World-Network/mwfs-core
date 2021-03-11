@@ -81,6 +81,7 @@ public final class Constants {
     }
 
     public static final JSONObject heightConf = (JSONObject) Conch.constantsJsonObj.get("height");
+    public static final JSONObject bootNodeHostConf = (JSONObject) Conch.constantsJsonObj.get("bootNodeHost");
 
     private static final String networkInProperties = Conch.getStringProperty("sharder.network");
     public static final String NetworkDef = loadNetworkDefinition();
@@ -426,20 +427,20 @@ public final class Constants {
 
     private static final String parseBootNodeHost() {
         if(isMainnet()){
-            return "boot.mw.run";
+            return bootNodeHostConf.getString("MAIN_BOOT");
         }else if(isTestnet()){
-            return "testboot.mw.run";
+            return bootNodeHostConf.getString("TEST_BOOT");
         }
-        return "192.168.0.239";
+        return bootNodeHostConf.getString("DEV_BOOT");
     }
 
     private static final List<String> parseBootNodesHost() {
        if(isMainnet()){
-           return Lists.newArrayList("boot.mw.run");
+           return Lists.newArrayList(bootNodeHostConf.getString("MAIN_BOOT"));
        }else if(isTestnet()){
-           return Lists.newArrayList("testboot.mw.run","testna.mw.run","testnb.mw.run");
+           return Lists.newArrayList(bootNodeHostConf.getString("TEST_BOOT"),bootNodeHostConf.getString("TEST_NA"),bootNodeHostConf.getString("TEST_NB"));
        }
-       return Lists.newArrayList("192.168.0.239");
+       return Lists.newArrayList(bootNodeHostConf.getString("DEV_BOOT"));
     }
     
     
