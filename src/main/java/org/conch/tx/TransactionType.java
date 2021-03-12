@@ -608,7 +608,7 @@ public abstract class TransactionType {
             private void applyByType(Transaction transaction, Account senderAccount, Account recipientAccount) throws ConchException.StopException {
                 Attachment.CoinBase coinBase = (Attachment.CoinBase) transaction.getAttachment();
                 if (RewardCalculator.isBlockRewardTx(transaction.getAttachment())) {
-                    RewardCalculator.blockRewardDistribution(transaction,false);
+                    Constants.rewardCalculatorInstance.blockRewardDistribution(transaction,false);
                 } else if (Attachment.CoinBase.CoinBaseType.GENESIS == coinBase.getCoinBaseType()) {
                     if (SharderGenesis.isGenesisCreator(coinBase.getCreator()) && SharderGenesis.isGenesisRecipients(senderAccount.getId())) {
                         if (Constants.isDevnet()) {

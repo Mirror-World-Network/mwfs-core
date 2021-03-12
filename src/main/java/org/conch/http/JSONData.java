@@ -1072,7 +1072,6 @@ public final class JSONData {
 
             // join pool tx or deletion poo tx: convert the pool id
 
-
             // coinbase
             if(tx.getType().isType(TransactionType.TYPE_COIN_BASE)) {
                 Attachment.CoinBase coinBase = (Attachment.CoinBase) tx.getAttachment();
@@ -1081,15 +1080,15 @@ public final class JSONData {
                 && coinBase.getCrowdMiners().size() > 0){
                     HashMap<Long, Long> crowdMiners = coinBase.getCrowdMiners();
                     Account minerAccount = Account.getAccount(coinBase.getCreator());
-                    attachmentJSON.put("crowdMiners", RewardCalculator.calCrowdMinerReward(minerAccount, tx, crowdMiners));
+                    attachmentJSON.put("crowdMiners", Constants.rewardCalculatorInstance.calCrowdMinerReward(minerAccount, tx, crowdMiners));
                 }
 
                 if( coinBase.getConsignors().size() > 0){
-                    attachmentJSON.put("consignors",RewardCalculator.calPoolReward(tx.getSenderId(), coinBase.getGeneratorId(), tx, coinBase.getConsignors()));
+                    attachmentJSON.put("consignors",Constants.rewardCalculatorInstance.calPoolReward(tx.getSenderId(), coinBase.getGeneratorId(), tx, coinBase.getConsignors()));
                 }
             }
-            attachmentJSON.put("blockMiningRewardAmount",RewardCalculator.blockMiningReward(tx.getHeight()));
-            attachmentJSON.put("crowdMinerRewardAmount",RewardCalculator.crowdMinerReward(tx.getHeight()));
+            attachmentJSON.put("blockMiningRewardAmount",Constants.rewardCalculatorInstance.blockMiningReward(tx.getHeight()));
+            attachmentJSON.put("crowdMinerRewardAmount",Constants.rewardCalculatorInstance.crowdMinerReward(tx.getHeight()));
             json.put("attachment", attachmentJSON);
         }
         putAccount(json, "sender", tx.getSenderId());

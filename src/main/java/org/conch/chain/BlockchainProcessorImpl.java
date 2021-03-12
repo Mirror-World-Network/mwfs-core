@@ -1921,7 +1921,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             if(Constants.BLOCK_REWARD_VERIFY
                     && blockchain.getHeight()+1 >= Constants.BLOCK_REWARD_VERIFY_HEIGHT
                     && transaction.getType().isType(TransactionType.TYPE_COIN_BASE)
-                    && transaction.getAmountNQT() != RewardCalculator.blockReward(blockchain.getHeight()+1)) {
+                    && transaction.getAmountNQT() != Constants.rewardCalculatorInstance.blockReward(blockchain.getHeight()+1)) {
                 throw new TransactionNotAcceptedException("CoinBaseTx verification failed", transaction);
             }
 
@@ -2483,7 +2483,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         TransactionImpl coinBaseTx = null;
         try {
             // transaction version=1, deadline=10,timestamp=blockTimestamp
-            coinBaseTx = RewardCalculator.generateCoinBaseTxBuilder(publicKey, Conch.getHeight())
+            coinBaseTx = Constants.rewardCalculatorInstance.generateCoinBaseTxBuilder(publicKey, Conch.getHeight())
                     .timestamp(blockTimestamp)
                     .recipientId(0)
                     .build(secretPhrase);

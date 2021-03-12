@@ -27,6 +27,8 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.conch.Conch;
 import org.conch.consensus.reward.RewardCalculator;
+import org.conch.consensus.reward.RewardCalculatorDefault;
+import org.conch.consensus.reward.RewardCalculatorForMw;
 import org.conch.env.RuntimeEnvironment;
 import org.conch.peer.Peer;
 
@@ -259,7 +261,7 @@ public final class Constants {
 
     //Coinbase
     public static final int COINBASE_CROWD_MINER_OPEN_HEIGHT = isTestnetOrDevnet() ? heightConf.getIntValue("COINBASE_CROWD_MINER_OPEN_HEIGHT_NOT_MAINNET") : heightConf.getIntValue("COINBASE_CROWD_MINER_OPEN_HEIGHT_IS_MAINNET");
-    private static final int SETTLEMENT_INTERVAL_SIZE = Conch.getIntProperty("sharder.rewards.settlementInterval");
+    public static final int SETTLEMENT_INTERVAL_SIZE = Conch.getIntProperty("sharder.rewards.settlementInterval");
 
     //OSS
     public static final String OSS_PREFIX = "https://mwfs.oss-cn-shenzhen.aliyuncs.com/";
@@ -274,29 +276,40 @@ public final class Constants {
     public static Boolean MANUAL_SYNC_BUTTON = Conch.getBooleanProperty("sharder.sync.manualButton", false);
     public static Boolean GENERATE_EXPIRED_FILE_BUTTON = Conch.getBooleanProperty("sharder.generateExpiredFileButton"
             , true);
-
-    // height
-    public static final int NONE_PUBLICKEY_ACTIVE_HEIGHT = heightConf.getIntValue("NONE_PUBLICKEY_ACTIVE_HEIGHT");
-    public static final int BLOCK_REWARD_VERIFY_HEIGHT = Constants.isDevnet() ? heightConf.getIntValue("BLOCK_REWARD_VERIFY_HEIGHT_IS_DEVNET") : heightConf.getIntValue("BLOCK_REWARD_VERIFY_HEIGHT_ID_TESTNET");
     public static final Boolean BLOCK_REWARD_VERIFY = Conch.getBooleanProperty("sharder.blockRewardVerify", false);
 
+
+    // height related
+    public static int NONE_PUBLICKEY_ACTIVE_HEIGHT = 0;
+    public static int BLOCK_REWARD_VERIFY_HEIGHT = 0;
+    public static int MINER_REMOVE_HIGHT = 0;
+
+    public static RewardCalculator rewardCalculatorInstance;
+
+    public static final String MW_CHAIN = "mw";
+    public static final String SHARDER_CHAIN = "sharder";
+
     /**
-     * Whether reach crowd reward height
-     *
-     * @param height
-     * @return
+     * The configuration is updated when the different networks are started
      */
-    public static int getRewardSettlementHeight(int height) {
-        // before 5185 height reward interval is every 432 height
-        int interval = 432;
-        if (height > 5185 && height < 6050) {
-            interval = 432 * 2;
-        } else if (height >= 6050 && height <= RewardCalculator.NETWORK_ROBUST_PHASE) {
-            interval = SETTLEMENT_INTERVAL_SIZE;
-        } else if (height > RewardCalculator.NETWORK_ROBUST_PHASE) {
-            interval = 432 * 10;
+    static {
+        switch (Conch.PROJECT_NAME) {
+            case MW_CHAIN:
+                if (Constants.isMainnet()) {
+                    rewardCalculatorInstance = new RewardCalculatorDefault();
+                } else {
+                    rewardCalculatorInstance = new RewardCalculatorForMw();
+                    MINER_REMOVE_HIGHT = heightConf.getIntValue("MINER_REMOVE_HEIGHT");
+                    NONE_PUBLICKEY_ACTIVE_HEIGHT = heightConf.getIntValue("NONE_PUBLICKEY_ACTIVE_HEIGHT");
+                    BLOCK_REWARD_VERIFY_HEIGHT = Constants.isDevnet() ? heightConf.getIntValue("BLOCK_REWARD_VERIFY_HEIGHT_IS_DEVNET") : heightConf.getIntValue("BLOCK_REWARD_VERIFY_HEIGHT_ID_TESTNET");
+                }
+                break;
+            case SHARDER_CHAIN:
+                rewardCalculatorInstance = new RewardCalculatorDefault();
+                break;
+            default:
+                rewardCalculatorInstance = new RewardCalculatorDefault();
         }
-        return interval;
     }
 
     public static boolean updateHistoryRecord() {
@@ -467,7 +480,7 @@ public final class Constants {
     public static final boolean initFromArchivedDbFile = Conch.getBooleanProperty("sharder.initFromArchivedDbFile");
 
 
-    public static final int MINER_REMOVE_HIGHT = heightConf.getIntValue("MINER_REMOVE_HEIGHT");
+
 
     public static final int HeartBeat_Time = Conch.getIntProperty("sharder.heartBeatTime",5*60*1000);
 
