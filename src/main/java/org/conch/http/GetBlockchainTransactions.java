@@ -125,4 +125,9 @@ public final class GetBlockchainTransactions extends APIServlet.APIRequestHandle
     protected boolean startDbTransaction() {
         return true;
     }
+
+    @Override
+    protected boolean requireRequestControl() {
+        return true;
+    }
 }

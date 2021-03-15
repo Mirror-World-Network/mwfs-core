@@ -134,4 +134,9 @@ public final class GetUserConfig extends APIServlet.APIRequestHandler {
     protected boolean startDbTransaction() {
         return true;
     }
+
+    @Override
+    protected boolean requireRequestControl() {
+        return true;
+    }
 }
