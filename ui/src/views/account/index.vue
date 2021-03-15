@@ -1,13 +1,13 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div>
         <div>
-            <el-row v-if="nonePublicKeyHint" class="notice-container">
-                <el-col :span="24">
-                    <div class="notice" style="background: #ffffff">
-                        <div><a>{{$t('account.account_inactive')}}</a></div>
-                    </div>
-                </el-col>
-            </el-row>
+            <!--            <el-row v-if="openApiProxy" class="notice-container">-->
+            <!--                <el-col :span="24">-->
+            <!--                    <div class="notice" style="background: #ffffff">-->
+            <!--                        <div><a>{{$t('sso.light_client')}}</a></div>-->
+            <!--                    </div>-->
+            <!--                </el-col>-->
+            <!--            </el-row>-->
             <div class="block_account mb20">
                 <p class="block_title">
                     <img src="../../assets/img/account.svg"/>
@@ -25,7 +25,7 @@
                     </p>
                     <div class="account_tool">
                         <button class="common_btn imgBtn "
-                                v-bind:class="{'disabledWriteBtn': !nonDownloading,'writeBtn': nonDownloading}"
+                                v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}"
                                 @click="openTransferDialog">
                             <span class="icon">
                                 <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 174.62 174.83">
@@ -37,7 +37,7 @@
                             <span>{{ $t('account.transfer') }}</span>
                         </button>
                         <button class="common_btn imgBtn "
-                                v-bind:class="{'disabledWriteBtn': !nonDownloading,'writeBtn': nonDownloading}"
+                                v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}"
                                 @click="openBatchTransferDialog"
                                 v-if="openAirdrop">
                             <span class="icon">
@@ -50,7 +50,7 @@
                             <span>{{ $t('transfer.batch_transfer') }}</span>
                         </button>
                         <button class="common_btn imgBtn "
-                                v-bind:class="{'disabledWriteBtn': !nonDownloading,'writeBtn': nonDownloading}"
+                                v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}"
                                 v-if="whetherShowSendMsgBtn()"
                                 @click="openSendMessageDialog">
                             <span class="icon">
@@ -63,7 +63,7 @@
                             <span>{{ $t('account.send_message') }}</span>
                         </button>
                         <button class="common_btn imgBtn "
-                                v-bind:class="{'disabledWriteBtn': !nonDownloading,'writeBtn': nonDownloading}"
+                                v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}"
                                 v-if="whetherShowStorageBtn()"
                                 @click="openStorageFileDialog">
                             <span class="icon">
@@ -181,6 +181,29 @@
                                 </svg>
                             </span>
                             <span>{{ $t('login.config_nat_server') }}</span>
+                        </button>
+
+                        <button class="common_btn imgBtn "
+                                v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}"
+                                v-if="whetherShowAssetsAcrossChainsBtn()"
+                                @click="openAssetsAcrossChainsDialog" style="width:150px;">
+                            <span class="icon" style="color:#A6A9AD">
+                                <svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                                     viewBox="0 0 150 162.5" style="enable-background:new 0 0 150 162.5;" xml:space="preserve" >
+
+                                <path class="st0" d="M131.1,13.7c6.4,0,11.8,5.3,11.8,11.8v111.9c0,6.4-5.3,11.8-11.8,11.8h-112c-6.4,0-11.8-5.3-11.8-11.8V25.5
+                                    c0-6.4,5.3-11.8,11.8-11.8H131.1 M131.1,6.6h-112C8.8,6.6,0.3,15.2,0.3,25.5v111.9c0,10.3,8.6,18.9,18.9,18.9h112
+                                    c10.3,0,18.9-8.5,18.9-18.9V25.5C149.7,15.2,141.1,6.6,131.1,6.6L131.1,6.6z M131.1,6.6"/>
+                                <rect x="0.3" y="6.5" class="st1" width="149.9" height="149.9"/>
+                                <path class="st0" d="M109.7,62.9H51.6l13.2-13.2c1.1-1.1,1.1-2.5,0-3.2l-3.2-3.2c-0.4-1.1-2.5-1.1-3.2,0L38.8,62.9
+                                    c-0.4,0.4-0.7,0.7-0.7,1.4c-0.4,0.4-0.4,0.7-0.4,1.1V70c0,1.4,1.1,2.5,2.5,2.5h70.3c1.4,0,2.5-1.1,2.5-2.5v-4.6
+                                    C112.2,63.6,111.2,62.9,109.7,62.9L109.7,62.9z M109.7,62.9"/>
+                                <path class="st0" d="M110.5,81.4H40.2c-1.4,0-2.5,1.1-2.5,1.8v4.6c0,1.4,0,2.9,4.6,2.9h54.9l-11.8,11.4c-1.1,1.1-1.1,2.5,0,3.2
+                                    l3.2,3.2c1.1,1.1,2.5,1.1,3.2,0l19.3-18.2c1.4-0.7,1.4-1.8,1.4-2.1v-4.6C112.2,82.5,111.2,81.4,110.5,81.4L110.5,81.4z M110.5,81.4"
+                                />
+                                </svg>
+                            </span>
+                            <span>{{ $t('account.assets_across_chains') }}</span>
                         </button>
                     </div>
                 </div>
@@ -408,7 +431,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" v-loading="messageForm.executing" class="btn common_btn writeBtn"
-                                @click="sendMessageInfo" :disabled="messageForm.executing">
+                                @click="sendMessageInfo" :disabled="isDisable">
                             {{ $t('sendMessage.send_message') }}
                         </button>
                     </div>
@@ -584,7 +607,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" v-loading="transfer.executing" class="btn common_btn writeBtn"
-                                @click="sendTransferInfo" :disabled="transfer.executing">
+                                @click="sendTransferInfo" :disabled="isDisable">
                             {{ $t('transfer.transfer_send') }}
                         </button>
                     </div>
@@ -627,7 +650,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" v-loading="batch_transfer.executing" class="btn common_btn writeBtn"
-                                @click="sendBatchTransferInfo" :disabled="batch_transfer.executing">
+                                @click="sendBatchTransferInfo" :disabled="isDisable">
                             {{ $t('transfer.batch_transfer_send') }}
                         </button>
                         <el-row>
@@ -637,9 +660,10 @@
                         </el-row>
                         <button type="button" v-loading="batch_transfer.executingAnother"
                                 class="btn common_btn writeBtn"
-                                @click="detectionBatchTransferInfo" :disabled="batch_transfer.executingAnother">
+                                @click="detectionBatchTransferInfo" :disabled="isDisable">
                             {{ $t('transfer.batch_transfer_detection') }}
                         </button>
+
                     </div>
                 </div>
             </div>
@@ -747,7 +771,7 @@
                 </el-form>
                 <div class="footer-btn">
                     <button class="common_btn writeBtn" v-loading="hubsetting.executing"
-                            @click="verifyHubSetting('init')" :disabled="hubsetting.executing">
+                            @click="verifyHubSetting('init')" :disabled="isDisable">
                         {{ $t('hubsetting.confirm_restart') }}
                     </button>
                     <button class="common_btn writeBtn" @click="closeDialog">{{ $t('hubsetting.cancel') }}</button>
@@ -1066,6 +1090,118 @@
                 </el-table>
             </div>
         </div>
+
+        <!-- AssetsAcrossChainsDialog -->
+        <div class="modal" id="assets_across_chains_modal" v-show="AssetsAcrossChainsDialog"
+             v-bind:class="{'modal-hidden':showChain}">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button class="close" @click="closeDialog"></button>
+                        <h4 class="modal-title">{{ $t('acrossChains.title') }}</h4>
+                    </div>
+                    <div class="modal-body modal-message">
+                        <ul class="title" v-if="!showChain">
+                            <li :class="chainShow==1? 'active':''" @click="showHecoChain" ><a>Heco Chain</a></li>
+                            <li :class="chainShow==2? 'active':''" @click="showOkExChain" ><a>OKEx Chain</a></li>
+                            <li :class="chainShow==3? 'active':''" @click="showMoreChain" ><a>...</a></li>
+                        </ul>
+                        <ul class="title" v-else>
+                            <li :class="chainShow==1? 'active':''" ><a>Heco Chain</a></li>
+                            <li :class="chainShow==2? 'active':''" ><a>OKEx Chain</a></li>
+                            <li :class="chainShow==3? 'active':''" ><a>...</a></li>
+                        </ul>
+
+                        <div id="content">
+                            <el-form class="mod" v-if="chainShow==1">
+                                <el-form-item :label="$t('acrossChains.heco_target_address')" class="item_address">
+                                    <el-input id="acrossChains_target_address" v-model="acrossChains.heco.target_address" :placeholder="$t('acrossChains.heco_address_tip')">
+                                        <el-button  slot="append" style="background: #3fb09a;color:#000" @click="bindAddress(1)" :disabled="showChain">{{ $t('acrossChains.bind') }}</el-button>
+                                    </el-input>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.heco_target_balance')" class="item_balance">
+                                    <input class="el-input__inner" id="acrossChains_target_balance"  v-model="acrossChains.heco.target_balance" type="number" disabled="disabled" />
+                                    <label class="input_suffix">{{ $global.hecoUnit }}</label>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.heco_convertible_balance')" class="balance">
+                                    <input class="el-input__inner" id="acrossChains_balance" v-model="acrossChains.heco.convertible_balance" type="number" disabled="disabled" />
+                                    <label class="input_suffix">{{ $global.hecoUnit }}</label>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.heco_rate')" class="rate" style="margin-bottom:0">
+                                   
+                                </el-form-item>
+                                <div style="width:100%;height:40px">
+                                    <input id="input__mw" v-model="acrossChains.heco.rateMW" type ="text" disabled="disabled" />
+                                    <label id="input_unit">{{ $global.unit }}</label>
+                                    <label id="input__equals">=</label>
+                                    <input id="input__heco" v-model="acrossChains.heco.rateHeco" type ="text" disabled="disabled" />
+                                    <label id="input_hecoUnit">{{ $global.hecoUnit }}</label>
+                                </div>
+                                
+                            </el-form>
+                            <el-form class="mod" v-if="chainShow==2" >
+                                <!-- <el-form-item :label="$t('acrossChains.target_address')" class="item_address">
+                                    <el-input id="acrossChains_target_address" v-model="acrossChains.OKEx.target_address" :placeholder="$t('acrossChains.address_tip')">
+                                        <el-button slot="append" style="background: #3fb09a;color:#000" @click="bindAddress(2)" :disabled="showChain">{{ $t('acrossChains.bind') }}</el-button>
+                                    </el-input>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.target_balance')" class="item_balance">
+                                    <input class="el-input__inner" id="acrossChains_target_balance"  v-model="acrossChains.OKEx.target_balance" type="number" disabled="disabled"/>
+                                    <label class="input_suffix">{{ $global.hecoUnit }}</label>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.balance')" class="balance">
+                                    <input class="el-input__inner" id="acrossChains_balance" v-model="acrossChains.balance" type="number" disabled="disabled"/>
+                                    <label class="input_suffix">{{ $global.unit }}</label>
+                                </el-form-item> -->
+                                {{$t('acrossChains.more')}}
+                            </el-form>
+                            <el-form class="mod" v-if="chainShow==3" >
+                                {{$t('acrossChains.more')}}
+                            </el-form>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+
+                        {{$t('acrossChains.tip-0')}}
+                        <br>
+
+                        {{$t('acrossChains.tip-1')}}
+                        <br>
+
+                        {{$t('acrossChains.tip-2')}}
+                        <a>{{MWLockAddress}}</a>
+                        {{$t('acrossChains.tip-3')}}{{chainShow == 1 ? "Heco" : "OKEx"}}
+                        {{$t('acrossChains.tip-4')}}{{chainShow == 1 ? "Heco" : "OKEx"}}
+                        {{$t('acrossChains.tip-5')}}{{chainShow == 1 ? "Heco" : "OKEx"}}
+                        {{$t('acrossChains.tip-6')}}
+                        <a>{{chainShow == 1 ? HecoLockAddress:OKExLockAddress}}</a>
+                        {{$t('acrossChains.tip-7')}}
+                        <br>
+
+                        {{$t('acrossChains.tip-8')}}
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="modal" id="showChain" v-show="showChain">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="content address">
+                        {{this.chainShow==1?$t('acrossChains.tipChian1'):$t('acrossChains.tipChian2')}}
+                        <a>{{this.chainShow==1?this.acrossChains.heco.target_address:this.acrossChains.OKEx.target_address}}</a>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <el-button  class="sureButton" v-if="chainShow==1" slot="append" style="color:#000" @click="bindHecoAddress()">{{ $t('acrossChains.sure') }}</el-button>
+                    <el-button  class="sureButton" v-else slot="append" style="color:#000" @click="bindOKExAddress()">{{ $t('acrossChains.sure') }}</el-button>
+                    <el-button  class="cancelButton" slot="append" style="color:#000" @click="cancel()">{{ $t('acrossChains.cancel') }}</el-button>
+                </div>
+            </div>
+        </div>
+
         <dialogCommon :tradingInfoOpen="tradingInfoDialog" :trading="trading"
                       :accountInfoOpen="accountInfoDialog" :generatorRS="generatorRS"
                       :blockInfoOpen="blockInfoDialog" :height="height" @isClose="isClose"></dialogCommon>
@@ -1075,8 +1211,7 @@
 </template>
 <script>
 import rules from "../../utils/rules";
-import {FoundationApiUrls, getCommonFoundationApiUrl} from "../../utils/apiUrl";
-import { BigNumber } from "bignumber.js";
+import {FoundationApiUrls, getCommonFoundationApiUrl} from "../../utils/apiUrl"
 
 export default {
     name: "Network",
@@ -1087,7 +1222,6 @@ export default {
             this.$t('rules.mustRequired')
         );
         return {
-            nonePublicKeyHint: false,
             isDisable: false,
             isMobile: false,
             //dialog
@@ -1095,6 +1229,7 @@ export default {
             requestUrl: "https://mw.run",
             sendSuccess: false, //true验证码发送 false验证码未发送
             time: 60, //时间
+            AssetsAcrossChainsDialog:false,
             sendMessageDialog: false,
             storageFileDialog: false,
             onChainDialog: false,
@@ -1211,6 +1346,7 @@ export default {
             blockchainState: this.$global.blockchainState,
             accountInfo: {
                 account: '',
+                accountId: '',
                 name: '',
                 accountRS: SSO.accountRS,
                 balanceNQT: 0,              //账户余额
@@ -1437,7 +1573,35 @@ export default {
                 sharderPwd: [{required: true, message: this.$t('rules.mustRequired')}],
                 sharderAccount: [{required: true, message: this.$t('rules.mustRequired')}],
             },
-            airdropFlag: false
+            airdropFlag: false,
+
+            acrossChains:{
+                heco:{
+                    target_address: '',
+                    target_balance: 0,
+                    old_address: '',
+                    convertible_balance:0,
+                    rateMW:10,
+                    rateHeco:1
+                },
+                OKEx:{
+                    target_address: '',
+                    target_balance: 0,
+                    old_address: '',
+                    convertible_balance:0
+                },
+                balance:0,
+                id:''
+            },
+
+            chainShow:1,
+
+            MWLockAddress:"CDW-mw",
+            HecoLockAddress:"0x0000",
+            OKExLockAddress:"0x0001",
+
+            showChain:false,
+
         };
     },
     created() {
@@ -1450,17 +1614,17 @@ export default {
             }
 
             const _this = this;
-            let publicKey = null;
             _this.getAccount(_this.accountInfo.accountRS).then(res => {
                 _this.accountInfo.account = res.account;
+                _this.accountInfo.accountId = res.accountId;
                 _this.accountInfo.balanceNQT = res.balanceNQT;
                 _this.accountInfo.effectiveBalanceNQT = res.effectiveBalanceNQT;
                 _this.accountInfo.forgedBalanceNQT = res.forgedBalanceNQT;
                 _this.accountInfo.frozenBalanceNQT = res.frozenBalanceNQT;
                 _this.accountInfo.guaranteedBalanceNQT = res.guaranteedBalanceNQT;
                 _this.accountInfo.unconfirmedBalanceNQT = res.unconfirmedBalanceNQT;
-                if (res.publicKey != null) {
-                    publicKey = res.publicKey;
+                if (!res.publicKey && !SSO.downloadingBlockchain) {
+                    _this.$message.warning(_this.$t("account.account_inactive"));
                 }
                 if (res.pocScore != null) {
                     _this.accountInfo.pocScore = res.pocScore.total;
@@ -1487,13 +1651,7 @@ export default {
             _this.$global.setBlockchainState(_this).then(res => {
                 _this.blockchainState = res.data;
                 _this.getLatestHubVersion();
-            }).then(() => {
-                _this.nonePublicKeyHint = false;
-                if (publicKey == null && !SSO.downloadingBlockchain && _this.blockchainState.blockchainState == "UP_TO_DATE") {
-                    _this.nonePublicKeyHint = false;
-                }
             });
-
             // SSO.getState();
             _this.$global.getUserConfig(_this).then(res => {
                 _this.hubsetting.address = res["sharder.NATServiceAddress"];
@@ -1929,10 +2087,12 @@ export default {
         verifyHubSetting: function (type) {
             this.hubsetting.executing = true;
             const _this = this;
+            _this.preventRepeatedClick();
             let reConfigFormData = _this.verifyAndGenerateHubSettingFormData();
             if (reConfigFormData !== false) {
                 reConfigFormData.append("isInit", "true");
             }
+
             if (type === 'init') {
                 this.operationType = 'init';
                 _this.$refs['initForm'].validate((valid) => {
@@ -2242,8 +2402,7 @@ export default {
                 formData.append("calculateFee", "true");
                 formData.append("broadcast", "false");
                 formData.append("feeNQT", "0");
-                formData.append("amountNQT", new BigNumber(_this.transfer.number).times(_this.$global.unitValue));
-
+                formData.append("amountNQT", _this.transfer.number * _this.$global.unitValue);
 
                 if (_this.transfer.hasMessage && _this.transfer.message !== "") {
                     if (_this.transfer.isEncrypted) {
@@ -2281,8 +2440,9 @@ export default {
         },
         uploadFile: function () {
             const _this = this;
+            _this.preventRepeatedClick();
             let formData = new FormData();
-            formData.append("feeNQT", new BigNumber(_this.messageForm.fee).times(_this.$global.unitValue));
+            formData.append("feeNQT", _this.messageForm.fee * _this.$global.unitValue);
             formData.append("secretPhrase", _this.messageForm.password || _this.secretPhrase);
             formData.append("name", _this.messageForm.fileName);
             formData.append("file", _this.storagefile);
@@ -2313,7 +2473,7 @@ export default {
             const _this = this;
             _this.preventRepeatedClick();
             let formData = new FormData();
-            formData.append("feeNQT", new BigNumber(_this.messageForm.fee).items(_this.$global.unitValue));
+            formData.append("feeNQT", _this.messageForm.fee * _this.$global.unitValue);
             formData.append("secretPhrase", _this.messageForm.password || _this.secretPhrase);
             formData.append("phased", 'false');
             formData.append("phasingLinkedFullHash", '');
@@ -2363,6 +2523,7 @@ export default {
         },
         sendMessageInfo: function () {
             const _this = this;
+            _this.preventRepeatedClick();
             _this.messageForm.executing = true;
             let options = {};
             let encrypted = {};
@@ -2400,7 +2561,7 @@ export default {
             formData.append("phasingLinkedFullHash", '');
             formData.append("phasingHashedSecret", '');
             formData.append("phasingHashedSecretAlgorithm", '2');
-            formData.append("feeNQT", new BigNumber(_this.messageForm.fee).items(_this.$global.unitValue));
+            formData.append("feeNQT", _this.messageForm.fee * _this.$global.unitValue);
             formData.append("secretPhrase", _this.messageForm.password || _this.secretPhrase);
             formData.append("deadline", '1440');
 
@@ -2442,6 +2603,7 @@ export default {
                     });
                 }
             }
+            _this.messageForm.executing = false;
         },
         sendMessage: function (formData) {
             const _this = this;
@@ -2465,7 +2627,6 @@ export default {
                         _this.$message.error(_this.$global.escape2Html(res.errorDescription));
                     }
                 }
-                _this.messageForm.executing = false;
             });
             /*return new Promise(function (resolve, reject) {
                 let config = {
@@ -2533,6 +2694,7 @@ export default {
         },
         sendBatchTransferInfo: function () {
             const _this = this;
+            _this.preventRepeatedClick();
             if (_this.batch_transfer.fileName === "") {
                 _this.$message.warning(_this.$t('sso.error_no_file_chosen'));
                 return;
@@ -2569,6 +2731,7 @@ export default {
         },
         detectionBatchTransferInfo: function () {
             const _this = this;
+            _this.preventRepeatedClick();
             if (_this.batch_transfer.fileName === "") {
                 _this.$message.warning(_this.$t('sso.error_no_file_chosen'));
                 return;
@@ -2599,6 +2762,7 @@ export default {
         },
         sendTransferInfo: function () {
             const _this = this;
+            _this.preventRepeatedClick();
             _this.transfer.executing = true;
             let options = {};
             let encrypted = {};
@@ -2622,16 +2786,18 @@ export default {
                 _this.transfer.executing = false;
                 return;
             }
-            if (parseFloat(_this.transfer.number, 10) === 0 || _this.transfer.number === "") {
+            if (_this.transfer.number === 0) {
                 _this.$message.warning(_this.$t('notification.transfer_amount_error'));
                 _this.transfer.executing = false;
                 return;
             }
             _this.getAccount(_this.accountInfo.accountRS).then(res => {
-                if (res.errorDescription === "Unknown account") {
-                    _this.$message.warning(_this.$t('notification.new_account_warning'));
-                    _this.transfer.executing = false;
-                    return;
+                if (typeof res.errorDescription === 'undefined') {
+                    if (res.errorDescription === "Unknown account") {
+                        _this.$message.warning(_this.$t('notification.new_account_warning'));
+                        _this.transfer.executing = false;
+                        return;
+                    }
                 }
                 _this.accountInfo = res;
 
@@ -2658,10 +2824,10 @@ export default {
                 formData.append("phasingHashedSecret", '');
                 formData.append("phasingHashedSecretAlgorithm", '2');
                 formData.append("publicKey", "");
-                formData.append("feeNQT", new BigNumber(_this.transfer.fee).times(_this.$global.unitValue));
-                formData.append("amountNQT", new BigNumber(_this.transfer.number).times(_this.$global.unitValue));
+                formData.append("feeNQT", _this.transfer.fee * _this.$global.unitValue);
+                formData.append("amountNQT", _this.transfer.number * _this.$global.unitValue);
                 formData.append("secretPhrase", _this.secretPhrase || _this.transfer.password);
-                debugger
+
                 if (_this.transfer.hasMessage && _this.transfer.message !== "") {
                     if (_this.transfer.isEncrypted) {
 
@@ -2679,6 +2845,7 @@ export default {
                     }
                 }
                 _this.sendTransfer(formData);
+                _this.transfer.executing = false;
             });
 
         },
@@ -2703,7 +2870,6 @@ export default {
                         _this.$message.error(_this.$global.escape2Html(res.errorDescription));
                     }
                 }
-                _this.transfer.executing = false;
             });
 
             /*return new Promise(function (resolve, reject) {
@@ -2811,10 +2977,6 @@ export default {
                 this.$message.warning(this.$t("account.synchronization_block"));
                 return;
             }
-            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
-            //     this.$message.warning(this.$t("account.up_to_date"));
-            //     return;
-            // }
             this.$store.state.mask = true;
             this.sendMessageDialog = true;
         },
@@ -2823,10 +2985,6 @@ export default {
                 this.$message.warning(this.$t("account.synchronization_block"));
                 return;
             }
-            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
-            //     this.$message.warning(this.$t("account.up_to_date"));
-            //     return;
-            // }
             this.$store.state.mask = true;
             this.storageFileDialog = true;
         },
@@ -2835,10 +2993,6 @@ export default {
                 this.$message.warning(this.$t("account.synchronization_block"));
                 return;
             }
-            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
-            //     this.$message.warning(this.$t("account.up_to_date"));
-            //     return;
-            // }
             this.$store.state.mask = true;
             this.onChainDialog = true;
         },
@@ -2847,12 +3001,63 @@ export default {
                 this.$message.warning(this.$t("account.synchronization_block"));
                 return;
             }
-            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
-            //     this.$message.warning(this.$t("account.up_to_date"));
-            //     return;
-            // }
             this.$store.state.mask = true;
             this.joinNetDialog = true;
+        },
+        /**
+         * 打开跨链资产页面
+         */
+        openAssetsAcrossChainsDialog: function () {
+            
+            if(typeof(this.secretPhrase)　=== 'undefined'){
+                this.$message.warning(this.$t("acrossChains.use_secretPhrase_tip"));
+                return;
+            }
+            // if (SSO.downloadingBlockchain) {
+            //     this.$message.warning(this.$t("account.synchronization_block"));
+            //     return;
+            // }
+            
+           
+
+            //发起网关请求，查找当前帐号绑定的信息
+            const _this = this;
+            var str = _this.$global.formatNQTMoney(_this.accountInfo.effectiveBalanceNQT, 2);
+            _this.acrossChains.balance = parseFloat(str.substring(0,str.length-2));
+            if(_this.accountInfo.accountId){
+                _this.$http.get(window.api.getAccountInfoUrl,{params:{accountId:_this.accountInfo.accountId}}).then(function (res1) {
+                    switch (res1.data.code) {
+                        case "200":
+                            var account = JSON.parse(res1.data.body[0]); ;
+                            _this.acrossChains.heco.target_address = account.hecoAddress;
+                            _this.acrossChains.heco.old_address = account.hecoAddress;
+                            _this.acrossChains.heco.target_balance = account.hecoBalance / _this.$global.hecoUnitValue;
+                            _this.acrossChains.heco.convertible_balance = account.hecoConvertibleQuantity / _this.$global.hecoUnitValue;
+                            _this.acrossChains.OKEx.target_address = account.okExAddress;
+                            _this.acrossChains.OKEx.old_address = account.okExAddress;
+                            _this.acrossChains.OKEx.convertible_balance = account.okExConvertibleQuantity;
+                            _this.acrossChains.id = account.id;
+
+                            _this.$store.state.mask = true;
+                            _this.AssetsAcrossChainsDialog = true;
+                            console.log(_this.acrossChains)
+                            break;
+                        case "209":
+                            _this.$message.warning(_this.$t('acrossChains.bindAddress_incomplete'));
+                            break;
+                        case "363":
+                            _this.$message.warning(_this.$t('acrossChains.bindAddress_double'));
+                            break;
+                        default:
+                            break;
+                    }
+                }).catch(err => {
+                    _this.$message.error(_this.$t('acrossChains.error'));
+                });
+            }else{
+                _this.$message.error(_this.$t('acrossChains.no_accountId'));
+            }
+            
         },
         formatInputDiskCapacity: function (val) {
             return val + " T";
@@ -2874,12 +3079,8 @@ export default {
             return parseFloat(this.userConfig.diskCapacity / 1024 / 1024).toFixed(2) + " GB";
         },
         openTransferDialog: function () {
-            if (SSO.downloadingBlockchain) {
-                return this.$message.warning(this.$t("account.synchronization_block"));
-            }
-            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
-            //     this.$message.warning(this.$t("account.up_to_date"));
-            //     return;
+            // if (SSO.downloadingBlockchain) {
+            //     return this.$message.warning(this.$t("account.synchronization_block"));
             // }
             this.$store.state.mask = true;
             this.tranferAccountsDialog = true;
@@ -2889,10 +3090,6 @@ export default {
             if (SSO.downloadingBlockchain) {
                 return this.$message.warning(this.$t("account.synchronization_block"));
             }
-            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
-            //     this.$message.warning(this.$t("account.up_to_date"));
-            //     return;
-            // }
             this.$store.state.mask = true;
             this.batchTranferAccountsDialog = true;
             this.batch_transfer.executing = false;
@@ -2991,10 +3188,6 @@ export default {
                 _this.$message.warning(_this.$t("account.synchronization_block"));
                 return;
             }
-            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
-            //     this.$message.warning(this.$t("account.up_to_date"));
-            //     return;
-            // }
             _this.isUserInfoDialog(false);
             _this.secretPhrase ? _this.setName(_this.secretPhrase) : _this.secretPhraseDialog = true;
         },
@@ -3057,6 +3250,7 @@ export default {
             this.storageFileDialog = false;
             this.onChainDialog = false;
             this.joinNetDialog = false;
+            this.AssetsAcrossChainsDialog = false;
             this.capacity = 0;
             this.accountSecret = "";
             this.mortgageFee = 0;
@@ -3141,17 +3335,13 @@ export default {
             })*/
             SSO.setAccountInfo(formData, function (res) {
                 console.log("res", res);
-                if (typeof res.errorDescription === "undefined") {
+                if (typeof res.data.errorDescription === "undefined") {
                     _this.$message.success(_this.$t('notification.modify_success'));
                     _this.accountInfo.name = res.data.transactionJSON.attachment.name;
                     _this.isShowName = true;
                     _this.temporaryName = "";
                 } else {
-                    if (res.errorDescription.indexOf("$.t") != -1) {
-                        _this.$message.error(_this.$global.escape2Html(_this.$t(res.errorDescription.slice(3))));
-                    } else {
-                        _this.$message.error(_this.$global.escape2Html(res.errorDescription));
-                    }
+                    _this.$message.error(res.data.errorDescription);
                     _this.accountInfo.name = "";
                     _this.isShowName = true;
                 }
@@ -3407,7 +3597,7 @@ export default {
             4. Hub bind MW address must equals to user account address;
             5. Not a light client;
             */
-            // return true;
+            //return true;
             return this.secretPhrase
                 && !this.initHUb
                 && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center')
@@ -3462,6 +3652,9 @@ export default {
             //     && this.userConfig.natAddress;
             return false;
         },
+        whetherShowAssetsAcrossChainsBtn() {
+            return true;
+        },
         getAccountRsBySecret() {
             let publicKey = global.SSO.getPublicKey(this.hubsetting.modifyMnemonicWord, false);
             let accountRs = global.SSO.getAccountIdFromPublicKey(publicKey, true);
@@ -3493,7 +3686,118 @@ export default {
                     _this[val].publicKey = res.publicKey;
                 }
             });
+        },
+        showHecoChain(){
+            this.chainShow = 1;
+        },
+        showOkExChain(){
+            this.chainShow = 2;
+        },
+        showMoreChain(){
+            this.chainShow = 3;
+        },
+
+        bindAddress(){
+            this.$store.state.mask = true;
+            this.showChain = true;
+        },
+
+        cancel(){
+            this.$store.state.mask = false;
+            this.showChain = false;
+        },
+
+        /**
+         * 绑定heco地址
+         */
+        bindHecoAddress(){
+            this.preventRepeatedClick();
+            this.showChain = false;
+
+            if(typeof(this.secretPhrase)　=== 'undefined'){
+                this.$message.warning(this.$t("acrossChains.use_secretPhrase_tip"));
+                return;
+            }
+
+            var web3Utils = require("web3-utils");
+            console.log(web3Utils.isAddress(this.acrossChains.heco.target_address))
+            if(!web3Utils.isAddress(this.acrossChains.heco.target_address)){
+                this.$message.warning(this.$t("acrossChains.notRightAddress"));
+                return;
+            }
+            if(this.acrossChains.heco.target_address == this.acrossChains.heco.old_address){
+                this.$message.warning(this.$t("acrossChains.sameAddress"));
+                return;
+            }
+
+            const _this = this;
+            let formData = new FormData();
+            formData.append("id", _this.acrossChains.id);
+            formData.append("accountId", _this.accountInfo.accountId);
+            formData.append("accountRS", _this.accountInfo.accountRS);
+            formData.append("publicKey", _this.accountInfo.publicKey);
+            formData.append("hecoAddress", _this.acrossChains.heco.target_address);
+            this.$http.post(window.api.updateChainAccountUrl,formData)
+                .then(function (res1) {
+                    switch (res1.data.code) {
+                        case "200":
+                            _this.acrossChains.heco.old_address = _this.acrossChains.heco.target_address;
+                            _this.$message.success(_this.$t('acrossChains.bindAddress_success_heco'));
+                            break;
+                        case "209":
+                            _this.$message.warning(_this.$t('acrossChains.bindAddress_incomplete'));
+                            break;
+                        case "202":
+                            _this.$message.warning(_this.$t('acrossChains.address_error'));
+                            break;
+                        case "363":
+                            _this.$message.warning(_this.$t('acrossChains.bindAddress_double'));
+                            break;
+                        default:
+                            break;
+                    }
+                })
+                .catch(err => {
+                    _this.$message.warning(_this.$t('acrossChains.bindAddress_fail_heco'));
+                });
+
+        },
+        /**
+         * 绑定OKEX地址　
+         */
+        bindOKExAddress(){
+            this.preventRepeatedClick();
+            this.showChain = false;
+
+            var web3Utils = require("web3-utils");
+            if(!web3Utils.isAddress(this.acrossChains.OKEx.target_address)){
+                this.$message.warning(this.$t("acrossChains.notRightAddress"));
+                return;
+            }
+            if(this.acrossChains.OKEx.target_address == this.acrossChains.OKEx.old_address){
+                this.$message.warning(this.$t("acrossChains.sameAddress"));
+                return;
+            }
+
+            const _this = this;
+            let formData = new FormData();
+            formData.append("id", _this.acrossChains.id);
+            formData.append("accountId", _this.accountInfo.accountId);
+            formData.append("publicKey", _this.accountInfo.publicKey);
+            formData.append("accountRS", _this.accountInfo.accountRS);
+            formData.append("hecoAddress", _this.acrossChains.heco.target_address);
+            formData.append("okExAddress", _this.acrossChains.OKEx.target_address);
+            this.$http.post(window.api.saveOrupdateChainAccountUrl,formData)
+                .then(function (res1) {
+                    _this.$message.success(_this.$t('acrossChains.bindAddress_success_OKEx'));
+                    _this.acrossChains.OKEx.old_address = _this.acrossChains.OKEx.target_address;
+                })
+                .catch(err => {
+                    _this.$message.warning(_this.$t('acrossChains.bindAddress_fail_OKEx'));
+                });
+
         }
+
     },
     computed: {
         getLang: function () {
@@ -3518,8 +3822,11 @@ export default {
             const _this = this;
             return _this.$global.isOpenApiProxy();
         },
-        nonDownloading: function () {
-            return !SSO.downloadingBlockchain;
+        isUpToDateOrLight: function () {
+            const _this = this;
+            console.log("_this.blockchainState", _this.blockchainState)
+            console.log("isUpToDateOrLight", !SSO.downloadingBlockchain || _this.blockchainState.isLightClient == true);
+            return !SSO.downloadingBlockchain || _this.blockchainState.isLightClient == true;
         }
     },
     watch: {
@@ -3652,7 +3959,7 @@ export default {
         margin-bottom: 20px;
         text-align: center;
         font-size: 16px;
-        font-weight: 400;
+        font-weight: 600;
         color: #3fb09a;
         line-height: 150%;
         border-radius: 4px;

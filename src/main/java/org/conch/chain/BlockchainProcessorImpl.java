@@ -2102,42 +2102,42 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
              *
              * @Author peifeng
              */
-            block.getTransactions().forEach(transaction -> {
-                if(transaction.getType().isType(TransactionType.TYPE_PAYMENT)){
-                    if(transaction.getRecipientId()==Constants.HecoLockAddress){
-                        String url = Constants.HecoLockUrl;
+            if(blockchain.getHeight() >= Constants.HECO_HEIGHT){
+                block.getTransactions().forEach(transaction -> {
+                    if(transaction.getType().isType(TransactionType.TYPE_PAYMENT)){
+                        String url = Constants.HECO_LOCKURL;
+                        RestfulHttpClient.HttpResponse response = null;
                         try {
-                            Map<String,String> params = new HashMap<>();
-                            params.put("accountId",transaction.getSenderId()+"");
-                            params.put("recordType","1");
-                            params.put("amount",transaction.getAmountNQT()+"");
-                            params.put("createDate",transaction.getTimestamp()+"");
-                            params.put("SourceTransactionHash",transaction.getFullHash());
-                            RestfulHttpClient.HttpResponse response = RestfulHttpClient.getClient(url).post().postParams(params).request();
-                            if(response != null){
-                                String content = response.getContent();
+                            response = RestfulHttpClient.getClient(url+"getHecoLockAddress").get().request();
+                            String content = response.getContent();
+                            com.alibaba.fastjson.JSONObject contentObj = com.alibaba.fastjson.JSON.parseObject(content);
+                            String code = (String)contentObj.get("code");
+                            if(code.equals("200")){
+                                String recipientId = ((Long)contentObj.get("body")+"");
+                                if(recipientId.equals(transaction.getRecipientId()+"")) {
+                                    Map<String,String> params = new HashMap<>();
+                                    params.put("accountId",transaction.getSenderId()+"");
+                                    params.put("recordType","1");
+                                    params.put("amount",transaction.getAmountNQT()+"");
+                                    params.put("createDate",transaction.getTimestamp()+"");
+                                    params.put("SourceTransactionHash",transaction.getFullHash());
+                                    try {
+                                        response = RestfulHttpClient.getClient(url+"saveRecord").post().postParams(params).request();
+                                        if(response != null){
+                                            content = response.getContent();
+                                        }
+                                    }catch (IOException e) {
+                                        Logger.logDebugMessage("Heco chain:can't sendTransactin in hecoChain"+e.getMessage());
+                                    }
+
+                                }
                             }
                         } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }else if(transaction.getRecipientId()==Constants.OKExLockAddress){
-                        String url = Constants.OKExLockUrl;
-                        try {
-                            Map<String,String> params = new HashMap<>();
-                            params.put("accountId",transaction.getSenderId()+"");
-                            params.put("recordType","3");
-                            params.put("amount",transaction.getAmountNQT()+"");
-                            params.put("createDate",transaction.getBlockTimestamp()+"");
-                            RestfulHttpClient.HttpResponse response = RestfulHttpClient.getClient(url).post().postParams(params).request();
-                            if(response != null){
-                                String content = response.getContent();
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                            Logger.logDebugMessage("Heco chain:can't connect"+Constants.HECO_LOCKURL+e.getMessage());
                         }
                     }
-                }
-            });
+                });
+            }
 
         } finally {
             isProcessingBlock = false;

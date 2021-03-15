@@ -90,6 +90,7 @@ public final class Constants {
     }
     protected static final JSONObject constantsJsonObj = loadConstantsSettings();
     public static final JSONObject heightConf = (JSONObject) constantsJsonObj.get("height");
+    public static final JSONObject acrossChainsConf = (JSONObject) constantsJsonObj.get("acrossChains");
 
     private static final String networkInProperties = Conch.getStringProperty("sharder.network");
     public static final String NetworkDef = loadNetworkDefinition();
@@ -477,5 +478,10 @@ public final class Constants {
     public static final int MINER_REMOVE_HIGHT = heightConf.getIntValue("MINER_REMOVE_HEIGHT");
 
     public static final int HeartBeat_Time = Conch.getIntProperty("sharder.heartBeatTime",5*60*1000);
+
+    public static final String HECO_LOCKURL = acrossChainsConf.getString("HECO_LOCKURL");
+
+    public static final int HECO_HEIGHT = acrossChainsConf.getIntValue("HECO_HEIGHT");
+
 
 }
