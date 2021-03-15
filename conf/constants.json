@@ -28,5 +28,44 @@
     "BLOCK_REWARD_VERIFY_HEIGHT_IS_DEVNET": 10,
     "BLOCK_REWARD_VERIFY_HEIGHT_ID_TESTNET": 18000,
     "MINER_REMOVE_HEIGHT": 16200
+  },
+  "basic": {
+    "COIN_UNIT": "MW",
+    "PROJECT_NAME": "mw",
+    "APPLICATION": "COS",
+    "FOUNDATION_URL": "mw.run",
+    "FOUNDATION_TEST_URL": "test.mw.run",
+    "SERIAL_NUM": ""
+  },
+  "port": {
+    "DEFAULT_PEER_PORT": 3218,
+    "DEFAULT_API_PORT": 8215,
+    "DEFAULT_API_SSL_PORT": 8217,
+    "DEVNET_PEER": 9219,
+    "DEVNET_API": 9216,
+    "DEVNET_API_SSL": 9218,
+    "TESTNET_PEER": 7219,
+    "TESTNET_API": 7216,
+    "TESTNET_API_SSL": 7218,
+    "MAINNET_PEER": 3219,
+    "MAINNET_API": 3216,
+    "MAINNET_API_SSL": 3218
+  },
+  "networkType": {
+    "DEVNET": "dev",
+    "TESTNET": "alpha",
+    "MAINNET": "beta"
+  },
+  "bootNodeHost": {
+    "MAIN_BOOT": "boot.mw.run",
+    "MAIN_NA": "",
+    "MAIN_NB": "",
+    "TEST_BOOT": "testboot.mw.run",
+    "TEST_NA": "testna.mw.run",
+    "TEST_NB": "testnb.mw.run",
+    "DEV_BOOT": "devboot.mw.run",
+    "DEV_NA": "",
+    "DEV_NB": ""
   }
+
 }

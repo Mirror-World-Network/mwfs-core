@@ -24,6 +24,7 @@ package org.conch.chain;
 import org.conch.Conch;
 import org.conch.common.ConchException;
 import org.conch.common.Constants;
+import org.conch.consensus.reward.RewardCalculator;
 import org.conch.db.Db;
 import org.conch.db.DbUtils;
 import org.conch.tx.TransactionDb;
@@ -440,7 +441,7 @@ public final class BlockDb {
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     int rewardDistributionHeightDifference = height - rs.getInt("REWARD_DISTRIBUTION_HEIGHT");
-                    int rewardSettlementHeight = Constants.getRewardSettlementHeight(height);
+                    int rewardSettlementHeight = Constants.rewardCalculatorInstance.getRewardSettlementHeight(height);
 
                     if (rewardDistributionHeightDifference == rewardSettlementHeight) {
                         return true;

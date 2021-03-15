@@ -1641,32 +1641,7 @@ public final class Account {
     public long getCurrentEffectiveBalanceSS() {
         return getEffectiveBalanceSS(Conch.getHeight());
     }
-
-    public long getConfirmedEffectiveBalanceSS(int height) {
-        if (height != Conch.getHeight()) {
-            throw new RuntimeException("argument height " + height + " not equal blockchain height " + Conch.getHeight());
-        }
-        if (this.publicKey == null) {
-            this.publicKey = publicKeyTable.get(accountDbKeyFactory.newKey(this));
-        }
-
-        // adding height judgment logic, not check the account publicKey
-        // TODO Network reset turn off the judgment
-        if (height <= RewardCalculator.NETWORK_ROBUST_PHASE && this.publicKey == null || this.publicKey.publicKey == null) {
-            return 0;
-        }
-
-        try {
-            Conch.getBlockchain().readLock();
-            long effectiveBalanceNQT = getLessorsGuaranteedBalanceNQT(height);
-            if (activeLesseeId == 0 || Constants.SYNC_BUTTON) {
-                effectiveBalanceNQT += getGuaranteedBalanceNQT(Constants.GUARANTEED_BALANCE_CONFIRMATIONS);
-            }
-            return  effectiveBalanceNQT / Constants.ONE_SS;
-        } finally {
-            Conch.getBlockchain().readUnlock();
-        }
-    }
+    
     /**
      * return the effective balance in the unit MW
      * @param height

@@ -635,8 +635,8 @@ public final class FundingMonitor {
             } else {
                 Conch.getTransactionProcessor().broadcast(transaction);
                 monitoredAccount.height = Conch.getBlockchain().getHeight();
-                Logger.logDebugMessage(String.format("Conch funding transaction %s for %f MW submitted from %s to %s",
-                        transaction.getStringId(), (double)monitoredAccount.amount / Constants.ONE_SS,
+                Logger.logDebugMessage(String.format("Conch funding transaction %s for %f %s submitted from %s to %s",
+                        transaction.getStringId(), (double)monitoredAccount.amount / Constants.ONE_SS, Conch.COIN_UNIT,
                         monitor.accountName, monitoredAccount.accountName));
             }
         }

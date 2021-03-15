@@ -1740,11 +1740,11 @@ public final class Peers {
         return json;
     }
 
-    public static boolean isCollectForkNode(String address) {
+    public static boolean isCollectForkNode(String announcedAddress) {
         ArrayList<Object> collectForkNodes = Lists.newArrayList();
         collectForkNodes.addAll(bootNodesHost);
         collectForkNodes.add("testnc.mw.run");
-        return collectForkNodes.contains(address) && !Peers.closeCollectFork;
+        return collectForkNodes.contains(announcedAddress) && !Peers.closeCollectFork;
     }
 
     public static JSONArray getForkBlocks(Integer startNum, Integer endNum) {

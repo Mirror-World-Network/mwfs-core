@@ -1921,7 +1921,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
             if(Constants.BLOCK_REWARD_VERIFY
                     && blockchain.getHeight()+1 >= Constants.BLOCK_REWARD_VERIFY_HEIGHT
                     && transaction.getType().isType(TransactionType.TYPE_COIN_BASE)
-                    && transaction.getAmountNQT() != RewardCalculator.blockReward(blockchain.getHeight()+1)) {
+                    && transaction.getAmountNQT() != Constants.rewardCalculatorInstance.blockReward(blockchain.getHeight()+1)) {
                 throw new TransactionNotAcceptedException("CoinBaseTx verification failed", transaction);
             }
 
@@ -2226,18 +2226,18 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                 for(Long crowdMinerId : crowdMiners.keySet()){
                     if(crowdMinerId.equals(transaction.getSenderId())){
                         //存在进行最新挖矿持仓量检查
-                        long holdingMwAmount = 0;
+                        long holdingAmount = 0;
                         try{
                             if(Account.getAccount(crowdMinerId)!=null){
-                                holdingMwAmount = Account.getAccount(crowdMinerId).getEffectiveBalanceSS(block.getHeight());
+                                holdingAmount = Account.getAccount(crowdMinerId).getEffectiveBalanceSS(block.getHeight());
                             }
                         }catch(Exception e){
                             Logger.logWarningMessage("[QualifiedMiner] not valid miner because can't get balance of account %s at height %d, caused by %s",  Account.getAccount(crowdMinerId).getRsAddress(), block.getHeight(), e.getMessage());
-                            holdingMwAmount = 0;
+                            holdingAmount = 0;
                         }
 
                         CertifiedPeer certifiedPeer = null;
-                        if(holdingMwAmount < QUALIFIED_CROWD_MINER_HOLDING_AMOUNT_MIN) {
+                        if(holdingAmount < QUALIFIED_CROWD_MINER_HOLDING_AMOUNT_MIN) {
                             //不满足移除
                             //原表增加deleteHeight字段 查询时判断deleteHeight == 0
                             certifiedPeer = Conch.getPocProcessor().getCertifiedPeers().get(crowdMinerId);
@@ -2254,17 +2254,17 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                         if(certifiedPeer!=null){
                             if(certifiedPeer.getDeleteHeight() != 0) {
                                 //存在进行最新挖矿持仓量检查
-                                long holdingMwAmount = 0;
+                                long holdingAmount = 0;
                                 try{
                                     if(Account.getAccount(crowdMinerId)!=null){
-                                        holdingMwAmount = Account.getAccount(crowdMinerId).getEffectiveBalanceSS(block.getHeight());
+                                        holdingAmount = Account.getAccount(crowdMinerId).getEffectiveBalanceSS(block.getHeight());
                                     }
                                 }catch(Exception e){
                                     Logger.logWarningMessage("[QualifiedMiner] not valid miner because can't get balance of account %s at height %d, caused by %s",  Account.getAccount(crowdMinerId).getRsAddress(), block.getHeight(), e.getMessage());
-                                    holdingMwAmount = 0;
+                                    holdingAmount = 0;
                                 }
 
-                                if(holdingMwAmount >= QUALIFIED_CROWD_MINER_HOLDING_AMOUNT_MIN) {
+                                if(holdingAmount >= QUALIFIED_CROWD_MINER_HOLDING_AMOUNT_MIN) {
                                     certifiedPeer.setDeleteHeight(0);
                                     PocDb.saveOrUpdatePeer(certifiedPeer);
                                 }
@@ -2483,7 +2483,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
         TransactionImpl coinBaseTx = null;
         try {
             // transaction version=1, deadline=10,timestamp=blockTimestamp
-            coinBaseTx = RewardCalculator.generateCoinBaseTxBuilder(publicKey, Conch.getHeight())
+            coinBaseTx = Constants.rewardCalculatorInstance.generateCoinBaseTxBuilder(publicKey, Conch.getHeight())
                     .timestamp(blockTimestamp)
                     .recipientId(0)
                     .build(secretPhrase);

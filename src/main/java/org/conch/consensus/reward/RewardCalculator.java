@@ -40,7 +40,7 @@ import java.util.*;
  * @author <a href="mailto:xy@sharder.org">Ben</a>
  * @since 2019/1/8
  */
-public class RewardCalculator {
+public abstract class RewardCalculator {
 
     /**
      * Reward definition
@@ -49,8 +49,6 @@ public class RewardCalculator {
     private enum RewardDef {
         BLOCK_REWARD(1333 * Constants.ONE_SS),
         CROWD_MINERS_REWARD(667 * Constants.ONE_SS),
-        ROBUST_PHASE_CROWD_MINERS_REWARD(9 * Constants.ONE_SS / 10),
-        ROBUST_PHASE_BLOCK_REWARD(1 * Constants.ONE_SS),
         STABLE_PHASE_BLOCK_REWARD(1 * Constants.ONE_SS),
         STABLE_PHASE_CROWD_MINERS_REWARD(1 * Constants.ONE_SS / 2);
 
@@ -66,64 +64,44 @@ public class RewardCalculator {
 
     }
 
+    public static RewardCalculator newInstance () {
+        if (Conch.PROJECT_NAME == "mw") {
+            if (Constants.isMainnet()) {
+                return new RewardCalculatorDefault();
+            }
+            return new RewardCalculatorForMw();
+        } else {
+            return new RewardCalculatorDefault();
+        }
+    }
+
     /**
      * Halve height, -1 means close halve
      */
-    private static final int HALVE_COUNT = -1;
+    public static final int HALVE_COUNT = -1;
     /**
      * Estimated stable height after network reset
      */
     public static final int NETWORK_STABLE_PHASE = Constants.isDevnet() ? Constants.heightConf.getIntValue("NETWORK_STABLE_PHASE_IS_DEVNET") : Constants.heightConf.getIntValue("NETWORK_STABLE_PHASE_IS_TESTNET");
     /**
-     * Estimated robust height after network reset
-     */
-    public static final int NETWORK_ROBUST_PHASE = Constants.isDevnet() ? Constants.heightConf.getIntValue("NETWORK_ROBUST_PHASE_IS_DEVNET") : Constants.heightConf.getIntValue("NETWORK_ROBUST_PHASE_IS_TESTNET");
-    /**
-     * block reward verify height
-     */
-    public static final int BLOCK_REWARD_VERIFY_HEIGHT = Constants.isDevnet() ? 10 : 11250;
-    /**
      * how much one block reward
      * @return
      */
-    public static long blockReward(int height) {
-        // Halving logic
-        if(HALVE_COUNT != -1) {
-            double turn = 0d;
-            if(Conch.getBlockchain().getHeight() > HALVE_COUNT){
-                turn = Conch.getBlockchain().getHeight() / HALVE_COUNT;
-            }
-            double rate = Math.pow(0.5d, turn);
-            return (long)(RewardDef.BLOCK_REWARD.getAmount() * rate);
-        }
+    public abstract long blockReward(int height);
 
-        // No block rewards in the miner joining phase
-        if(height <= NETWORK_STABLE_PHASE) {
-            return RewardDef.STABLE_PHASE_BLOCK_REWARD.getAmount();
-        } else if (height <= NETWORK_ROBUST_PHASE) {
-            return RewardDef.BLOCK_REWARD.getAmount();
-        } else {
-            return RewardDef.ROBUST_PHASE_BLOCK_REWARD.getAmount();
-        }
-    }
+    public abstract long crowdMinerReward(int height);
 
-    public static long crowdMinerReward(int height){
-        if(height >= Constants.COINBASE_CROWD_MINER_OPEN_HEIGHT
-        || LocalDebugTool.isLocalDebugAndBootNodeMode){
-            if(height <= NETWORK_STABLE_PHASE) {
-                return RewardDef.STABLE_PHASE_CROWD_MINERS_REWARD.getAmount();
-            } else if (height <= NETWORK_ROBUST_PHASE) {
-                return RewardDef.CROWD_MINERS_REWARD.getAmount();
-            } else {
-                return RewardDef.ROBUST_PHASE_CROWD_MINERS_REWARD.getAmount();
-            }
-        }
-        return 0L;
-    }
-
-    public static long blockMiningReward(int height){
+    public long blockMiningReward(int height){
         return blockReward(height) - crowdMinerReward(height);
     }
+
+    /**
+     * Whether reach crowd reward height
+     *
+     * @param height
+     * @return
+     */
+    public abstract int getRewardSettlementHeight(int height);
 
     /**
      *
@@ -131,7 +109,7 @@ public class RewardCalculator {
      * @param height blockchain's height
      * @return
      */
-    public static TransactionImpl.BuilderImpl generateCoinBaseTxBuilder(final byte[] publicKey, int height){
+    public TransactionImpl.BuilderImpl generateCoinBaseTxBuilder(final byte[] publicKey, int height){
         Account creator = Account.getAccount(publicKey);
 
         // Pool owner -> pool rewards map (send rewards to pool joiners)
@@ -267,14 +245,14 @@ public class RewardCalculator {
                 continue;
             }
 
-            long holdingMwAmount = 0;
+            long holdingAmount = 0;
             try{
-                holdingMwAmount = declaredAccount.getEffectiveBalanceSS(height);
+                holdingAmount = declaredAccount.getEffectiveBalanceSS(height);
             }catch(Exception e){
                 Logger.logWarningMessage("[QualifiedMiner] not valid miner because can't get balance of account %s at height %d, caused by %s",  declaredAccount.getRsAddress(), height, e.getMessage());
-                holdingMwAmount = 0;
+                holdingAmount = 0;
             }
-            if(holdingMwAmount < QUALIFIED_CROWD_MINER_HOLDING_AMOUNT_MIN) {
+            if(holdingAmount < QUALIFIED_CROWD_MINER_HOLDING_AMOUNT_MIN) {
                 continue;
             }
 
@@ -295,9 +273,6 @@ public class RewardCalculator {
     }
 
     /**
-<<<<<<< HEAD
-     * 核对并结算RowdMinerRewards
-=======
      * Total capacity of qualified miner hardware
      * @return
      * @param height
@@ -325,7 +300,6 @@ public class RewardCalculator {
     }
 
     /**
->>>>>>> 815213fadc95ae89d7196d0b29d2a7377ec8e39d
      * Check whether reach the settlement height
      * Settle all un-settlement blocks before this height
      * Combine changes of the same account from these blocks
@@ -334,7 +308,7 @@ public class RewardCalculator {
      *
      * @param tx coinbase tx of block at the settlement height
      */
-    private static boolean checkAndSettleCrowdMinerRewards(Transaction tx) throws ConchException.StopException {
+    private boolean checkAndSettleCrowdMinerRewards(Transaction tx) throws ConchException.StopException {
         if (!Db.db.isInTransaction()) {
             throw new IllegalStateException("RewardCalculator#checkAndSettleCrowdMinerRewards method should in a " +
                     "transaction, open the tx before call this method");
@@ -454,7 +428,7 @@ public class RewardCalculator {
      * @param crowdMiners
      * @return crowd miner reward json array:[{accountId:,accountRS:,pocScore:,rewardAmount:}]
      */
-    public static  JSONArray calCrowdMinerReward(Account minerAccount, Transaction tx, Map<Long, Long> crowdMiners){
+    public JSONArray calCrowdMinerReward(Account minerAccount, Transaction tx, Map<Long, Long> crowdMiners){
         return _calAndSetCrowdMinerReward(false, minerAccount, tx, crowdMiners, false);
     }
 
@@ -472,7 +446,7 @@ public class RewardCalculator {
      *  rewardAmount: 11491
      * }]
      */
-    public static JSONArray calPoolReward(long senderId, long blockGeneratorId, Transaction tx, Map<Long, Long> consignors){
+    public JSONArray calPoolReward(long senderId, long blockGeneratorId, Transaction tx, Map<Long, Long> consignors){
         JSONArray poolRewardArray = new JSONArray();
         Map<Long, Long> poolRewardMap = PoolRule.calRewardMapAccordingToRules(senderId, blockGeneratorId, blockMiningReward(tx.getHeight()), consignors);
         for (long accountId : poolRewardMap.keySet()) {
@@ -501,7 +475,7 @@ public class RewardCalculator {
      *  rewardAmount: 2451491
      * }]
      */
-    private static JSONArray _calAndSetCrowdMinerReward(boolean updateBalance, Account minerAccount, Transaction tx, Map<Long, Long> crowdMiners, boolean stageTwo){
+    private JSONArray _calAndSetCrowdMinerReward(boolean updateBalance, Account minerAccount, Transaction tx, Map<Long, Long> crowdMiners, boolean stageTwo){
         JSONArray crowdMinerRewardArray = new JSONArray();
         Map<Long,Long> crowdMinerRewardMap = Maps.newHashMap();
 
@@ -619,7 +593,7 @@ public class RewardCalculator {
      * @param stageTwo true - stage two; false - stage one
      * @return
      */
-    public static long blockRewardDistribution(Transaction tx, boolean stageTwo) throws ConchException.StopException {
+    public long blockRewardDistribution(Transaction tx, boolean stageTwo) throws ConchException.StopException {
         Attachment.CoinBase coinBase = (Attachment.CoinBase) tx.getAttachment();
         Account senderAccount = Account.getAccount(tx.getSenderId());
         Account minerAccount = Account.getAccount(coinBase.getCreator());
