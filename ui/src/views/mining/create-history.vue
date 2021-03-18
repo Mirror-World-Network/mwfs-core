@@ -121,7 +121,8 @@
     }
 </script>
 
-<style scoped>
+<style scoped type="text/scss" lang="scss">
+@import '../../styles/css/vars.scss';
     .create-history .history {
         padding: 15px;
     }
@@ -178,7 +179,7 @@
         width: 100%;
         text-align: center;
         padding: 10px 0;
-        background: #3fb09a;
+        background: $primary_color;
         color: #fff;
         font-size: 15px;
         border-bottom-left-radius: 6px;

@@ -102,6 +102,12 @@ public final class GetUserConfig extends APIServlet.APIRequestHandler {
 
             if(Conch.systemInfo == null) GetNodeHardware.readSystemInfo();
             response.put("sharder.diskCapacity", Conch.systemInfo.getHardDiskSize());
+
+            // Supplementary configuration, UI theme depends on this
+            response.put("sharder.projectName", Conch.PROJECT_NAME);
+            response.put("sharder.coinUnit", Conch.COIN_UNIT);
+            response.put("sharder.foundationUrl", Conch.FOUNDATION_URL);
+            response.put("sharder.foundationTestUrl", Conch.FOUNDATION_TEST_URL);
         } catch (IOException e) {
             response.clear();
             response.put("error", e.getMessage());

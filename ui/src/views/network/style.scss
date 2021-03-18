@@ -1,3 +1,4 @@
+@import '../../styles/css/vars.scss';
 .xs_section_fa {
     height: 260px;
     background: transparent;
@@ -49,6 +50,9 @@
     .modal-dialog .modal-content .modal-body {
         max-height: 480px;
         overflow-y: auto;
+    }
+    .primary-color-account {
+        color: $primary_color;
     }
 }
 
@@ -114,9 +118,9 @@
                     font-size: 13px;
                     font-weight: 400;
                 }
-                
+
             }
-            
+
         }
     }
 }
@@ -167,5 +171,8 @@
     }
     .only_mobile {
         display: block;
+        a {
+            color: $primary_color;
+        }
     }
 }

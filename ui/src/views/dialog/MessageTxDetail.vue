@@ -4,7 +4,7 @@
             <el-row :gutter="20" >
                 <el-col :xl="12" :lg="12" :md="12" :sm="24" :xs="24" >
                     <el-card shadow="hover" class="content">
-                        
+
                         <div class="mobile">
                             <p class="node-type">
                                 <strong>{{$t('poc.creator')}}: </strong>{{ rowData.senderRS }}
@@ -19,7 +19,7 @@
                                 <strong>{{$t('poc.started_block')}}: </strong>{{ rowData.block }}
                             </p>
                         </div>
-                        
+
                         <p v-if="(rowData.recipientRS === rowData.accountRS || rowData.accountRS === rowData.senderRS) && typeof(secretPhrase) !== 'undefined'" class="node-type">
                             <span v-if="rowData.messageInfo.encryptedMessage">
                                 <strong>{{$t('transaction.message_data')}} : </strong>{{formatMessageData(rowData)}}<br>
@@ -98,8 +98,8 @@
 
 </script>
 
-
-<style >
+<style scoped lang="scss" type="text/scss">
+@import '../../styles/css/vars.scss';
 
     .messageTxDetail {
         padding: 10px;
@@ -122,7 +122,7 @@
     }
 
     .messageTxDetail .template .content {
-        box-shadow: 1px 1px 10px #3fb09a;
+        box-shadow: 1px 1px 10px $primary_color;
         border-radius: 4px;
     }
 </style>

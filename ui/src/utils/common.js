@@ -1,11 +1,22 @@
 /**
  * 全局变量及方法
  */
+import vars from "../styles/css/vars.scss";
 
 export default {
+    // core config of project
+    projectName: vars.projectName,
+    projectPrefixStr: "CDW",
     loginState: 'hub',
-    sharderFoundationHost: 'mw.run',
-    sharderFoundationTestHost: 'test.mw.run',
+    foundationHost: 'mw.run',
+    foundationTestHost: 'test.mw.run',
+    unit: " MW",
+    primaryColor: vars.primary_color,
+    primaryColor_dd: vars.primary_color_dd,
+    pattern: /CDW-([A-Z0-9]{4}-){3}[A-Z0-9]{5}/,
+    receiverPrefixStr: "CDW-____-____-____-_____",
+    receiverEmptyStr: "___-____-____-____-_____",
+
     apiUrl: '',
     cfg: {defaultInterval: 300000, soonInterval: 60000, slowInterval: 600000, topSpeedInterval: 30000},
     epochBeginning: -1,
@@ -18,11 +29,48 @@ export default {
     coordinatesMap: null,
     $vue: {},
     placeholder: "--",
-    unit: " MW",
     unitValue: 100000000,
     poolPledgeAmount: 10000000000000, // pledge amount of pool creator
     optHeight: {join: 0, quit: 0, destroy: 0, create: 0},
     validPeerPercentage: 0.7, // Less than this value filter display mode, greater than or equal to close
+    defineConf() {
+        if (this.projectName === 'mw') {
+            this.projectPrefixStr = "CDW"
+            this.receiverPrefixStr = "CDW-____-____-____-_____"
+            this.pattern = /CDW-([A-Z0-9]{4}-){3}[A-Z0-9]{5}/
+            this.unit = " MW"
+        } else if (this.projectName === 'sharder') {
+            this.projectPrefixStr = "SSA"
+            this.receiverPrefixStr = "SSA-____-____-____-_____"
+            this.pattern = /SSA-([A-Z0-9]{4}-){3}[A-Z0-9]{5}/
+            this.unit = " SS"
+        }
+    },
+    updateConf(res) {
+        // Get the config and render the corresponding UI scheme
+        const projectName = res["sharder.projectName"];
+        const coinUnit = res["sharder.coinUnit"];
+        const foundationUrl = res["sharder.foundationUrl"];
+        const foundationTestUrl = res["sharder.foundationTestUrl"];
+
+        if (coinUnit != null) {
+            // Close the server to update the core configuration
+            // this.unit = " " + coinUnit;
+        }
+
+        if (projectName != null) {
+            // Close the server to update the core configuration
+            // this.defineConf(projectName);
+        }
+
+        if (foundationUrl != null) {
+            this.foundationHost = foundationUrl;
+        }
+
+        if (foundationTestUrl != null) {
+            this.foundationTestHost = foundationTestUrl;
+        }
+    },
     sendVerifyCode(url, username, fun) {
 
         $.ajax({
@@ -652,13 +700,13 @@ export default {
     useLocal() {
         return SSO.useLocal;
     },
-    getSharderFoundationHost() {
+    getFoundationHost() {
         return (this.isDevNet()) ?
-            this.sharderFoundationTestHost : this.sharderFoundationHost;
+            this.foundationTestHost : this.foundationHost;
     },
     getCommonFoundationAPI(eoLinkerUrl, path) {
         if (this.isMainNet() || this.isTestNet()) {
-            return "http://" + this.getSharderFoundationHost() + path;
+            return "http://" + this.getFoundationHost() + path;
         }
         return eoLinkerUrl;
     },
@@ -708,7 +756,7 @@ export default {
                         borderColor: "#fff"
                     },
                     emphasis: {
-                        areaColor: '#3fb09a'
+                        areaColor: this.primaryColor
                     }
                 },
                 left: 0,
@@ -770,7 +818,7 @@ export default {
                     itemStyle: {
                         normal: {
                             borderColor: "#fff",
-                            color: "#53c7b1"
+                            color: this.primaryColor_dd
                         }
                     }
                 }

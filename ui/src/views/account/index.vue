@@ -10,14 +10,17 @@
             </el-row>
             <div class="block_account mb20">
                 <p class="block_title">
-                    <img src="../../assets/img/account.svg"/>
+                    <img src="../../assets/img/account.svg" v-if="projectName === 'mw'"/>
+                    <img src="../../assets/img/sharder/account.svg" v-else-if="projectName === 'sharder'"/>
                     <span>{{ $t('account.account_title') }}</span>
                 </p>
                 <div class="w pt60">
                     <div class="account_address">
                         <span>{{ accountInfo.accountRS }}</span>
                         <img class="csp pc-i" src="../../assets/img/copy.svg" v-clipboard:copy="accountInfo.accountRS"
-                             v-clipboard:success="copySuccess" v-clipboard:error="copyError"/>
+                             v-clipboard:success="copySuccess" v-clipboard:error="copyError" v-if="projectName === 'mw'"/>
+                        <img class="csp pc-i" src="../../assets/img/sharder/copy.svg" v-clipboard:copy="accountInfo.accountRS"
+                             v-clipboard:success="copySuccess" v-clipboard:error="copyError" v-else-if="projectName === 'sharder'"/>
                     </div>
                     <p class="account_info" @click="isUserInfoDialog(true)">{{ $t('account.account_info') }}</p>
                     <p class="account_asset" v-loading="loading">
@@ -94,7 +97,9 @@
                                 @click="openJoinNetDialog">
                             <div>
                                 <img src="../../assets/img/join_net.svg" style="vertical-align:middle" hspace="5"
-                                     width="18">
+                                     width="18" v-if="projectName === 'mw'">
+                                <img src="../../assets/img/sharder/join_net.svg" style="vertical-align:middle" hspace="5"
+                                     width="18" v-else-if="projectName === 'sharder'">
                                 {{ $t('joinNet.join') }}
                             </div>
                         </button>
@@ -187,7 +192,8 @@
             </div>
             <div class="block_receiptDisbursement mb20">
                 <p class="block_title">
-                    <img src="../../assets/img/receipt&disbursementInfo.svg"/>
+                    <img src="../../assets/img/receipt&disbursementInfo.svg" v-if="projectName === 'mw'"/>
+                    <img src="../../assets/img/sharder/receipt&disbursementInfo.svg" v-else-if="projectName === 'sharder'"/>
                     <span>{{ $t('account.income_and_expenditure_details') }}</span>
                 </p>
                 <div class="w">
@@ -199,7 +205,8 @@
             </div>
             <div class="block_list">
                 <p class="block_title fl">
-                    <img src="../../assets/img/transaction.svg" alt="transactionImg"/>
+                    <img src="../../assets/img/transaction.svg" alt="transactionImg" v-if="projectName === 'mw'"/>
+                    <img src="../../assets/img/sharder/transaction.svg" alt="transactionImg" v-else-if="projectName === 'sharder'"/>
                     <span>{{ $t('transaction.transaction_record') }}</span>
                 </p>
                 <div class="transaction_type">
@@ -249,7 +256,11 @@
                                     {{ $global.returnObj(transaction.block, transaction.height) }}
                                 </td>
                                 <td>{{ transaction.transaction }}</td>
-                                <td class="transaction-img pc-table">
+                                <td class="transaction-img pc-table" v-if="projectName === 'mw'">
+                                    <span class="bg" :class="'type' + transaction.type + transaction.subtype"></span>
+                                    <span>{{ $global.getTransactionTypeStr(transaction) }}</span>
+                                </td>
+                                <td class="transaction-img-sharder pc-table" v-else-if="projectName === 'sharder'">
                                     <span class="bg" :class="'type' + transaction.type + transaction.subtype"></span>
                                     <span>{{ $global.getTransactionTypeStr(transaction) }}</span>
                                 </td>
@@ -278,7 +289,8 @@
                                          <span v-else>{{ transaction.senderRS }}</span>
                                     </span>
 
-                                    <img src="../../assets/img/right_arrow.svg"/>
+                                    <img src="../../assets/img/right_arrow.svg" v-if="projectName === 'mw'"/>
+                                    <img src="../../assets/img/sharder/right_arrow.svg" v-else-if="projectName === 'sharder'"/>
                                     <!-- tx recipient -->
                                     <span class="linker" @click="openAccountInfoDialog(transaction.senderRS)"
                                           v-if="transaction.type === 9">
@@ -366,7 +378,8 @@
                             <el-form-item :label="$t('sendMessage.receiver')" class="item_receiver">
                                 <masked-input id="receiver" mask="AAA-****-****-****-*****"
                                               v-model="messageForm.receiver"/>
-                                <img src="../../assets/img/account_directory.svg"/>
+                                <img src="../../assets/img/account_directory.svg" v-if="projectName === 'mw'"/>
+                                <img src="../../assets/img/sharder/account_directory.svg" v-else-if="projectName === 'sharder'"/>
                             </el-form-item>
                             <el-form-item :label="$t('sendMessage.receiver_publickey')" v-if="messageForm.hasPublicKey">
                                 <el-input v-model="messageForm.publicKey" type="password"></el-input>
@@ -546,7 +559,8 @@
                             <el-form-item :label="$t('transfer.receiver')" class="item_receiver">
                                 <masked-input id="tranfer_receiver" mask="AAA-****-****-****-*****"
                                               v-model="transfer.receiver"/>
-                                <img src="../../assets/img/account_directory.svg"/>
+                                <img src="../../assets/img/account_directory.svg" v-if="projectName === 'mw'"/>
+                                <img src="../../assets/img/sharder/account_directory.svg" v-else-if="projectName === 'sharder'"/>
                             </el-form-item>
                             <el-form-item :label="$t('transfer.receiver_public_key')" v-if="transfer.hasPublicKey">
                                 <el-input v-model="transfer.publicKey" type="password"></el-input>
@@ -943,7 +957,8 @@
                                       style="color:#999;font-weight: normal">{{
                                         $t('account_info.account_name_not_set')
                                     }}</span>
-                                <img src="../../assets/img/rewrite.svg" @click="isShowName = false"/>
+                                <img src="../../assets/img/rewrite.svg" @click="isShowName = false" v-if="projectName === 'mw'"/>
+                                <img src="../../assets/img/sharder/rewrite.svg" @click="isShowName = false" v-else-if="projectName === 'sharder'"/>
                             </div>
                             <div class="rewriteName" v-else>
                                 <el-input v-model="temporaryName"></el-input>
@@ -1045,7 +1060,7 @@
                     </el-table-column>
                     <el-table-column>
                         <template slot-scope="props">
-                            <span style="color: #00ff99">{{ props.row.address }}</span>
+                            <span class="primary-color-address">{{ props.row.address }}</span>
                         </template>
                     </el-table-column>
                     <el-table-column>
@@ -1087,6 +1102,7 @@ export default {
             this.$t('rules.mustRequired')
         );
         return {
+            projectName: this.$global.projectName,
             nonePublicKeyHint: false,
             isDisable: false,
             isMobile: false,
@@ -1141,7 +1157,7 @@ export default {
             publicKey: SSO.publicKey,
             messageForm: {
                 errorCode: false,
-                receiver: "CDW-____-____-____-_____",
+                receiver: this.$global.receiverPrefixStr,
                 message: "",
                 executing: false,
                 isEncrypted: false,
@@ -1158,7 +1174,7 @@ export default {
             parsefile: null,
             onchainfile: null,
             transfer: {
-                receiver: "CDW-____-____-____-_____",
+                receiver: this.$global.receiverPrefixStr,
                 number: 0,
                 fee: 1,
                 hasMessage: false,
@@ -1677,7 +1693,7 @@ export default {
                 series: [{
                     data: barchat.series,
                     type: 'bar',
-                    color: '#3fb09a',
+                    color: _this.$global.primaryColor,
                 }]
             };
             if (option && typeof option === "object") {
@@ -1740,7 +1756,7 @@ export default {
                 series: [{
                     data: yields.series,
                     type: 'line',
-                    color: '#3fb09a',
+                    color: _this.$global.primaryColor,
                     smooth: true
                 }]
             };
@@ -1884,8 +1900,7 @@ export default {
             }
 
             if (_this.hubsetting.SS_Address !== '') {
-                const pattern = /CDW-([A-Z0-9]{4}-){3}[A-Z0-9]{5}/;
-                if (!_this.hubsetting.SS_Address.toUpperCase().match(pattern)) {
+                if (!_this.hubsetting.SS_Address.toUpperCase().match(_this.$global.pattern)) {
                     _this.$message.warning(_this.$t('notification.hubsetting_account_address_error_format'));
                     return false;
                 } else {
@@ -2125,8 +2140,8 @@ export default {
                     return;
                 }
             });
-            if (_this.messageForm.receiver === "CDW-____-____-____-_____" ||
-                _this.messageForm.receiver === "___-____-____-____-_____") {
+            if (_this.messageForm.receiver === this.$global.receiverPrefixStr ||
+                _this.messageForm.receiver === this.$global.receiverEmptyStr) {
                 formData.append("recipient", "");
             } else {
                 formData.append("recipient", _this.messageForm.receiver);
@@ -2142,8 +2157,8 @@ export default {
             formData.append("publicKey", SSO.publicKey);
             formData.append("deadline", '1440');
             if (_this.messageForm.isEncrypted) {
-                if (_this.messageForm.receiver === "CDW-____-____-____-_____" ||
-                    _this.messageForm.receiver === "___-____-____-____-_____") {
+                if (_this.messageForm.receiver === this.$global.receiverPrefixStr ||
+                    _this.messageForm.receiver === this.$global.receiverEmptyStr) {
                     _this.$message.warning(_this.$t('notification.sendmessage_null_account'));
                     return;
                 }
@@ -2201,13 +2216,12 @@ export default {
             let formData = new FormData();
 
 
-            if (_this.transfer.receiver === "CDW-____-____-____-_____" ||
-                _this.transfer.receiver === "___-____-____-____-_____") {
+            if (_this.transfer.receiver === this.$global.receiverPrefixStr ||
+                _this.transfer.receiver === this.$global.receiverEmptyStr) {
                 _this.$message.warning(_this.$t('notification.sendmessage_null_account'));
                 return;
             }
-            const pattern = /CDW-([A-Z0-9]{4}-){3}[A-Z0-9]{5}/;
-            if (!_this.transfer.receiver.toUpperCase().match(pattern)) {
+            if (!_this.transfer.receiver.toUpperCase().match(_this.$global.pattern)) {
                 _this.$message.warning(_this.$t('notification.sendmessage_account_error_format'));
                 return;
             }
@@ -2368,16 +2382,15 @@ export default {
             let encrypted = {};
             let formData = new FormData();
             console.log(_this.messageForm);
-            if (_this.messageForm.receiver === "CDW-____-____-____-_____" ||
-                _this.messageForm.receiver === "___-____-____-____-_____" ||
+            if (_this.messageForm.receiver === this.$global.receiverPrefixStr ||
+                _this.messageForm.receiver === this.$global.receiverEmptyStr ||
                 _this.messageForm.receiver === "CDW" ||
                 _this.messageForm.receiver === "") {
                 _this.$message.warning(_this.$t('notification.sendmessage_null_account'));
                 _this.messageForm.executing = false;
                 return;
             }
-            const pattern = /CDW-([A-Z0-9]{4}-){3}[A-Z0-9]{5}/;
-            if (!_this.messageForm.receiver.toUpperCase().match(pattern)) {
+            if (!_this.messageForm.receiver.toUpperCase().match(_this.$global.pattern)) {
                 _this.$message.warning(_this.$t('notification.sendmessage_account_error_format'));
                 _this.messageForm.executing = false;
                 return;
@@ -2603,16 +2616,15 @@ export default {
             let options = {};
             let encrypted = {};
             let formData = new FormData();
-            if (_this.transfer.receiver === "CDW-____-____-____-_____" ||
-                _this.transfer.receiver === "___-____-____-____-_____" ||
+            if (_this.transfer.receiver === this.$global.receiverPrefixStr ||
+                _this.transfer.receiver === this.$global.receiverEmptyStr ||
                 _this.transfer.receiver === "CDW" ||
                 _this.transfer.receiver === "") {
                 _this.$message.warning(_this.$t('notification.sendmessage_null_account'));
                 _this.transfer.executing = false;
                 return;
             }
-            const pattern = /CDW-([A-Z0-9]{4}-){3}[A-Z0-9]{5}/;
-            if (!_this.transfer.receiver.toUpperCase().match(pattern)) {
+            if (!_this.transfer.receiver.toUpperCase().match(_this.$global.pattern)) {
                 _this.$message.warning(_this.$t('notification.sendmessage_account_error_format'));
                 _this.transfer.executing = false;
                 return;
@@ -3071,7 +3083,7 @@ export default {
 
             const _this = this;
             _this.messageForm.errorCode = false;
-            _this.messageForm.receiver = "CDW-____-____-____-_____";
+            _this.messageForm.receiver = this.$global.receiverPrefixStr;
             _this.messageForm.message = "";
             _this.messageForm.isEncrypted = false;
             _this.messageForm.hasPublicKey = false;
@@ -3084,7 +3096,7 @@ export default {
             _this.file = null;
             _this.storagefile = null;
             _this.parsefile = null;
-            _this.transfer.receiver = "CDW-____-____-____-_____";
+            _this.transfer.receiver = this.$global.receiverPrefixStr;
             _this.transfer.number = 0;
             _this.transfer.fee = 1;
             _this.transfer.hasMessage = false;
@@ -3471,11 +3483,10 @@ export default {
         validationReceiver(val) {
             let _this = this;
             let receiver = _this[val].receiver;
-            if (receiver === "___-____-____-____-_____" || receiver === "CDW-____-____-____-_____") {
+            if (receiver === this.$global.receiverEmptyStr || receiver === this.$global.receiverPrefixStr) {
                 return
             }
-            const pattern = /CDW-([A-Z0-9]{4}-){3}[A-Z0-9]{5}/;
-            if (!receiver.toUpperCase().match(pattern)) {
+            if (!receiver.toUpperCase().match(_this.$global.pattern)) {
                 return _this.$message.warning(_this.$t('notification.sendmessage_account_error_format'));
             }
             if (receiver === _this.accountInfo.accountRS) {
@@ -3645,6 +3656,7 @@ export default {
 <style lang="scss" type="text/scss">
 /*@import '~scss_vars';*/
 @import './style.scss';
+@import '../../styles/css/vars.scss';
 
 .notice-container {
     .notice {
@@ -3653,13 +3665,14 @@ export default {
         text-align: center;
         font-size: 16px;
         font-weight: 400;
-        color: #3fb09a;
+        color: $primary_color;
         line-height: 150%;
         border-radius: 4px;
     }
 }
 </style>
 <style scoped lang="scss" type="text/scss">
+@import '../../styles/css/vars.scss';
 
 @media only screen and (max-width: 780px) {
     .list_pagination /deep/ .el-pagination__jump {
@@ -3677,12 +3690,12 @@ export default {
 
 .el-select-dropdown {
     .el-select-dropdown__item.selected {
-        background-color: #3fb09a !important;
+        background-color: $primary_color !important;
         color: #fff !important;
     }
 
     .el-select-dropdown__item.selected.hover {
-        background-color: #3fb09a !important;
+        background-color: $primary_color !important;
         color: #fff !important;
     }
 }
@@ -3701,7 +3714,7 @@ export default {
 }
 
 .calculate_fee {
-    background-color: #3fb09a;
+    background-color: $primary_color;
     color: #fff;
     border-radius: 4px;
     border: none;

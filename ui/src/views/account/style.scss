@@ -1,3 +1,4 @@
+@import '../../styles/css/vars.scss';
 .block_account {
     .w {
         background: #fff;
@@ -7,7 +8,7 @@
 
         .account_address {
             //margin-left: 112px;
-            color: #3fb09a;
+            color: $primary_color;
             font: {
                 size: 18px;
                 family: "Microsoft YaHei UI";
@@ -35,7 +36,7 @@
             cursor:pointer;
             padding-top: 20px;
             font-weight: bold;
-            color: #3fb09a;
+            color: $primary_color;
             font-size: 14px;
         }
         .account_asset {
@@ -88,7 +89,7 @@
                 height: 28.5px;
                 //margin-left: 20px;
                 background: transparent;
-                border: 1px solid #3fb09a;
+                border: 1px solid $primary_color;
                 padding: 5px 15px 5px 5px;
                 text-align: center;
             }
@@ -104,14 +105,14 @@
             cursor: pointer;
             font-size: 13px;
             padding: 5px 10px;
-            border: 0.5px solid #3fb09a;
+            border: 0.5px solid $primary_color;
             border-radius: 4px;
             margin-right: 10px;
             height: 28px;
         }
 
         .active {
-            background: #3fb09a;
+            background: $primary_color;
             color: #fff;
         }
     }
@@ -217,7 +218,7 @@
                         }
 
                         .el-input__inner:focus {
-                            border-color: #3fb09a;
+                            border-color: $primary_color;
                         }
                     }
 
@@ -261,6 +262,11 @@
                 padding-top: 10px;
             }
 
+        }
+    }
+    .pocScore-detail {
+        .primary-color-address {
+            color: $primary_color;
         }
     }
 }

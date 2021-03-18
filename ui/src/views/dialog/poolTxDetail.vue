@@ -9,7 +9,7 @@
                             <strong>{{$t('transaction.transaction_pool_id')}}:</strong>{{ rowData.poolInfo.poolId }}
                             <strong>{{$t('network.block_list_fee')}}:</strong>{{formatAmount(rowData)}}
                         </p>-->
-                        
+
                         <div class="mobile">
                             <p class="node-type">
                                 <strong>{{$t('poc.creator')}}: </strong>{{ rowData.senderRS }}
@@ -24,7 +24,7 @@
                                 <strong>{{$t('poc.started_block')}}: </strong>{{ rowData.block }}
                             </p>
                         </div>
-                        
+
                         <p v-if="rowData.poolInfo.poolId" class="node-type">
                             <strong>{{$t('transaction.transaction_pool_id')}}: </strong>{{ rowData.poolInfo.poolId }}
                         </p>
@@ -101,7 +101,8 @@
     }
 </script>
 
-<style scoped>
+<style scoped type="text/scss" lang="scss">
+@import '../../styles/css/vars.scss';
     .poolTxDetail {
         padding: 10px;
     }
@@ -123,7 +124,7 @@
     }
 
     .poolTxDetail .template .content {
-        box-shadow: 1px 1px 10px #3fb09a;
+        box-shadow: 1px 1px 10px $primary_color;
         border-radius: 4px;
     }
 </style>

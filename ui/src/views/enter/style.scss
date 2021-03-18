@@ -1,3 +1,4 @@
+@import '../../styles/css/vars.scss';
 .content_enter{
     a{
         font-family: "Microsoft YaHei";
@@ -16,7 +17,7 @@
         textarea{
             resize:none;
             //background: #edeff5;
-            color: #3fb09a;
+            color: $primary_color;
             font-size: 16px;
             font-weight: bold;
             line-height: 28px;

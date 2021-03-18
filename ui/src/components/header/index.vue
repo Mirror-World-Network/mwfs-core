@@ -2,12 +2,21 @@
     <header class="header">
         <div class="header_content pc">
             <div id="logo">
-                <a href="#" class="logo">
+                <a href="#" class="logo"  v-if="this.$global.projectName === 'mw'">
                     <img src="../../assets/img/logo.svg"/>
                     <div @click="openCosUpgradeDialog()">
                         <span v-if="isUpdate" title="Update" class="update"></span>
                         <span v-if="openApiProxy">MW·<span style="color: #ccc;font-size: smaller;">Light</span></span>
                         <span v-else>MW</span>
+                        <span>{{blockchainStatus.application}}{{$t('header.version')}}{{blockchainStatus.fullVersion}}</span>
+                    </div>
+                </a>
+                <a href="#" class="logo" v-else-if="this.$global.projectName === 'sharder'">
+                    <img src="../../assets/img/sharder/sharder-logo.svg"/>
+                    <div @click="openCosUpgradeDialog()">
+                        <span v-if="isUpdate" title="Update" class="update"></span>
+                        <span v-if="openApiProxy">Sharder·<span style="color: #ccc;font-size: smaller;">Light</span></span>
+                        <span v-else>Sharder</span>
                         <span>{{blockchainStatus.application}}{{$t('header.version')}}{{blockchainStatus.fullVersion}}</span>
                     </div>
                 </a>
@@ -25,11 +34,11 @@
 <!--                        {{$t('header.mining')}}-->
 <!--                    </el-menu-item>-->
                 </el-menu>
-<!--                <div class="navbar_console">-->
-<!--                    <el-button type="text" @click="goConsole">-->
-<!--                        <span class="console"></span>-->
-<!--                    </el-button>-->
-<!--                </div>-->
+                <div class="navbar_console" v-if="this.$global.projectName === 'sharder'">
+                    <el-button type="text" @click="goConsole">
+                        <span class="console"></span>
+                    </el-button>
+                </div>
                 <div class="navbar_search">
                     <div>
                         <input class="navbar_search_input" :class="activeSearch ? 'navbar_search_input_active' : ''"
@@ -655,21 +664,22 @@
     @import './style.scss';
 </style>
 <style scoped lang="scss" type="text/scss">
+@import '../../styles/css/vars.scss';
      @media only screen and (max-width: 780px) {
         .navbar_left /deep/ .el-menu--horizontal .el-menu-item:not(.is-disabled):focus, .el-menu--horizontal .el-menu-item:not(.is-disabled):hover {
-            border-bottom: 2px solid #3fb09a!important;
-            color: #3fb09a!important;
+            border-bottom: 2px solid $primary_color !important;
+            color: $primary_color !important;
         }
     }
 
     .el-select-dropdown {
         .el-select-dropdown__item.selected {
-            background-color: #3fb09a !important;
+            background-color: $primary_color !important;
             color: #fff !important;
         }
 
         .el-select-dropdown__item.selected.hover {
-            background-color: #3fb09a !important;
+            background-color: $primary_color !important;
             color: #fff !important;
         }
     }
@@ -712,7 +722,7 @@
         left: 0;
         right: 0;
         z-index: 9999;
-        box-shadow: 1px 1px 10px #3fb09a;
+        box-shadow: 1px 1px 10px $primary_color;
 
         .modal-header {
             .modal-title {
@@ -735,7 +745,7 @@
                 }
 
                 .found-new-version {
-                    color: #3fb09a;
+                    color: $primary_color;
                     font-weight: bold;
                 }
 

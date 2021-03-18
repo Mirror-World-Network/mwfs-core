@@ -117,13 +117,14 @@ public final class Conch {
     public static final String CONCH_DEFAULT_PROPERTIES = "sharder-default.properties";
     public static final String CONCH_PROPERTIES = "sharder.properties";
     public static final String CONFIG_DIR = "conf";
+    public static String CONCH_CONSTANTS;
 
     private static final RuntimeMode runtimeMode;
     public static final DirProvider dirProvider;
 
     private static final Properties DEFAULT_PROPERTIES = new Properties();
-    private static final String FOUNDATION_URL = basicConf.getString("FOUNDATION_URL");
-    private static final String FOUNDATION_TEST_URL = basicConf.getString("FOUNDATION_TEST_URL");
+    public static final String FOUNDATION_URL = basicConf.getString("FOUNDATION_URL");
+    public static final String FOUNDATION_TEST_URL = basicConf.getString("FOUNDATION_TEST_URL");
 
     public static final Peer.RunningMode runningMode;
     //TODO refactor myAddress, serialNum, nodeIp and nodeType into systemInfo
@@ -137,7 +138,8 @@ public final class Conch {
      * Load the JSON configuration with respect to Constants
      */
     public static com.alibaba.fastjson.JSONObject loadConstantsSettings() {
-        return JSON.parseObject(readJsonFile("conf/constants.json"));
+        CONCH_CONSTANTS = CONFIG_DIR + "/constants.json";
+        return JSON.parseObject(readJsonFile(CONCH_CONSTANTS));
     }
 
     public static boolean getAirdropHeighStatus(int height) {

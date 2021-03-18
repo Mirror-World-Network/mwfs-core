@@ -143,7 +143,8 @@
         }
     }
 </script>
-<style>
+<style scoped type="text/scss" lang="scss">
+@import '../../styles/css/vars.scss';
     .my-mining .tabs .el-radio-button__inner {
         width: 100%;
         border: none;
@@ -155,14 +156,14 @@
     }
 
     .my-mining .tabs .is-active .el-radio-button__inner {
-        color: #3fb09a;
+        color: $primary_color;
     }
 
     .my-mining .tabs .btn.is-active:after {
         content: "";
         display: inline-block;
         position: absolute;
-        background: #3fb09a;
+        background: $primary_color;
         top: 30px;
         width: 60px;
         height: 4px;
@@ -207,7 +208,7 @@
         width: 33%;
         display: inline-block;
         text-align: center;
-        background: #3fb09a;
+        background: $primary_color;
         color: #fff;
         border-bottom-left-radius: 6px;
         border-top-left-radius: 6px;
@@ -241,7 +242,7 @@
     }
 
     .mining-list.create + .history {
-        color: #3fb09a;
+        color: $primary_color;
         cursor: pointer;
     }
 
