@@ -479,7 +479,7 @@ public final class Constants {
 
     public static final int HeartBeat_Time = Conch.getIntProperty("sharder.heartBeatTime",5*60*1000);
 
-    public static final String HECO_LOCKURL = acrossChainsConf.getString("HECO_LOCKURL");
+    public static final String MGR_URL = acrossChainsConf.getString("MGR_URL");
 
     public static final int HECO_HEIGHT = acrossChainsConf.getIntValue("HECO_HEIGHT");
 

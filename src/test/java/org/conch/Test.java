@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
+import org.conch.account.Account;
 import org.conch.common.Constants;
 import org.conch.util.RestfulHttpClient;
 
@@ -73,13 +74,13 @@ public class Test {
     }
 
     public static void main(String[] args) throws IOException {
-        String url = "http://192.168.0.101:8080/api/front/acrossChain/getHecoLockAddress";
-        RestfulHttpClient.HttpResponse response = RestfulHttpClient.getClient(url).get().request();
-        String content = response.getContent();
-        JSONObject contentObj = JSON.parseObject(content);
-        Long recipientId = (Long)contentObj.get("body");
-        String recipient = Long.toUnsignedString(recipientId);
-        System.out.println(123);
+//        String url = "http://192.168.0.101:8080/api/front/acrossChain/getHecoLockAddress";
+//        RestfulHttpClient.HttpResponse response = RestfulHttpClient.getClient(url).get().request();
+//        String content = response.getContent();
+//        JSONObject contentObj = JSON.parseObject(content);
+//        Long recipientId = (Long)contentObj.get("body");
+//        String recipient = Long.toUnsignedString(recipientId);
+//        System.out.println(123);
         //        try {
 //            Uncompress("temp/cos-0.1.0.7z");
 //        } catch (Exception e) {

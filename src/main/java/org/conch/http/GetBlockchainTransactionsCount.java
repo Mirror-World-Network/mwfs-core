@@ -33,11 +33,14 @@ public class GetBlockchainTransactionsCount extends APIServlet.APIRequestHandler
         }catch (NumberFormatException e){
             subtype = -1;
         }
+
+        String recipientRS = req.getParameter("recipientRS");
+        String senderRS = req.getParameter("senderRS");
         int count = 0;
         JSONObject response = new JSONObject();
         try{
             if(type != TransactionType.TYPE_POC) {
-                count = Conch.getBlockchain().getTransactionCountByAccount(accountId,type,subtype);
+                count = Conch.getBlockchain().getTransactionCountByAccount(accountId,type,subtype,recipientRS,senderRS);
             }
 
             response.put("count",count);

@@ -331,7 +331,7 @@
     }
 
     #input__mw{
-        width: 40%;
+        width: 30%;
         height: 40px;
         border: 1px solid #ddd;
         border-radius: 4px;
@@ -348,7 +348,7 @@
     }
 
     #input__heco{
-        width: 40%;
+        width: 30%;
         height: 40px;
         border: 1px solid #ddd;
         border-radius: 4px;
@@ -361,12 +361,12 @@
         display: inline-block;
         font-size: inherit;
         position: absolute;
-        right: 40px;
+        right: 137px;
     }
 
     #input_unit{
         position: absolute;
-        left: 264px;
+        left: 193px;
         color: #555;
         line-height: 40px;
         background: none;
@@ -376,7 +376,7 @@
 
     #input_hecoUnit{
         position: absolute;
-        right: 55px;
+        right: 152px;
         color: #555;
         line-height: 40px;
         background: none;
@@ -386,9 +386,17 @@
 
     #input__equals{
         position: absolute;
-        margin:0px 42px;
+        margin:0px 65px;
         font-size: 30px;
         line-height: 40px;
+    }
+
+    #input_exchange{
+        position: absolute;
+        right: 40px;
+        width: 100px;
+        background: #3fb09a;
+        color:#000;
     }
 }
 
@@ -480,3 +488,14 @@
 #acrossChains_rate_heco{
     width: 50%;
 }
+
+#transfer_accounts_modal{
+    z-index: 100000;
+}
+
+#MaxConvertibleBalance{
+    width: 70px;
+    font-size: 2px;
+}
+
+

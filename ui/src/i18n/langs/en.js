@@ -127,7 +127,8 @@ const en = {
         'tip-5':"chain by using the transaction method officially recommended by ",
         'tip-6':"chain in address ( ",
         'tip-7':"), and the transaction can be received within 20 minutes after the transaction is confirmed;",
-        'tip-8':"3. Please do not transfer other assets to the exchange address. If any loss is caused, you should bear it by yourself.",
+        'tip-8':"3. Please do not transfer other assets to the exchange address. If any loss is caused, you should bear it by yourself;",
+        'tip-9':"4. The daily convertibility limit will be reset automatically at 12:00 Beijing time every day. The convertibility limit cannot be accumulated.",
         'sure':"sure",
         'cancel':"cancel",
         'tipChian1':"Make sure the binding heco address is:",
@@ -144,7 +145,13 @@ const en = {
         'bindAddress_double':"Duplicate address binding information, please contact the community staff to modify!",
         'address_error':"The address parameter is wrong, please check whether it has been bound!",
         'no_accountId':"Account information is not loaded, please click refresh button to get account information again!",
-        
+        'exchange':"exchange",
+        'hmw_exchange_title':"HMW Exchange",
+        'convertible_balance_not_enough':"The convertibility limit is insufficient today",
+        'no_MWLockAddress':"The acceptance address is heco exchange address, please transfer through the Asset Exchange page",
+        'all_convertible_balance':"MAX convertible",
+        'tx_in_HecoChain':"Query heco chain transaction results",
+        'tx_error':"Transaction TX on heco chain not found",
 
     },
     transaction: {
@@ -192,6 +199,8 @@ const en = {
         'transaction_type_burn': "Burn",
         'transaction_burn_account': "Burn Account",
         'transaction_type_pool_join_tx': "Join Tx",
+        'transaction_type_mw_to_hmw': "MW To HMW",
+        'transaction_type_hmw_to_mw': "HMW To MW",
         'self': "You",
         'view_details': "View Details",
     },

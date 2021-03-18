@@ -57,7 +57,8 @@ public final class GetBlockchainTransactions extends APIServlet.APIRequestHandle
         boolean includeExpiredPrunable = "true".equalsIgnoreCase(req.getParameter("includeExpiredPrunable"));
         boolean includePhasingResult = "true".equalsIgnoreCase(req.getParameter("includePhasingResult"));
         boolean executedOnly = "true".equalsIgnoreCase(req.getParameter("executedOnly"));
-
+        String recipientRS = req.getParameter("recipientRS");
+        String senderRS = req.getParameter("senderRS");
         byte type;
         byte subtype;
         try {
@@ -80,7 +81,7 @@ public final class GetBlockchainTransactions extends APIServlet.APIRequestHandle
             long statementAccountId = new Long(accountId);
             iterator = Conch.getBlockchain().getTransactions(accountId, numberOfConfirmations,
                     type, subtype, timestamp, withMessage, phasedOnly, nonPhasedOnly, firstIndex, lastIndex,
-                    includeExpiredPrunable, executedOnly);
+                    includeExpiredPrunable, executedOnly,recipientRS,senderRS);
             // normal txs
             while (iterator.hasNext()) {
                 transactions.add(JSONData.transaction(iterator.next(), includePhasingResult));

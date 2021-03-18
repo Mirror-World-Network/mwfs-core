@@ -235,6 +235,12 @@
                     <span class="btn" :class="activeSelectType(9)" @click="selectType = 9">
                         {{ $t('transaction.transaction_type_system_reward') }}
                     </span>
+                    <span class="btn" :class="activeSelectType(19)" @click="selectType = 19">
+                        {{ $t('transaction.transaction_type_mw_to_hmw') }}
+                    </span>
+                    <span class="btn" :class="activeSelectType(20)" @click="selectType = 20">
+                        {{ $t('transaction.transaction_type_hmw_to_mw') }}
+                    </span>
                     <el-select v-model="selectType" :placeholder="$t('transaction.transaction_type_all')">
                         <el-option
                             v-for="item in transactionType"
@@ -1136,6 +1142,7 @@
                                     <label id="input__equals">=</label>
                                     <input id="input__heco" v-model="acrossChains.heco.rateHeco" type ="text" disabled="disabled" />
                                     <label id="input_hecoUnit">{{ $global.hecoUnit }}</label>
+                                    <el-button  id="input_exchange" slot="append" @click="openExchangeDialog" :disabled="showChain">{{ $t('acrossChains.exchange') }}</el-button>
                                 </div>
                                 
                             </el-form>
@@ -1177,13 +1184,74 @@
                         <a>{{chainShow == 1 ? HecoLockAddress:OKExLockAddress}}</a>
                         {{$t('acrossChains.tip-7')}}
                         <br>
-
                         {{$t('acrossChains.tip-8')}}
+                        <br>
+
+                        {{$t('acrossChains.tip-9')}}
 
                     </div>
                 </div>
             </div>
 
+        </div>
+
+        <!-- view asset exchange dialog -->
+        <div class="modal" id="transfer_accounts_modal" v-show="AssetsExchangeDialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button class="close" @click="closeDialog"></button>
+                        <h4 class="modal-title">{{ $t('acrossChains.hmw_exchange_title') }}</h4>
+                    </div>
+                    <div class="modal-body modal-message">
+                        <el-form>
+                            <el-form-item :label="$t('transfer.receiver')" class="item_receiver">
+                                <masked-input id="tranfer_receiver" mask="AAA-****-****-****-*****"
+                                              v-model="MWLockAddress"/>
+                                <img src="../../assets/img/account_directory.svg"/>
+                            </el-form-item>
+                            <el-form-item :label="$t('transfer.receiver_public_key')" v-if="transfer.hasPublicKey">
+                                <el-input v-model="transfer.publicKey" type="password"></el-input>
+                            </el-form-item>
+                            <el-form-item :label="$t('transfer.amount')">
+                                <el-button class="calculate_fee" id="MaxConvertibleBalance" @click="setMaxConvertibleBalance()">
+                                    {{ $t('acrossChains.all_convertible_balance') }}
+                                </el-button>
+                                <input class="el-input__inner" v-model="transfer.exchangeNumber" type="number"/>
+                                <label class="input_suffix">{{ $global.unit }}</label>
+                            </el-form-item>
+                            <el-form-item :label="$t('transfer.fee')">
+                                <input class="el-input__inner" v-model="transfer.fee" type="number"/>
+                                <label class="input_suffix">{{ $global.unit }}</label>
+                            </el-form-item>
+                            <el-form-item label="">
+                                <el-checkbox v-model="transfer.hasMessage">{{ $t('transfer.enable_add_info') }}
+                                </el-checkbox>
+                                <el-checkbox ref="encrypted2" v-model="transfer.isEncrypted"
+                                             :disabled="!transfer.hasMessage">{{ $t('transfer.encrypted_information') }}
+                                </el-checkbox>
+                                <el-input
+                                    type="textarea"
+                                    :autosize="{ minRows: 2, maxRows: 10}"
+                                    resize="none"
+                                    :placeholder="$t('transfer.message_tip')"
+                                    v-model="transfer.message"
+                                    :disabled="!transfer.hasMessage">
+                                </el-input>
+                            </el-form-item>
+                            <el-form-item :label="$t('transfer.secret_key')" v-if="!secretPhrase">
+                                <el-input v-model="transfer.password" type="password"></el-input>
+                            </el-form-item>
+                        </el-form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" v-loading="transfer.executing" class="btn common_btn writeBtn"
+                                @click="sendExchangeTransferInfo" :disabled="isDisable">
+                            {{ $t('transfer.transfer_send') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="modal" id="showChain" v-show="showChain">
@@ -1230,6 +1298,7 @@ export default {
             sendSuccess: false, //true验证码发送 false验证码未发送
             time: 60, //时间
             AssetsAcrossChainsDialog:false,
+            AssetsExchangeDialog:false,
             sendMessageDialog: false,
             storageFileDialog: false,
             onChainDialog: false,
@@ -1295,6 +1364,7 @@ export default {
             transfer: {
                 receiver: "CDW-____-____-____-_____",
                 number: 0,
+                exchangeNumber: 0,
                 fee: 1,
                 hasMessage: false,
                 message: "",
@@ -1404,7 +1474,14 @@ export default {
             }, {
                 value: 18,
                 label: this.$t('transaction.transaction_type_burn')
-            }],
+            }, {
+                value: 19,
+                label: this.$t('transaction.transaction_type_mw_to_hmw')
+            }, {
+                value: 20,
+                label: this.$t('transaction.transaction_type_hmw_to_mw')
+            }
+            ],
             trading: '',
             accountTransactionList: [],
             //分页信息
@@ -1596,7 +1673,9 @@ export default {
 
             chainShow:1,
 
-            MWLockAddress:"CDW-mw",
+            MWLockAddress:"CDW-J8RK-3ADG-2A7S-F9DV6",
+            MWLockAddressPublicKey:"f0bdc0c37782129d3225f9b1e33569f39d248755d2ca580caddafba1fd764c2b",
+            MWTOHecoRate:10,
             HecoLockAddress:"0x0000",
             OKExLockAddress:"0x0001",
 
@@ -2781,6 +2860,11 @@ export default {
                 _this.transfer.executing = false;
                 return;
             }
+            if(_this.transfer.receiver === _this.MWLockAddress){
+                _this.$message.warning(_this.$t('acrossChains.no_MWLockAddress'));
+                _this.transfer.executing = false;
+                return;
+            }
             if (_this.transfer.publicKey === "") {
                 _this.$message.warning(_this.$t('notification.sendmessage_null_account_public'));
                 _this.transfer.executing = false;
@@ -2849,10 +2933,113 @@ export default {
             });
 
         },
+        sendExchangeTransferInfo: function () {
+            const _this = this;
+            _this.preventRepeatedClick();
+            _this.transfer.executing = true;
+            let options = {};
+            let encrypted = {};
+            let formData = new FormData();
+            if (_this.MWLockAddress === "CDW-____-____-____-_____" ||
+                _this.MWLockAddress === "___-____-____-____-_____" ||
+                _this.MWLockAddress === "CDW" ||
+                _this.MWLockAddress === "" 
+                ) {
+                _this.$message.warning(_this.$t('notification.sendmessage_null_account'));
+                _this.transfer.executing = false;
+                return;
+            }
+            const pattern = /CDW-([A-Z0-9]{4}-){3}[A-Z0-9]{5}/;
+            if (!_this.MWLockAddress.toUpperCase().match(pattern)) {
+                _this.$message.warning(_this.$t('notification.sendmessage_account_error_format'));
+                _this.transfer.executing = false;
+                return;
+            }
+            if (_this.MWLockAddressPublicKey === "") {
+                _this.$message.warning(_this.$t('notification.sendmessage_null_account_public'));
+                _this.transfer.executing = false;
+                return;
+            }
+            if (_this.transfer.exchangeNumber === 0) {
+                _this.$message.warning(_this.$t('notification.transfer_amount_error'));
+                _this.transfer.executing = false;
+                return;
+            }
+            _this.getAccount(_this.accountInfo.accountRS).then(res => {
+                if (typeof res.errorDescription === 'undefined') {
+                    if (res.errorDescription === "Unknown account") {
+                        _this.$message.warning(_this.$t('notification.new_account_warning'));
+                        _this.transfer.executing = false;
+                        return;
+                    }
+                }
+                _this.accountInfo = res;
+
+                if (_this.transfer.exchangeNumber.toString().split(".")[1] !== undefined && _this.transfer.exchangeNumber.toString().split(".")[1].length > _this.$global.unitValue.toString().length - 1) {
+                    _this.$message.warning(_this.$t('notification.transfer_balance_decimal_not_support'));
+                    _this.transfer.executing = false;
+                    return;
+                }
+                if (_this.transfer.exchangeNumber > _this.acrossChains.heco.convertible_balance * _this.MWTOHecoRate) {
+                    _this.$message.warning(_this.$t('acrossChains.convertible_balance_not_enough'));
+                    _this.transfer.executing = false;
+                    return;
+                }
+                if (_this.transfer.exchangeNumber > _this.accountInfo.effectiveBalanceNQT / _this.$global.unitValue) {
+                    _this.$message.warning(_this.$t('notification.transfer_balance_insufficient'));
+                    _this.transfer.executing = false;
+                    return;
+                }
+                if (!(_this.secretPhrase || _this.transfer.password)) {
+                    _this.$message.warning(_this.$t('notification.transfer_null_secret_key'));
+                    _this.transfer.executing = false;
+                    return;
+                }
+                formData.append("recipient", _this.MWLockAddress);
+                formData.append("recipientPublicKey", _this.MWLockAddressPublicKey);
+                formData.append("deadline", "1440");
+                formData.append("phased", 'false');
+                formData.append("phasingLinkedFullHash", '');
+                formData.append("phasingHashedSecret", '');
+                formData.append("phasingHashedSecretAlgorithm", '2');
+                formData.append("publicKey", "");
+                formData.append("feeNQT", _this.transfer.fee * _this.$global.unitValue);
+                formData.append("amountNQT", _this.transfer.exchangeNumber * _this.$global.unitValue);
+                formData.append("secretPhrase", _this.secretPhrase || _this.transfer.password);
+
+                if (_this.transfer.hasMessage && _this.transfer.message !== "") {
+                    if (_this.transfer.isEncrypted) {
+
+                        options.account = _this.MWLockAddress;
+                        options.publicKey = _this.MWLockAddressPublicKey;
+                        encrypted = SSO.encryptNote(_this.transfer.message, options, _this.secretPhrase || _this.transfer.password);
+                        formData.append("encrypt_message", '1');
+                        formData.append("encryptedMessageData", encrypted.message);
+                        formData.append("encryptedMessageNonce", encrypted.nonce);
+                        formData.append("messageToEncryptIsText", 'true');
+                        formData.append("encryptedMessageIsPrunable", 'true');
+                    } else {
+                        formData.append("message", _this.transfer.message);
+                        formData.append("messageIsText", "true");
+                    }
+                }
+                _this.sendTransfer(formData);
+                _this.transfer.executing = false;
+            });
+
+        },
+        /**
+         * 最大今日可兑换量
+         */
+        setMaxConvertibleBalance:function (){
+            this.transfer.exchangeNumber = this.acrossChains.heco.convertible_balance * this.MWTOHecoRate;
+        },
         sendTransfer: function (formData) {
             const _this = this;
             SSO.sendMoney(formData, function (res) {
                 console.log("res", res);
+                this.acrossChains.heco.convertible_balance -= this.transfer.exchangeNumber / 10;
+                 this.acrossChains.heco.target_balance += this.transfer.exchangeNumber * 10;
                 if (typeof res.errorDescription === 'undefined') {
                     if (res.broadcasted) {
                         _this.$message.success(_this.$t('notification.transfer_success'));
@@ -2925,7 +3112,15 @@ export default {
             } else if (_this.selectType === 1) {
                 params.append("type", "1");
                 params.append("subtype", "0");
-            } else {
+            } else if(_this.selectType === 19){
+                //mw to hmw
+                params.append("recipientRS", _this.MWLockAddress);
+
+            } else if(_this.selectType === 20){
+                //hmw to mw
+                params.append("senderRS", _this.MWLockAddress);
+            }
+            else {
                 params.append("type", _this.selectType);
             }
 
@@ -2946,7 +3141,7 @@ export default {
                 });
                 _this.loading = false;
                 _this.getTotalList();
-                _this.getDrawData();
+                // _this.getDrawData();
                 _this.updateMinerState();
             }).catch(function (err) {
                 _this.loading = false;
@@ -3013,19 +3208,17 @@ export default {
                 this.$message.warning(this.$t("acrossChains.use_secretPhrase_tip"));
                 return;
             }
-            // if (SSO.downloadingBlockchain) {
-            //     this.$message.warning(this.$t("account.synchronization_block"));
-            //     return;
-            // }
-            
-           
-
+            if (SSO.downloadingBlockchain) {
+                this.$message.warning(this.$t("account.synchronization_block"));
+                return;
+            }
             //发起网关请求，查找当前帐号绑定的信息
             const _this = this;
             var str = _this.$global.formatNQTMoney(_this.accountInfo.effectiveBalanceNQT, 2);
             _this.acrossChains.balance = parseFloat(str.substring(0,str.length-2));
-            if(_this.accountInfo.accountId){
-                _this.$http.get(window.api.getAccountInfoUrl,{params:{accountId:_this.accountInfo.accountId}}).then(function (res1) {
+            console.log(_this.accountInfo)
+            if(_this.accountInfo.accountRS){
+                _this.$http.get(window.api.getAccountInfoUrl,{params:{accountRS:_this.accountInfo.accountRS}}).then(function (res1) {
                     switch (res1.data.code) {
                         case "200":
                             var account = JSON.parse(res1.data.body[0]); ;
@@ -3040,7 +3233,6 @@ export default {
 
                             _this.$store.state.mask = true;
                             _this.AssetsAcrossChainsDialog = true;
-                            console.log(_this.acrossChains)
                             break;
                         case "209":
                             _this.$message.warning(_this.$t('acrossChains.bindAddress_incomplete'));
@@ -3058,6 +3250,15 @@ export default {
                 _this.$message.error(_this.$t('acrossChains.no_accountId'));
             }
             
+        },
+        openExchangeDialog: function () {
+            if (SSO.downloadingBlockchain) {
+                return this.$message.warning(this.$t("account.synchronization_block"));
+            }
+            this.$store.state.mask = true;
+            this.AssetsExchangeDialog = true;
+            this.AssetsAcrossChainsDialog = false;
+            this.transfer.executing = false;
         },
         formatInputDiskCapacity: function (val) {
             return val + " T";
@@ -3079,9 +3280,9 @@ export default {
             return parseFloat(this.userConfig.diskCapacity / 1024 / 1024).toFixed(2) + " GB";
         },
         openTransferDialog: function () {
-            // if (SSO.downloadingBlockchain) {
-            //     return this.$message.warning(this.$t("account.synchronization_block"));
-            // }
+            if (SSO.downloadingBlockchain) {
+                return this.$message.warning(this.$t("account.synchronization_block"));
+            }
             this.$store.state.mask = true;
             this.tranferAccountsDialog = true;
             this.transfer.executing = false;
@@ -3251,6 +3452,11 @@ export default {
             this.onChainDialog = false;
             this.joinNetDialog = false;
             this.AssetsAcrossChainsDialog = false;
+            if(this.AssetsExchangeDialog){
+                this.AssetsExchangeDialog = false;
+                this.AssetsAcrossChainsDialog = true;
+            }
+            
             this.capacity = 0;
             this.accountSecret = "";
             this.mortgageFee = 0;
