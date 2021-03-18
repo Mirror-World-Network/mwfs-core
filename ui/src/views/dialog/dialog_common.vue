@@ -192,7 +192,11 @@
                                 <span class="utc-time compact-small-font">{{$global.formatTime(transaction.timestamp)}} +UTC</span>
                             </td>
                             <td class="linker pc-table" @click="openTransactionDialog(transaction.transaction)">{{transaction.transaction}}</td>
-                            <td class="transaction-img mobile-td compact-style">
+                            <td class="transaction-img mobile-td compact-style" v-if="$global.projectName === 'mw'">
+                                <span class="bg" :class="'type' + transaction.type + transaction.subtype"></span>
+                                <span>{{$global.getTransactionTypeStr(transaction)}}</span>
+                            </td>
+                            <td class="transaction-img-sharder mobile-td compact-style" v-else-if="$global.projectName === 'sharder'">
                                 <span class="bg" :class="'type' + transaction.type + transaction.subtype"></span>
                                 <span>{{$global.getTransactionTypeStr(transaction)}}</span>
                             </td>
@@ -1183,8 +1187,9 @@
 </script>
 
 <style scoped type="text/scss" lang="scss">
+@import '../../styles/css/vars.scss';
     .is-active /deep/.el-radio-button__inner {
-        border-bottom: 2px solid #3fb09a !important;
+        border-bottom: 2px solid $primary_color !important;
     }
 
     .reward-tab /deep/.el-radio-button__inner {
@@ -1193,7 +1198,7 @@
         margin-top: 5px !important;
         border-radius: 0 !important;;
         border: 0;
-        box-shadow: 0 0 0 0 #3fb09a;
+        box-shadow: 0 0 0 0 $primary_color;
     }
 
     #block_info {
@@ -1205,7 +1210,7 @@
             .title {
                 .el-radio-button__orig-radio:checked + .el-radio-button__inner,
                 .el-select-dropdown__item.selected.hover, .el-select-dropdown__item.selected {
-                    background-color: #3fb09a;
+                    background-color: $primary_color;
                 }
 
                 .el-radio-button__orig-radio:checked + .el-radio-button__inner:hover {
@@ -1213,7 +1218,7 @@
                 }
 
                 .el-radio-button__inner:hover {
-                    color: #3fb09a;
+                    color: $primary_color;
                 }
             }
 
@@ -1245,7 +1250,7 @@
                     }
 
                     .linker {
-                        color: #3fb09a;
+                        color: $primary_color;
                         cursor: pointer;
 
                         a {
@@ -1304,7 +1309,7 @@
 
                 .el-radio-button__orig-radio:checked + .el-radio-button__inner,
                 .el-select-dropdown__item.selected.hover, .el-select-dropdown__item.selected {
-                    background-color: #3fb09a;
+                    background-color: $primary_color;
                 }
 
                 .el-radio-button__orig-radio:checked + .el-radio-button__inner:hover {
@@ -1312,7 +1317,7 @@
                 }
 
                 .el-radio-button__inner:hover {
-                    color: #3fb09a;
+                    color: $primary_color;
                 }
 
                 .account_list {
@@ -1367,7 +1372,7 @@
                         }
 
                         .linker {
-                            color: #3fb09a;
+                            color: $primary_color;
                             cursor: pointer;
 
                             a {

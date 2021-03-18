@@ -286,7 +286,8 @@
     }
 </script>
 
-<style scoped>
+<style scoped type="text/scss" lang="scss">
+@import '../../styles/css/vars.scss';
     .exchange .exchange-header h1 {
         font-size: 28px;
         font-weight: bold;
@@ -334,7 +335,7 @@
         outline: none;
         border: none;
         border-radius: 4px;
-        background: #3fb09a;
+        background: $primary_color;
         height: 40px;
         width: 80px;
         color: #fff;
