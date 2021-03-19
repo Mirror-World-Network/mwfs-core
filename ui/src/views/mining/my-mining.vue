@@ -20,18 +20,21 @@
                             </div>
                             <div class="tag">
                                 <p>
-                                    <img src="../../assets/img/kuangchisouyi.png">
+                                    <img src="../../assets/img/kuangchisouyi.png" v-if="$global.projectName === 'mw'">
+                                    <img src="../../assets/img/sharder/kuangchisouyi.png" v-else-if="$global.projectName === 'sharder'">
                                     <span>{{$t('mining.index.pool_income') + $global.getAmountFormat(mining.earnings)}}</span>
                                 </p>
                                 <p>
-                                    <img src="../../assets/img/kuagnchifhenpei.png">
+                                    <img src="../../assets/img/kuagnchifhenpei.png" v-if="$global.projectName === 'mw'">
+                                    <img src="../../assets/img/sharder/kuagnchifhenpei.png" v-else-if="$global.projectName === 'sharder'">
                                     <span>
                                         {{$t('mining.index.Income_distribution')}}
                                         {{(1 - mining.distribution)*100}}%
                                     </span>
                                 </p>
                                 <p>
-                                    <img src="../../assets/img/kuangchishenyu.png">
+                                    <img src="../../assets/img/kuangchishenyu.png" v-if="$global.projectName === 'mw'">
+                                    <img src="../../assets/img/sharder/kuangchishenyu.png" v-else-if="$global.projectName === 'sharder'">
                                     <span>{{$t('mining.index.remaining_mining')}}{{mining.remaining}}</span>
                                 </p>
                             </div>
@@ -53,18 +56,21 @@
                             </div>
                             <div class="tag">
                                 <p>
-                                    <img src="../../assets/img/kuangchisouyi.png">
+                                    <img src="../../assets/img/kuangchisouyi.png" v-if="$global.projectName === 'mw'">
+                                    <img src="../../assets/img/sharder/kuangchisouyi.png" v-else-if="$global.projectName === 'sharder'">
                                     <span>{{$t('mining.index.pool_income') + $global.getAmountFormat(mining.earnings)}}</span>
                                 </p>
                                 <p>
-                                    <img src="../../assets/img/kuagnchifhenpei.png">
+                                    <img src="../../assets/img/kuagnchifhenpei.png" v-if="$global.projectName === 'mw'">
+                                    <img src="../../assets/img/sharder/kuagnchifhenpei.png" v-else-if="$global.projectName === 'sharder'">
                                     <span>
                                         {{$t('mining.index.Income_distribution')}}
                                         {{(1 - mining.distribution)*100}}%
                                     </span>
                                 </p>
                                 <p>
-                                    <img src="../../assets/img/kuangchishenyu.png">
+                                    <img src="../../assets/img/kuangchishenyu.png" v-if="$global.projectName === 'mw'">
+                                    <img src="../../assets/img/sharder/kuangchishenyu.png" v-else-if="$global.projectName === 'sharder'">
                                     <span>{{$t('mining.index.remaining_mining')}}{{mining.remaining}}</span>
                                 </p>
                             </div>

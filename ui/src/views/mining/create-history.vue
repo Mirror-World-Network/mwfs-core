@@ -4,17 +4,20 @@
         <div class="history">
             <div class="history-content" v-for="history in historyList" @click="details(history)">
                 <p>
-                    <img src="../../assets/img/kuangchisouyi.png">
+                    <img src="../../assets/img/kuangchisouyi.png" v-if="$global.projectName === 'mw'">
+                    <img src="../../assets/img/sharder/kuangchisouyi.png" v-else-if="$global.projectName === 'sharder'">
                     <span>{{$t('mining.create_history.create_time')}}</span>:
                     <span>{{history.createTime}}</span>
                 </p>
                 <p>
-                    <img src="../../assets/img/kuagnchifhenpei.png">
+                    <img src="../../assets/img/kuagnchifhenpei.png" v-if="$global.projectName === 'mw'">
+                    <img src="../../assets/img/sharder/kuagnchifhenpei.png" v-else-if="$global.projectName === 'sharder'">
                     <span>{{$t('mining.create_history.mining_time')}}</span>:
                     <span>{{history.miningTime}}{{$t('mining.create_history.mining_time_tip')}}</span>
                 </p>
                 <p>
-                    <img src="../../assets/img/kuangchishenyu.png">
+                    <img src="../../assets/img/kuangchishenyu.png" v-if="$global.projectName === 'mw'">
+                    <img src="../../assets/img/sharder/kuangchishenyu.png" v-else-if="$global.projectName === 'sharder'">
                     <span>{{$t('mining.create_history.mining_income')}}</span>:
                     <span>{{history.earnings}}{{$t('mining.create_history.diamond')}}</span>
                 </p>

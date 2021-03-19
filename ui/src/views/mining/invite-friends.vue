@@ -27,7 +27,8 @@
                 </div>
             </div>
             <div class="qr">
-                <img src="../../assets/img/account.svg" class="img-qr">
+                <img src="../../assets/img/account.svg" class="img-qr" v-if="$global.projectName === 'mw'">
+                <img src="../../assets/img/sharder/account.svg" class="img-qr" v-else-if="$global.projectName === 'sharder'">
                 <p>{{$t('mining.invite_friends.qr_tip1')}}</p>
             </div>
             <p class="about">

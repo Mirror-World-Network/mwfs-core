@@ -30,9 +30,9 @@
                     <el-menu-item index="/network" :class="this.$route.path.indexOf('/network') >= 0 ? 'activeLi' : ''">
                         {{$t('header.network')}}
                     </el-menu-item>
-<!--                    <el-menu-item index="/mining" :class="this.$route.path.indexOf('/mining') >= 0 ? 'activeLi' : ''">-->
-<!--                        {{$t('header.mining')}}-->
-<!--                    </el-menu-item>-->
+                    <el-menu-item index="/mining" :class="this.$route.path.indexOf('/mining') >= 0 ? 'activeLi' : ''">
+                        {{$t('header.mining')}}
+                    </el-menu-item>
                 </el-menu>
                 <div class="navbar_console" v-if="this.$global.projectName === 'sharder'">
                     <el-button type="text" @click="goConsole">

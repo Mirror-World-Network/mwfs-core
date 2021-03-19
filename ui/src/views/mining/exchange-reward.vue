@@ -40,7 +40,8 @@
         <!--申请兑换MW列表-->
         <div v-if="exchangeOpen && sharderAccount" class="block_list"  style="clear:both">
             <p class="block_title" style="padding-bottom: 10px;">
-                <img src="../../assets/img/block.svg" width="20px" height="20px"/>
+                <img src="../../assets/img/block.svg" width="20px" height="20px" v-if="$global.projectName === 'mw'"/>
+                <img src="../../assets/img/sharder/block.svg" width="20px" height="20px" v-else-if="$global.projectName === 'sharder'"/>
                 <span>{{$t('exchange_list.exchange_title')}}</span>
             </p>
             <div class="list_table w br4">
