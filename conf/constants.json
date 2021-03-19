@@ -28,9 +28,9 @@
     "BLOCK_REWARD_VERIFY_HEIGHT_IS_DEVNET": 10,
     "BLOCK_REWARD_VERIFY_HEIGHT_ID_TESTNET": 18000,
     "MINER_REMOVE_HEIGHT": 16200,
-    "HECO_HEIGHT": 16200
+    "HECO_HEIGHT": 19500
   },
   "acrossChains": {
-    "MGR_URL": "http://192.168.0.101:8080/api/front/acrossChain/"
+    "MGR_URL": "https://mw.run/admin/api/front/acrossChain/"
   }
 }
