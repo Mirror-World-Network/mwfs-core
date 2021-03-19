@@ -26,7 +26,8 @@
                 </div>
                 <div class="my-info" v-loading="loading">
                     <h1>
-                        <img src="../../assets/img/wodexingxi.png" class="head-portrait">
+                        <img src="../../assets/img/wodexingxi.png" class="head-portrait" v-if="$global.projectName === 'mw'">
+                        <img src="../../assets/img/sharder/wodexingxi.png" class="head-portrait" v-else-if="$global.projectName === 'sharder'">
                         <span>{{$t('mining.attribute.self_info')}}</span>
                     </h1>
                     <div class="my-attribute">
@@ -82,7 +83,8 @@
                 <span class="img-close" @click="miningMask('isAttribute')"></span>
                 <div class="attribute">
                     <h1>
-                        <img src="../../assets/img/pay.svg" class="attribute-img">
+                        <img src="../../assets/img/pay.svg" class="attribute-img" v-if="$global.projectName === 'mw'">
+                        <img src="../../assets/img/sharder/pay.svg" class="attribute-img" v-else-if="$global.projectName === 'sharder'">
                         <span>{{$t('mining.attribute.pool_details')}}</span>
                     </h1>
                     <div class="attribute-value">

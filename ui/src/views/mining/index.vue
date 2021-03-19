@@ -10,7 +10,8 @@
         <div v-if="tabTitle === 'mining' && tabMenu === 'mining'" class="mining-page">
             <div class="pool-top">
                 <div class="mining-content">
-                    <img src="../../assets/img/chatu.png" id="chatu">
+                    <img src="../../assets/img/chatu.png" id="chatu" v-if="$global.projectName === 'mw'">
+                    <img src="../../assets/img/sharder/chatu.png" id="chatu" v-else-if="$global.projectName === 'sharder'">
                     <div class="assets">
                         <ul>
                             <li>{{$t('mining.index.net_mining')}}{{$t('mining.index.net_mining_number',
@@ -64,7 +65,8 @@
                     </div>
                 </div>
                 <div class="mining-notice">
-                    <img src="../../assets/img/guangbo.png" class="notice-img">
+                    <img src="../../assets/img/guangbo.png" class="notice-img" v-if="$global.projectName === 'mw'">
+                    <img src="../../assets/img/sharder/guangbo.png" class="notice-img" v-else-if="$global.projectName === 'sharder'">
                     <span class="notice-info">
                     {{$t('mining.index.mineral') + $t('mining.index.net_mining_number',{number:newestBlock.height})}} |
                     {{$t('mining.index.blocker') + newestBlockCreator}} | {{$t('mining.index.reward') + $global.getAmountFormat(newBlockReward)}}
@@ -72,7 +74,8 @@
                 </div>
                 <div class ="sort_type">
                     <div class="list-title">
-                        <img src="../../assets/img/miner.svg" class="mining-list-img">
+                        <img src="../../assets/img/miner.svg" class="mining-list-img" v-if="$global.projectName === 'mw'">
+                        <img src="../../assets/img/sharder/miner.svg" class="mining-list-img" v-else-if="$global.projectName === 'sharder'">
                         <span>{{$t('mining.index.pool_list')}}</span>
                         <!--                        <span>{{$t('mining.index.pool_list_block')}}</span>-->
                     </div>
@@ -107,7 +110,8 @@
                                     <h2 :class="(mining.creatorRS === accountInfo.accountRS) ? 'my-pool-title' : '' ">
                                         {{mining.creatorRS === accountInfo.accountRS ? $t('mining.index.my_pool') : $t('mining.index.pool')}}
                                         <span v-if="mining.isJoin">
-                                            <img class="pool-badge" src="../../assets/img/my-join.svg" height="22px">
+                                            <img class="pool-badge" src="../../assets/img/my-join.svg" height="22px" v-if="$global.projectName === 'mw'">
+                                            <img class="pool-badge" src="../../assets/img/sharder/my-join.svg" height="22px" v-else-if="$global.projectName === 'sharder'">
                                         </span>
                                     </h2>
                                     <p class="pool-no">No.{{mining.poolId}}</p>
@@ -120,17 +124,20 @@
                                 <div class="tag">
 
                                     <p>
-                                        <img src="../../assets/img/kuangchisouyi.png">
+                                        <img src="../../assets/img/kuangchisouyi.png" v-if="$global.projectName === 'mw'">
+                                        <img src="../../assets/img/sharder/kuangchisouyi.png" v-else-if="$global.projectName === 'sharder'">
                                         <span>{{$t('mining.index.pool_income') + $global.getAmountFormat(mining.mintRewards)}}</span>
                                     </p>
                                     <p>
-                                        <img src="../../assets/img/kuagnchifhenpei.png">
+                                        <img src="../../assets/img/kuagnchifhenpei.png" v-if="$global.projectName === 'mw'">
+                                        <img src="../../assets/img/sharder/kuagnchifhenpei.png" v-else-if="$global.projectName === 'sharder'">
                                         <span>
                                             {{$t('mining.index.Income_distribution') + $global.getRewardRate(mining.rule)}}
                                         </span>
                                     </p>
                                     <p>
-                                        <img src="../../assets/img/kuangchishenyu.png">
+                                        <img src="../../assets/img/kuangchishenyu.png" v-if="$global.projectName === 'mw'">
+                                        <img src="../../assets/img/sharder/kuangchishenyu.png" v-else-if="$global.projectName === 'sharder'">
 <!--                                        <span>{{$t('mining.index.remaining_mining') + getMinerBlock(mining) + $t('mining.index.unit_block')}}</span>-->
                                         <span>{{$t('mining.index.manual_deletion')}}</span>
                                     </p>
@@ -178,7 +185,8 @@
         <div v-if="tabMenu === 'personal'">
             <div class="personal-content">
                 <div class="user">
-                    <img src="../../assets/img/money.svg" class="header-img">
+                    <img src="../../assets/img/money.svg" class="header-img" v-if="$global.projectName === 'mw'">
+                    <img src="../../assets/img/sharder/money.svg" class="header-img" v-else-if="$global.projectName === 'sharder'">
                     <p>
                         <span>{{$t('mining.index.miner_name')}}</span>:
                         <span v-if="accountInfo.name !== undefined">{{accountInfo.name}}</span>
@@ -192,15 +200,18 @@
                     </p>
                 </div>
                 <div class="list" @click="$router.push({name: 'my-assets'})">
-                    <img src="../../assets/img/money.svg">
+                    <img src="../../assets/img/money.svg" v-if="$global.projectName === 'mw'">
+                    <img src="../../assets/img/sharder/money.svg" v-else-if="$global.projectName === 'sharder'">
                     <span>{{$t('mining.index.my_assets')}}</span>
                 </div>
                 <div class="list" @click="$router.push({name: 'diamond-exchange'})">
-                    <img src="../../assets/img/exchange.svg">
+                    <img src="../../assets/img/exchange.svg" v-if="$global.projectName === 'mw'">
+                    <img src="../../assets/img/sharder/exchange.svg" v-else-if="$global.projectName === 'sharder'">
                     <span>{{$t('mining.index.diamond_exchange')}}</span>
                 </div>
                 <div class="list">
-                    <img src="../../assets/img/about.svg">
+                    <img src="../../assets/img/about.svg" v-if="$global.projectName === 'mw'">
+                    <img src="../../assets/img/sharder/about.svg" v-else-if="$global.projectName === 'sharder'">
                     <span>{{$t('mining.index.about_us')}}</span>
                 </div>
                 <div class="about">
@@ -967,17 +978,22 @@
 
 </style>
 <!--MW矿场-->
-<style>
-
+<style scoped type="text/scss" lang="scss">
+@import '../../styles/css/vars.scss';
     .mining-content {
         position: relative;
-        margin-top: 10px;
+        margin-top: 20px;
         border-top-left-radius: 6px;
         border-top-right-radius: 6px;
-        height: 300px;
+        height: 320px;
         padding: 30px;
-        background: url("../../assets/img/kuangchi_bg.png") no-repeat center 140px;
-        background-color: $primary_color;
+        @if $projectName == mw {
+            background: url("../../assets/img/kuangchi_bg.png") no-repeat center 140px;
+        }
+        @else if $projectName == sharder {
+            background: url("../../assets/img/sharder/kuangchi_bg.png") no-repeat center 140px;
+        }
+        background-color: $primary_color_1f;
     }
 
     .mining-content .assets ul {
@@ -1017,8 +1033,8 @@
 
     .state .state-info {
         display: inline-block;
-        background-color: #20a0ff99;
-        color: #14c6fc;
+        background-color: $primary_color_dd;
+        color: #fff;
         font-size: 14px;
         font-weight: bold;
         border-radius: 4px;
@@ -1031,7 +1047,7 @@
         float: right;
         right: -30px;
         /*top: -20px;*/
-        background-color: #00D6A3;
+        background-color: $primary_color_dd;
         display: inline-block;
         font-size: 14px;
         color: #fff;

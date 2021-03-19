@@ -186,12 +186,12 @@
 .el-tooltip__popper {
     color: #ffffff !important;
     background: $primary_color !important;
+    border-color: $primary_color;
     z-index: 9999 !important;
 }
 
 .el-tooltip__popper.is-light .popper__arrow:after {
-    border-top-color: $primary_color !important;
-    border-bottom-color: $primary_color !important;
+    border-color: $primary_color !important;
     z-index: 9999 !important;
 }
 
@@ -935,6 +935,7 @@
 
 .el-radio-button__orig-radio:checked + .el-radio-button__inner {
     background: $primary_color !important;
+    border-color: $primary_color;
 }
 
 .el-button--primary {
