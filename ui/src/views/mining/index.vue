@@ -11,7 +11,7 @@
             <div class="pool-top">
                 <div class="mining-content">
                     <img src="../../assets/img/chatu.png" id="chatu" v-if="$global.projectName === 'mw'">
-                    <img src="../../assets/img/sharder/chatu.png" id="chatu-sharder" v-else-if="$global.projectName === 'sharder'">
+                    <img src="../../assets/img/sharder/chatu.png" id="chatu" v-else-if="$global.projectName === 'sharder'">
                     <div class="assets">
                         <ul>
                             <li>{{$t('mining.index.net_mining')}}{{$t('mining.index.net_mining_number',
@@ -978,17 +978,22 @@
 
 </style>
 <!--MW矿场-->
-<style>
-
+<style scoped type="text/scss" lang="scss">
+@import '../../styles/css/vars.scss';
     .mining-content {
         position: relative;
-        margin-top: 10px;
+        margin-top: 20px;
         border-top-left-radius: 6px;
         border-top-right-radius: 6px;
-        height: 300px;
+        height: 320px;
         padding: 30px;
-        background: url("../../assets/img/kuangchi_bg.png") no-repeat center 140px;
-        background-color: $primary_color;
+        @if $projectName == mw {
+            background: url("../../assets/img/kuangchi_bg.png") no-repeat center 140px;
+        }
+        @else if $projectName == sharder {
+            background: url("../../assets/img/sharder/kuangchi_bg.png") no-repeat center 140px;
+        }
+        background-color: $primary_color_1f;
     }
 
     .mining-content .assets ul {
@@ -1028,8 +1033,8 @@
 
     .state .state-info {
         display: inline-block;
-        background-color: #20a0ff99;
-        color: #14c6fc;
+        background-color: $primary_color_dd;
+        color: #fff;
         font-size: 14px;
         font-weight: bold;
         border-radius: 4px;
@@ -1042,7 +1047,7 @@
         float: right;
         right: -30px;
         /*top: -20px;*/
-        background-color: #00D6A3;
+        background-color: $primary_color_dd;
         display: inline-block;
         font-size: 14px;
         color: #fff;
