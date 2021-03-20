@@ -480,10 +480,17 @@ public final class BlockchainImpl implements Blockchain {
     }
 
     @Override
-    public int getTransactionCountByAccount(long accountId, byte type,byte subtype){
+    public int getTransactionCountByAccount(long accountId, byte type,byte subtype, boolean isRecipient, boolean isSender){
 
         StringBuilder buf = new StringBuilder();
-        buf.append("SELECT COUNT(*) FROM transaction WHERE (recipient_id = ? or sender_id = ?) ");
+        buf.append("SELECT COUNT(*) FROM transaction WHERE ");
+        if (isRecipient && !isSender) {
+            buf.append("recipient_id = ? AND sender_id <> ? ");
+        } else if (!isRecipient && isSender){
+            buf.append("sender_id = ?  AND recipient_id <> ? ");
+        } else if (isRecipient && isSender) {
+            buf.append("(recipient_id = ? or sender_id = ?) ");
+        }
         if(type >= 0){
             buf.append("AND type = ? ");
             if(subtype >= 0){
@@ -511,6 +518,8 @@ public final class BlockchainImpl implements Blockchain {
             }
         }catch (SQLException e){
             throw new RuntimeException(e.toString(), e);
+        }finally {
+            DbUtils.close(con);
         }
     }
 

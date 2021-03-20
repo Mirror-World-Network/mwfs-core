@@ -60,6 +60,19 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div class="list_pagination"> <!--v-if="totalSize > pageSize">-->
+                            <div class="list_pagination">
+                                <el-pagination
+                                    :small="isMobile"
+                                    @size-change="handleSizeChange"
+                                    @current-change="handleCurrentChange"
+                                    :current-page.sync="currentPage"
+                                    :page-size="pageSize"
+                                    layout="total, prev, pager, next, jumper"
+                                    :total="totalSize">
+                                </el-pagination>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -703,9 +716,29 @@
                 tradingInfoDialog: this.tradingInfoOpen,
                 rs:'',
                 secretPhrase:SSO.secretPhrase,
+                pageNO: 1,
+                isMobile: false,
+                totalSize: 0,
+                pageSize: 10,
+                currentPage: 1,
+                accountBind: null,
+            }
+        },
+        created() {
+            if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) { //移动端
+                this.isMobile = true
             }
         },
         methods: {
+            handleSizeChange(val) {
+
+            },
+            handleCurrentChange(val) {
+                console.log(`当前页: ${val}`);
+                console.log(`当前账户: ${this.accountBind}`);
+                this.currentPage = val;
+                this.httpGetAccountInfo(this.accountBind);
+            },
             containCrowdRewardTxs() {
                 const _this = this;
 
@@ -734,6 +767,7 @@
 
             httpGetAccountInfo(accountID) {
                 const _this = this;
+                _this.accountBind = accountID;
                 return new Promise((resolve, reject) => {
 
                     _this.$http.get(_this.$global.urlPrefix() + '?requestType=getAccount', {
@@ -743,12 +777,13 @@
                     }).then(function (res) {
                         if (!res.data.errorDescription) {
                             _this.accountInfo = res.data;
-                            _this.$http.get(_this.$global.urlPrefix() + '?requestType=getBlockchainTransactions', {
-                                params: {
-                                    account: accountID
-                                }
-                            }).then(function (res) {
+                            let params = new URLSearchParams();
+                            params.append("account", accountID);
+                            params.append("firstIndex", (_this.currentPage - 1) * 10);
+                            params.append("lastIndex", (_this.currentPage - 1) * 10 + 9);
+                            _this.$http.get(_this.$global.urlPrefix() + '?requestType=getBlockchainTransactions', {params}).then(function (res) {
                                 _this.accountTransactionInfo = res.data.transactions;
+                                _this.totalSize = res.data.count;
                             }).catch(function (err) {
                                 resolve(err);
                             });
