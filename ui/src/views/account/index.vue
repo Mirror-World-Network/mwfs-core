@@ -2778,18 +2778,19 @@ export default {
             _this.loading = true;
             this.$http.get(_this.$global.urlPrefix() + '?requestType=getBlockchainTransactions', {params}).then(function (res1) {
                 _this.accountTransactionList = res1.data.transactions;
-                params.delete("firstIndex");
-                params.delete("lastIndex");
-                _this.$http.get(_this.$global.urlPrefix() + '?requestType=getBlockchainTransactionsCount', {params}).then(function (res2) {
-
-                    if (typeof res2.data.errorDescription === "undefined") {
-                        _this.totalSize = res2.data.count;
-                    } else {
-                        _this.$message.error(res2.data.errorCode);
-                    }
-                }).catch(err => {
-                    // _this.$message.error(err.message);
-                });
+                _this.totalSize = res1.data.count;
+                // params.delete("firstIndex");
+                // params.delete("lastIndex");
+                // _this.$http.get(_this.$global.urlPrefix() + '?requestType=getBlockchainTransactionsCount', {params}).then(function (res2) {
+                //
+                //     if (typeof res2.data.errorDescription === "undefined") {
+                //         _this.totalSize = res2.data.count;
+                //     } else {
+                //         _this.$message.error(res2.data.errorCode);
+                //     }
+                // }).catch(err => {
+                //     // _this.$message.error(err.message);
+                // });
                 _this.loading = false;
                 _this.getTotalList();
                 _this.getDrawData();

@@ -480,10 +480,27 @@ public final class BlockchainImpl implements Blockchain {
     }
 
     @Override
-    public int getTransactionCountByAccount(long accountId, byte type,byte subtype){
+    public int getTransactionCountByAccount(long accountId, byte type,byte subtype, boolean isRecipient, boolean isSender){
 
+        boolean RecipientAndSender = false;
         StringBuilder buf = new StringBuilder();
-        buf.append("SELECT COUNT(*) FROM transaction WHERE (recipient_id = ? or sender_id = ?) ");
+        buf.append("SELECT COUNT(*) FROM transaction WHERE ");
+        if (isRecipient && !isSender) {
+            buf.append("recipient_id = ? ");
+        } else if (!isRecipient && isSender){
+            buf.append("sender_id = ? ");
+        } else if (isRecipient && isSender) {
+            RecipientAndSender = true;
+            buf.append("sender_id = ? ");
+            if(type >= 0){
+                buf.append("AND type = ? ");
+                if(subtype >= 0){
+                    buf.append("AND subtype = ? ");
+                }
+            }
+            buf.append("union all SELECT COUNT(*) FROM transaction WHERE ");
+            buf.append("recipient_id = ? AND sender_id <> ? ");
+        }
         if(type >= 0){
             buf.append("AND type = ? ");
             if(subtype >= 0){
@@ -496,7 +513,16 @@ public final class BlockchainImpl implements Blockchain {
             con = Db.db.getConnection();
             PreparedStatement pstmt = con.prepareStatement(buf.toString());
             pstmt.setLong(++i, accountId);
-            pstmt.setLong(++i, accountId);
+            if (RecipientAndSender) {
+                if(type >= 0){
+                    pstmt.setByte(++i, type);
+                    if(subtype >= 0){
+                        pstmt.setInt(++i, subtype);
+                    }
+                }
+                pstmt.setLong(++i, accountId);
+                pstmt.setLong(++i, accountId);
+            }
             if(type >= 0){
                 pstmt.setByte(++i, type);
                 if(subtype >= 0){
@@ -504,6 +530,13 @@ public final class BlockchainImpl implements Blockchain {
                 }
             }
             try(ResultSet rs = pstmt.executeQuery()){
+                if (RecipientAndSender) {
+                    int count = 0;
+                    while (rs.next()) {
+                        count += rs.getInt(1);
+                    }
+                    return count;
+                }
                 rs.next();
                 return rs.getInt(1);
             }catch (Exception e){
@@ -511,6 +544,8 @@ public final class BlockchainImpl implements Blockchain {
             }
         }catch (SQLException e){
             throw new RuntimeException(e.toString(), e);
+        }finally {
+            DbUtils.close(con);
         }
     }
 
