@@ -10,7 +10,8 @@
         <div v-if="tabTitle === 'mining' && tabMenu === 'mining'" class="mining-page">
             <div class="pool-top">
                 <div class="mining-content">
-                    <img src="../../assets/img/chatu.png" id="chatu">
+                    <img src="../../assets/img/chatu.png" id="chatu" v-if="$global.projectName === 'mw'">
+                    <img src="../../assets/img/sharder/chatu.png" id="chatu" v-else-if="$global.projectName === 'sharder'">
                     <div class="assets">
                         <ul>
                             <li>{{$t('mining.index.net_mining')}}{{$t('mining.index.net_mining_number',
@@ -64,7 +65,8 @@
                     </div>
                 </div>
                 <div class="mining-notice">
-                    <img src="../../assets/img/guangbo.png" class="notice-img">
+                    <img src="../../assets/img/guangbo.png" class="notice-img" v-if="$global.projectName === 'mw'">
+                    <img src="../../assets/img/sharder/guangbo.png" class="notice-img" v-else-if="$global.projectName === 'sharder'">
                     <span class="notice-info">
                     {{$t('mining.index.mineral') + $t('mining.index.net_mining_number',{number:newestBlock.height})}} |
                     {{$t('mining.index.blocker') + newestBlockCreator}} | {{$t('mining.index.reward') + $global.getAmountFormat(newBlockReward)}}
@@ -72,7 +74,8 @@
                 </div>
                 <div class ="sort_type">
                     <div class="list-title">
-                        <img src="../../assets/img/miner.svg" class="mining-list-img">
+                        <img src="../../assets/img/miner.svg" class="mining-list-img" v-if="$global.projectName === 'mw'">
+                        <img src="../../assets/img/sharder/miner.svg" class="mining-list-img" v-else-if="$global.projectName === 'sharder'">
                         <span>{{$t('mining.index.pool_list')}}</span>
                         <!--                        <span>{{$t('mining.index.pool_list_block')}}</span>-->
                     </div>
@@ -107,7 +110,8 @@
                                     <h2 :class="(mining.creatorRS === accountInfo.accountRS) ? 'my-pool-title' : '' ">
                                         {{mining.creatorRS === accountInfo.accountRS ? $t('mining.index.my_pool') : $t('mining.index.pool')}}
                                         <span v-if="mining.isJoin">
-                                            <img class="pool-badge" src="../../assets/img/my-join.svg" height="22px">
+                                            <img class="pool-badge" src="../../assets/img/my-join.svg" height="22px" v-if="$global.projectName === 'mw'">
+                                            <img class="pool-badge" src="../../assets/img/sharder/my-join.svg" height="22px" v-else-if="$global.projectName === 'sharder'">
                                         </span>
                                     </h2>
                                     <p class="pool-no">No.{{mining.poolId}}</p>
@@ -120,17 +124,20 @@
                                 <div class="tag">
 
                                     <p>
-                                        <img src="../../assets/img/kuangchisouyi.png">
+                                        <img src="../../assets/img/kuangchisouyi.png" v-if="$global.projectName === 'mw'">
+                                        <img src="../../assets/img/sharder/kuangchisouyi.png" v-else-if="$global.projectName === 'sharder'">
                                         <span>{{$t('mining.index.pool_income') + $global.getAmountFormat(mining.mintRewards)}}</span>
                                     </p>
                                     <p>
-                                        <img src="../../assets/img/kuagnchifhenpei.png">
+                                        <img src="../../assets/img/kuagnchifhenpei.png" v-if="$global.projectName === 'mw'">
+                                        <img src="../../assets/img/sharder/kuagnchifhenpei.png" v-else-if="$global.projectName === 'sharder'">
                                         <span>
                                             {{$t('mining.index.Income_distribution') + $global.getRewardRate(mining.rule)}}
                                         </span>
                                     </p>
                                     <p>
-                                        <img src="../../assets/img/kuangchishenyu.png">
+                                        <img src="../../assets/img/kuangchishenyu.png" v-if="$global.projectName === 'mw'">
+                                        <img src="../../assets/img/sharder/kuangchishenyu.png" v-else-if="$global.projectName === 'sharder'">
 <!--                                        <span>{{$t('mining.index.remaining_mining') + getMinerBlock(mining) + $t('mining.index.unit_block')}}</span>-->
                                         <span>{{$t('mining.index.manual_deletion')}}</span>
                                     </p>
@@ -178,7 +185,8 @@
         <div v-if="tabMenu === 'personal'">
             <div class="personal-content">
                 <div class="user">
-                    <img src="../../assets/img/money.svg" class="header-img">
+                    <img src="../../assets/img/money.svg" class="header-img" v-if="$global.projectName === 'mw'">
+                    <img src="../../assets/img/sharder/money.svg" class="header-img" v-else-if="$global.projectName === 'sharder'">
                     <p>
                         <span>{{$t('mining.index.miner_name')}}</span>:
                         <span v-if="accountInfo.name !== undefined">{{accountInfo.name}}</span>
@@ -192,15 +200,18 @@
                     </p>
                 </div>
                 <div class="list" @click="$router.push({name: 'my-assets'})">
-                    <img src="../../assets/img/money.svg">
+                    <img src="../../assets/img/money.svg" v-if="$global.projectName === 'mw'">
+                    <img src="../../assets/img/sharder/money.svg" v-else-if="$global.projectName === 'sharder'">
                     <span>{{$t('mining.index.my_assets')}}</span>
                 </div>
                 <div class="list" @click="$router.push({name: 'diamond-exchange'})">
-                    <img src="../../assets/img/exchange.svg">
+                    <img src="../../assets/img/exchange.svg" v-if="$global.projectName === 'mw'">
+                    <img src="../../assets/img/sharder/exchange.svg" v-else-if="$global.projectName === 'sharder'">
                     <span>{{$t('mining.index.diamond_exchange')}}</span>
                 </div>
                 <div class="list">
-                    <img src="../../assets/img/about.svg">
+                    <img src="../../assets/img/about.svg" v-if="$global.projectName === 'mw'">
+                    <img src="../../assets/img/sharder/about.svg" v-else-if="$global.projectName === 'sharder'">
                     <span>{{$t('mining.index.about_us')}}</span>
                 </div>
                 <div class="about">
@@ -809,7 +820,8 @@
     }
 </script>
 <!--全局样式处理-->
-<style>
+<style scoped type="text/scss" lang="scss">
+@import '../../styles/css/vars.scss';
     body {
         background: #00000010;
     }
@@ -843,7 +855,7 @@
 
     .mining .title .el-radio-button__orig-radio:checked + .el-radio-button__inner,
     .el-select-dropdown__item.selected.hover, .el-select-dropdown__item.selected {
-        background-color: #3fb09a;
+        background-color: $primary_color;
     }
 
     .mining .title .el-radio-button__orig-radio:checked + .el-radio-button__inner:hover {
@@ -851,7 +863,7 @@
     }
 
     .mining .title .el-radio-button__inner:hover {
-        color: #3fb09a;
+        color: $primary_color;
     }
 
     .mining .el-input {
@@ -885,19 +897,19 @@
     }
 
     .mining .mining-paging1 .el-pager li.active {
-        background-color: #3fb09a;
+        background-color: $primary_color;
         border: none;
     }
     .mining .mining-paging2 .el-pager li.active {
-        background-color: #3fb09a;
+        background-color: $primary_color;
         border: none;
     }
 
     .mining .mining-paging1 .el-pager li:hover {
-        color: #3fb09a;
+        color: $primary_color;
     }
     .mining .mining-paging2 .el-pager li:hover {
-        color: #3fb09a;
+        color: $primary_color;
     }
 
     .mining .mining-paging1 .el-pager li.active:hover {
@@ -909,7 +921,7 @@
 
     .mining .create-pool .el-slider__button,
     .mining .create-pool .el-slider__bar {
-        background-color: #3fb09a;
+        background-color: $primary_color;
     }
 
     .img-close {
@@ -932,12 +944,12 @@
         position: absolute;
         left: 9px;
         top: 9px;
-        color: #3fb09a;
+        color: $primary_color;
         cursor: pointer;
     }
 
     .mining-back:hover {
-        color: #3fb09aaa;
+        color: $primary_color_aa;
     }
 
     .mining-list .el-select .el-input .el-select__caret {
@@ -966,17 +978,22 @@
 
 </style>
 <!--MW矿场-->
-<style>
-
+<style scoped type="text/scss" lang="scss">
+@import '../../styles/css/vars.scss';
     .mining-content {
         position: relative;
-        margin-top: 10px;
+        margin-top: 20px;
         border-top-left-radius: 6px;
         border-top-right-radius: 6px;
-        height: 300px;
+        height: 320px;
         padding: 30px;
-        background: url("../../assets/img/kuangchi_bg.png") no-repeat center 140px;
-        background-color: #3fb09a;
+        @if $projectName == mw {
+            background: url("../../assets/img/kuangchi_bg.png") no-repeat center 140px;
+        }
+        @else if $projectName == sharder {
+            background: url("../../assets/img/sharder/kuangchi_bg.png") no-repeat center 140px;
+        }
+        background-color: $primary_color_1f;
     }
 
     .mining-content .assets ul {
@@ -1016,8 +1033,8 @@
 
     .state .state-info {
         display: inline-block;
-        background-color: #20a0ff99;
-        color: #14c6fc;
+        background-color: $primary_color_dd;
+        color: #fff;
         font-size: 14px;
         font-weight: bold;
         border-radius: 4px;
@@ -1030,7 +1047,7 @@
         float: right;
         right: -30px;
         /*top: -20px;*/
-        background-color: #00D6A3;
+        background-color: $primary_color_dd;
         display: inline-block;
         font-size: 14px;
         color: #fff;
@@ -1114,7 +1131,7 @@
 
     .mining-notice .notice-info {
         font-size: 16px;
-        color: #3fb09a;
+        color: $primary_color;
     }
 
     .mining-list .list-title {
@@ -1158,7 +1175,7 @@
         width: 185px;
         height: 120px;
         text-align: center;
-        background-color: #3fb09a;
+        background-color: $primary_color;
         border-radius: 8px;
         cursor: pointer;
     }
@@ -1280,7 +1297,7 @@
     }
 
     .receive .receive-text {
-        color: #3fb09a;
+        color: $primary_color;
         font-size: 14px;
     }
 </style>
@@ -1355,16 +1372,16 @@
         height: 50px;
         font-size: 16px;
         border-radius: 4px;
-        background-color: #3fb09a;
+        background-color: $primary_color;
         border: none;
     }
 
     .content-right button:hover {
-        background-color: #3fb09add;
+        background-color: $primary_color_dd;
     }
 
     .content-right button:active {
-        background-color: #3fb09aaa;
+        background-color: $primary_color_aa;
     }
 
     .en_mining .content-left span.strong {
@@ -1398,7 +1415,7 @@
         padding: 20px 0;
         font-size: 16px;
         font-weight: bold;
-        background-color: #3fb09a;
+        background-color: $primary_color;
         color: #fff;
         border-top-left-radius: 6px;
         border-top-right-radius: 6px;
@@ -1480,7 +1497,7 @@
 
     .create-pool-content .pool-attribute {
         padding: 30px 40px;
-        background-color: #3fb09a;
+        background-color: $primary_color;
         color: #fff;
     }
 
@@ -1539,23 +1556,23 @@
 
     .pool-bth .immediately-create {
         float: right;
-        background-color: #3fb09a;
+        background-color: $primary_color;
         color: #fff;
         border: none;
     }
 
     .pool-bth .immediately-create:hover {
-        background-color: #3fb09aaa;
+        background-color: $primary_color_aa;
     }
 
     .pool-bth .cancel {
         background-color: #fff;
-        color: #3fb09a;
-        border: 1px solid #3fb09a;
+        color: $primary_color;
+        border: 1px solid $primary_color;
     }
 
     .pool-bth .cancel:hover {
-        background-color: #3fb09a10;
+        background-color: $primary_color_10;
     }
 
     .en_mining .pool-data .strong {
@@ -1892,7 +1909,7 @@
         }
 
         .menu .el-radio-button__orig-radio:checked + .el-radio-button__inner {
-            color: #3fb09a !important;
+            color: $primary_color !important;
         }
 
         .mining .mining-list .mining-list-info {
@@ -1924,7 +1941,7 @@
         .mining .personal-content .user {
             height: 170px;
             width: 100%;
-            background: #3fb09a;
+            background: $primary_color;
             border-radius: 4px;
             text-align: center;
             color: #fff;
@@ -2008,7 +2025,7 @@
         }
 
         .mining .tss .close {
-            background: #3fb09a;
+            background: $primary_color;
             cursor: pointer;
             color: #fff;
             width: 100%;
@@ -2052,7 +2069,7 @@
 
         .mining .set-name .determine {
             width: 100%;
-            background: #3fb09a;
+            background: $primary_color;
             padding: 15px 0;
             border-bottom-left-radius: 6px;
             border-bottom-right-radius: 6px;

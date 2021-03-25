@@ -43,7 +43,7 @@
                 if (_this.confirmPassphrase === "") {
                     return _this.$message.info(_this.$t('notification.login_no_input_error'));
                 }
-                if (_this.confirmPassphrase !== _this.passphrase) {
+                if (_this.confirmPassphrase != _this.passphrase) {
                     return _this.$message.error(_this.$t('login.incorrect_key'));
                 }
                 SSO.secretPhrase = _this.passphrase;

@@ -60,6 +60,19 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div class="list_pagination"> <!--v-if="totalSize > pageSize">-->
+                            <div class="list_pagination">
+                                <el-pagination
+                                    :small="isMobile"
+                                    @size-change="handleSizeChange"
+                                    @current-change="handleCurrentChange"
+                                    :current-page.sync="currentPage"
+                                    :page-size="pageSize"
+                                    layout="total, prev, pager, next, jumper"
+                                    :total="totalSize">
+                                </el-pagination>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -192,7 +205,11 @@
                                 <span class="utc-time compact-small-font">{{$global.formatTime(transaction.timestamp)}} +UTC</span>
                             </td>
                             <td class="linker pc-table" @click="openTransactionDialog(transaction.transaction)">{{transaction.transaction}}</td>
-                            <td class="transaction-img mobile-td compact-style">
+                            <td class="transaction-img mobile-td compact-style" v-if="$global.projectName === 'mw'">
+                                <span class="bg" :class="'type' + transaction.type + transaction.subtype"></span>
+                                <span>{{$global.getTransactionTypeStr(transaction)}}</span>
+                            </td>
+                            <td class="transaction-img-sharder mobile-td compact-style" v-else-if="$global.projectName === 'sharder'">
                                 <span class="bg" :class="'type' + transaction.type + transaction.subtype"></span>
                                 <span>{{$global.getTransactionTypeStr(transaction)}}</span>
                             </td>
@@ -653,7 +670,7 @@
                     </tr>
                     </tbody>
                 </table>
-                <el-button v-show="($global.getSenderOrRecipient(transactionInfo) == MWLockAddress) || ($global.getSenderRSOrWo(transactionInfo) == MWLockAddress)" id="findTXInHecoChain" 
+                <el-button v-show="($global.getSenderOrRecipient(transactionInfo) == MWHecoExchangeAddress) || ($global.getSenderRSOrWo(transactionInfo) == MWHecoExchangeAddress)" id="findTXInHecoChain" 
                 @click="findTXInHecoChain(transactionInfo.fullHash)">{{$t('acrossChains.tx_in_HecoChain')}}</el-button>
             </div>
 
@@ -700,10 +717,37 @@
                 tradingInfoDialog: this.tradingInfoOpen,
                 rs:'',
                 secretPhrase:SSO.secretPhrase,
-                MWLockAddress:"CDW-J8RK-3ADG-2A7S-F9DV6",
+
+                MWHecoExchangeAddress:"",
+
+                pageNO: 1,
+                isMobile: false,
+                totalSize: 0,
+                pageSize: 10,
+                currentPage: 1,
+                accountBind: null,
             }
         },
+        created() {
+            if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) { //移动端
+                this.isMobile = true
+            }
+            this.$http.get(window.api.getAddress).then(function (res1) {
+                if(res1.data.body.MWHecoExchangeAddress){
+                    this.MWHecoExchangeAddress = res1.data.body.MWHecoExchangeAddress;
+                }
+            });
+        },
         methods: {
+            handleSizeChange(val) {
+
+            },
+            handleCurrentChange(val) {
+                console.log(`当前页: ${val}`);
+                console.log(`当前账户: ${this.accountBind}`);
+                this.currentPage = val;
+                this.httpGetAccountInfo(this.accountBind);
+            },
             containCrowdRewardTxs() {
                 const _this = this;
 
@@ -732,6 +776,7 @@
 
             httpGetAccountInfo(accountID) {
                 const _this = this;
+                _this.accountBind = accountID;
                 return new Promise((resolve, reject) => {
 
                     _this.$http.get(_this.$global.urlPrefix() + '?requestType=getAccount', {
@@ -741,12 +786,13 @@
                     }).then(function (res) {
                         if (!res.data.errorDescription) {
                             _this.accountInfo = res.data;
-                            _this.$http.get(_this.$global.urlPrefix() + '?requestType=getBlockchainTransactions', {
-                                params: {
-                                    account: accountID
-                                }
-                            }).then(function (res) {
+                            let params = new URLSearchParams();
+                            params.append("account", accountID);
+                            params.append("firstIndex", (_this.currentPage - 1) * 10);
+                            params.append("lastIndex", (_this.currentPage - 1) * 10 + 9);
+                            _this.$http.get(_this.$global.urlPrefix() + '?requestType=getBlockchainTransactions', {params}).then(function (res) {
                                 _this.accountTransactionInfo = res.data.transactions;
+                                _this.totalSize = res.data.count;
                             }).catch(function (err) {
                                 resolve(err);
                             });
@@ -1066,9 +1112,9 @@
             findTXInHecoChain(fullHash){
                 const _this = this;
                 var recordType;
-                if(_this.$global.getSenderOrRecipient(_this.transactionInfo) == _this.MWLockAddress){
+                if(_this.$global.getSenderOrRecipient(_this.transactionInfo) == _this.MWHecoExchangeAddress){
                     recordType = 1;
-                }else if(_this.$global.getSenderRSOrWo(_this.transactionInfo) == _this.MWLockAddress){
+                }else if(_this.$global.getSenderRSOrWo(_this.transactionInfo) == _this.MWHecoExchangeAddress){
                     recordType = 2;
                 }
                 _this.$http.get(window.api.getRecordUrl,{params:{fullSource:fullHash,recordType:recordType}}).then(function (res1) {
@@ -1207,8 +1253,9 @@
 </script>
 
 <style scoped type="text/scss" lang="scss">
+@import '../../styles/css/vars.scss';
     .is-active /deep/.el-radio-button__inner {
-        border-bottom: 2px solid #3fb09a !important;
+        border-bottom: 2px solid $primary_color !important;
     }
 
     .reward-tab /deep/.el-radio-button__inner {
@@ -1217,7 +1264,7 @@
         margin-top: 5px !important;
         border-radius: 0 !important;;
         border: 0;
-        box-shadow: 0 0 0 0 #3fb09a;
+        box-shadow: 0 0 0 0 $primary_color;
     }
 
     #block_info {
@@ -1229,7 +1276,7 @@
             .title {
                 .el-radio-button__orig-radio:checked + .el-radio-button__inner,
                 .el-select-dropdown__item.selected.hover, .el-select-dropdown__item.selected {
-                    background-color: #3fb09a;
+                    background-color: $primary_color;
                 }
 
                 .el-radio-button__orig-radio:checked + .el-radio-button__inner:hover {
@@ -1237,7 +1284,7 @@
                 }
 
                 .el-radio-button__inner:hover {
-                    color: #3fb09a;
+                    color: $primary_color;
                 }
             }
 
@@ -1269,7 +1316,7 @@
                     }
 
                     .linker {
-                        color: #3fb09a;
+                        color: $primary_color;
                         cursor: pointer;
 
                         a {
@@ -1328,7 +1375,7 @@
 
                 .el-radio-button__orig-radio:checked + .el-radio-button__inner,
                 .el-select-dropdown__item.selected.hover, .el-select-dropdown__item.selected {
-                    background-color: #3fb09a;
+                    background-color: $primary_color;
                 }
 
                 .el-radio-button__orig-radio:checked + .el-radio-button__inner:hover {
@@ -1336,7 +1383,7 @@
                 }
 
                 .el-radio-button__inner:hover {
-                    color: #3fb09a;
+                    color: $primary_color;
                 }
 
                 .account_list {
@@ -1391,7 +1438,7 @@
                         }
 
                         .linker {
-                            color: #3fb09a;
+                            color: $primary_color;
                             cursor: pointer;
 
                             a {

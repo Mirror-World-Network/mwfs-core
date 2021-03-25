@@ -1,17 +1,21 @@
+import global from "../utils/common";
+
 const SERVER_API = "http://localhost:7216";
 // const SERVER_API = "https://biz.sharder.io";
 // const SERVER_API_DEV = "47.107.188.3:8215";
 // const SERVER_API_DEV = "http://localhost:8215";
 // const SERVER_API_TEST = "http://localhost:8215";
-const SERVER_API_DEV = "http://localhost:7216";
+const SERVER_API_DEV = "http://localhost:9216";
 const SERVER_API_TEST = "http://localhost:7216";
+
 const SHARDER_URL = process.env.NODE_ENV === 'development' ? "http://localhost:8080" : "https://mw.run";
 const MGR_URL = process.env.NODE_ENV === 'development' ? "http://192.168.0.104:8080" : "https://mw.run/admin";
 const HECO_URL = process.env.NODE_ENV === 'development' ? "https://testnet.hecoinfo.com" : "https://hecoinfo.com";
 
+
 function getUrl() {
     if (window.location.port === '4000') {
-        return SERVER_API_DEV;
+        return SERVER_API_TEST;
     } else {
         return "";
     }

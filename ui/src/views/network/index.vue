@@ -3,10 +3,11 @@
         <div>
             <div class="block_network mb20" v-loading="loading">
                 <p class="block_title">
-                    <img src="../../assets/img/network.svg"/>
+                    <img src="../../assets/img/network.svg" v-if="projectName === 'mw'"/>
+                    <img src="../../assets/img/sharder/network.svg" v-else-if="projectName === 'sharder'"/>
                     <span>{{$t('network.network_title')}}</span>
                     <span class="hrefbtn fr csp only_mobile">
-                        <a @click="turn2peers" style="color: #3fb09a;">
+                        <a @click="turn2peers">
                             <span>{{$t('network.peers_detail')}}</span>
                         </a>
                     </span>
@@ -32,7 +33,8 @@
             <div class="block_peers mb20 fl" v-loading="loading">
                 <p>
                     <span class="block_title fl">
-                        <img src="../../assets/img/miner.svg"/>
+                        <img src="../../assets/img/miner.svg" v-if="projectName === 'mw'"/>
+                        <img src="../../assets/img/sharder/miner.svg" v-else-if="projectName === 'sharder'"/>
                         <span>{{$t('network.miner_info')}}</span>
                     </span>
                     <span class="hrefbtn fr block_title csp mr5">
@@ -106,7 +108,8 @@
             <div class="block_peers mb20 fr" v-loading="loading">
                 <p>
                     <span class="block_title fl">
-                        <img src="../../assets/img/peerlist.svg"/>
+                        <img src="../../assets/img/peerlist.svg" v-if="projectName === 'mw'"/>
+                        <img src="../../assets/img/sharder/peerlist.svg" v-else-if="projectName === 'sharder'"/>
                         <span>{{$t('network.peers_info')}}</span>
                     </span>
                     <span class="hrefbtn fr block_title csp">
@@ -123,7 +126,8 @@
             <div class="cb"></div>
             <div class="block_list">
                 <p class="block_title">
-                    <img src="../../assets/img/block.svg"/>
+                    <img src="../../assets/img/block.svg" v-if="projectName === 'mw'"/>
+                    <img src="../../assets/img/sharder/block.svg" v-else-if="projectName === 'sharder'"/>
                     <span>{{$t('network.block_list')}}</span>
                 </p>
                 <div class="list_table w br4">
@@ -313,8 +317,8 @@
                             </el-table-column>
                             <el-table-column :label="$t('dialog.account_info_account')" width="230">
                                 <template slot-scope="scope">
-                                    <div v-html="scope.row.accountRS" v-if="scope.row.accountRS === accountRS" style="color:#1bc98e;"></div>
-                                    <div v-html="scope.row.accountRS" v-if="scope.row.accountRS !== accountRS" style=""></div>
+                                    <div v-html="scope.row.accountRS" v-if="scope.row.accountRS === accountRS" class="primary-color-account"></div>
+                                    <div v-html="scope.row.accountRS" v-if="scope.row.accountRS !== accountRS"></div>
                                 </template>
                             </el-table-column>
                             <el-table-column
@@ -505,6 +509,7 @@
         name: "Network",
         data() {
             return {
+                projectName: this.$global.projectName,
                 tabTitle: "account",
                 //blockinfoDialog
                 blockInfoDialog: false,
@@ -789,6 +794,7 @@
 <style lang="scss" type="text/scss">
     /*@import '~scss_vars';*/
     @import './style.scss';
+    @import '../../styles/css/vars.scss';
 
     @media only screen and (max-width: 780px) {
         .list_pagination /deep/ .el-pagination__jump {

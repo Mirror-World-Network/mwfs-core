@@ -7,8 +7,9 @@
                 </el-radio-button>
                 <el-radio-button label="account" class="btn">{{$t('login.account_login')}}</el-radio-button>
             </el-radio-group>
+
             <el-col :span="24" class="login_operation">
-                <div style="font-size: x-small;color: #5daf34;text-align: left;height: 12px;">
+                <div class="login_binding_tip" >
                     <span v-if="tabTitle === 'key' && hubBind && displayBindAddr">{{$t('login.login_binding_hub_account_tip')}}{{hubBindAddress}}</span>
                 </div>
                 <input v-if="tabTitle === 'key'" class="account_input" type="password" v-model="secretPhrase"
@@ -19,7 +20,8 @@
             </el-col>
 
             <el-col :span="24">
-                <img src="../../assets/img/add.svg"/>
+                <img src="../../assets/img/add.svg" v-if="this.$global.projectName === 'mw'"/>
+                <img src="../../assets/img/sharder/add.svg" v-else-if="this.$global.projectName === 'sharder'"/>
                 <a @click="register">{{$t('login.register_tip')}}</a>
             </el-col>
         </div>
@@ -66,14 +68,16 @@
                 _this.$store.state.userConfig = res;
                 _this.hubBind = res["sharder.HubBind"];
                 _this.hubBindAddress = res["sharder.HubBindAddress"];
-                _this.displayBindAddr = this.checkAndSetdisplayBindAddr();
+                _this.displayBindAddr = this.checkAndSetDisplayBindAddr();
                 _this.autoLogin(res);
+                _this.$global.updateConf(res);
             });
+
 
             SSO.init();
         },
         methods: {
-            checkAndSetdisplayBindAddr(){
+            checkAndSetDisplayBindAddr(){
                 const _this = this;
                 if(_this.$store.state.userConfig["sharder.myAddress"]) {
                     if(_this.$store.state.userConfig["sharder.myAddress"].indexOf("mw.run") != -1
@@ -100,7 +104,11 @@
                 if (_this.hubsetting.sharderAccount !== '' && _this.hubsetting.sharderPwd !== '' && _this.hubsetting.openPunchthrough) {
                     formData.append("username", _this.hubsetting.sharderAccount);
                     formData.append("password", _this.hubsetting.sharderPwd);
-                    _this.$http.post('https://taskhall.mw.run/bounties/hubDirectory/check.ss', formData).then(res => {
+                    let url = '';
+                    if (this.$global.projectName === 'mw') {
+                        url = 'https://taskhall.mw.run/bounties/hubDirectory/check.ss';
+                    }
+                    _this.$http.post(url, formData).then(res => {
                         if (res.data.status === 'success') {
                             _this.hubsetting.address = res.data.data.natServiceAddress;
                             _this.hubsetting.port = res.data.data.natServicePort;
@@ -178,14 +186,15 @@
     };
 </script>
 
-<style>
+<style scoped type="text/scss" lang="scss">
+@import '../../styles/css/vars.scss';
     .content_login .title .el-radio-button__orig-radio:checked + .el-radio-button__inner {
-        background-color: #3fb09a;
-        border-color: #3fb09a;
+        background-color: $primary_color;
+        border-color: $primary_color;
     }
 
     .content_login .title .el-radio-button__inner:hover {
-        color: #3fb09a;
+        color: $primary_color;
     }
 
     .content_login .title .el-radio-button__orig-radio:checked + .el-radio-button__inner:hover {
@@ -201,7 +210,7 @@
         text-align: center;
         font-size: 24px;
         font-weight: bold;
-        color: #3fb09a;
+        color: $primary_color;
         margin-top: 40px;
     }
 
@@ -213,7 +222,7 @@
     .content_welcome .welcome_main .init_hub_btn {
         width: 400px;
         height: 40px;
-        background: #3fb09a;
+        background: $primary_color;
         border: none;
         color: #fff;
         font-size: 18px;
@@ -223,8 +232,8 @@
 
     .content_welcome .welcome_main .init_hub_btn:hover {
         background: #fff;
-        color: #3fb09a;
-        border: 1px solid #3fb09a;
+        color: $primary_color;
+        border: 1px solid $primary_color;
         transition: .4s;
     }
 

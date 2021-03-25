@@ -1,4 +1,4 @@
-# MW Client UI #
+# MW/Sharder Client UI #
 
 ## Compile and run in npm
 0. run `npm i`
@@ -11,4 +11,32 @@
 2. run `npm run generate_theme`
 3. run `npm run build`
 4. startup MW Client service
-5. access URL: [http://localhost:8215](http://localhost:8215)
+5. access URL: [http://localhost:7216](http://localhost:7216)
+
+## UI Client Options
+MW Client:
+```properties
+ui/src/styles/css/vars.scss
+$projectName: mw
+
+ui/build/config.js
+module.exports.title="MW-Client"
+
+ui/static/favicon.ico 
+ui/static/img/*
+> Replace with the corresponding icon
+```
+
+Sharder Client:
+```properties
+ui/src/styles/css/vars.scss
+$projectName: sharder
+
+ui/build/config.js
+module.exports.title="Sharder-Client"
+
+ui/static/favicon.ico 
+ui/static/img/*
+> Replace with the corresponding icon
+```
+After the configuration is complete, the UI will be automatically switched

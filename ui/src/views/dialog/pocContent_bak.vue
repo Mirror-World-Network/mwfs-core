@@ -104,9 +104,10 @@
     }
 </script>
 
-<style scoped>
+<style scoped type="text/scss" lang="scss">
+@import '../../styles/css/vars.scss';
     .pocContent .template p {
-        border-bottom: 1px solid #3fb09a;
+        border-bottom: 1px solid $primary_color;
         margin-bottom: 4px;
         padding-bottom: 4px;
     }
@@ -131,7 +132,7 @@
     }
 
     .pocContent .online-rate > div {
-        box-shadow: 1px 1px 10px #3fb09a;
+        box-shadow: 1px 1px 10px $primary_color;
         padding: 10px;
         border-radius: 4px;
     }
@@ -161,7 +162,7 @@
         text-align: right;
         font-style: italic;
     }
-    
+
     .pocContent .testnet-tips {
         padding: 16px 0 0;
         font-size: 13px;
@@ -175,5 +176,5 @@
             flex-direction: column;
         }
     }
-    
+
 </style>

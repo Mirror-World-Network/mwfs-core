@@ -41,6 +41,7 @@ public class GetBlockchainTransactionsCount extends APIServlet.APIRequestHandler
         try{
             if(type != TransactionType.TYPE_POC) {
                 count = Conch.getBlockchain().getTransactionCountByAccount(accountId,type,subtype,recipientRS,senderRS);
+
             }
 
             response.put("count",count);

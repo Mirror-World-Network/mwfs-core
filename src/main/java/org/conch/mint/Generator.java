@@ -50,6 +50,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -486,7 +487,7 @@ public class Generator implements Comparable<Generator> {
         && height > Constants.LAST_KNOWN_BLOCK) {
             if(Logger.printNow(Logger.Generator_startMining)
                 || Logger.isLevel(Logger.Level.DEBUG)) {
-                Logger.logWarningMessage("Invalid miner %s can't start auto mining or mint block. Because the MW holding limit of the mining is %d and current balance is %d",
+                Logger.logWarningMessage("Invalid miner %s can't start auto mining or mint block. Because the "+ Conch.COIN_UNIT +" holding limit of the mining is %d and current balance is %d",
                         minerRs,
                         (Constants.MINING_HOLDING_LIMIT / Constants.ONE_SS),
                         (accountBalanceNQT / Constants.ONE_SS));
@@ -828,6 +829,27 @@ public class Generator implements Comparable<Generator> {
         return json;
     }
     
+    public JSONObject toBlockExplorerJson() {
+        int elapsedTime = Conch.getEpochTime() - Conch.getBlockchain().getLastBlock().getTimestamp();
+        JSONObject json = new JSONObject();
+        json.put("account", Long.toUnsignedString(accountId));
+        json.put("accountRS", StringUtils.isNotEmpty(rsAddress) ? rsAddress : Account.rsAccount(accountId));
+        json.put("effectiveBalanceSS",  effectiveBalance);
+        json.put("pocScore", pocScore);
+        json.put("detailedPocScore", detailedPocScore);
+        json.put("deadline", deadline);
+        json.put("hitTime", hitTime);
+        json.put("remaining", Math.max(deadline - elapsedTime, 0));
+        CertifiedPeer boundedPeer = Conch.getPocProcessor().getBoundedPeer(accountId, Conch.getHeight());
+        Peer.Type type = (boundedPeer != null) ? boundedPeer.getType() : Peer.Type.NORMAL;
+        json.put("bindPeerType", type.getName());
+        json.put("totalBlockCount", Conch.getHeight());
+        int amount = BlockDb.getAmountByGenerator(accountId);
+        json.put("minerBlockCount", amount);
+        json.put("percentage", new DecimalFormat("0.00").format((float) (amount*100)/Conch.getHeight()).toString() + "%");
+        return json;
+    }
+
     public static void updatePocScore(PocScore pocScore){
         if(sortedMiners != null) {
             synchronized (sortedMiners) {
@@ -1159,7 +1181,7 @@ public class Generator implements Comparable<Generator> {
     }
 
     // Hub auto mining setting
-    private static final String HUB_BIND_ADDRESS = Conch.getStringProperty("sharder.HubBindAddress");
+    public static final String HUB_BIND_ADDRESS = Conch.getStringProperty("sharder.HubBindAddress");
     public static final Boolean HUB_IS_BIND = Conch.getBooleanProperty("sharder.HubBind");
     private static final String HUB_BIND_PR = Conch.getStringProperty("sharder.HubBindPassPhrase", "", true).trim();
     private static final String AUTO_MINT_ADDRESS = autoMintAccountRs();
@@ -1295,4 +1317,5 @@ public class Generator implements Comparable<Generator> {
     public static void main(String[] args) {
         System.out.println(Account.rsAccount(2792673654720227339L));
     }
+
 }

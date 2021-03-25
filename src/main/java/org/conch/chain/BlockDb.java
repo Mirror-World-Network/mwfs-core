@@ -24,6 +24,7 @@ package org.conch.chain;
 import org.conch.Conch;
 import org.conch.common.ConchException;
 import org.conch.common.Constants;
+import org.conch.consensus.reward.RewardCalculator;
 import org.conch.db.Db;
 import org.conch.db.DbUtils;
 import org.conch.tx.TransactionDb;
@@ -440,7 +441,7 @@ public final class BlockDb {
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     int rewardDistributionHeightDifference = height - rs.getInt("REWARD_DISTRIBUTION_HEIGHT");
-                    int rewardSettlementHeight = Constants.getRewardSettlementHeight(height);
+                    int rewardSettlementHeight = Constants.rewardCalculatorInstance.getRewardSettlementHeight(height);
 
                     if (rewardDistributionHeightDifference == rewardSettlementHeight) {
                         return true;
@@ -550,6 +551,28 @@ public final class BlockDb {
             PreparedStatement preparedStatement = con.prepareStatement("update BLOCK set REWARD_DISTRIBUTION_HEIGHT = 0 where REWARD_DISTRIBUTION_HEIGHT = ?");
             preparedStatement.setInt(1, latestRewardHeight);
             preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.toString(), e);
+        }finally {
+            if (!isInTx) {
+                DbUtils.close(con);
+            }
+        }
+    }
+
+    public static int getAmountByGenerator(long generatorId) {
+        boolean isInTx = Db.db.isInTransaction();
+        Connection con = null;
+        try {
+            con = Db.db.getConnection();
+            try (PreparedStatement pstmt = con.prepareStatement("SELECT COUNT(*) as count from BLOCK where GENERATOR_ID = ?")) {
+                pstmt.setLong(1, generatorId);
+                ResultSet resultSet = pstmt.executeQuery();
+                if (resultSet.next()) {
+                    return resultSet.getInt("count");
+                }
+                return 0;
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e.toString(), e);
         }finally {
