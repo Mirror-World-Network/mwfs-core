@@ -1314,7 +1314,7 @@ public final class Conch {
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
-                Logger.logInfoMessage("[HeartBeat]:cos is working properly");
+                Logger.logDebugMessage("[HeartBeat] COS is working properly");
             }
         }, 3*60*1000, Constants.HeartBeat_Time);
     }
