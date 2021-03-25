@@ -1176,12 +1176,12 @@
                         <br>
 
                         {{$t('acrossChains.tip-2')}}
-                        <a>{{MWLockAddress}}</a>
+                        <a>{{MWHecoExchangeAddress}}</a>
                         {{$t('acrossChains.tip-3')}}{{chainShow == 1 ? "Heco" : "OKEx"}}
                         {{$t('acrossChains.tip-4')}}{{chainShow == 1 ? "Heco" : "OKEx"}}
                         {{$t('acrossChains.tip-5')}}{{chainShow == 1 ? "Heco" : "OKEx"}}
                         {{$t('acrossChains.tip-6')}}
-                        <a>{{chainShow == 1 ? HecoLockAddress:OKExLockAddress}}</a>
+                        <a>{{chainShow == 1 ? HecoExchangeAddress:OKExExchangeAddress}}</a>
                         {{$t('acrossChains.tip-7')}}
                         <br>
                         {{$t('acrossChains.tip-8')}}
@@ -1207,7 +1207,7 @@
                         <el-form>
                             <el-form-item :label="$t('transfer.receiver')" class="item_receiver">
                                 <masked-input id="tranfer_receiver" mask="AAA-****-****-****-*****"
-                                              v-model="MWLockAddress"/>
+                                              v-model="MWHecoExchangeAddress"/>
                                 <img src="../../assets/img/account_directory.svg"/>
                             </el-form-item>
                             <el-form-item :label="$t('transfer.receiver_public_key')" v-if="transfer.hasPublicKey">
@@ -1673,11 +1673,11 @@ export default {
 
             chainShow:1,
 
-            MWLockAddress:"CDW-J8RK-3ADG-2A7S-F9DV6",
-            MWLockAddressPublicKey:"f0bdc0c37782129d3225f9b1e33569f39d248755d2ca580caddafba1fd764c2b",
+            MWHecoExchangeAddress:"CDW-XXXX-XXXX-XXXX-XXXX",
+            MWHecoExchangeAddressPublicKey:"",
             MWTOHecoRate:10,
-            HecoLockAddress:"0x0000",
-            OKExLockAddress:"0x0001",
+            HecoExchangeAddress:"0x0000",
+            OKExExchangeAddress:"0x0000",
 
             showChain:false,
 
@@ -1743,6 +1743,8 @@ export default {
             });
             // _this.getLatestHubVersion();
             _this.getPicVCode();
+
+            _this.getAddress();
         },
         // menuAdapter() {
         //     document.getElementsByClassName('header')[0].style.display = 'block'
@@ -2860,7 +2862,7 @@ export default {
                 _this.transfer.executing = false;
                 return;
             }
-            if(_this.transfer.receiver === _this.MWLockAddress){
+            if(_this.transfer.receiver === _this.MWHecoExchangeAddress){
                 _this.$message.warning(_this.$t('acrossChains.no_MWLockAddress'));
                 _this.transfer.executing = false;
                 return;
@@ -2940,22 +2942,22 @@ export default {
             let options = {};
             let encrypted = {};
             let formData = new FormData();
-            if (_this.MWLockAddress === "CDW-____-____-____-_____" ||
-                _this.MWLockAddress === "___-____-____-____-_____" ||
-                _this.MWLockAddress === "CDW" ||
-                _this.MWLockAddress === "" 
+            if (_this.MWHecoExchangeAddress === "CDW-____-____-____-_____" ||
+                _this.MWHecoExchangeAddress === "___-____-____-____-_____" ||
+                _this.MWHecoExchangeAddress === "CDW" ||
+                _this.MWHecoExchangeAddress === "" 
                 ) {
                 _this.$message.warning(_this.$t('notification.sendmessage_null_account'));
                 _this.transfer.executing = false;
                 return;
             }
             const pattern = /CDW-([A-Z0-9]{4}-){3}[A-Z0-9]{5}/;
-            if (!_this.MWLockAddress.toUpperCase().match(pattern)) {
+            if (!_this.MWHecoExchangeAddress.toUpperCase().match(pattern)) {
                 _this.$message.warning(_this.$t('notification.sendmessage_account_error_format'));
                 _this.transfer.executing = false;
                 return;
             }
-            if (_this.MWLockAddressPublicKey === "") {
+            if (_this.MWHecoExchangeAddressPublicKey === "") {
                 _this.$message.warning(_this.$t('notification.sendmessage_null_account_public'));
                 _this.transfer.executing = false;
                 return;
@@ -2995,8 +2997,8 @@ export default {
                     _this.transfer.executing = false;
                     return;
                 }
-                formData.append("recipient", _this.MWLockAddress);
-                formData.append("recipientPublicKey", _this.MWLockAddressPublicKey);
+                formData.append("recipient", _this.MWHecoExchangeAddress);
+                formData.append("recipientPublicKey", _this.MWHecoExchangeAddressPublicKey);
                 formData.append("deadline", "1440");
                 formData.append("phased", 'false');
                 formData.append("phasingLinkedFullHash", '');
@@ -3010,8 +3012,8 @@ export default {
                 if (_this.transfer.hasMessage && _this.transfer.message !== "") {
                     if (_this.transfer.isEncrypted) {
 
-                        options.account = _this.MWLockAddress;
-                        options.publicKey = _this.MWLockAddressPublicKey;
+                        options.account = _this.MWHecoExchangeAddress;
+                        options.publicKey = _this.MWHecoExchangeAddressPublicKey;
                         encrypted = SSO.encryptNote(_this.transfer.message, options, _this.secretPhrase || _this.transfer.password);
                         formData.append("encrypt_message", '1');
                         formData.append("encryptedMessageData", encrypted.message);
@@ -3114,11 +3116,11 @@ export default {
                 params.append("subtype", "0");
             } else if(_this.selectType === 19){
                 //mw to hmw
-                params.append("recipientRS", _this.MWLockAddress);
+                params.append("recipientRS", _this.MWHecoExchangeAddress);
 
             } else if(_this.selectType === 20){
                 //hmw to mw
-                params.append("senderRS", _this.MWLockAddress);
+                params.append("senderRS", _this.MWHecoExchangeAddress);
             }
             else {
                 params.append("type", _this.selectType);
@@ -3200,9 +3202,25 @@ export default {
             this.joinNetDialog = true;
         },
         /**
+         * 得到系统跨链兑换地址信息
+         */
+        getAddress: function(){
+            const _this = this;
+            _this.$http.get(window.api.getAddress).then(function (res1) {
+                console.log(res1.data.body);
+                if(res1.data.body.MWHecoExchangeAddress){
+                    _this.MWHecoExchangeAddress = res1.data.body.MWHecoExchangeAddress;
+                    _this.MWHecoExchangeAddressPublicKey = res1.data.body.MWHecoExchangeAddressPublicKey;
+                    _this.MWTOHecoRate = res1.data.body.MwHmwRate;
+                    _this.HecoExchangeAddress = res1.data.body.HecoExchangeAddress;
+                }
+            });
+        },
+        /**
          * 打开跨链资产页面
          */
         openAssetsAcrossChainsDialog: function () {
+            const _this = this;
             
             if(typeof(this.secretPhrase)　=== 'undefined'){
                 this.$message.warning(this.$t("acrossChains.use_secretPhrase_tip"));
@@ -3212,11 +3230,16 @@ export default {
                 this.$message.warning(this.$t("account.synchronization_block"));
                 return;
             }
+
+            if(!this.MWHecoExchangeAddressPublicKey){
+                _this.$message.info(_this.$t('acrossChains.not_yet_open'));
+                return;
+            }
             //发起网关请求，查找当前帐号绑定的信息
-            const _this = this;
+           
             var str = _this.$global.formatNQTMoney(_this.accountInfo.effectiveBalanceNQT, 2);
             _this.acrossChains.balance = parseFloat(str.substring(0,str.length-2));
-            console.log(_this.accountInfo)
+            
             if(_this.accountInfo.accountRS){
                 _this.$http.get(window.api.getAccountInfoUrl,{params:{accountRS:_this.accountInfo.accountRS}}).then(function (res1) {
                     switch (res1.data.code) {

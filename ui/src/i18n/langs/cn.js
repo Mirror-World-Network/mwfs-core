@@ -153,6 +153,7 @@ const cn = {
         'all_convertible_balance':"最大可兑换量",
         'tx_in_HecoChain':"查询heco链上交易结果",
         'tx_error':"未查询到heco链上交易tx",
+        'not_yet_open':"跨链资产兑换暂未开放",
     },
     transaction: {
         'transaction_record': "交易记录",

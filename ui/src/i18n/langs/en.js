@@ -152,6 +152,7 @@ const en = {
         'all_convertible_balance':"MAX convertible",
         'tx_in_HecoChain':"Query heco chain transaction results",
         'tx_error':"Transaction TX on heco chain not found",
+        'not_yet_open':"Cross chain asset exchange not yet open",
 
     },
     transaction: {
