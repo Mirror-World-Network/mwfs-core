@@ -1313,6 +1313,7 @@ public final class Conch {
     public static void setHeartBeatTimer() {
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
             public void run() {
                 Logger.logDebugMessage("[HeartBeat] COS is working properly");
             }
