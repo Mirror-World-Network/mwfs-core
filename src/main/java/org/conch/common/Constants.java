@@ -21,9 +21,13 @@
 
 package org.conch.common;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Random;
+import java.util.TimeZone;
 import org.apache.commons.lang3.StringUtils;
 import org.conch.Conch;
 import org.conch.consensus.reward.RewardCalculator;
@@ -31,10 +35,6 @@ import org.conch.consensus.reward.RewardCalculatorDefault;
 import org.conch.consensus.reward.RewardCalculatorForMw;
 import org.conch.env.RuntimeEnvironment;
 import org.conch.peer.Peer;
-
-import java.util.*;
-
-import static org.conch.util.JSON.readJsonFile;
 
 public final class Constants {
 
@@ -462,8 +462,10 @@ public final class Constants {
         return bootNodesHost.contains(peer.getHost()) || bootNodesHost.contains(peer.getAnnouncedAddress());
     }
     
-    public static synchronized boolean isValidBootNode(String peerHost){
-        if(StringUtils.isEmpty(peerHost)) return false;
+    public static synchronized boolean isValidBootNode(String peerHost) {
+        if (StringUtils.isEmpty(peerHost)) {
+            return false;
+        }
         return bootNodesHost.contains(peerHost);
     }
 
@@ -479,9 +481,6 @@ public final class Constants {
 
     public static final boolean hubLinked = Conch.getBooleanProperty("sharder.HubBind");
     public static final boolean initFromArchivedDbFile = Conch.getBooleanProperty("sharder.initFromArchivedDbFile");
-
-
-
 
     public static final int HeartBeat_Time = Conch.getIntProperty("sharder.heartBeatTime",5*60*1000);
 
