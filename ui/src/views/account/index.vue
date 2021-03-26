@@ -1762,8 +1762,8 @@ export default {
                 _this.hubsetting.port = res["sharder.NATServicePort"];
                 _this.hubsetting.clientSecretkey = res["sharder.NATClientKey"];
                 _this.hubsetting.publicAddress = res["sharder.myAddress"];
-                _this.hubsetting.airdropAccount = res["sharder.airdrop.account"];
-                _this.hubsetting.airdropStatus = res["sharder.airdrop.enable"];
+                _this.hubsetting.airdropAccount = res["sharder.airdrop.accounts"];
+                _this.hubsetting.airdropStatus = res["sharder.airdrop.isEnable"];
                 //_this.hubsetting.SS_Address = res["sharder.HubBindAddress"];
             });
             // _this.getLatestHubVersion();
@@ -4083,15 +4083,14 @@ export default {
         openAirdrop: function () {
             const _this = this;
             if (_this.hubsetting.airdropStatus && !_this.$global.isOpenApiProxy() && !_this.airdropFlag) {
-                let airdropAccount = [];
-                if (_this.hubsetting.airdropAccount) {
-                    airdropAccount = _this.hubsetting.airdropAccount.split(";");
+                if (_this.hubsetting.airdropAccount != null) {
+                    _this.hubsetting.airdropAccount.forEach(ele => {
+                        if (ele === _this.accountInfo.accountRS) {
+                            _this.airdropFlag = true;
+                        }
+                    })
                 }
-                airdropAccount.forEach(ele => {
-                    if (ele === _this.accountInfo.accountRS) {
-                        _this.airdropFlag = true;
-                    }
-                })
+
             }
             return _this.airdropFlag;
         },
