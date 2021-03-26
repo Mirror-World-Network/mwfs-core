@@ -21,6 +21,7 @@
 
 package org.conch.common;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
@@ -35,6 +36,8 @@ import org.conch.consensus.reward.RewardCalculatorDefault;
 import org.conch.consensus.reward.RewardCalculatorForMw;
 import org.conch.env.RuntimeEnvironment;
 import org.conch.peer.Peer;
+
+import static org.conch.util.JSON.readJsonFile;
 
 public final class Constants {
 
