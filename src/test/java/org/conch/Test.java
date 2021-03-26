@@ -1,7 +1,12 @@
 package org.conch;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
+import org.conch.account.Account;
+import org.conch.common.Constants;
+import org.conch.util.RestfulHttpClient;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -51,6 +56,8 @@ public class Test {
                 bos.close();
                 out.close();
             }
+
+
         }
     }
     static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -66,8 +73,15 @@ public class Test {
         strs.add("987");
     }
 
-    public static void main(String[] args) {
-//        try {
+    public static void main(String[] args) throws IOException {
+//        String url = "http://192.168.0.101:8080/api/front/acrossChain/getHecoLockAddress";
+//        RestfulHttpClient.HttpResponse response = RestfulHttpClient.getClient(url).get().request();
+//        String content = response.getContent();
+//        JSONObject contentObj = JSON.parseObject(content);
+//        Long recipientId = (Long)contentObj.get("body");
+//        String recipient = Long.toUnsignedString(recipientId);
+//        System.out.println(123);
+        //        try {
 //            Uncompress("temp/cos-0.1.0.7z");
 //        } catch (Exception e) {
 //            e.printStackTrace();
@@ -139,27 +153,24 @@ public class Test {
 //        System.out.println(strs.hashCode());
 //        add();
 //        System.out.println(strs);
-        String a = "qq";
-        try{
-            if(true){
-                int i = 1/0;
-                System.out.println(i);
-            }
-            a += "email";
-        }catch (Exception e){
-            try {
-                if(true){
-                    int[] ints = {1, 2};
-                    System.out.println(ints[3]);
-                }
-                a += "music";
-            }catch (Exception e1){
-                System.out.println(e1);
-                return;
-            }
-        }
-
-
-        System.out.println(a);
+//        String a = "qq";
+//        try{
+//            if(true){
+//                int i = 1/0;
+//                System.out.println(i);
+//            }
+//            a += "email";
+//        }catch (Exception e){
+//            try {
+//                if(true){
+//                    int[] ints = {1, 2};
+//                    System.out.println(ints[3]);
+//                }
+//                a += "music";
+//            }catch (Exception e1){
+//                System.out.println(e1);
+//                return;
+//            }
+//        }
     }
 }

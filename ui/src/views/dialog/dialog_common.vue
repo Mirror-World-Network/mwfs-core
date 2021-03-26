@@ -670,7 +670,8 @@
                     </tr>
                     </tbody>
                 </table>
-
+                <el-button v-show="($global.getSenderOrRecipient(transactionInfo) == MWHecoExchangeAddress) || ($global.getSenderRSOrWo(transactionInfo) == MWHecoExchangeAddress)" id="findTXInHecoChain" 
+                @click="findTXInHecoChain(transactionInfo.fullHash)">{{$t('acrossChains.tx_in_HecoChain')}}</el-button>
             </div>
 
 
@@ -716,6 +717,9 @@
                 tradingInfoDialog: this.tradingInfoOpen,
                 rs:'',
                 secretPhrase:SSO.secretPhrase,
+
+                MWHecoExchangeAddress:"",
+
                 pageNO: 1,
                 isMobile: false,
                 totalSize: 0,
@@ -728,6 +732,11 @@
             if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) { //移动端
                 this.isMobile = true
             }
+            this.$http.get(window.api.getAddress).then(function (res1) {
+                if(res1.data.body.MWHecoExchangeAddress){
+                    this.MWHecoExchangeAddress = res1.data.body.MWHecoExchangeAddress;
+                }
+            });
         },
         methods: {
             handleSizeChange(val) {
@@ -1100,6 +1109,28 @@
             downloadFile(row,column){
                 window.open(_this.$global.urlPrefix() + "?requestType=downloadStoredData&ssid="+row.fileInfo.ssid+"&filename="+row.fileInfo.name,"_blank");
             },
+            findTXInHecoChain(fullHash){
+                const _this = this;
+                var recordType;
+                if(_this.$global.getSenderOrRecipient(_this.transactionInfo) == _this.MWHecoExchangeAddress){
+                    recordType = 1;
+                }else if(_this.$global.getSenderRSOrWo(_this.transactionInfo) == _this.MWHecoExchangeAddress){
+                    recordType = 2;
+                }
+                _this.$http.get(window.api.getRecordUrl,{params:{fullSource:fullHash,recordType:recordType}}).then(function (res1) {
+                    console.log(res1.data.body.transactionHash);
+                    var tx = res1.data.body.transactionHash;
+                    if(tx){
+                       window.open(window.api.getHecoInfo+tx, '_blank');
+                    }else{
+                        _this.$message.error(_this.$t('acrossChains.tx_error'));
+                    }
+                }).catch(err => {
+                    _this.$message.error(_this.$t('acrossChains.error'));
+                });
+                
+
+            }
 
         },
         filter:{
@@ -1530,6 +1561,12 @@
         .compact-hidden {
             display: none;
         }
+    }
+
+    #findTXInHecoChain{
+        color: #000;
+        background: #3fb09a;
+        margin-top: 20px;
     }
 
 </style>
