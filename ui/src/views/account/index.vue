@@ -1149,7 +1149,7 @@
                                     <label class="input_suffix">{{ $global.hecoUnit }}</label>
                                 </el-form-item>
                                 <el-form-item :label="$t('acrossChains.heco_rate')" class="rate" style="margin-bottom:0">
-                                   
+
                                 </el-form-item>
                                 <div style="width:100%;height:40px">
                                     <input id="input__mw" v-model="acrossChains.heco.rateMW" type ="text" disabled="disabled" />
@@ -1159,7 +1159,7 @@
                                     <label id="input_hecoUnit">{{ $global.hecoUnit }}</label>
                                     <el-button  id="input_exchange" slot="append" @click="openExchangeDialog" :disabled="showChain">{{ $t('acrossChains.exchange') }}</el-button>
                                 </div>
-                                
+
                             </el-form>
                             <el-form class="mod" v-if="chainShow==2" >
                                 <!-- <el-form-item :label="$t('acrossChains.target_address')" class="item_address">
@@ -2629,7 +2629,7 @@ export default {
             console.log(_this.messageForm);
             if (_this.messageForm.receiver === this.$global.receiverPrefixStr ||
                 _this.messageForm.receiver === this.$global.receiverEmptyStr ||
-                _this.messageForm.receiver === "CDW" ||
+                _this.messageForm.receiver === this.$global.prefixStr ||
                 _this.messageForm.receiver === "") {
                 _this.$message.warning(_this.$t('notification.sendmessage_null_account'));
                 _this.messageForm.executing = false;
@@ -2866,7 +2866,7 @@ export default {
             let formData = new FormData();
             if (_this.transfer.receiver === this.$global.receiverPrefixStr ||
                 _this.transfer.receiver === this.$global.receiverEmptyStr ||
-                _this.transfer.receiver === "CDW" ||
+                _this.transfer.receiver === this.$global.prefixStr ||
                 _this.transfer.receiver === "") {
                 _this.$message.warning(_this.$t('notification.sendmessage_null_account'));
                 _this.transfer.executing = false;
@@ -2957,17 +2957,16 @@ export default {
             let options = {};
             let encrypted = {};
             let formData = new FormData();
-            if (_this.MWHecoExchangeAddress === "CDW-____-____-____-_____" ||
-                _this.MWHecoExchangeAddress === "___-____-____-____-_____" ||
-                _this.MWHecoExchangeAddress === "CDW" ||
-                _this.MWHecoExchangeAddress === "" 
+            if (_this.MWHecoExchangeAddress === this.$global.receiverPrefixStr ||
+                _this.MWHecoExchangeAddress === this.$global.receiverEmptyStr ||
+                _this.MWHecoExchangeAddress === this.$global.prefixStr ||
+                _this.MWHecoExchangeAddress === ""
                 ) {
                 _this.$message.warning(_this.$t('notification.sendmessage_null_account'));
                 _this.transfer.executing = false;
                 return;
             }
-            const pattern = /CDW-([A-Z0-9]{4}-){3}[A-Z0-9]{5}/;
-            if (!_this.MWHecoExchangeAddress.toUpperCase().match(pattern)) {
+            if (!_this.MWHecoExchangeAddress.toUpperCase().match(_this.$global.pattern)) {
                 _this.$message.warning(_this.$t('notification.sendmessage_account_error_format'));
                 _this.transfer.executing = false;
                 return;
@@ -3237,7 +3236,7 @@ export default {
          */
         openAssetsAcrossChainsDialog: function () {
             const _this = this;
-            
+
             if(typeof(this.secretPhrase)　=== 'undefined'){
                 this.$message.warning(this.$t("acrossChains.use_secretPhrase_tip"));
                 return;
@@ -3252,10 +3251,10 @@ export default {
                 return;
             }
             //发起网关请求，查找当前帐号绑定的信息
-           
+
             var str = _this.$global.formatNQTMoney(_this.accountInfo.effectiveBalanceNQT, 2);
             _this.acrossChains.balance = parseFloat(str.substring(0,str.length-2));
-            
+
             if(_this.accountInfo.accountRS){
                 _this.$http.get(window.api.getAccountInfoUrl,{params:{accountRS:_this.accountInfo.accountRS}}).then(function (res1) {
                     switch (res1.data.code) {
@@ -3288,7 +3287,7 @@ export default {
             }else{
                 _this.$message.error(_this.$t('acrossChains.no_accountId'));
             }
-            
+
         },
         openExchangeDialog: function () {
             if (SSO.downloadingBlockchain) {
@@ -3495,7 +3494,7 @@ export default {
                 this.AssetsExchangeDialog = false;
                 this.AssetsAcrossChainsDialog = true;
             }
-            
+
             this.capacity = 0;
             this.accountSecret = "";
             this.mortgageFee = 0;
