@@ -670,7 +670,7 @@
                     </tr>
                     </tbody>
                 </table>
-                <el-button v-show="($global.getSenderOrRecipient(transactionInfo) == MWHecoExchangeAddress) || ($global.getSenderRSOrWo(transactionInfo) == MWHecoExchangeAddress)" id="findTXInHecoChain" 
+                <el-button v-show="($global.getSenderOrRecipient(transactionInfo) == MWLockAddress) || ($global.getSenderRSOrWo(transactionInfo) == MWLockAddress)" id="findTXInHecoChain"
                 @click="findTXInHecoChain(transactionInfo.fullHash)">{{$t('acrossChains.tx_in_HecoChain')}}</el-button>
             </div>
 
@@ -717,26 +717,19 @@
                 tradingInfoDialog: this.tradingInfoOpen,
                 rs:'',
                 secretPhrase:SSO.secretPhrase,
-
-                MWHecoExchangeAddress:"",
-
                 pageNO: 1,
                 isMobile: false,
                 totalSize: 0,
                 pageSize: 10,
                 currentPage: 1,
                 accountBind: null,
+                MWLockAddress:"CDW-J8RK-3ADG-2A7S-F9DV6",
             }
         },
         created() {
             if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) { //移动端
                 this.isMobile = true
             }
-            this.$http.get(window.api.getAddress).then(function (res1) {
-                if(res1.data.body.MWHecoExchangeAddress){
-                    this.MWHecoExchangeAddress = res1.data.body.MWHecoExchangeAddress;
-                }
-            });
         },
         methods: {
             handleSizeChange(val) {
@@ -1112,9 +1105,9 @@
             findTXInHecoChain(fullHash){
                 const _this = this;
                 var recordType;
-                if(_this.$global.getSenderOrRecipient(_this.transactionInfo) == _this.MWHecoExchangeAddress){
+                if(_this.$global.getSenderOrRecipient(_this.transactionInfo) == _this.MWLockAddress){
                     recordType = 1;
-                }else if(_this.$global.getSenderRSOrWo(_this.transactionInfo) == _this.MWHecoExchangeAddress){
+                }else if(_this.$global.getSenderRSOrWo(_this.transactionInfo) == _this.MWLockAddress){
                     recordType = 2;
                 }
                 _this.$http.get(window.api.getRecordUrl,{params:{fullSource:fullHash,recordType:recordType}}).then(function (res1) {
@@ -1128,7 +1121,7 @@
                 }).catch(err => {
                     _this.$message.error(_this.$t('acrossChains.error'));
                 });
-                
+
 
             }
 

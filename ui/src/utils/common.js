@@ -29,10 +29,7 @@ export default {
     coordinatesMap: null,
     $vue: {},
     placeholder: "--",
-
-    unit: "MW",
     hecoUnit: "HMW",
-
     unitValue: 100000000,
     hecoUnitValue: 100000000,
     poolPledgeAmount: 10000000000000, // pledge amount of pool creator
