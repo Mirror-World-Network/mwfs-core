@@ -29,7 +29,9 @@ export default {
     coordinatesMap: null,
     $vue: {},
     placeholder: "--",
+    hecoUnit: "HMW",
     unitValue: 100000000,
+    hecoUnitValue: 100000000,
     poolPledgeAmount: 10000000000000, // pledge amount of pool creator
     optHeight: {join: 0, quit: 0, destroy: 0, create: 0},
     validPeerPercentage: 0.7, // Less than this value filter display mode, greater than or equal to close

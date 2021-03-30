@@ -27,7 +27,8 @@
     "NONE_PUBLICKEY_ACTIVE_HEIGHT": 17200,
     "BLOCK_REWARD_VERIFY_HEIGHT_IS_DEVNET": 10,
     "BLOCK_REWARD_VERIFY_HEIGHT_ID_TESTNET": 18000,
-    "MINER_REMOVE_HEIGHT": 16200
+    "MINER_REMOVE_HEIGHT": 16200,
+    "HECO_HEIGHT": 19500
   },
   "basic": {
     "COIN_UNIT": "MW",
@@ -66,6 +67,8 @@
     "DEV_BOOT": "devboot.mw.run",
     "DEV_NA": "",
     "DEV_NB": ""
+  },
+  "acrossChains": {
+    "MGR_URL": "https://mw.run/admin/api/front/acrossChain/"
   }
-
 }

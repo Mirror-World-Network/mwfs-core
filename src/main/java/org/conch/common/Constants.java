@@ -84,6 +84,7 @@ public final class Constants {
 
     public static final JSONObject heightConf = (JSONObject) Conch.constantsJsonObj.get("height");
     public static final JSONObject bootNodeHostConf = (JSONObject) Conch.constantsJsonObj.get("bootNodeHost");
+    public static final JSONObject acrossChainsConf = (JSONObject) Conch.constantsJsonObj.get("acrossChains");
 
     private static final String networkInProperties = Conch.getStringProperty("sharder.network");
     public static final String NetworkDef = loadNetworkDefinition();
@@ -483,5 +484,10 @@ public final class Constants {
 
 
     public static final int HeartBeat_Time = Conch.getIntProperty("sharder.heartBeatTime",5*60*1000);
+
+    public static final String MGR_URL = acrossChainsConf.getString("MGR_URL");
+
+    public static final int HECO_HEIGHT = acrossChainsConf.getIntValue("HECO_HEIGHT");
+
 
 }

@@ -670,7 +670,8 @@
                     </tr>
                     </tbody>
                 </table>
-
+                <el-button v-show="($global.getSenderOrRecipient(transactionInfo) == MWLockAddress) || ($global.getSenderRSOrWo(transactionInfo) == MWLockAddress)" id="findTXInHecoChain"
+                @click="findTXInHecoChain(transactionInfo.fullHash)">{{$t('acrossChains.tx_in_HecoChain')}}</el-button>
             </div>
 
 
@@ -722,6 +723,7 @@
                 pageSize: 10,
                 currentPage: 1,
                 accountBind: null,
+                MWLockAddress:"CDW-J8RK-3ADG-2A7S-F9DV6",
             }
         },
         created() {
@@ -1100,6 +1102,28 @@
             downloadFile(row,column){
                 window.open(_this.$global.urlPrefix() + "?requestType=downloadStoredData&ssid="+row.fileInfo.ssid+"&filename="+row.fileInfo.name,"_blank");
             },
+            findTXInHecoChain(fullHash){
+                const _this = this;
+                var recordType;
+                if(_this.$global.getSenderOrRecipient(_this.transactionInfo) == _this.MWLockAddress){
+                    recordType = 1;
+                }else if(_this.$global.getSenderRSOrWo(_this.transactionInfo) == _this.MWLockAddress){
+                    recordType = 2;
+                }
+                _this.$http.get(window.api.getRecordUrl,{params:{fullSource:fullHash,recordType:recordType}}).then(function (res1) {
+                    console.log(res1.data.body.transactionHash);
+                    var tx = res1.data.body.transactionHash;
+                    if(tx){
+                       window.open(window.api.getHecoInfo+tx, '_blank');
+                    }else{
+                        _this.$message.error(_this.$t('acrossChains.tx_error'));
+                    }
+                }).catch(err => {
+                    _this.$message.error(_this.$t('acrossChains.error'));
+                });
+
+
+            }
 
         },
         filter:{
@@ -1530,6 +1554,12 @@
         .compact-hidden {
             display: none;
         }
+    }
+
+    #findTXInHecoChain{
+        color: #000;
+        background: #3fb09a;
+        margin-top: 20px;
     }
 
 </style>
