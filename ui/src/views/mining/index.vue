@@ -516,8 +516,14 @@
                 });
             },
             poolOwnerRs(rs) {
-                if (rs != null && rs.indexOf("CDW-") != -1) {
-                    return rs.substring(4);
+                if (this.$global.projectName === "mw") {
+                    if (rs != null && rs.indexOf("CDW-") != -1) {
+                        return rs.substring(4);
+                    }
+                } else if (this.$global.projectName === "sharder") {
+                    if (rs != null && rs.indexOf("SSA-") != -1) {
+                        return rs.substring(4);
+                    }
                 }
                 return "";
             },

@@ -24,6 +24,7 @@ package org.conch.http;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.conch.Conch;
+import org.conch.common.Constants;
 import org.conch.consensus.poc.hardware.GetNodeHardware;
 import org.conch.util.Logger;
 import org.json.simple.JSONObject;
@@ -108,6 +109,10 @@ public final class GetUserConfig extends APIServlet.APIRequestHandler {
             response.put("sharder.coinUnit", Conch.COIN_UNIT);
             response.put("sharder.foundationUrl", Conch.FOUNDATION_URL);
             response.put("sharder.foundationTestUrl", Conch.FOUNDATION_TEST_URL);
+
+            // airdrop
+            response.put("sharder.airdrop.accounts", Constants.airdropJsonObj.getJSONArray("accounts"));
+            response.put("sharder.airdrop.isEnable", Constants.airdropJsonObj.getBooleanValue("isEnable"));
         } catch (IOException e) {
             response.clear();
             response.put("error", e.getMessage());
