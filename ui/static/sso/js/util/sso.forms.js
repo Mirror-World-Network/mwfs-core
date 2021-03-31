@@ -391,6 +391,12 @@ var NRS = (function(NRS, $) {
                 data.feeSS = "0";
             }
         }
+        let reg;
+        if (global.projectName === "mw") {
+            reg = /^CDW\-[A-Z0-9]+\-[A-Z0-9]+\-[A-Z0-9]+\-[A-Z0-9]+/i;
+        } else if (global.projectName === "sharder") {
+            reg = /^SSA\-[A-Z0-9]+\-[A-Z0-9]+\-[A-Z0-9]+\-[A-Z0-9]+/i;
+        }
 
 		if (data.recipient) {
 			data.recipient = $.trim(data.recipient);
@@ -401,9 +407,9 @@ var NRS = (function(NRS, $) {
 				}
 				NRS.unlockForm($modal, $btn);
 				return;
-			} else if (!/^CDW\-[A-Z0-9]+\-[A-Z0-9]+\-[A-Z0-9]+\-[A-Z0-9]+/i.test(data.recipient)) {
+			} else if (!reg.test(data.recipient)) {
 				var convertedAccountId = $modal.find("input[name=converted_account_id]").val();
-				if (!convertedAccountId || (!/^\d+$/.test(convertedAccountId) && !/^CDW\-[A-Z0-9]+\-[A-Z0-9]+\-[A-Z0-9]+\-[A-Z0-9]+/i.test(convertedAccountId))) {
+				if (!convertedAccountId || (!/^\d+$/.test(convertedAccountId) && !reg.test(convertedAccountId))) {
 					$form.find(".error_message").html($.t("sso.error_account_id")).show();
 					if (formErrorFunction) {
 						formErrorFunction(false, data);

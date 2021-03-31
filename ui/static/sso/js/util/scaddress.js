@@ -10,6 +10,14 @@ function Scaddress () {
 	var alphabet = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
 	// var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ345679';
 
+    var outPrefix;
+
+    if (global.projectName === "mw") {
+        outPrefix = "CDW-";
+    } else if (global.projectName === "sharder") {
+        outPrefix = "SSA-";
+    }
+
 	this.guess = [];
 
 	function ginv (a) {
@@ -250,10 +258,9 @@ function Scaddress () {
 	} // __________________________
 
 	this.toString = function () {
-		var out = "CDW-";
-
+	    let out = outPrefix;
 		for (var i = 0; i < 17; i++) {
-			out += alphabet[codeword[cwmap[i]]];
+            out += alphabet[codeword[cwmap[i]]];
 
 			if ((i & 3) == 3 && i < 13) out += "-";
 		}
@@ -305,7 +312,7 @@ function Scaddress () {
 
 		adr = adr.replace(/(^\s+)|(\s+$)/g, "").toUpperCase();
 
-		if (adr.indexOf("CDW-") == 0) adr = adr.substr(4);
+		if (adr.indexOf(outPrefix) == 0) adr = adr.substr(4);
 
 		if (adr.match(/^\d{1,20}$/g)) // account id
 		{
