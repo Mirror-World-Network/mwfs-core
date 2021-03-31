@@ -21,7 +21,6 @@
 
 package org.conch.common;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
@@ -36,8 +35,6 @@ import org.conch.consensus.reward.RewardCalculatorDefault;
 import org.conch.consensus.reward.RewardCalculatorForMw;
 import org.conch.env.RuntimeEnvironment;
 import org.conch.peer.Peer;
-
-import static org.conch.util.JSON.readJsonFile;
 
 public final class Constants {
 
@@ -85,21 +82,9 @@ public final class Constants {
         }
     }
 
-
-    /**
-     * Load the JSON configuration with respect to Constants
-     */
-    private static JSONObject loadConstantsSettings() {
-        String pathName = Conch.getStringProperty("sharder.constants.pathName", "conf/constants.json");
-        String jsonStr = readJsonFile(pathName);
-        return JSON.parseObject(jsonStr);
-    }
-    protected static final JSONObject constantsJsonObj = loadConstantsSettings();
-    public static final JSONObject heightConf = (JSONObject) constantsJsonObj.get("height");
-    public static final JSONObject acrossChainsConf = (JSONObject) constantsJsonObj.get("acrossChains");
-
+    public static final JSONObject heightConf = (JSONObject) Conch.constantsJsonObj.get("height");
     public static final JSONObject bootNodeHostConf = (JSONObject) Conch.constantsJsonObj.get("bootNodeHost");
-
+    public static final JSONObject acrossChainsConf = (JSONObject) Conch.constantsJsonObj.get("acrossChains");
 
     private static final String networkInProperties = Conch.getStringProperty("sharder.network");
     public static final String NetworkDef = loadNetworkDefinition();

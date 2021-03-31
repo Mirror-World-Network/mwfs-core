@@ -1,13 +1,13 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div>
         <div>
-            <!--            <el-row v-if="openApiProxy" class="notice-container">-->
-            <!--                <el-col :span="24">-->
-            <!--                    <div class="notice" style="background: #ffffff">-->
-            <!--                        <div><a>{{$t('sso.light_client')}}</a></div>-->
-            <!--                    </div>-->
-            <!--                </el-col>-->
-            <!--            </el-row>-->
+            <el-row v-if="nonePublicKeyHint" class="notice-container">
+                <el-col :span="24">
+                    <div class="notice" style="background: #ffffff">
+                        <div><a>{{$t('account.account_inactive')}}</a></div>
+                    </div>
+                </el-col>
+            </el-row>
             <div class="block_account mb20">
                 <p class="block_title">
                     <img src="../../assets/img/account.svg" v-if="projectName === 'mw'"/>
@@ -28,7 +28,7 @@
                     </p>
                     <div class="account_tool">
                         <button class="common_btn imgBtn "
-                                v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}"
+                                v-bind:class="{'disabledWriteBtn': !nonDownloading,'writeBtn': nonDownloading}"
                                 @click="openTransferDialog">
                             <span class="icon">
                                 <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 174.62 174.83">
@@ -40,7 +40,7 @@
                             <span>{{ $t('account.transfer') }}</span>
                         </button>
                         <button class="common_btn imgBtn "
-                                v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}"
+                                v-bind:class="{'disabledWriteBtn': !nonDownloading,'writeBtn': nonDownloading}"
                                 @click="openBatchTransferDialog"
                                 v-if="openAirdrop">
                             <span class="icon">
@@ -53,7 +53,7 @@
                             <span>{{ $t('transfer.batch_transfer') }}</span>
                         </button>
                         <button class="common_btn imgBtn "
-                                v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}"
+                                v-bind:class="{'disabledWriteBtn': !nonDownloading,'writeBtn': nonDownloading}"
                                 v-if="whetherShowSendMsgBtn()"
                                 @click="openSendMessageDialog">
                             <span class="icon">
@@ -66,7 +66,7 @@
                             <span>{{ $t('account.send_message') }}</span>
                         </button>
                         <button class="common_btn imgBtn "
-                                v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}"
+                                v-bind:class="{'disabledWriteBtn': !nonDownloading,'writeBtn': nonDownloading}"
                                 v-if="whetherShowStorageBtn()"
                                 @click="openStorageFileDialog">
                             <span class="icon">
@@ -189,7 +189,7 @@
                         </button>
 
                         <button class="common_btn imgBtn "
-                                v-bind:class="{'disabledWriteBtn': !isUpToDateOrLight,'writeBtn': isUpToDateOrLight}"
+                                v-bind:class="{'disabledWriteBtn': !nonDownloading,'writeBtn': nonDownloading}"
                                 v-if="whetherShowAssetsAcrossChainsBtn()"
                                 @click="openAssetsAcrossChainsDialog" style="width:150px;">
                             <span class="icon" style="color:#A6A9AD">
@@ -450,7 +450,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" v-loading="messageForm.executing" class="btn common_btn writeBtn"
-                                @click="sendMessageInfo" :disabled="isDisable">
+                                @click="sendMessageInfo" :disabled="messageForm.executing">
                             {{ $t('sendMessage.send_message') }}
                         </button>
                     </div>
@@ -627,7 +627,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" v-loading="transfer.executing" class="btn common_btn writeBtn"
-                                @click="sendTransferInfo" :disabled="isDisable">
+                                @click="sendTransferInfo" :disabled="transfer.executing">
                             {{ $t('transfer.transfer_send') }}
                         </button>
                     </div>
@@ -670,7 +670,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" v-loading="batch_transfer.executing" class="btn common_btn writeBtn"
-                                @click="sendBatchTransferInfo" :disabled="isDisable">
+                                @click="sendBatchTransferInfo" :disabled="batch_transfer.executing">
                             {{ $t('transfer.batch_transfer_send') }}
                         </button>
                         <el-row>
@@ -680,7 +680,7 @@
                         </el-row>
                         <button type="button" v-loading="batch_transfer.executingAnother"
                                 class="btn common_btn writeBtn"
-                                @click="detectionBatchTransferInfo" :disabled="isDisable">
+                                @click="detectionBatchTransferInfo" :disabled="batch_transfer.executingAnother">
                             {{ $t('transfer.batch_transfer_detection') }}
                         </button>
 
@@ -791,7 +791,7 @@
                 </el-form>
                 <div class="footer-btn">
                     <button class="common_btn writeBtn" v-loading="hubsetting.executing"
-                            @click="verifyHubSetting('init')" :disabled="isDisable">
+                            @click="verifyHubSetting('init')" :disabled="hubsetting.executing">
                         {{ $t('hubsetting.confirm_restart') }}
                     </button>
                     <button class="common_btn writeBtn" @click="closeDialog">{{ $t('hubsetting.cancel') }}</button>
@@ -1149,7 +1149,7 @@
                                     <label class="input_suffix">{{ $global.hecoUnit }}</label>
                                 </el-form-item>
                                 <el-form-item :label="$t('acrossChains.heco_rate')" class="rate" style="margin-bottom:0">
-                                   
+
                                 </el-form-item>
                                 <div style="width:100%;height:40px">
                                     <input id="input__mw" v-model="acrossChains.heco.rateMW" type ="text" disabled="disabled" />
@@ -1159,7 +1159,7 @@
                                     <label id="input_hecoUnit">{{ $global.hecoUnit }}</label>
                                     <el-button  id="input_exchange" slot="append" @click="openExchangeDialog" :disabled="showChain">{{ $t('acrossChains.exchange') }}</el-button>
                                 </div>
-                                
+
                             </el-form>
                             <el-form class="mod" v-if="chainShow==2" >
                                 <!-- <el-form-item :label="$t('acrossChains.target_address')" class="item_address">
@@ -1294,7 +1294,8 @@
 </template>
 <script>
 import rules from "../../utils/rules";
-import {FoundationApiUrls, getCommonFoundationApiUrl} from "../../utils/apiUrl"
+import {FoundationApiUrls, getCommonFoundationApiUrl} from "../../utils/apiUrl";
+import { BigNumber } from "bignumber.js";
 
 export default {
     name: "Network",
@@ -1305,10 +1306,8 @@ export default {
             this.$t('rules.mustRequired')
         );
         return {
-
             projectName: this.$global.projectName,
             nonePublicKeyHint: false,
-
             isDisable: false,
             isMobile: false,
             //dialog
@@ -1712,6 +1711,7 @@ export default {
             }
 
             const _this = this;
+            let publicKey = null;
             _this.getAccount(_this.accountInfo.accountRS).then(res => {
                 _this.accountInfo.account = res.account;
                 _this.accountInfo.accountId = res.accountId;
@@ -1721,8 +1721,8 @@ export default {
                 _this.accountInfo.frozenBalanceNQT = res.frozenBalanceNQT;
                 _this.accountInfo.guaranteedBalanceNQT = res.guaranteedBalanceNQT;
                 _this.accountInfo.unconfirmedBalanceNQT = res.unconfirmedBalanceNQT;
-                if (!res.publicKey && !SSO.downloadingBlockchain) {
-                    _this.$message.warning(_this.$t("account.account_inactive"));
+                if (res.publicKey != null) {
+                    publicKey = res.publicKey;
                 }
                 if (res.pocScore != null) {
                     _this.accountInfo.pocScore = res.pocScore.total;
@@ -1749,7 +1749,13 @@ export default {
             _this.$global.setBlockchainState(_this).then(res => {
                 _this.blockchainState = res.data;
                 _this.getLatestHubVersion();
+            }).then(() => {
+                _this.nonePublicKeyHint = false;
+                if (publicKey == null && !SSO.downloadingBlockchain && _this.blockchainState.blockchainState == "UP_TO_DATE") {
+                    _this.nonePublicKeyHint = false;
+                }
             });
+
             // SSO.getState();
             _this.$global.getUserConfig(_this).then(res => {
                 _this.hubsetting.address = res["sharder.NATServiceAddress"];
@@ -2500,7 +2506,8 @@ export default {
                 formData.append("calculateFee", "true");
                 formData.append("broadcast", "false");
                 formData.append("feeNQT", "0");
-                formData.append("amountNQT", _this.transfer.number * _this.$global.unitValue);
+                formData.append("amountNQT", new BigNumber(_this.transfer.number).times(_this.$global.unitValue));
+
 
                 if (_this.transfer.hasMessage && _this.transfer.message !== "") {
                     if (_this.transfer.isEncrypted) {
@@ -2538,9 +2545,8 @@ export default {
         },
         uploadFile: function () {
             const _this = this;
-            _this.preventRepeatedClick();
             let formData = new FormData();
-            formData.append("feeNQT", _this.messageForm.fee * _this.$global.unitValue);
+            formData.append("feeNQT", new BigNumber(_this.messageForm.fee).times(_this.$global.unitValue));
             formData.append("secretPhrase", _this.messageForm.password || _this.secretPhrase);
             formData.append("name", _this.messageForm.fileName);
             formData.append("file", _this.storagefile);
@@ -2571,7 +2577,7 @@ export default {
             const _this = this;
             _this.preventRepeatedClick();
             let formData = new FormData();
-            formData.append("feeNQT", _this.messageForm.fee * _this.$global.unitValue);
+            formData.append("feeNQT", new BigNumber(_this.messageForm.fee).items(_this.$global.unitValue));
             formData.append("secretPhrase", _this.messageForm.password || _this.secretPhrase);
             formData.append("phased", 'false');
             formData.append("phasingLinkedFullHash", '');
@@ -2621,7 +2627,6 @@ export default {
         },
         sendMessageInfo: function () {
             const _this = this;
-            _this.preventRepeatedClick();
             _this.messageForm.executing = true;
             let options = {};
             let encrypted = {};
@@ -2658,7 +2663,7 @@ export default {
             formData.append("phasingLinkedFullHash", '');
             formData.append("phasingHashedSecret", '');
             formData.append("phasingHashedSecretAlgorithm", '2');
-            formData.append("feeNQT", _this.messageForm.fee * _this.$global.unitValue);
+            formData.append("feeNQT", new BigNumber(_this.messageForm.fee).items(_this.$global.unitValue));
             formData.append("secretPhrase", _this.messageForm.password || _this.secretPhrase);
             formData.append("deadline", '1440');
 
@@ -2700,7 +2705,6 @@ export default {
                     });
                 }
             }
-            _this.messageForm.executing = false;
         },
         sendMessage: function (formData) {
             const _this = this;
@@ -2724,6 +2728,7 @@ export default {
                         _this.$message.error(_this.$global.escape2Html(res.errorDescription));
                     }
                 }
+                _this.messageForm.executing = false;
             });
             /*return new Promise(function (resolve, reject) {
                 let config = {
@@ -2791,7 +2796,6 @@ export default {
         },
         sendBatchTransferInfo: function () {
             const _this = this;
-            _this.preventRepeatedClick();
             if (_this.batch_transfer.fileName === "") {
                 _this.$message.warning(_this.$t('sso.error_no_file_chosen'));
                 return;
@@ -2828,7 +2832,6 @@ export default {
         },
         detectionBatchTransferInfo: function () {
             const _this = this;
-            _this.preventRepeatedClick();
             if (_this.batch_transfer.fileName === "") {
                 _this.$message.warning(_this.$t('sso.error_no_file_chosen'));
                 return;
@@ -2859,7 +2862,6 @@ export default {
         },
         sendTransferInfo: function () {
             const _this = this;
-            _this.preventRepeatedClick();
             _this.transfer.executing = true;
             let options = {};
             let encrypted = {};
@@ -2887,18 +2889,16 @@ export default {
                 _this.transfer.executing = false;
                 return;
             }
-            if (_this.transfer.number === 0) {
+            if (parseFloat(_this.transfer.number, 10) === 0 || _this.transfer.number === "") {
                 _this.$message.warning(_this.$t('notification.transfer_amount_error'));
                 _this.transfer.executing = false;
                 return;
             }
             _this.getAccount(_this.accountInfo.accountRS).then(res => {
-                if (typeof res.errorDescription === 'undefined') {
-                    if (res.errorDescription === "Unknown account") {
-                        _this.$message.warning(_this.$t('notification.new_account_warning'));
-                        _this.transfer.executing = false;
-                        return;
-                    }
+                if (res.errorDescription === "Unknown account") {
+                    _this.$message.warning(_this.$t('notification.new_account_warning'));
+                    _this.transfer.executing = false;
+                    return;
                 }
                 _this.accountInfo = res;
 
@@ -2925,8 +2925,8 @@ export default {
                 formData.append("phasingHashedSecret", '');
                 formData.append("phasingHashedSecretAlgorithm", '2');
                 formData.append("publicKey", "");
-                formData.append("feeNQT", _this.transfer.fee * _this.$global.unitValue);
-                formData.append("amountNQT", _this.transfer.number * _this.$global.unitValue);
+                formData.append("feeNQT", new BigNumber(_this.transfer.fee).times(_this.$global.unitValue));
+                formData.append("amountNQT", new BigNumber(_this.transfer.number).times(_this.$global.unitValue));
                 formData.append("secretPhrase", _this.secretPhrase || _this.transfer.password);
 
                 if (_this.transfer.hasMessage && _this.transfer.message !== "") {
@@ -2960,7 +2960,7 @@ export default {
             if (_this.MWHecoExchangeAddress === "CDW-____-____-____-_____" ||
                 _this.MWHecoExchangeAddress === "___-____-____-____-_____" ||
                 _this.MWHecoExchangeAddress === "CDW" ||
-                _this.MWHecoExchangeAddress === "" 
+                _this.MWHecoExchangeAddress === ""
                 ) {
                 _this.$message.warning(_this.$t('notification.sendmessage_null_account'));
                 _this.transfer.executing = false;
@@ -3074,6 +3074,7 @@ export default {
                         _this.$message.error(_this.$global.escape2Html(res.errorDescription));
                     }
                 }
+                _this.transfer.executing = false;
             });
 
             /*return new Promise(function (resolve, reject) {
@@ -3159,7 +3160,7 @@ export default {
                 // });
                 _this.loading = false;
                 _this.getTotalList();
-                // _this.getDrawData();
+                _this.getDrawData();
                 _this.updateMinerState();
             }).catch(function (err) {
                 _this.loading = false;
@@ -3190,6 +3191,10 @@ export default {
                 this.$message.warning(this.$t("account.synchronization_block"));
                 return;
             }
+            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+            //     this.$message.warning(this.$t("account.up_to_date"));
+            //     return;
+            // }
             this.$store.state.mask = true;
             this.sendMessageDialog = true;
         },
@@ -3198,6 +3203,10 @@ export default {
                 this.$message.warning(this.$t("account.synchronization_block"));
                 return;
             }
+            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+            //     this.$message.warning(this.$t("account.up_to_date"));
+            //     return;
+            // }
             this.$store.state.mask = true;
             this.storageFileDialog = true;
         },
@@ -3206,6 +3215,10 @@ export default {
                 this.$message.warning(this.$t("account.synchronization_block"));
                 return;
             }
+            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+            //     this.$message.warning(this.$t("account.up_to_date"));
+            //     return;
+            // }
             this.$store.state.mask = true;
             this.onChainDialog = true;
         },
@@ -3214,6 +3227,10 @@ export default {
                 this.$message.warning(this.$t("account.synchronization_block"));
                 return;
             }
+            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+            //     this.$message.warning(this.$t("account.up_to_date"));
+            //     return;
+            // }
             this.$store.state.mask = true;
             this.joinNetDialog = true;
         },
@@ -3237,7 +3254,7 @@ export default {
          */
         openAssetsAcrossChainsDialog: function () {
             const _this = this;
-            
+
             if(typeof(this.secretPhrase)　=== 'undefined'){
                 this.$message.warning(this.$t("acrossChains.use_secretPhrase_tip"));
                 return;
@@ -3252,10 +3269,10 @@ export default {
                 return;
             }
             //发起网关请求，查找当前帐号绑定的信息
-           
+
             var str = _this.$global.formatNQTMoney(_this.accountInfo.effectiveBalanceNQT, 2);
             _this.acrossChains.balance = parseFloat(str.substring(0,str.length-2));
-            
+
             if(_this.accountInfo.accountRS){
                 _this.$http.get(window.api.getAccountInfoUrl,{params:{accountRS:_this.accountInfo.accountRS}}).then(function (res1) {
                     switch (res1.data.code) {
@@ -3288,7 +3305,7 @@ export default {
             }else{
                 _this.$message.error(_this.$t('acrossChains.no_accountId'));
             }
-            
+
         },
         openExchangeDialog: function () {
             if (SSO.downloadingBlockchain) {
@@ -3322,6 +3339,10 @@ export default {
             if (SSO.downloadingBlockchain) {
                 return this.$message.warning(this.$t("account.synchronization_block"));
             }
+            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+            //     this.$message.warning(this.$t("account.up_to_date"));
+            //     return;
+            // }
             this.$store.state.mask = true;
             this.tranferAccountsDialog = true;
             this.transfer.executing = false;
@@ -3330,6 +3351,10 @@ export default {
             if (SSO.downloadingBlockchain) {
                 return this.$message.warning(this.$t("account.synchronization_block"));
             }
+            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+            //     this.$message.warning(this.$t("account.up_to_date"));
+            //     return;
+            // }
             this.$store.state.mask = true;
             this.batchTranferAccountsDialog = true;
             this.batch_transfer.executing = false;
@@ -3428,6 +3453,10 @@ export default {
                 _this.$message.warning(_this.$t("account.synchronization_block"));
                 return;
             }
+            // if(this.blockchainState.blockchainState != "UP_TO_DATE"){
+            //     this.$message.warning(this.$t("account.up_to_date"));
+            //     return;
+            // }
             _this.isUserInfoDialog(false);
             _this.secretPhrase ? _this.setName(_this.secretPhrase) : _this.secretPhraseDialog = true;
         },
@@ -3495,7 +3524,7 @@ export default {
                 this.AssetsExchangeDialog = false;
                 this.AssetsAcrossChainsDialog = true;
             }
-            
+
             this.capacity = 0;
             this.accountSecret = "";
             this.mortgageFee = 0;
@@ -3580,13 +3609,17 @@ export default {
             })*/
             SSO.setAccountInfo(formData, function (res) {
                 console.log("res", res);
-                if (typeof res.data.errorDescription === "undefined") {
+                if (typeof res.errorDescription === "undefined") {
                     _this.$message.success(_this.$t('notification.modify_success'));
                     _this.accountInfo.name = res.data.transactionJSON.attachment.name;
                     _this.isShowName = true;
                     _this.temporaryName = "";
                 } else {
-                    _this.$message.error(res.data.errorDescription);
+                    if (res.errorDescription.indexOf("$.t") != -1) {
+                        _this.$message.error(_this.$global.escape2Html(_this.$t(res.errorDescription.slice(3))));
+                    } else {
+                        _this.$message.error(_this.$global.escape2Html(res.errorDescription));
+                    }
                     _this.accountInfo.name = "";
                     _this.isShowName = true;
                 }
@@ -3842,7 +3875,7 @@ export default {
             4. Hub bind MW address must equals to user account address;
             5. Not a light client;
             */
-            //return true;
+            // return true;
             return this.secretPhrase
                 && !this.initHUb
                 && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center')
@@ -4066,11 +4099,8 @@ export default {
             const _this = this;
             return _this.$global.isOpenApiProxy();
         },
-        isUpToDateOrLight: function () {
-            const _this = this;
-            console.log("_this.blockchainState", _this.blockchainState)
-            console.log("isUpToDateOrLight", !SSO.downloadingBlockchain || _this.blockchainState.isLightClient == true);
-            return !SSO.downloadingBlockchain || _this.blockchainState.isLightClient == true;
+        nonDownloading: function () {
+            return !SSO.downloadingBlockchain;
         }
     },
     watch: {
@@ -4204,10 +4234,8 @@ export default {
         margin-bottom: 20px;
         text-align: center;
         font-size: 16px;
-
         font-weight: 400;
         color: $primary_color;
-
         line-height: 150%;
         border-radius: 4px;
     }
