@@ -291,7 +291,7 @@ public final class Constants {
     public static String OSS_PREFIX = "https://mwfs.oss-cn-shenzhen.aliyuncs.com/";
 
     // airdrop
-    public static final JSONObject airdropJsonObj = loadAirdropSettings();
+    public static final JSONObject airdropJsonObj = loadAirdropSettings() == null ? new JSONObject() : loadAirdropSettings();
 
     /**
      * The configuration is updated when the different networks are started
