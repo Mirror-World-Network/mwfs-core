@@ -3996,12 +3996,12 @@ export default {
                 return;
             }
 
-            var web3Utils = require("web3-utils");
-            console.log(web3Utils.isAddress(this.acrossChains.heco.target_address))
-            if(!web3Utils.isAddress(this.acrossChains.heco.target_address)){
-                this.$message.warning(this.$t("acrossChains.notRightAddress"));
-                return;
-            }
+            // var web3Utils = require("web3-utils");
+            // console.log(web3Utils.isAddress(this.acrossChains.heco.target_address))
+            // if(!web3Utils.isAddress(this.acrossChains.heco.target_address)){
+            //     this.$message.warning(this.$t("acrossChains.notRightAddress"));
+            //     return;
+            // }
             if(this.acrossChains.heco.target_address == this.acrossChains.heco.old_address){
                 this.$message.warning(this.$t("acrossChains.sameAddress"));
                 return;
@@ -4046,11 +4046,11 @@ export default {
             this.preventRepeatedClick();
             this.showChain = false;
 
-            var web3Utils = require("web3-utils");
-            if(!web3Utils.isAddress(this.acrossChains.OKEx.target_address)){
-                this.$message.warning(this.$t("acrossChains.notRightAddress"));
-                return;
-            }
+            // var web3Utils = require("web3-utils");
+            // if(!web3Utils.isAddress(this.acrossChains.OKEx.target_address)){
+            //     this.$message.warning(this.$t("acrossChains.notRightAddress"));
+            //     return;
+            // }
             if(this.acrossChains.OKEx.target_address == this.acrossChains.OKEx.old_address){
                 this.$message.warning(this.$t("acrossChains.sameAddress"));
                 return;
