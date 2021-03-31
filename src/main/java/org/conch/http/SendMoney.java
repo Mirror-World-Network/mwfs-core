@@ -21,20 +21,18 @@
 
 package org.conch.http;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 import org.conch.account.Account;
 import org.conch.chain.BlockchainImpl;
-import org.conch.chain.BlockchainProcessor;
 import org.conch.common.ConchException;
 import org.conch.common.Constants;
 import org.conch.util.Logger;
 import org.conch.util.RestfulHttpClient;
 import org.json.simple.JSONStreamAware;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
 
 public final class SendMoney extends CreateTransaction {
 
@@ -84,13 +82,13 @@ public final class SendMoney extends CreateTransaction {
                                 RestfulHttpClient.getClient(url+"setDailyExchangeQuantity").post().postParams(params).request();
                             }
                         }catch (IOException e) {
-                            Logger.logDebugMessage("Heco chain:can't connect"+Constants.MGR_URL+e.getMessage());
+                            Logger.logDebugMessage("Heco chain: can't connect " + Constants.MGR_URL + e.getMessage());
                             return createTransaction(req, account, recipient, amountNQT);
                         }
                     }
                 }
             }catch (IOException e) {
-                Logger.logDebugMessage("Heco chain:can't connect"+Constants.MGR_URL+e.getMessage());
+                Logger.logDebugMessage("Heco chain: can't connect " + Constants.MGR_URL + " caused by: " + e.getMessage());
                 return createTransaction(req, account, recipient, amountNQT);
             }
         }
