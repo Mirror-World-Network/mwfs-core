@@ -2634,7 +2634,7 @@ export default {
             console.log(_this.messageForm);
             if (_this.messageForm.receiver === this.$global.receiverPrefixStr ||
                 _this.messageForm.receiver === this.$global.receiverEmptyStr ||
-                _this.messageForm.receiver === "CDW" ||
+                _this.messageForm.receiver === this.$global.projectPrefixStr ||
                 _this.messageForm.receiver === "") {
                 _this.$message.warning(_this.$t('notification.sendmessage_null_account'));
                 _this.messageForm.executing = false;
@@ -2868,7 +2868,7 @@ export default {
             let formData = new FormData();
             if (_this.transfer.receiver === this.$global.receiverPrefixStr ||
                 _this.transfer.receiver === this.$global.receiverEmptyStr ||
-                _this.transfer.receiver === "CDW" ||
+                _this.transfer.receiver === this.$global.projectPrefixStr ||
                 _this.transfer.receiver === "") {
                 _this.$message.warning(_this.$t('notification.sendmessage_null_account'));
                 _this.transfer.executing = false;
@@ -2957,17 +2957,16 @@ export default {
             let options = {};
             let encrypted = {};
             let formData = new FormData();
-            if (_this.MWHecoExchangeAddress === "CDW-____-____-____-_____" ||
-                _this.MWHecoExchangeAddress === "___-____-____-____-_____" ||
-                _this.MWHecoExchangeAddress === "CDW" ||
+            if (_this.MWHecoExchangeAddress === this.$global.receiverPrefixStr ||
+                _this.MWHecoExchangeAddress === this.$global.receiverEmptyStr ||
+                _this.MWHecoExchangeAddress === this.$global.projectPrefixStr ||
                 _this.MWHecoExchangeAddress === ""
                 ) {
                 _this.$message.warning(_this.$t('notification.sendmessage_null_account'));
                 _this.transfer.executing = false;
                 return;
             }
-            const pattern = /CDW-([A-Z0-9]{4}-){3}[A-Z0-9]{5}/;
-            if (!_this.MWHecoExchangeAddress.toUpperCase().match(pattern)) {
+            if (!_this.MWHecoExchangeAddress.toUpperCase().match(_this.$global.pattern)) {
                 _this.$message.warning(_this.$t('notification.sendmessage_account_error_format'));
                 _this.transfer.executing = false;
                 return;
