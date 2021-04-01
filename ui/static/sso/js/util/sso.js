@@ -1906,7 +1906,7 @@ var Sso = (function (NRS, $, undefined) {
         var id = $.trim($("#id_search").find("input[name=q]").val());
 
         // if (/NXT\-/i.test(id)) {
-        if (/CDW\-/i.test(id)) {
+        if (global.projectReg.test(id)) {
             NRS.sendRequest("getAccount", {
                 "account": id
             }, function (response, input) {

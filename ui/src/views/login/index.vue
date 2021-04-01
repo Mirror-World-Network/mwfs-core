@@ -35,7 +35,7 @@
             return {
                 tabTitle: "key",
                 secretPhrase: "",
-                account: "CDW-____-____-____-_____",
+                account: this.$global.receiverPrefixStr,
                 type: 1,
                 userConfig: [],
                 hubBindAddress:"",
@@ -175,9 +175,16 @@
                         _this.$message.warning(_this.$t("password_modal.input_account"));
                         return false;
                     }
-                    if (!_this.account.toUpperCase().match(/^(CDW)-([A-Z0-9]{4})-([A-Z0-9]{4})-([A-Z0-9]{4})-([A-Z0-9]{5})/)) {
-                        _this.$message.warning(_this.$t("password_modal.account_error"));
-                        return false;
+                    if (_this.$global.projectName === "mw") {
+                        if (!_this.account.toUpperCase().match(/^(CDW)-([A-Z0-9]{4})-([A-Z0-9]{4})-([A-Z0-9]{4})-([A-Z0-9]{5})/)) {
+                            _this.$message.warning(_this.$t("password_modal.account_error"));
+                            return false;
+                        }
+                    } else if (_this.$global.projectName === "sharder") {
+                        if (!_this.account.toUpperCase().match(/^(SSA)-([A-Z0-9]{4})-([A-Z0-9]{4})-([A-Z0-9]{4})-([A-Z0-9]{5})/)) {
+                            _this.$message.warning(_this.$t("password_modal.account_error"));
+                            return false;
+                        }
                     }
                     return true;
                 }

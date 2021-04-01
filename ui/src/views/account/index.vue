@@ -1762,8 +1762,8 @@ export default {
                 _this.hubsetting.port = res["sharder.NATServicePort"];
                 _this.hubsetting.clientSecretkey = res["sharder.NATClientKey"];
                 _this.hubsetting.publicAddress = res["sharder.myAddress"];
-                _this.hubsetting.airdropAccount = res["sharder.airdrop.account"];
-                _this.hubsetting.airdropStatus = res["sharder.airdrop.enable"];
+                _this.hubsetting.airdropAccount = res["sharder.airdrop.accounts"];
+                _this.hubsetting.airdropStatus = res["sharder.airdrop.isEnable"];
                 //_this.hubsetting.SS_Address = res["sharder.HubBindAddress"];
             });
             // _this.getLatestHubVersion();
@@ -2634,7 +2634,7 @@ export default {
             console.log(_this.messageForm);
             if (_this.messageForm.receiver === this.$global.receiverPrefixStr ||
                 _this.messageForm.receiver === this.$global.receiverEmptyStr ||
-                _this.messageForm.receiver === "CDW" ||
+                _this.messageForm.receiver === this.$global.projectPrefixStr ||
                 _this.messageForm.receiver === "") {
                 _this.$message.warning(_this.$t('notification.sendmessage_null_account'));
                 _this.messageForm.executing = false;
@@ -2868,7 +2868,7 @@ export default {
             let formData = new FormData();
             if (_this.transfer.receiver === this.$global.receiverPrefixStr ||
                 _this.transfer.receiver === this.$global.receiverEmptyStr ||
-                _this.transfer.receiver === "CDW" ||
+                _this.transfer.receiver === this.$global.projectPrefixStr ||
                 _this.transfer.receiver === "") {
                 _this.$message.warning(_this.$t('notification.sendmessage_null_account'));
                 _this.transfer.executing = false;
@@ -2957,17 +2957,16 @@ export default {
             let options = {};
             let encrypted = {};
             let formData = new FormData();
-            if (_this.MWHecoExchangeAddress === "CDW-____-____-____-_____" ||
-                _this.MWHecoExchangeAddress === "___-____-____-____-_____" ||
-                _this.MWHecoExchangeAddress === "CDW" ||
+            if (_this.MWHecoExchangeAddress === this.$global.receiverPrefixStr ||
+                _this.MWHecoExchangeAddress === this.$global.receiverEmptyStr ||
+                _this.MWHecoExchangeAddress === this.$global.projectPrefixStr ||
                 _this.MWHecoExchangeAddress === ""
                 ) {
                 _this.$message.warning(_this.$t('notification.sendmessage_null_account'));
                 _this.transfer.executing = false;
                 return;
             }
-            const pattern = /CDW-([A-Z0-9]{4}-){3}[A-Z0-9]{5}/;
-            if (!_this.MWHecoExchangeAddress.toUpperCase().match(pattern)) {
+            if (!_this.MWHecoExchangeAddress.toUpperCase().match(_this.$global.pattern)) {
                 _this.$message.warning(_this.$t('notification.sendmessage_account_error_format'));
                 _this.transfer.executing = false;
                 return;
@@ -3996,12 +3995,12 @@ export default {
                 return;
             }
 
-            var web3Utils = require("web3-utils");
-            console.log(web3Utils.isAddress(this.acrossChains.heco.target_address))
-            if(!web3Utils.isAddress(this.acrossChains.heco.target_address)){
-                this.$message.warning(this.$t("acrossChains.notRightAddress"));
-                return;
-            }
+            // var web3Utils = require("web3-utils");
+            // console.log(web3Utils.isAddress(this.acrossChains.heco.target_address))
+            // if(!web3Utils.isAddress(this.acrossChains.heco.target_address)){
+            //     this.$message.warning(this.$t("acrossChains.notRightAddress"));
+            //     return;
+            // }
             if(this.acrossChains.heco.target_address == this.acrossChains.heco.old_address){
                 this.$message.warning(this.$t("acrossChains.sameAddress"));
                 return;
@@ -4046,11 +4045,11 @@ export default {
             this.preventRepeatedClick();
             this.showChain = false;
 
-            var web3Utils = require("web3-utils");
-            if(!web3Utils.isAddress(this.acrossChains.OKEx.target_address)){
-                this.$message.warning(this.$t("acrossChains.notRightAddress"));
-                return;
-            }
+            // var web3Utils = require("web3-utils");
+            // if(!web3Utils.isAddress(this.acrossChains.OKEx.target_address)){
+            //     this.$message.warning(this.$t("acrossChains.notRightAddress"));
+            //     return;
+            // }
             if(this.acrossChains.OKEx.target_address == this.acrossChains.OKEx.old_address){
                 this.$message.warning(this.$t("acrossChains.sameAddress"));
                 return;
@@ -4083,15 +4082,14 @@ export default {
         openAirdrop: function () {
             const _this = this;
             if (_this.hubsetting.airdropStatus && !_this.$global.isOpenApiProxy() && !_this.airdropFlag) {
-                let airdropAccount = [];
-                if (_this.hubsetting.airdropAccount) {
-                    airdropAccount = _this.hubsetting.airdropAccount.split(";");
+                if (_this.hubsetting.airdropAccount != null) {
+                    _this.hubsetting.airdropAccount.forEach(ele => {
+                        if (ele === _this.accountInfo.accountRS) {
+                            _this.airdropFlag = true;
+                        }
+                    })
                 }
-                airdropAccount.forEach(ele => {
-                    if (ele === _this.accountInfo.accountRS) {
-                        _this.airdropFlag = true;
-                    }
-                })
+
             }
             return _this.airdropFlag;
         },

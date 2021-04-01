@@ -2147,7 +2147,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                                 }
                             }
                         } catch (IOException e) {
-                            Logger.logDebugMessage("Heco chain:can't connect"+Constants.MGR_URL+e.getMessage());
+                            Logger.logDebugMessage("Heco chain: can't connect " + Constants.MGR_URL + " caused by: " + e.getMessage());
                         }
                     }
                 });
