@@ -17,6 +17,9 @@
 /**
  * @depends {sso.js}
  */
+
+import globalVar from "../../../../src/utils/common";
+
 var NRS = (function(NRS, $) {
 	NRS.loadContacts = function() {
 		NRS.contacts = {};
@@ -87,7 +90,7 @@ var NRS = (function(NRS, $) {
 			};
 		}
 
-		if (/^\d+$/.test(data.name) || global.projectReg.test(data.name)) {
+		if (/^\d+$/.test(data.name) || globalVar.projectReg.test(data.name)) {
 			return {
 				"error": $.t("sso.error_contact_name_alpha")
 			};
@@ -110,7 +113,7 @@ var NRS = (function(NRS, $) {
 			}
 		}
 		var address;
-		if (global.projectReg.test(data.account_id)) {
+		if (globalVar.projectReg.test(data.account_id)) {
 			data.account_rs = data.account_id;
 			address = new NxtAddress();
 			if (address.set(data.account_rs)) {
@@ -200,7 +203,7 @@ var NRS = (function(NRS, $) {
 		var contactId = parseInt($invoker.data("contact"), 10);
 		if (!contactId && NRS.selectedContext) {
 			var accountId = NRS.selectedContext.data("account");
-			var dbKey = (global.projectReg.test(accountId) ? "accountRS" : "account");
+			var dbKey = (globalVar.projectReg.test(accountId) ? "accountRS" : "account");
 			var dbQuery = {};
 			dbQuery[dbKey] = accountId;
 			NRS.storageSelect("contacts", [dbQuery], function(error, contact) {
@@ -255,7 +258,7 @@ var NRS = (function(NRS, $) {
 			};
 		}
 		var address;
-		if (global.projectReg.test(data.account_id)) {
+		if (globalVar.projectReg.test(data.account_id)) {
 			data.account_rs = data.account_id;
 			address = new NxtAddress();
 			if (address.set(data.account_rs)) {

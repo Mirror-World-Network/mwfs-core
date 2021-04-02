@@ -1,3 +1,5 @@
+import global from "../../../../src/utils/common";
+
 function Scaddress () {
 	var codeword = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 	var syndrome = [0, 0, 0, 0, 0];
