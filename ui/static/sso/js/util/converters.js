@@ -1,3 +1,5 @@
+import global from "../../../../src/utils/common";
+
 var converters = (function () {
 	var charToNibble = {};
 	var nibbleToChar = [];

@@ -17,6 +17,9 @@
 /**
  * @depends {sso.js}
  */
+
+import globalVar from "../../../../src/utils/common";
+
 var NRS = (function(NRS, $) {
 	NRS.forms = {};
 
@@ -392,9 +395,9 @@ var NRS = (function(NRS, $) {
             }
         }
         let reg;
-        if (global.projectName === "mw") {
+        if (globalVar.projectName === "mw") {
             reg = /^CDW\-[A-Z0-9]+\-[A-Z0-9]+\-[A-Z0-9]+\-[A-Z0-9]+/i;
-        } else if (global.projectName === "sharder") {
+        } else if (globalVar.projectName === "sharder") {
             reg = /^SSA\-[A-Z0-9]+\-[A-Z0-9]+\-[A-Z0-9]+\-[A-Z0-9]+/i;
         }
 
