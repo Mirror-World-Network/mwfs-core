@@ -16,8 +16,7 @@ export default {
     pattern: /CDW-([A-Z0-9]{4}-){3}[A-Z0-9]{5}/,
     receiverPrefixStr: "CDW-____-____-____-_____",
     receiverEmptyStr: "___-____-____-____-_____",
-    prefixStr: "CDW",
-
+    projectReg: /^CDW\-/i,
     apiUrl: '',
     cfg: {defaultInterval: 300000, soonInterval: 60000, slowInterval: 600000, topSpeedInterval: 30000},
     epochBeginning: -1,
@@ -31,7 +30,6 @@ export default {
     $vue: {},
     placeholder: "--",
     hecoUnit: "HMW",
-
     unitValue: 100000000,
     hecoUnitValue: 100000000,
     poolPledgeAmount: 10000000000000, // pledge amount of pool creator
@@ -43,13 +41,13 @@ export default {
             this.receiverPrefixStr = "CDW-____-____-____-_____"
             this.pattern = /CDW-([A-Z0-9]{4}-){3}[A-Z0-9]{5}/
             this.unit = " MW"
-            this.PrefixStr = "CDW"
+            this.projectReg = /^CDW\-/i
         } else if (this.projectName === 'sharder') {
             this.projectPrefixStr = "SSA"
             this.receiverPrefixStr = "SSA-____-____-____-_____"
             this.pattern = /SSA-([A-Z0-9]{4}-){3}[A-Z0-9]{5}/
             this.unit = " SS"
-            this.PrefixStr = "SSA"
+            this.projectReg = /^SSA\-/i
         }
     },
     updateConf(res) {

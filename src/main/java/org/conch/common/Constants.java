@@ -22,13 +22,9 @@
 package org.conch.common;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Random;
-import java.util.TimeZone;
 import org.apache.commons.lang3.StringUtils;
 import org.conch.Conch;
 import org.conch.consensus.reward.RewardCalculator;
@@ -36,6 +32,9 @@ import org.conch.consensus.reward.RewardCalculatorDefault;
 import org.conch.consensus.reward.RewardCalculatorForMw;
 import org.conch.env.RuntimeEnvironment;
 import org.conch.peer.Peer;
+import org.conch.util.Logger;
+
+import java.util.*;
 
 import static org.conch.util.JSON.readJsonFile;
 
@@ -85,21 +84,9 @@ public final class Constants {
         }
     }
 
-
-    /**
-     * Load the JSON configuration with respect to Constants
-     */
-    private static JSONObject loadConstantsSettings() {
-        String pathName = Conch.getStringProperty("sharder.constants.pathName", "conf/constants.json");
-        String jsonStr = readJsonFile(pathName);
-        return JSON.parseObject(jsonStr);
-    }
-    protected static final JSONObject constantsJsonObj = loadConstantsSettings();
-    public static final JSONObject heightConf = (JSONObject) constantsJsonObj.get("height");
-    public static final JSONObject acrossChainsConf = (JSONObject) constantsJsonObj.get("acrossChains");
-
+    public static final JSONObject heightConf = (JSONObject) Conch.constantsJsonObj.get("height");
     public static final JSONObject bootNodeHostConf = (JSONObject) Conch.constantsJsonObj.get("bootNodeHost");
-
+    public static final JSONObject acrossChainsConf = (JSONObject) Conch.constantsJsonObj.get("acrossChains");
 
     private static final String networkInProperties = Conch.getStringProperty("sharder.network");
     public static final String NetworkDef = loadNetworkDefinition();
@@ -262,7 +249,6 @@ public final class Constants {
     public static final long SHUFFLING_DEPOSIT_NQT = (isTestnetOrDevnet() ? 7 : 1000) * ONE_SS;
 
     public static final boolean correctInvalidFees = Conch.getBooleanProperty("sharder.correctInvalidFees");
-    public static final String ACCOUNT_PREFIX = "CDW-"; //account prefix
 
     //chain begin time
     public static final long EPOCH_BEGINNING = launchedTime(0).getTimeInMillis();
@@ -279,9 +265,6 @@ public final class Constants {
     public static final int COINBASE_CROWD_MINER_OPEN_HEIGHT = isTestnetOrDevnet() ? heightConf.getIntValue("COINBASE_CROWD_MINER_OPEN_HEIGHT_NOT_MAINNET") : heightConf.getIntValue("COINBASE_CROWD_MINER_OPEN_HEIGHT_IS_MAINNET");
     public static final int SETTLEMENT_INTERVAL_SIZE = Conch.getIntProperty("sharder.rewards.settlementInterval");
 
-    //OSS
-    public static final String OSS_PREFIX = "https://mwfs.oss-cn-shenzhen.aliyuncs.com/";
-
     //syn
     public static final int SYNC_BLOCK_NUM = Conch.getIntProperty("sharder.sync.blockNum");
     public static final int SYNC_CACHE_BLOCK_NUM = Conch.getIntProperty("sharder.sync.cacheblocknum");
@@ -294,7 +277,6 @@ public final class Constants {
             , true);
     public static final Boolean BLOCK_REWARD_VERIFY = Conch.getBooleanProperty("sharder.blockRewardVerify", false);
 
-
     // height related
     public static int NONE_PUBLICKEY_ACTIVE_HEIGHT = 0;
     public static int BLOCK_REWARD_VERIFY_HEIGHT = 0;
@@ -304,6 +286,12 @@ public final class Constants {
 
     public static final String MW_CHAIN = "mw";
     public static final String SHARDER_CHAIN = "sharder";
+    public static String ACCOUNT_PREFIX = "CDW-"; //account prefix
+    //OSS
+    public static String OSS_PREFIX = "https://mwfs.oss-cn-shenzhen.aliyuncs.com/";
+
+    // airdrop
+    public static final JSONObject airdropJsonObj = loadAirdropSettings() == null ? new JSONObject() : loadAirdropSettings();
 
     /**
      * The configuration is updated when the different networks are started
@@ -322,6 +310,8 @@ public final class Constants {
                 break;
             case SHARDER_CHAIN:
                 rewardCalculatorInstance = new RewardCalculatorDefault();
+                ACCOUNT_PREFIX = "SSA-";
+                OSS_PREFIX = "https://mwfs.oss-cn-shenzhen.aliyuncs.com/";
                 break;
             default:
                 rewardCalculatorInstance = new RewardCalculatorDefault();
@@ -333,6 +323,16 @@ public final class Constants {
             return false;
         }
         return true;
+    }
+
+    public static com.alibaba.fastjson.JSONObject loadAirdropSettings() {
+        String jsonString = "";
+        try {
+            jsonString = readJsonFile(Conch.CONFIG_DIR + "/airdrop_setting.json");
+        } catch (Exception e) {
+            Logger.logInfoMessage("airdrop_setting file does not exist, airdrop default close");
+        }
+        return JSON.parseObject(jsonString);
     }
 
     /**
@@ -455,21 +455,33 @@ public final class Constants {
     }
 
     private static final String parseBootNodeHost() {
+        JSONArray jsonArray;
         if(isMainnet()){
-            return bootNodeHostConf.getString("MAIN_BOOT");
+            jsonArray = bootNodeHostConf.getJSONArray("MAIN");
         }else if(isTestnet()){
-            return bootNodeHostConf.getString("TEST_BOOT");
+            jsonArray = bootNodeHostConf.getJSONArray("TEST");
+        } else {
+            jsonArray = bootNodeHostConf.getJSONArray("DEV");
         }
-        return bootNodeHostConf.getString("DEV_BOOT");
+        return jsonArray.get(0).toString();
     }
 
     private static final List<String> parseBootNodesHost() {
-       if(isMainnet()){
-           return Lists.newArrayList(bootNodeHostConf.getString("MAIN_BOOT"));
-       }else if(isTestnet()){
-           return Lists.newArrayList(bootNodeHostConf.getString("TEST_BOOT"),bootNodeHostConf.getString("TEST_NA"),bootNodeHostConf.getString("TEST_NB"));
-       }
-       return Lists.newArrayList(bootNodeHostConf.getString("DEV_BOOT"));
+        List<String> arrayList = Lists.newArrayList();
+        JSONArray jsonArray;
+        if (isMainnet()) {
+            jsonArray = bootNodeHostConf.getJSONArray("MAIN");
+        } else if (isTestnet()) {
+            jsonArray = bootNodeHostConf.getJSONArray("TEST");
+        } else {
+            jsonArray = bootNodeHostConf.getJSONArray("DEV");
+        }
+        if (jsonArray != null) {
+            for (Object item : jsonArray) {
+                arrayList.add(item.toString());
+            }
+        }
+        return arrayList;
     }
     
     

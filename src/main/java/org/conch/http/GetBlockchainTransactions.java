@@ -85,7 +85,6 @@ public final class GetBlockchainTransactions extends APIServlet.APIRequestHandle
                     type, subtype, timestamp, withMessage, phasedOnly, nonPhasedOnly, firstIndex, lastIndex,
                     includeExpiredPrunable, executedOnly,recipientRS,senderRS);
             // normal txs
-
             while (iterator.hasNext()) {
                 transactions.add(JSONData.transaction(iterator.next(), includePhasingResult, false));
             }

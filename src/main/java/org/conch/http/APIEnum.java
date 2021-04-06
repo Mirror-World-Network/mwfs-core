@@ -301,7 +301,6 @@ public enum APIEnum {
     ROLLBACK_DATABASE("rollbackDatabase", RollBackDataBase.instance),
     GET_INFO("getInfo",GetInfo.instance),
     AIRDROP("airdrop",Airdrop.instance),
-    AIRDROP_DETECTION("airdropDetection",AirdropDetection.instance),
     GET_MINER_STATISTICS("getMinerStatistics",GetMinerStatistics.instance),
     GET_FORK_DATA("getForkData",GetForkData.instance),
     //sharder_authorization_login
