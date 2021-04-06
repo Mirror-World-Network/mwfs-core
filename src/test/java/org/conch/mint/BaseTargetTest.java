@@ -19,7 +19,7 @@
  *
  */
 
-package org.sharder.mint;
+package org.conch.mint;
 
 import org.conch.common.Constants;
 import org.conch.db.Db;
