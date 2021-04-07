@@ -93,11 +93,12 @@ public class SnapshotTest {
 
     public static void main(String[] args) {
 //        ssAmountSnapshot();
+        ssHoldingAmount();
 //        pocTxsSnapshot();
 //        ssPaymentTxsSnapshot();
 //        amountAirdropBySnapshot();
 //        airdropDataStatistics();
-        fileDataComparison();
+//        fileDataComparison();
     }
 
     /**
@@ -495,6 +496,77 @@ public class SnapshotTest {
         }
     }
 
+    static void ssHoldingAmount(){
+        Db.init();
+        Connection con = null;
+        String path = "batch";
+        String filenamePrefix = "batch/holdingList";
+        File file = new File(path);
+        if(!file.exists()) {
+            file.mkdir();
+        }
+        int count = 0;
+        int batchUnit = 200000;
+        try {
+            con = Db.db.getConnection();
+            PreparedStatement pstmt = con.prepareStatement("SELECT * FROM ACCOUNT WHERE LATEST=TRUE ORDER BY BALANCE DESC");
+            ResultSet rs = pstmt.executeQuery();
+            JSONObject amountJson = new JSONObject();
+            amountJson.put("totalBalance" , 0L);
+            amountJson.put("totalMined" , 0L);
+            amountJson.put("totalFrozen" , 0L);
+            amountJson.put("totalUnconfirmed" , 0L);
+            String transferJsonStr = "";
+            while(rs.next()){
+                count++;
+                long accountId = rs.getLong("ID");
+                long balance = rs.getLong("BALANCE");
+                long unconfirmedBalance = rs.getLong("UNCONFIRMED_BALANCE");
+                long minedBalance = rs.getLong("FORGED_BALANCE");
+                long frozenBlance = rs.getLong("FROZEN_BALANCE");
+                byte[] publicKey = Account.getPublicKey(accountId);
+                String publicKeyStr = Convert.toHexString(publicKey);
+                amountJson.put("totalBalance" , amountJson.getLongValue("totalBalance") + (balance / Constants.ONE_SS));
+                amountJson.put("totalMined" , amountJson.getLongValue("totalMined") + (minedBalance/ Constants.ONE_SS));
+                amountJson.put("totalFrozen" , amountJson.getLongValue("totalFrozen") + (frozenBlance/ Constants.ONE_SS));
+                amountJson.put("totalUnconfirmed" , amountJson.getLongValue("totalUnconfirmed") + (unconfirmedBalance/ Constants.ONE_SS));
+
+                transferJsonStr += "{"
+                        + "\"recipientPublicKey\":\"" + publicKeyStr + "\""
+                        + ",\"recipientRS\":\"" + Account.rsAccount(accountId) + "\""
+                        + ",\"amountNQT\":\"" + balance + "\""
+                        + "},\n";
+
+                if (batchUnit == 0) {
+                    System.out.println("batchUnit can`t equal zero\n");
+                }
+                if (count % batchUnit == 0) {
+                    String filename;
+                    String csvFilename;
+                    filename = filenamePrefix + "_" + count + ".json";
+                    csvFilename = filenamePrefix + "_" + count + ".csv";
+                    transferJsonStr = "[" + transferJsonStr + "]";
+                    writeToHoldingFile(transferJsonStr, filename);
+                    org.conch.util.JSON.JsonToCSV(filename, csvFilename);
+                    transferJsonStr = "";
+                }
+
+            }
+            if (StringUtils.isNotEmpty(transferJsonStr)) {
+                // extra is stored in the file
+                transferJsonStr = "[" + transferJsonStr + "]";
+                writeToHoldingFile(transferJsonStr, filenamePrefix + "_" + count + ".json");
+                org.conch.util.JSON.JsonToCSV(filenamePrefix + "_" + count + ".json", filenamePrefix + "_" + count + ".csv");
+            }
+            System.out.println("Total count is " + count + "\n\r");
+            System.out.println("Total balance is " + amountJson.toString() );
+        } catch (SQLException e) {
+            throw new RuntimeException(e.toString(), e);
+        } finally {
+            DbUtils.close(con);
+        }
+    }
+
     static void amountAirdropBySnapshot(){
         Db.init();
         Connection con = null;
@@ -569,6 +641,16 @@ public class SnapshotTest {
         jsonObject.put("secretPhrase", "");
         jsonObject.put("feeNQT", "0");
         jsonObject.put("deadline", "1440");
+
+        org.conch.util.JSON.JsonWrite(jsonObject, filename);
+        System.out.println(String.format("write to file %s succeed", filename));
+
+    }
+
+    private static void writeToHoldingFile(String transferJson, String filename) {
+        org.json.simple.JSONObject jsonObject = new org.json.simple.JSONObject();
+        JSONArray jsonArray = JSON.parseArray(transferJson);
+        jsonObject.put("list", jsonArray);
 
         org.conch.util.JSON.JsonWrite(jsonObject, filename);
         System.out.println(String.format("write to file %s succeed", filename));

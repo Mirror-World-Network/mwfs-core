@@ -87,6 +87,7 @@ public final class Constants {
     public static final JSONObject heightConf = (JSONObject) Conch.constantsJsonObj.get("height");
     public static final JSONObject bootNodeHostConf = (JSONObject) Conch.constantsJsonObj.get("bootNodeHost");
     public static final JSONObject acrossChainsConf = (JSONObject) Conch.constantsJsonObj.get("acrossChains");
+    public static final JSONObject featureConf = (JSONObject) Conch.constantsJsonObj.get("feature");
 
     private static final String networkInProperties = Conch.getStringProperty("sharder.network");
     public static final String NetworkDef = loadNetworkDefinition();

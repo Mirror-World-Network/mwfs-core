@@ -38,6 +38,10 @@
     "FOUNDATION_TEST_URL": "test.mw.run",
     "SERIAL_NUM": ""
   },
+  "feature": {
+    "QUICK_AUTH": true,
+    "OPEN_HOLDINGS_COIN_API": true
+  },
   "port": {
     "DEFAULT_PEER_PORT": 3218,
     "DEFAULT_API_PORT": 8215,
