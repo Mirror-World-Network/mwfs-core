@@ -20,7 +20,7 @@ const cn = {
         'init_hub': "初始化",
         'use_nat_server': "穿透服务",
         'config_nat_server': "穿透服务",
-        'login_binding_hub_account_tip':"此节点已绑定地址 ",
+        'login_binding_hub_account_tip':"此节点已绑定MW地址 ",
     },
     hubsetting: {
         'register_nat_server': "申请穿透服务",
@@ -69,6 +69,14 @@ const cn = {
         'register_status_pending': "申请中",
         'register_status_approval': "有效",
         'create_account': "创建账户",
+        'quick_auth': "快捷授权",
+        'factory_num': "矿机编号",
+        'factory_des': "脚本安装成功后打印的code",
+        'sharder_account_des': "MW官网注册用户名",
+        'real_ip': "真实IP",
+        'ip_des': "设备的内网/外网IP",
+        'remark': "备注",
+        'reserved': "预留字段",
     },
     upgrade: {
         'title': "COS版本升级",
