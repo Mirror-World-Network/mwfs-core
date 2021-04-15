@@ -2344,24 +2344,17 @@ export default {
         //         return valid;
         //     });
         // },
-        // todo 调取mgr接口，1. 根据sharderAccount获取userId；2. 发送所有参数新增矿机记录，建立绑定关系；
         quickAuth() {
             const _this = this;
-            // 生成或读取矿机编码
-
             let data = new FormData();
-            data.append("sharderAccount", this.quickAuthForm.bindSsAddress);
-            data.append("sharderAccount", this.quickAuthForm.serialNum);
-            data.append("sharderAccount", this.quickAuthForm.status);
-            data.append("sharderAccount", this.quickAuthForm.type);
-            data.append("sharderAccount", this.quickAuthForm.factoryNum);
-            data.append("sharderAccount", this.quickAuthForm.remark);
-            data.append("sharderAccount", this.quickAuthForm.joUserByUserId);
-            data.append("tssAddress", ssAddr);
-            data.append("nodeType", this.userConfig.nodeType);
-            data.append("registerStatus", "0");
-            _this.$http.post(window.api.hardwareProduct, data).then(function (res) {
+            data.append("bindSsAddress", this.quickAuthForm.bindSsAddress);
+            data.append("serialNum", this.quickAuthForm.serialNum);
+            data.append("factoryNum", this.quickAuthForm.factoryNum);
+            data.append("joUserByUserId", this.quickAuthForm.joUserByUserId);
+            _this.$http.post(window.api.updateHardwareProduct, data).then(function (res) {
                 console.log(res.data.body);
+                // todo 返回成功则继续执行
+                // todo 返回失败则return，并弹窗提示
             });
         },
         reconfigure(data) {
@@ -2380,7 +2373,7 @@ export default {
                         (res1.data.failedReason ? res1.data.failedReason : 'error');
                     _this.$message.error(msg);
                     _this.closeDialog();
-                    console.log('failed to reconfigure settings...')
+                    console.log('failed to reconfigure settings...');
                 }
             }).catch(err => {
                 // _this.$message.error(err.message);
@@ -3955,10 +3948,10 @@ export default {
             3. NodeType is Hub;
             4. Not a light client;
             */
-            return true;
+            // return true;
             return this.secretPhrase
                 && this.initHUb
-                && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center')
+                && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center' || this.userConfig.nodeType === 'Normal')
                 && !this.$global.isOpenApiProxy();
         },
         whetherShowUseNATServiceBtn() {

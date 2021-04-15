@@ -38,7 +38,7 @@ const api = {
     //查询heco交易信息
     getHecoInfo:HECO_URL + "/tx/",
     // 快捷授权相关
-    hardwareProduct: MGR_API_URL + "/ssHardwareProduct"
+    updateHardwareProduct: MGR_API_URL + "/ssHardwareProduct/update"
 };
 window.api = api;
 
