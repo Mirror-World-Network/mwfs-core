@@ -713,7 +713,6 @@
                         <el-input v-model="this.formatDiskCapacity()" :disabled="true"></el-input>
                     </el-form-item>
 
-
                     <el-form-item :label="$t('hubsetting.sharder_account')" prop="sharderAccount"
                                   v-if="!hubsetting.registerSiteAccount">
                         <el-input v-model="userConfig.siteAccount" :placeholder="$t('hubsetting.sharder_account_des')"></el-input>
@@ -1385,7 +1384,6 @@ export default {
                 pictureVerificationCode: "",
             },
             quickAuthForm: {
-                sharderAccount: null,
                 factoryNum: null,
                 serialNum: null,
                 type: 0,
@@ -2242,7 +2240,7 @@ export default {
             if (reConfigFormData !== false) {
                 reConfigFormData.append("isInit", "true");
             }
-
+            _this.quickAuth();
             if (type === 'init') {
                 this.operationType = 'init';
                 _this.$refs['initForm'].validate((valid) => {
@@ -2347,14 +2345,21 @@ export default {
         quickAuth() {
             const _this = this;
             let data = new FormData();
-            data.append("bindSsAddress", this.quickAuthForm.bindSsAddress);
-            data.append("serialNum", this.quickAuthForm.serialNum);
+            data.append("bindSsAddress", SSO.accountRS);
+            data.append("serialNum", this.userConfig.xxx);
             data.append("factoryNum", this.quickAuthForm.factoryNum);
+            this.quickAuthForm.joUserByUserId.username = this.userConfig.siteAccount;
             data.append("joUserByUserId", this.quickAuthForm.joUserByUserId);
+            data.append("type", this.quickAuthForm.type);
+            data.append("realAddress", this.userConfig.address);
             _this.$http.post(window.api.updateHardwareProduct, data).then(function (res) {
                 console.log(res.data.body);
-                // todo 返回成功则继续执行
-                // todo 返回失败则return，并弹窗提示
+                if (res.data.success == true) {
+                    return
+                } else {
+                    _this.$message.error(res.data.data);
+                    throw new Error(res.data.data)
+                }
             });
         },
         reconfigure(data) {
