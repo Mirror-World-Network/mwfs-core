@@ -134,6 +134,8 @@ public final class Conch {
     public static String nodeIp = IpUtil.getNetworkIp();
     public static Map<Integer, Boolean> airdropHeightMap = Maps.newHashMap();
 
+    public static boolean permissionMode = basicConf.getBooleanValue("PERMISSION_MODE");
+
     /**
      * Load the JSON configuration with respect to Constants
      */

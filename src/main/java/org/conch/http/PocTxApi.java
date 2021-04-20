@@ -152,10 +152,17 @@ public abstract class PocTxApi {
             super(new APITag[]{APITag.POC, APITag.CREATE_TRANSACTION}, "nodetype");
         }
 
+        /**
+         * 1. permissionMode：The POC node declare are created by the Foundation node
+         * 2. nonPermissionMode：The POC node declare are created by the any node
+         */
         @Override
         protected JSONStreamAware processRequest(HttpServletRequest request) throws ConchException {
             try {
-                Preconditions.checkArgument(UrlManager.validFoundationHost(request), "Not valid host! ONLY foundation domain can do this operation!");
+
+                if (Conch.permissionMode) {
+                    Preconditions.checkArgument(UrlManager.validFoundationHost(request), "Not valid host! ONLY foundation domain can do this operation!");
+                }
                 Account account = Optional.ofNullable(ParameterParser.getSenderAccount(request))
                         .orElseThrow(() -> new ConchException.AccountControlException("account info can not be null!"));
                 Account.checkApiAutoTxAccount(Account.rsAccount(account.getId()));

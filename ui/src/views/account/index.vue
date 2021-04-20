@@ -772,14 +772,8 @@
                     </el-form-item>
                     <el-divider  v-if="hubsetting.quickAuth"><i class="el-icon-caret-top"></i></el-divider>
                     <el-form-item :label="$t('hubsetting.factory_num')" prop="factoryNum"  v-if="hubsetting.quickAuth">
-                        <el-input v-model="quickAuthForm.factoryNum" :placeholder="$t('hubsetting.factory_des')" ></el-input>
+                        <el-input v-model="userConfig.factoryNum" :placeholder="$t('hubsetting.factory_des')" ></el-input>
                     </el-form-item>
-<!--                    <el-form-item :label="$t('hubsetting.remark')" prop="remark" v-if="hubsetting.quickAuth">-->
-<!--                        <el-input v-model.trim="quickAuthForm.remark"></el-input>-->
-<!--                    </el-form-item>-->
-<!--                    <el-form-item :label="$t('hubsetting.reserved')" prop="reserved" v-if="hubsetting.quickAuth">-->
-<!--                        <el-input v-model.trim="quickAuthForm.reserved"></el-input>-->
-<!--                    </el-form-item>-->
                     <el-divider  v-if="hubsetting.quickAuth"><i class="el-icon-caret-bottom"></i></el-divider>
 
 
@@ -1375,6 +1369,7 @@ export default {
                 natAddress: this.$store.state.userConfig['sharder.NATServiceAddress'],
                 ssAddress: this.$store.state.userConfig['sharder.HubBindAddress'],
                 siteAccount: this.$store.state.userConfig['sharder.siteAccount'],
+                factoryNum: null
             },
             registerSharderSiteUser: {
                 sharderAccountPhoneOrEmail: '',
@@ -1382,19 +1377,6 @@ export default {
                 setSharderPwd: '',
                 confirmSharderPwd: '',
                 pictureVerificationCode: "",
-            },
-            quickAuthForm: {
-                factoryNum: null,
-                serialNum: null,
-                type: 0,
-                status: 0,
-                bindSsAddress: null,
-                realAddress: null,
-                remark: null,
-                reserved: null,
-                joUserByUserId: {
-                    username: null
-                }
             },
             needRegister: false,
             isShowName: true,
@@ -2164,6 +2146,7 @@ export default {
             formData.append('password', _this.hubsetting.sharderPwd);
             formData.append('registerStatus', _this.hubsetting.register_status);
             formData.append('nodeType', _this.userConfig.nodeType);
+            formData.append("factoryNum", this.userConfig.factoryNum);
 
             // nat settings
             if (_this.hubsetting.openPunchthrough) {
@@ -2240,12 +2223,10 @@ export default {
             if (reConfigFormData !== false) {
                 reConfigFormData.append("isInit", "true");
             }
-            _this.quickAuth();
             if (type === 'init') {
                 this.operationType = 'init';
                 _this.$refs['initForm'].validate((valid) => {
                     if (valid) {
-                        _this.quickAuth();
                         _this.reconfigure(reConfigFormData);
                     } else {
                         console.log('init dialog error submit!!');
@@ -2342,26 +2323,6 @@ export default {
         //         return valid;
         //     });
         // },
-        quickAuth() {
-            const _this = this;
-            let data = new FormData();
-            data.append("bindSsAddress", SSO.accountRS);
-            data.append("serialNum", this.userConfig.xxx);
-            data.append("factoryNum", this.quickAuthForm.factoryNum);
-            this.quickAuthForm.joUserByUserId.username = this.userConfig.siteAccount;
-            data.append("joUserByUserId", this.quickAuthForm.joUserByUserId);
-            data.append("type", this.quickAuthForm.type);
-            data.append("realAddress", this.userConfig.address);
-            _this.$http.post(window.api.updateHardwareProduct, data).then(function (res) {
-                console.log(res.data.body);
-                if (res.data.success == true) {
-                    return
-                } else {
-                    _this.$message.error(res.data.data);
-                    throw new Error(res.data.data)
-                }
-            });
-        },
         reconfigure(data) {
             let _this = this;
             this.$http.post('/sharder?requestType=reConfig', data).then(res1 => {

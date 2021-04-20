@@ -39,11 +39,10 @@ clean un-necessary files after the cos installation is successful ...
 
 Rebooting...
 
-The generated mining machine code is: xxx
 ```
 > 手动重启指令：`cd ~/mwfs && ./start.sh`
 
-6. 复制上述日志底部打印的`mining machine code`(以下称“矿机编码”): xxx， **注**：`mining machine code`是重要的矿机凭证，后续激活矿机认证需用到该code，**请务必妥善保管**
+6. 脚本打印如上，说明执行安装成功。进入如下文件获取生成的矿机编码：`cd ~/mwfs && cat .factoryNum`，复制出现的数值，后续流程中需要用到该编码（用于矿机节点认证）
 7. 安装完成后查找端口是否启动：`lsof -i tcp:7216`，当端口启动则安装启动正常，类似如下：
 ```dotnetcli
 root@mwfs-0001:~# lsof -i tcp:7216 COMMAND PID USER FD TYPE DEVICE SIZE/OFF NODE NAME 

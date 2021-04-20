@@ -44,7 +44,10 @@ import java.util.Map;
 import static org.conch.http.JSONResponses.*;
 import static org.conch.util.JSON.JsonWrite;
 import static org.conch.util.JSON.readJsonFile;
-
+/**
+ * @author bowen
+ * @date 01/11/2020
+ */
 public final class Airdrop extends CreateTransaction {
 
     static final Airdrop instance = new Airdrop();
@@ -327,7 +330,7 @@ public final class Airdrop extends CreateTransaction {
 
                 String transactionIdString = Convert.emptyToNull(reqWrapper.getParameter("transactionID"));
                 if (transactionIdString == null) {
-                    jsonObject.put("errorResponse", MISSING_TRANSACTION);
+                    jsonObject.put("errorResponse", JSONValue.parse(org.conch.util.JSON.toString(MISSING_TRANSACTION)));
                 }
                 boolean includePhasingResult = "true".equalsIgnoreCase(reqWrapper.getParameter("includePhasingResult"));
 
