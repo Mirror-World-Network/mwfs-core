@@ -723,58 +723,58 @@
                     </el-form-item>
 
                     <!-- register the new site account                   -->
-                    <el-form-item :label="$t('hubsetting.register_sharder_account')">
-                        <el-switch
-                            v-model="hubsetting.registerSiteAccount"
-                            active-color="#13ce66"
-                            inactive-color="#ff4949">
-                        </el-switch>
-                    </el-form-item>
-                    <el-divider  v-if="hubsetting.registerSiteAccount"><i class="el-icon-caret-top"></i></el-divider>
+<!--                    <el-form-item :label="$t('hubsetting.register_sharder_account')">-->
+<!--                        <el-switch-->
+<!--                            v-model="hubsetting.registerSiteAccount"-->
+<!--                            active-color="#13ce66"-->
+<!--                            inactive-color="#ff4949">-->
+<!--                        </el-switch>-->
+<!--                    </el-form-item>-->
+<!--                    <el-divider  v-if="hubsetting.registerSiteAccount"><i class="el-icon-caret-top"></i></el-divider>-->
 
-                    <el-form-item :label="$t('hubsetting.sharder_account_phone_or_email')"  v-if="hubsetting.registerSiteAccount">
-                        <el-input v-model="registerSharderSiteUser.sharderAccountPhoneOrEmail" ></el-input>
-                    </el-form-item>
-                    <el-form-item :label="$t('hubsetting.verification_code')" v-if="hubsetting.registerSiteAccount">
-                        <el-input v-model="registerSharderSiteUser.verificationCode" ></el-input><el-button type="primary" style="position: absolute;right:0px;top:0px " @click="sendVCode()" :disabled="sendSuccess">
-                        {{sendSuccess?time+"s 可"+$t('hubsetting.resend_verification_code'):$t('hubsetting.send_verification_code')}}
-                    </el-button>
-                    </el-form-item>
-                    <el-form-item :label="$t('hubsetting.set_sharder_account_password')"  v-if="hubsetting.registerSiteAccount">
-                        <el-input type="password" v-model="registerSharderSiteUser.setSharderPwd"></el-input>
-                    </el-form-item>
-                    <el-form-item :label="$t('hubsetting.confirm_sharder_account_password')"  v-if="hubsetting.registerSiteAccount">
-                        <el-input type="password" v-model="registerSharderSiteUser.confirmSharderPwd"></el-input>
-                    </el-form-item>
-                    <el-form-item :label="$t('hubsetting.picture_verification_code')"  v-if="hubsetting.registerSiteAccount">
-                        <el-input v-model="registerSharderSiteUser.pictureVerificationCode" @blur="checkPicVerificationCode"></el-input>
-                        <el-image :src="src" style="width:112px;height:38px;position: absolute;right:1px;top:1px " @click="getPicVCode()">
-                            <div slot="placeholder" class="image-slot">
-                                Loding<span class="dot">...</span>
-                            </div>
-                        </el-image>
-                    </el-form-item>
-                    <el-form-item >
-                        <el-button type="primary" v-if="hubsetting.registerSiteAccount" style="float: right" @click="registerSharderSite()">
-                            {{$t('hubsetting.register_sharder_account')}}
-                        </el-button>
-                    </el-form-item>
-                    <el-divider  v-if="hubsetting.registerSiteAccount"><i class="el-icon-caret-bottom"></i></el-divider>
+<!--                    <el-form-item :label="$t('hubsetting.sharder_account_phone_or_email')"  v-if="hubsetting.registerSiteAccount">-->
+<!--                        <el-input v-model="registerSharderSiteUser.sharderAccountPhoneOrEmail" ></el-input>-->
+<!--                    </el-form-item>-->
+<!--                    <el-form-item :label="$t('hubsetting.verification_code')" v-if="hubsetting.registerSiteAccount">-->
+<!--                        <el-input v-model="registerSharderSiteUser.verificationCode" ></el-input><el-button type="primary" style="position: absolute;right:0px;top:0px " @click="sendVCode()" :disabled="sendSuccess">-->
+<!--                        {{sendSuccess?time+"s 可"+$t('hubsetting.resend_verification_code'):$t('hubsetting.send_verification_code')}}-->
+<!--                    </el-button>-->
+<!--                    </el-form-item>-->
+<!--                    <el-form-item :label="$t('hubsetting.set_sharder_account_password')"  v-if="hubsetting.registerSiteAccount">-->
+<!--                        <el-input type="password" v-model="registerSharderSiteUser.setSharderPwd"></el-input>-->
+<!--                    </el-form-item>-->
+<!--                    <el-form-item :label="$t('hubsetting.confirm_sharder_account_password')"  v-if="hubsetting.registerSiteAccount">-->
+<!--                        <el-input type="password" v-model="registerSharderSiteUser.confirmSharderPwd"></el-input>-->
+<!--                    </el-form-item>-->
+<!--                    <el-form-item :label="$t('hubsetting.picture_verification_code')"  v-if="hubsetting.registerSiteAccount">-->
+<!--                        <el-input v-model="registerSharderSiteUser.pictureVerificationCode" @blur="checkPicVerificationCode"></el-input>-->
+<!--                        <el-image :src="src" style="width:112px;height:38px;position: absolute;right:1px;top:1px " @click="getPicVCode()">-->
+<!--                            <div slot="placeholder" class="image-slot">-->
+<!--                                Loding<span class="dot">...</span>-->
+<!--                            </div>-->
+<!--                        </el-image>-->
+<!--                    </el-form-item>-->
+<!--                    <el-form-item >-->
+<!--                        <el-button type="primary" v-if="hubsetting.registerSiteAccount" style="float: right" @click="registerSharderSite()">-->
+<!--                            {{$t('hubsetting.register_sharder_account')}}-->
+<!--                        </el-button>-->
+<!--                    </el-form-item>-->
+<!--                    <el-divider  v-if="hubsetting.registerSiteAccount"><i class="el-icon-caret-bottom"></i></el-divider>-->
 
 
                     <!-- quick auth                   -->
-                    <el-form-item :label="$t('hubsetting.quick_auth')">
+                    <el-form-item :label="$t('hubsetting.quick_auth')" v-if="userConfig.permissionModeDisplay">
                         <el-switch
-                            v-model="hubsetting.quickAuth"
+                            v-model="userConfig.permissionMode"
                             active-color="#13ce66"
                             inactive-color="#ff4949">
                         </el-switch>
                     </el-form-item>
-                    <el-divider  v-if="hubsetting.quickAuth"><i class="el-icon-caret-top"></i></el-divider>
-                    <el-form-item :label="$t('hubsetting.factory_num')" prop="factoryNum"  v-if="hubsetting.quickAuth">
+                    <el-divider  v-if="userConfig.permissionMode"><i class="el-icon-caret-top"></i></el-divider>
+                    <el-form-item :label="$t('hubsetting.factory_num')" prop="factoryNum"  v-if="userConfig.permissionMode">
                         <el-input v-model="userConfig.factoryNum" :placeholder="$t('hubsetting.factory_des')" ></el-input>
                     </el-form-item>
-                    <el-divider  v-if="hubsetting.quickAuth"><i class="el-icon-caret-bottom"></i></el-divider>
+                    <el-divider  v-if="userConfig.permissionMode"><i class="el-icon-caret-bottom"></i></el-divider>
 
 
                     <!-- NAT Seeting by site account -->
@@ -1369,7 +1369,9 @@ export default {
                 natAddress: this.$store.state.userConfig['sharder.NATServiceAddress'],
                 ssAddress: this.$store.state.userConfig['sharder.HubBindAddress'],
                 siteAccount: this.$store.state.userConfig['sharder.siteAccount'],
-                factoryNum: null
+                factoryNum: null,
+                permissionMode: this.$store.state.userConfig['sharder.permissionMode'],
+                permissionModeDisplay: this.$store.state.userConfig['sharder.permissionMode'],
             },
             registerSharderSiteUser: {
                 sharderAccountPhoneOrEmail: '',
@@ -1432,7 +1434,6 @@ export default {
             },
             hubsetting: {
                 registerSiteAccount: false,
-                quickAuth: false,
                 openPunchthrough: false,
                 loadingData: false,
                 sharderPwd: '',
@@ -1723,7 +1724,6 @@ export default {
             OKExExchangeAddress:"0x0000",
 
             showChain:false,
-
         };
     },
     created() {
@@ -1889,7 +1889,6 @@ export default {
             let requestUrl = _this.requestUrl + "/official/register_.ss";
             _this.$global.registerSharderSite(requestUrl, data, function (res) {
                 if (res.success) {
-                    _this.hubsetting.quickAuth = false;
                     _this.userConfig.siteAccount = sharderAccount;
                     _this.hubsetting.sharderPwd = setSharderPwd;
                     _this.bindNatService();
