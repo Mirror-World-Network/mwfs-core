@@ -1125,15 +1125,18 @@
                         <ul class="title" v-if="!showChain">
                             <li :class="chainShow==1? 'active':''" @click="showHecoChain" ><a>Heco Chain</a></li>
                             <li :class="chainShow==2? 'active':''" @click="showOkExChain" ><a>OKEx Chain</a></li>
-                            <li :class="chainShow==3? 'active':''" @click="showMoreChain" ><a>...</a></li>
+                            <li :class="chainShow==3? 'active':''" @click="showETHChain" ><a>ETH Chain</a></li>
+                            <li :class="chainShow==4? 'active':''" @click="showMoreChain" ><a>...</a></li>
                         </ul>
                         <ul class="title" v-else>
                             <li :class="chainShow==1? 'active':''" ><a>Heco Chain</a></li>
                             <li :class="chainShow==2? 'active':''" ><a>OKEx Chain</a></li>
-                            <li :class="chainShow==3? 'active':''" ><a>...</a></li>
+                            <li :class="chainShow==3? 'active':''" ><a>ETH Chain</a></li>
+                            <li :class="chainShow==4? 'active':''" ><a>...</a></li>
                         </ul>
 
                         <div id="content">
+                            <!--Heco-->
                             <el-form class="mod" v-if="chainShow==1">
                                 <el-form-item :label="$t('acrossChains.heco_target_address')" class="item_address">
                                     <el-input id="acrossChains_target_address" v-model="acrossChains.heco.target_address" :placeholder="$t('acrossChains.heco_address_tip')">
@@ -1161,23 +1164,115 @@
                                 </div>
 
                             </el-form>
+                            <!--OKEx-->
                             <el-form class="mod" v-if="chainShow==2" >
-                                <!-- <el-form-item :label="$t('acrossChains.target_address')" class="item_address">
-                                    <el-input id="acrossChains_target_address" v-model="acrossChains.OKEx.target_address" :placeholder="$t('acrossChains.address_tip')">
-                                        <el-button slot="append" style="background: #3fb09a;color:#000" @click="bindAddress(2)" :disabled="showChain">{{ $t('acrossChains.bind') }}</el-button>
+                                <el-form-item :label="$t('acrossChains.OKEx_target_address')" class="item_address">
+                                    <el-input id="acrossChains_target_address" v-model="acrossChains.OKEx.target_address" :placeholder="$t('acrossChains.OKEx_address_tip')">
+                                        <el-button  slot="append" style="background: #3fb09a;color:#000" @click="bindAddress(2)" :disabled="showChain">{{ $t('acrossChains.bind') }}</el-button>
                                     </el-input>
                                 </el-form-item>
-                                <el-form-item :label="$t('acrossChains.target_balance')" class="item_balance">
-                                    <input class="el-input__inner" id="acrossChains_target_balance"  v-model="acrossChains.OKEx.target_balance" type="number" disabled="disabled"/>
-                                    <label class="input_suffix">{{ $global.hecoUnit }}</label>
+                                <el-form-item :label="$t('acrossChains.OKEx_target_balance')" class="item_balance">
+                                    <input class="el-input__inner" id="acrossChains_target_balance"  v-model="acrossChains.OKEx.target_balance" type="number" disabled="disabled" />
+                                    <label class="input_suffix">{{ $global.OKExUnit }}</label>
                                 </el-form-item>
-                                <el-form-item :label="$t('acrossChains.balance')" class="balance">
-                                    <input class="el-input__inner" id="acrossChains_balance" v-model="acrossChains.balance" type="number" disabled="disabled"/>
-                                    <label class="input_suffix">{{ $global.unit }}</label>
-                                </el-form-item> -->
-                                {{$t('acrossChains.more')}}
+                                <el-form-item :label="$t('acrossChains.OKEx_convertible_balance')" class="balance">
+                                    <input class="el-input__inner" id="acrossChains_balance" v-model="acrossChains.OKEx.convertible_balance" type="number" disabled="disabled" />
+                                    <label class="input_suffix">{{ $global.OKExUnit }}</label>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.OKEx_rate')" class="rate" style="margin-bottom:0">
+
+                                </el-form-item>
+                                <div style="width:100%;height:40px">
+                                    <input id="input__mw" v-model="acrossChains.OKEx.rateMW" type ="text" disabled="disabled" />
+                                    <label id="input_unit">{{ $global.unit }}</label>
+                                    <label id="input__equals">=</label>
+                                    <input id="input__heco" v-model="acrossChains.OKEx.rateOKEx" type ="text" disabled="disabled" />
+                                    <label id="input_hecoUnit">{{ $global.OKExUnit }}</label>
+                                    <el-button  id="input_exchange" slot="append" @click="openExchangeDialog" :disabled="showChain">{{ $t('acrossChains.exchange') }}</el-button>
+                                </div>
                             </el-form>
+                            <!--ETH-->
                             <el-form class="mod" v-if="chainShow==3" >
+                                <el-form-item :label="$t('acrossChains.ETH_target_address')" class="item_address">
+                                    <el-input id="acrossChains_target_address" v-model="acrossChains.ETH.target_address" :placeholder="$t('acrossChains.ETH_address_tip')">
+                                        <el-button  slot="append" style="background: #3fb09a;color:#000" @click="bindAddress(3)" :disabled="showChain">{{ $t('acrossChains.bind') }}</el-button>
+                                    </el-input>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.ETH_target_balance')" class="item_balance">
+                                    <input class="el-input__inner" id="acrossChains_target_balance"  v-model="acrossChains.ETH.target_balance" type="number" disabled="disabled" />
+                                    <label class="input_suffix">{{ $global.ETHUnit }}</label>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.ETH_convertible_balance')" class="balance">
+                                    <input class="el-input__inner" id="acrossChains_balance" v-model="acrossChains.ETH.convertible_balance" type="number" disabled="disabled" />
+                                    <label class="input_suffix">{{ $global.ETHUnit }}</label>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.ETH_rate')" class="rate" style="margin-bottom:0">
+
+                                </el-form-item>
+                                <div style="width:100%;height:40px">
+                                    <input id="input__mw" v-model="acrossChains.ETH.rateMW" type ="text" disabled="disabled" />
+                                    <label id="input_unit">{{ $global.unit }}</label>
+                                    <label id="input__equals">=</label>
+                                    <input id="input__heco" v-model="acrossChains.ETH.rateETH" type ="text" disabled="disabled" />
+                                    <label id="input_hecoUnit">{{ $global.ETHUnit }}</label>
+                                    <el-button  id="input_exchange" slot="append" @click="openExchangeDialog" :disabled="showChain">{{ $t('acrossChains.exchange') }}</el-button>
+                                </div>
+                            </el-form>
+                            <!--Tron-->
+                            <el-form class="mod" v-if="chainShow==4" >
+                                <el-form-item :label="$t('acrossChains.Tron_target_address')" class="item_address">
+                                    <el-input id="acrossChains_target_address" v-model="acrossChains.Tron.target_address" :placeholder="$t('acrossChains.Tron_address_tip')">
+                                        <el-button  slot="append" style="background: #3fb09a;color:#000" @click="bindAddress(3)" :disabled="showChain">{{ $t('acrossChains.bind') }}</el-button>
+                                    </el-input>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.Tron_target_balance')" class="item_balance">
+                                    <input class="el-input__inner" id="acrossChains_target_balance"  v-model="acrossChains.Tron.target_balance" type="number" disabled="disabled" />
+                                    <label class="input_suffix">{{ $global.TronUnit }}</label>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.Tron_convertible_balance')" class="balance">
+                                    <input class="el-input__inner" id="acrossChains_balance" v-model="acrossChains.Tron.convertible_balance" type="number" disabled="disabled" />
+                                    <label class="input_suffix">{{ $global.TronUnit }}</label>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.Tron_rate')" class="rate" style="margin-bottom:0">
+
+                                </el-form-item>
+                                <div style="width:100%;height:40px">
+                                    <input id="input__mw" v-model="acrossChains.Tron.rateMW" type ="text" disabled="disabled" />
+                                    <label id="input_unit">{{ $global.unit }}</label>
+                                    <label id="input__equals">=</label>
+                                    <input id="input__heco" v-model="acrossChains.Tron.rateTron" type ="text" disabled="disabled" />
+                                    <label id="input_hecoUnit">{{ $global.TronUnit }}</label>
+                                    <el-button  id="input_exchange" slot="append" @click="openExchangeDialog" :disabled="showChain">{{ $t('acrossChains.exchange') }}</el-button>
+                                </div>
+                            </el-form>
+                            <!--BSC-->
+                            <el-form class="mod" v-if="chainShow==5" >
+                                <el-form-item :label="$t('acrossChains.BSC_target_address')" class="item_address">
+                                    <el-input id="acrossChains_target_address" v-model="acrossChains.BSC.target_address" :placeholder="$t('acrossChains.BSC_address_tip')">
+                                        <el-button  slot="append" style="background: #3fb09a;color:#000" @click="bindAddress(3)" :disabled="showChain">{{ $t('acrossChains.bind') }}</el-button>
+                                    </el-input>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.BSC_target_balance')" class="item_balance">
+                                    <input class="el-input__inner" id="acrossChains_target_balance"  v-model="acrossChains.BSC.target_balance" type="number" disabled="disabled" />
+                                    <label class="input_suffix">{{ $global.BSCUnit }}</label>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.BSC_convertible_balance')" class="balance">
+                                    <input class="el-input__inner" id="acrossChains_balance" v-model="acrossChains.BSC.convertible_balance" type="number" disabled="disabled" />
+                                    <label class="input_suffix">{{ $global.BSCUnit }}</label>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.BSC_rate')" class="rate" style="margin-bottom:0">
+
+                                </el-form-item>
+                                <div style="width:100%;height:40px">
+                                    <input id="input__mw" v-model="acrossChains.BSC.rateMW" type ="text" disabled="disabled" />
+                                    <label id="input_unit">{{ $global.unit }}</label>
+                                    <label id="input__equals">=</label>
+                                    <input id="input__heco" v-model="acrossChains.BSC.rateBSC" type ="text" disabled="disabled" />
+                                    <label id="input_hecoUnit">{{ $global.BSCUnit }}</label>
+                                    <el-button  id="input_exchange" slot="append" @click="openExchangeDialog" :disabled="showChain">{{ $t('acrossChains.exchange') }}</el-button>
+                                </div>
+                            </el-form>
+                            <el-form class="mod" v-if="chainShow==6" >
                                 {{$t('acrossChains.more')}}
                             </el-form>
                         </div>
@@ -1191,12 +1286,12 @@
                         <br>
 
                         {{$t('acrossChains.tip-2')}}
-                        <a>{{MWHecoExchangeAddress}}</a>
-                        {{$t('acrossChains.tip-3')}}{{chainShow == 1 ? "Heco" : "OKEx"}}
-                        {{$t('acrossChains.tip-4')}}{{chainShow == 1 ? "Heco" : "OKEx"}}
-                        {{$t('acrossChains.tip-5')}}{{chainShow == 1 ? "Heco" : "OKEx"}}
+                        <a>{{chainShow == 1 ? MWHecoExchangeAddress:chainShow == 2 ? MWOKExExchangeAddress : chainShow == 3 ? MWETHExchangeAddress : chainShow == 4 ? MWTronExchangeAddress : chainShow == 5 ? MWBSCExchangeAddress : ""}}</a>
+                        {{$t('acrossChains.tip-3')}}{{chainShow == 1 ? "Heco" : chainShow == 2 ? "OKEx" : chainShow == 3 ? "ETH" : chainShow == 4 ? "Tron" :  chainShow == 5 ? "BSC" : ""}}
+                        {{$t('acrossChains.tip-4')}}{{chainShow == 1 ? "Heco" : chainShow == 2 ? "OKEx" : chainShow == 3 ? "ETH" : chainShow == 4 ? "Tron" :  chainShow == 5 ? "BSC" : ""}}
+                        {{$t('acrossChains.tip-5')}}{{chainShow == 1 ? "Heco" : chainShow == 2 ? "OKEx" : chainShow == 3 ? "ETH" : chainShow == 4 ? "Tron" :  chainShow == 5 ? "BSC" : ""}}
                         {{$t('acrossChains.tip-6')}}
-                        <a>{{chainShow == 1 ? HecoExchangeAddress:OKExExchangeAddress}}</a>
+                        <a>{{chainShow == 1 ? HecoExchangeAddress:chainShow == 2 ? OKExExchangeAddress : chainShow == 3 ? ETHExchangeAddress : chainShow == 4 ? TronExchangeAddress : chainShow == 5 ? BSCExchangeAddress : ""}}</a>
                         {{$t('acrossChains.tip-7')}}
                         <br>
                         {{$t('acrossChains.tip-8')}}
@@ -1216,13 +1311,33 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <button class="close" @click="closeDialog"></button>
-                        <h4 class="modal-title">{{ $t('acrossChains.hmw_exchange_title') }}</h4>
+                        <h4 class="modal-title">{{ chainShow == 1 ? $t('acrossChains.hmw_exchange_title') : chainShow == 2 ? $t('acrossChains.omw_exchange_title') : chainShow == 3 ? $t('acrossChains.emw_exchange_title') : ""}}</h4>
                     </div>
                     <div class="modal-body modal-message">
                         <el-form>
-                            <el-form-item :label="$t('transfer.receiver')" class="item_receiver">
+                            <el-form-item :label="$t('transfer.receiver')" class="item_receiver" v-if="chainShow == 1">
                                 <masked-input id="tranfer_receiver" mask="AAA-****-****-****-*****"
-                                              v-model="MWHecoExchangeAddress"/>
+                                              v-model="MWHecoExchangeAddress" readonly />
+                                <img src="../../assets/img/account_directory.svg"/>
+                            </el-form-item>
+                            <el-form-item :label="$t('transfer.receiver')" class="item_receiver" v-else-if="chainShow == 2">
+                                <masked-input id="tranfer_receiver" mask="AAA-****-****-****-*****"
+                                              v-model="MWOKExExchangeAddress"  readonly />
+                                <img src="../../assets/img/account_directory.svg"/>
+                            </el-form-item>
+                            <el-form-item :label="$t('transfer.receiver')" class="item_receiver" v-else-if="chainShow == 3">
+                                <masked-input id="tranfer_receiver" mask="AAA-****-****-****-*****"
+                                              v-model="MWETHExchangeAddress"  readonly />
+                                <img src="../../assets/img/account_directory.svg"/>
+                            </el-form-item>
+                            <el-form-item :label="$t('transfer.receiver')" class="item_receiver" v-else-if="chainShow == 4">
+                                <masked-input id="tranfer_receiver" mask="AAA-****-****-****-*****"
+                                              v-model="MWTronExchangeAddress"  readonly />
+                                <img src="../../assets/img/account_directory.svg"/>
+                            </el-form-item>
+                            <el-form-item :label="$t('transfer.receiver')" class="item_receiver" v-else-if="chainShow == 5">
+                                <masked-input id="tranfer_receiver" mask="AAA-****-****-****-*****"
+                                              v-model="MWBSCExchangeAddress"  readonly />
                                 <img src="../../assets/img/account_directory.svg"/>
                             </el-form-item>
                             <el-form-item :label="$t('transfer.receiver_public_key')" v-if="transfer.hasPublicKey">
@@ -1273,13 +1388,14 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="content address">
-                        {{this.chainShow==1?$t('acrossChains.tipChian1'):$t('acrossChains.tipChian2')}}
-                        <a>{{this.chainShow==1?this.acrossChains.heco.target_address:this.acrossChains.OKEx.target_address}}</a>
+                        {{ chainShow==1 ? $t('acrossChains.tipChian1') : chainShow==2 ? $t('acrossChains.tipChian2') :　chainShow==3 ? $t('acrossChains.tipChian3'): chainShow==4 ? $t('acrossChains.tipChian4'): chainShow==5 ? $t('acrossChains.tipChian5'): ""}}
+                        <a>{{chainShow==1 ? acrossChains.heco.target_address: chainShow==2 ? acrossChains.OKEx.target_address : chainShow==3 ? acrossChains.ETH.target_address : chainShow==4 ? acrossChains.Tron.target_address : chainShow==5 ? acrossChains.BSC.target_address : ""}}</a>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <el-button  class="sureButton" v-if="chainShow==1" slot="append" style="color:#000" @click="bindHecoAddress()">{{ $t('acrossChains.sure') }}</el-button>
-                    <el-button  class="sureButton" v-else slot="append" style="color:#000" @click="bindOKExAddress()">{{ $t('acrossChains.sure') }}</el-button>
+                    <el-button  class="sureButton" v-else-if="chainShow==2" slot="append" style="color:#000" @click="bindOKExAddress()">{{ $t('acrossChains.sure') }}</el-button>
+                    <el-button  class="sureButton" v-else-if="chainShow==3" slot="append" style="color:#000" @click="bindETHAddress()">{{ $t('acrossChains.sure') }}</el-button>
                     <el-button  class="cancelButton" slot="append" style="color:#000" @click="cancel()">{{ $t('acrossChains.cancel') }}</el-button>
                 </div>
             </div>
@@ -1683,7 +1799,33 @@ export default {
                     target_address: '',
                     target_balance: 0,
                     old_address: '',
-                    convertible_balance:0
+                    convertible_balance:0,
+                    rateMW:10,
+                    rateOKEx:1
+                },
+                ETH:{
+                    target_address: '',
+                    target_balance: 0,
+                    old_address: '',
+                    convertible_balance:0,
+                    rateMW:10,
+                    rateETH:1
+                },
+                Tron:{
+                    target_address: '',
+                    target_balance: 0,
+                    old_address: '',
+                    convertible_balance:0,
+                    rateMW:10,
+                    rateETH:1
+                },
+                BSC:{
+                    target_address: '',
+                    target_balance: 0,
+                    old_address: '',
+                    convertible_balance:0,
+                    rateMW:10,
+                    rateETH:1
                 },
                 balance:0,
                 id:''
@@ -1691,11 +1833,30 @@ export default {
 
             chainShow:1,
 
-            MWHecoExchangeAddress:"CDW-XXXX-XXXX-XXXX-XXXX",
+            MWHecoExchangeAddress:"CDW-XXXX-XXXX-XXXX-Heco",
             MWHecoExchangeAddressPublicKey:"",
             MWTOHecoRate:10,
-            HecoExchangeAddress:"0x0000",
-            OKExExchangeAddress:"0x0000",
+            HecoExchangeAddress:"0x0Heco",
+
+            MWOKExExchangeAddress:"CDW-XXXX-XXXX-XXXX-OKEx",
+            MWOKExExchangeAddressPublicKey:"",
+            MWTOOKExRate:10,
+            OKExExchangeAddress:"0x0OKEx",
+
+            MWETHExchangeAddress:"CDW-XXXX-XXXX-XXXX-ETH",
+            MWETHExchangeAddressPublicKey:"",
+            MWTOETHRate:10,
+            ETHExchangeAddress:"0x0ETH",
+
+            MWTronExchangeAddress:"CDW-XXXX-XXXX-XXXX-Tron",
+            MWTronExchangeAddressPublicKey:"",
+            MWTOTronRate:10,
+            TronExchangeAddress:"0x0Tron",
+
+            MWBSCExchangeAddress:"CDW-XXXX-XXXX-XXXX-BSC",
+            MWBSCExchangeAddressPublicKey:"",
+            MWTOBSCRate:10,
+            BSCExchangeAddress:"0x0BSC",
 
             showChain:false,
 
@@ -2880,7 +3041,17 @@ export default {
                 return;
             }
             if(_this.transfer.receiver === _this.MWHecoExchangeAddress){
-                _this.$message.warning(_this.$t('acrossChains.no_MWLockAddress'));
+                _this.$message.warning(_this.$t('acrossChains.no_HMWExchangeAddress'));
+                _this.transfer.executing = false;
+                return;
+            }
+            if(_this.transfer.receiver === _this.MWOKExExchangeAddress){
+                _this.$message.warning(_this.$t('acrossChains.no_OMWExchangeAddress'));
+                _this.transfer.executing = false;
+                return;
+            }
+            if(_this.transfer.receiver === _this.MWETHExchangeAddress){
+                _this.$message.warning(_this.$t('acrossChains.no_EMWExchangeAddress'));
                 _this.transfer.executing = false;
                 return;
             }
@@ -3048,7 +3219,18 @@ export default {
          * 最大今日可兑换量
          */
         setMaxConvertibleBalance:function (){
-            this.transfer.exchangeNumber = this.acrossChains.heco.convertible_balance * this.MWTOHecoRate;
+            if(this.chainShow == 1){
+                this.transfer.exchangeNumber = this.acrossChains.heco.convertible_balance * this.MWTOHecoRate;
+            }else if(this.chainShow == 2){
+                this.transfer.exchangeNumber = this.acrossChains.OKEx.convertible_balance * this.MWTOOKExRate;
+            }else if(this.chainShow == 3){
+                this.transfer.exchangeNumber = this.acrossChains.ETH.convertible_balance * this.MWTOETHRate;
+            }else if(this.chainShow == 4){
+                this.transfer.exchangeNumber = this.acrossChains.Tron.convertible_balance * this.MWTOTronRate;
+            }else if(this.chainShow == 5){
+                this.transfer.exchangeNumber = this.acrossChains.BSC.convertible_balance * this.MWTOBSCRate;
+            }
+            
         },
         sendTransfer: function (formData) {
             const _this = this;
@@ -3245,6 +3427,27 @@ export default {
                     _this.MWHecoExchangeAddressPublicKey = res1.data.body.MWHecoExchangeAddressPublicKey;
                     _this.MWTOHecoRate = res1.data.body.MwHmwRate;
                     _this.HecoExchangeAddress = res1.data.body.HecoExchangeAddress;
+
+                    _this.MWOKExExchangeAddress = res1.data.body.MWOKExExchangeAddress;
+                    _this.MWOKExExchangeAddressPublicKey = res1.data.body.MWOKExExchangeAddressPublicKey;
+                    _this.MWTOOKExRate = res1.data.body.MwOKExRate;
+                    _this.OKExExchangeAddress = res1.data.body.OKExExchangeAddress;
+
+                    _this.MWETHExchangeAddress = res1.data.body.MWETHExchangeAddress;
+                    _this.MWETHExchangeAddressPublicKey = res1.data.body.MWETHExchangeAddressPublicKey;
+                    _this.MWTOETHRate = res1.data.body.MwETHRate;
+                    _this.ETHExchangeAddress = res1.data.body.ETHExchangeAddress;
+
+                    _this.MWTronExchangeAddress = res1.data.body.MWTronExchangeAddress;
+                    _this.MWTronExchangeAddressPublicKey = res1.data.body.MWTronExchangeAddressPublicKey;
+                    _this.MWTOTronRate = res1.data.body.MwTronRate;
+                    _this.TronExchangeAddress = res1.data.body.TronExchangeAddress;
+
+                    _this.MWBSCExchangeAddress = res1.data.body.MWBSCExchangeAddress;
+                    _this.MWBSCExchangeAddressPublicKey = res1.data.body.MWBSCExchangeAddressPublicKey;
+                    _this.MWTOBSCRate = res1.data.body.MwBSCRate;
+                    _this.BSCExchangeAddress = res1.data.body.BSCExchangeAddress;
+
                 }
             });
         },
@@ -3263,10 +3466,10 @@ export default {
                 return;
             }
 
-            if(!this.MWHecoExchangeAddressPublicKey){
-                _this.$message.info(_this.$t('acrossChains.not_yet_open'));
-                return;
-            }
+            // if(!this.MWHecoExchangeAddressPublicKey){
+            //     _this.$message.info(_this.$t('acrossChains.not_yet_open'));
+            //     return;
+            // }
             //发起网关请求，查找当前帐号绑定的信息
 
             var str = _this.$global.formatNQTMoney(_this.accountInfo.effectiveBalanceNQT, 2);
@@ -3277,13 +3480,32 @@ export default {
                     switch (res1.data.code) {
                         case "200":
                             var account = JSON.parse(res1.data.body[0]); ;
+
                             _this.acrossChains.heco.target_address = account.hecoAddress;
                             _this.acrossChains.heco.old_address = account.hecoAddress;
                             _this.acrossChains.heco.target_balance = account.hecoBalance / _this.$global.hecoUnitValue;
                             _this.acrossChains.heco.convertible_balance = account.hecoConvertibleQuantity / _this.$global.hecoUnitValue;
+
                             _this.acrossChains.OKEx.target_address = account.okExAddress;
                             _this.acrossChains.OKEx.old_address = account.okExAddress;
-                            _this.acrossChains.OKEx.convertible_balance = account.okExConvertibleQuantity;
+                            _this.acrossChains.OKEx.target_balance = account.OKExBalance / _this.$global.OKExUnitValue;
+                            _this.acrossChains.OKEx.convertible_balance = account.OKExConvertibleQuantity / _this.$global.OKExUnitValue;
+
+                            _this.acrossChains.ETH.target_address = account.ETHAddress;
+                            _this.acrossChains.ETH.old_address = account.ETHAddress;
+                            _this.acrossChains.ETH.target_balance = account.ETHBalance / _this.$global.ETHUnitValue;
+                            _this.acrossChains.ETH.convertible_balance = account.ETHConvertibleQuantity / _this.$global.ETHUnitValue;
+
+                            _this.acrossChains.Tron.target_address = account.TronAddress;
+                            _this.acrossChains.Tron.old_address = account.TronAddress;
+                            _this.acrossChains.Tron.target_balance = account.TronBalance / _this.$global.TronUnitValue;
+                            _this.acrossChains.Tron.convertible_balance = account.TronConvertibleQuantity / _this.$global.TronUnitValue;
+
+                            _this.acrossChains.BSC.target_address = account.BSCAddress;
+                            _this.acrossChains.BSC.old_address = account.BSCAddress;
+                            _this.acrossChains.BSC.target_balance = account.BSCBalance / _this.$global.BSCUnitValue;
+                            _this.acrossChains.BSC.convertible_balance = account.BSCConvertibleQuantity / _this.$global.BSCUnitValue;
+
                             _this.acrossChains.id = account.id;
 
                             _this.$store.state.mask = true;
@@ -3969,8 +4191,11 @@ export default {
         showOkExChain(){
             this.chainShow = 2;
         },
-        showMoreChain(){
+        showETHChain(){
             this.chainShow = 3;
+        },
+        showMoreChain(){
+            this.chainShow = 4;
         },
 
         bindAddress(){
@@ -3995,12 +4220,6 @@ export default {
                 return;
             }
 
-            // var web3Utils = require("web3-utils");
-            // console.log(web3Utils.isAddress(this.acrossChains.heco.target_address))
-            // if(!web3Utils.isAddress(this.acrossChains.heco.target_address)){
-            //     this.$message.warning(this.$t("acrossChains.notRightAddress"));
-            //     return;
-            // }
             if(this.acrossChains.heco.target_address == this.acrossChains.heco.old_address){
                 this.$message.warning(this.$t("acrossChains.sameAddress"));
                 return;
@@ -4045,11 +4264,11 @@ export default {
             this.preventRepeatedClick();
             this.showChain = false;
 
-            // var web3Utils = require("web3-utils");
-            // if(!web3Utils.isAddress(this.acrossChains.OKEx.target_address)){
-            //     this.$message.warning(this.$t("acrossChains.notRightAddress"));
-            //     return;
-            // }
+            if(typeof(this.secretPhrase)　=== 'undefined'){
+                this.$message.warning(this.$t("acrossChains.use_secretPhrase_tip"));
+                return;
+            }
+
             if(this.acrossChains.OKEx.target_address == this.acrossChains.OKEx.old_address){
                 this.$message.warning(this.$t("acrossChains.sameAddress"));
                 return;
@@ -4061,15 +4280,79 @@ export default {
             formData.append("accountId", _this.accountInfo.accountId);
             formData.append("publicKey", _this.accountInfo.publicKey);
             formData.append("accountRS", _this.accountInfo.accountRS);
-            formData.append("hecoAddress", _this.acrossChains.heco.target_address);
             formData.append("okExAddress", _this.acrossChains.OKEx.target_address);
             this.$http.post(window.api.saveOrupdateChainAccountUrl,formData)
                 .then(function (res1) {
-                    _this.$message.success(_this.$t('acrossChains.bindAddress_success_OKEx'));
-                    _this.acrossChains.OKEx.old_address = _this.acrossChains.OKEx.target_address;
+                    switch (res1.data.code) {
+                        case "200":
+                            _this.acrossChains.OKEx.old_address = _this.acrossChains.OKEx.target_address;
+                            _this.$message.success(_this.$t('acrossChains.bindAddress_success_OKEx'));
+                            break;
+                        case "209":
+                            _this.$message.warning(_this.$t('acrossChains.bindAddress_incomplete'));
+                            break;
+                        case "202":
+                            _this.$message.warning(_this.$t('acrossChains.address_error'));
+                            break;
+                        case "363":
+                            _this.$message.warning(_this.$t('acrossChains.bindAddress_double'));
+                            break;
+                        default:
+                            break;
+                    }
                 })
                 .catch(err => {
                     _this.$message.warning(_this.$t('acrossChains.bindAddress_fail_OKEx'));
+                });
+
+        },
+
+        /**
+         * 绑定ETH地址　
+         */
+        bindETHAddress(){
+            this.preventRepeatedClick();
+            this.showChain = false;
+
+            if(typeof(this.secretPhrase)　=== 'undefined'){
+                this.$message.warning(this.$t("acrossChains.use_secretPhrase_tip"));
+                return;
+            }
+
+            if(this.acrossChains.ETH.target_address == this.acrossChains.ETH.old_address){
+                this.$message.warning(this.$t("acrossChains.sameAddress"));
+                return;
+            }
+
+            const _this = this;
+            let formData = new FormData();
+            formData.append("id", _this.acrossChains.id);
+            formData.append("accountId", _this.accountInfo.accountId);
+            formData.append("publicKey", _this.accountInfo.publicKey);
+            formData.append("accountRS", _this.accountInfo.accountRS);
+            formData.append("ETHAddress", _this.acrossChains.ETH.target_address);
+            this.$http.post(window.api.saveOrupdateChainAccountUrl,formData)
+                .then(function (res1) {
+                    switch (res1.data.code) {
+                        case "200":
+                            _this.acrossChains.ETH.old_address = _this.acrossChains.ETH.target_address;
+                            _this.$message.success(_this.$t('acrossChains.bindAddress_success_ETH'));
+                            break;
+                        case "209":
+                            _this.$message.warning(_this.$t('acrossChains.bindAddress_incomplete'));
+                            break;
+                        case "202":
+                            _this.$message.warning(_this.$t('acrossChains.address_error'));
+                            break;
+                        case "363":
+                            _this.$message.warning(_this.$t('acrossChains.bindAddress_double'));
+                            break;
+                        default:
+                            break;
+                    }
+                })
+                .catch(err => {
+                    _this.$message.warning(_this.$t('acrossChains.bindAddress_fail_ETH'));
                 });
 
         }
