@@ -368,7 +368,6 @@
                 });
             },
             getData: function () {
-                console.log("getData ", Date.parse(new Date()).toString())
                 const _this = this;
                 // if(_this.i%30 === 0){
                 // _this.blocksLeft = SSO.blocksLeft;
@@ -405,7 +404,6 @@
                 });
             },
             getState: function () {
-                console.log("getState ", Date.parse(new Date()).toString())
                 const _this = this;
                 _this.$global.setBlockchainState(_this).then(res => {
                     _this.blockchainStatus = res.data;
@@ -427,7 +425,6 @@
                 let formData = new FormData();
                 let timestamp = Date.parse(new Date()).toString();
                 let signature = SSO.signBytes(converters.stringToHexString(timestamp), converters.stringToHexString(secret));
-                console.log("[signature] " + signature)
                 formData.append("signature", signature);
                 formData.append("message", timestamp);
                 return formData;

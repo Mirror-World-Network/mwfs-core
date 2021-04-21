@@ -673,8 +673,6 @@
                 <el-button v-show="($global.getSenderOrRecipient(transactionInfo) == MWLockAddress) || ($global.getSenderRSOrWo(transactionInfo) == MWLockAddress)" id="findTXInHecoChain"
                 @click="findTXInHecoChain(transactionInfo.fullHash)">{{$t('acrossChains.tx_in_HecoChain')}}</el-button>
             </div>
-
-
         </div>
     </div>
 </template>
@@ -1100,7 +1098,25 @@
                 if (subtype === 5) return _this.$root.$t("transaction.transaction_type_account");
             },
             downloadFile(row,column){
-                window.open(_this.$global.urlPrefix() + "?requestType=downloadStoredData&ssid="+row.fileInfo.ssid+"&filename="+row.fileInfo.name,"_blank");
+                // window.open(this.$global.urlPrefix() + "?requestType=downloadStoredData&ssid="+row.fileInfo.ssid+"&filename="+row.fileInfo.name,"_blank")
+                const img = new Image;
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                img.onload = function() {
+                    canvas.width = this.width;
+                    canvas.height = this.height;
+                    ctx.drawImage(this, 0, 0);
+
+                    const elt = document.createElement('a');
+                    elt.setAttribute('href', canvas.toDataURL('image/png'));
+                    elt.setAttribute('download', row.fileInfo.name);
+                    elt.style.display = 'none';
+                    document.body.appendChild(elt);
+                    elt.click();
+                    document.body.removeChild(elt);
+                };
+                img.crossOrigin = 'anonymous';
+                img.src = window.api.apiUrl + this.$global.urlPrefix() + "?requestType=downloadStoredData&ssid="+row.fileInfo.ssid+"&filename="+row.fileInfo.name;
             },
             findTXInHecoChain(fullHash){
                 const _this = this;

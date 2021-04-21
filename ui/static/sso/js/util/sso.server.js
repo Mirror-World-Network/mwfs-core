@@ -16,6 +16,7 @@
 /**
  * @depends {sso.js}
  */
+import globalVar from "../../../../src/utils/common";
 
 var NRS = (function (NRS, $, undefined) {
     var _password;
@@ -1604,7 +1605,7 @@ var NRS = (function (NRS, $, undefined) {
     function addAddressData (data) {
         if (typeof data === "object" && ("recipient" in data)) {
             var address = new NxtAddress();
-            if (global.projectReg.test(data.recipient)) {
+            if (globalVar.projectReg.test(data.recipient)) {
                 data.recipientRS = data.recipient;
                 if (address.set(data.recipient)) {
                     data.recipient = address.account_id();
