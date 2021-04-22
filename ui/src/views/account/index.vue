@@ -713,15 +713,6 @@
                         <el-input v-model="this.formatDiskCapacity()" :disabled="true"></el-input>
                     </el-form-item>
 
-                    <el-form-item :label="$t('hubsetting.sharder_account')" prop="sharderAccount"
-                                  v-if="!hubsetting.registerSiteAccount">
-                        <el-input v-model="userConfig.siteAccount" :placeholder="$t('hubsetting.sharder_account_des')"></el-input>
-                    </el-form-item>
-                    <el-form-item :label="$t('hubsetting.sharder_account_password')" prop="sharderPwd"
-                                  v-if="!hubsetting.registerSiteAccount">
-                        <el-input type="password" v-model="hubsetting.sharderPwd" @blur="checkSiteAccount"></el-input>
-                    </el-form-item>
-
                     <!-- register the new site account                   -->
 <!--                    <el-form-item :label="$t('hubsetting.register_sharder_account')">-->
 <!--                        <el-switch-->
@@ -769,6 +760,14 @@
                             active-color="#13ce66"
                             inactive-color="#ff4949">
                         </el-switch>
+                    </el-form-item>
+                    <el-form-item :label="$t('hubsetting.sharder_account')" prop="sharderAccount"
+                                  v-if="!hubsetting.registerSiteAccount && userConfig.permissionMode">
+                        <el-input v-model="userConfig.siteAccount" :placeholder="$t('hubsetting.sharder_account_des')"></el-input>
+                    </el-form-item>
+                    <el-form-item :label="$t('hubsetting.sharder_account_password')" prop="sharderPwd"
+                                  v-if="!hubsetting.registerSiteAccount && userConfig.permissionMode">
+                        <el-input type="password" v-model="hubsetting.sharderPwd" @blur="checkSiteAccount"></el-input>
                     </el-form-item>
                     <el-divider  v-if="userConfig.permissionMode"><i class="el-icon-caret-top"></i></el-divider>
                     <el-form-item :label="$t('hubsetting.factory_num')" prop="factoryNum"  v-if="userConfig.permissionMode">
@@ -3901,7 +3900,7 @@ export default {
             // return true;
             return this.secretPhrase
                 && !this.initHUb
-                && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center')
+                && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center' || this.userConfig.nodeType === 'Normal')
                 && this.userConfig.ssAddress === this.accountInfo.accountRS
                 && !this.$global.isOpenApiProxy();
         },

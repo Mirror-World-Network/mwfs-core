@@ -73,7 +73,6 @@
                 _this.$global.updateConf(res);
             });
 
-
             SSO.init();
         },
         methods: {

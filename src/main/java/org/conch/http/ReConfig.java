@@ -283,15 +283,20 @@ public final class ReConfig extends APIServlet.APIRequestHandler {
                 paramter.put("ip", new String[]{myAddress});
                 paramter.put("network", new String[]{Conch.getNetworkType()});
                 paramter.put("serialNum", new String[]{Conch.getSerialNum()});
-                paramter.put("tssAddress", new String[]{rsAddress});
+                paramter.put("bindRs", new String[]{rsAddress});
                 paramter.put("diskCapacity", new String[]{String.valueOf(Conch.systemInfo.getHardDiskSize())});
-                paramter.put("from", new String[]{"NodeInitialStage#Reconfig"});
-                BizParameterRequestWrapper reqWrapper = new BizParameterRequestWrapper(req, req.getParameterMap(), paramter);
+                paramter.put("type", new String[]{String.valueOf(req.getParameter("nodeType"))});
+                paramter.put("secretPhrase", new String[]{req.getParameter("sharder.HubBindPassPhrase")});
+                paramter.put("broadcast", new String[]{Boolean.TRUE.toString()});
+                paramter.put("deadline", new String[]{"10"});
+                paramter.put("feeNQT", new String[]{"0"});
+
+                BizParameterRequestWrapper reqWrapper = new BizParameterRequestWrapper(req, Maps.newHashMap(), paramter);
                 JSONStreamAware processRequest = PocTxApi.CreateNodeType.INSTANCE.processRequest(reqWrapper);
 
-                com.alibaba.fastjson.JSONObject responseObj =(com.alibaba.fastjson.JSONObject) JSONValue.parse(org.conch.util.JSON.toString(processRequest));
-                if (!responseObj.getBooleanValue(Constants.SUCCESS)) {
-                    throw new ConchException.NotValidException(responseObj.getString("data"));
+                JSONObject responseObj =(JSONObject) JSONValue.parse(org.conch.util.JSON.toString(processRequest));
+                if (!(Boolean) responseObj.get(Constants.SUCCESS)) {
+                    throw new ConchException.NotValidException((String) responseObj.get("data"));
                 }
             } else {
                 RestfulHttpClient.HttpClient client = RestfulHttpClient.getClient(SF_BIND_URL)
