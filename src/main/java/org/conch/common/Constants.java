@@ -450,7 +450,9 @@ public final class Constants {
     private static final String loadNetworkDefinition() {
 
         String networkInEnv = System.getProperty(RuntimeEnvironment.NETWORK_ARG);
-        if (StringUtils.isNotBlank(networkInEnv)) return networkInEnv;
+        if (StringUtils.isNotBlank(networkInEnv)) {
+            return networkInEnv;
+        }
 
         return networkInProperties;
     }

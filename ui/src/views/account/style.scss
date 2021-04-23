@@ -294,15 +294,17 @@
 
     .title li{
         display: inline-block;
-        border: 1px solid rgb(158, 158, 158);
+        // border: 1px solid rgb(158, 158, 158);
         background:  #ffffff;
         text-align: center;
-        width: 120px;
+        width: 80px;
         height: 30px;
         line-height: 30px;
         margin-right: -5px;
         color: #000;
-        cursor:pointer
+        cursor:pointer;
+        border: 1px solid #DCDFE6;
+        border-radius: 4px 0 0 4px;
     }
     .title .active{
         background:  #3fb09a;
@@ -318,7 +320,7 @@
         font-size: 14px;
         line-height: 20px;
     }
-    
+
     .input__rate{
         width: 40%;
         height: 40px;
@@ -336,7 +338,7 @@
         font-size: inherit;
     }
 
-    #input__mw{
+    .input__mw{
         width: 30%;
         height: 40px;
         border: 1px solid #ddd;
@@ -353,7 +355,7 @@
         font-size: inherit;
     }
 
-    #input__heco{
+    .input__heco{
         width: 30%;
         height: 40px;
         border: 1px solid #ddd;
@@ -370,7 +372,7 @@
         right: 137px;
     }
 
-    #input_unit{
+    .input_unit{
         position: absolute;
         left: 193px;
         color: #555;
@@ -380,7 +382,7 @@
         font-size: 14px;
     }
 
-    #input_hecoUnit{
+    .input_hecoUnit{
         position: absolute;
         right: 152px;
         color: #555;
@@ -390,14 +392,14 @@
         font-size: 14px;
     }
 
-    #input__equals{
+    .input__equals{
         position: absolute;
         margin:0px 65px;
         font-size: 30px;
         line-height: 40px;
     }
 
-    #input_exchange{
+    .input_exchange{
         position: absolute;
         right: 40px;
         width: 100px;
@@ -500,7 +502,7 @@
 }
 
 #MaxConvertibleBalance{
-    width: 70px;
+    width: 73px;
     font-size: 2px;
 }
 
