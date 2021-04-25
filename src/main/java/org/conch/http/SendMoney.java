@@ -65,8 +65,8 @@ public final class SendMoney extends CreateTransaction {
                 String content = response.getContent();
                 String code = (String)com.alibaba.fastjson.JSON.parseObject(content).get("code");
                 if(code.equals(rightCode)){
-
-                    com.alibaba.fastjson.JSONObject contentObj = com.alibaba.fastjson.JSON.parseObject((String) com.alibaba.fastjson.JSON.parseObject(content).get("body"));
+                    com.alibaba.fastjson.JSONObject contentObj =
+                            (JSONObject) com.alibaba.fastjson.JSON.parseObject(content).get("body");
                     com.alibaba.fastjson.JSONObject chainObj = null;
                     switch (chainId){
                         case "1":
@@ -89,8 +89,8 @@ public final class SendMoney extends CreateTransaction {
                     }
 
                     assert chainObj != null;
-                    String recipientId = (String) chainObj.get("CosRecipient");
-                    if(recipientId.equals(account.getId()+"")) {
+                    String CosRecipient = (String) chainObj.get("CosRecipient");
+                    if(CosRecipient.equals(account.getId()+"")) {
                         try {
                             response = RestfulHttpClient.getClient(url+"getDailyExchangeQuantity").get().request();
                             content = response.getContent();

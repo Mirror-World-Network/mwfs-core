@@ -2112,19 +2112,39 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
              * @Author peifeng
              */
             if(blockchain.getHeight() >= Constants.HECO_HEIGHT){
+                String rightCode = "200";
+                Map<String,String> chainIds = new HashMap<>();
+                chainIds.put("1","Heco");
+                chainIds.put("2","OKEx");
+                chainIds.put("3","ETH");
+                chainIds.put("4","Tron");
+                chainIds.put("5","BSC");
                 block.getTransactions().forEach(transaction -> {
                     if(transaction.getType().isType(TransactionType.TYPE_PAYMENT)){
                         String url = Constants.MGR_URL;
                         RestfulHttpClient.HttpResponse response = null;
                         try {
-                            response = RestfulHttpClient.getClient(url+"getHecoExchangeAddress").get().request();
+                            response = RestfulHttpClient.getClient(url+"getExchangeAddress").get().request();
                             String content = response.getContent();
-                            com.alibaba.fastjson.JSONObject contentObj = com.alibaba.fastjson.JSON.parseObject(content);
-                            String code = (String)contentObj.get("code");
-                            if(code.equals("200")){
-                                String recipientId = ((Long)contentObj.get("body")+"");
-                                if(recipientId.equals(transaction.getRecipientId()+"")) {
-                                    Map<String,String> params = new HashMap<>();
+                            String code = (String)com.alibaba.fastjson.JSON.parseObject(content).get("code");
+                            com.alibaba.fastjson.JSONObject contentObj = (com.alibaba.fastjson.JSONObject) com.alibaba.fastjson.JSON.parseObject(content).get("body");
+                            if(code.equals(rightCode)){
+                                com.alibaba.fastjson.JSONObject chainObj;
+                                Map<String,String> params = new HashMap<>(6);
+                                Boolean flag = false;
+
+                                for(Map.Entry<String, String> entry : chainIds.entrySet()){
+                                    if(!flag){
+                                        chainObj = contentObj.getJSONObject(entry.getValue());
+                                        if((transaction.getRecipientId()+"").equals(chainObj.getString("CosRecipient"))){
+                                            params.put("chainId",entry.getKey());
+                                            flag = true;
+                                        }
+                                    }
+                                }
+
+
+                                if(flag){
                                     params.put("accountId",transaction.getSenderId()+"");
                                     params.put("recordType","1");
                                     params.put("amount",transaction.getAmountNQT()+"");
@@ -2135,7 +2155,7 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                                         content = response.getContent();
                                         contentObj = com.alibaba.fastjson.JSON.parseObject(content);
                                         code = (String)contentObj.get("code");
-                                        if(code.equals("200")){
+                                        if(code.equals(rightCode)){
                                             Logger.logInfoMessage("Heco chain: Record save success");
                                         }else{
                                             com.alibaba.fastjson.JSONObject body = com.alibaba.fastjson.JSON.parseObject((String)contentObj.get("body"));;
