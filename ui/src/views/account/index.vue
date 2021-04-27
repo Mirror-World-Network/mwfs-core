@@ -498,7 +498,8 @@
             >
             </el-option>
           </el-select>
-          <el-select id="exchangeSelectType"
+          <el-select
+            id="exchangeSelectType"
             v-model="exchangeSelectType"
             :placeholder="$t('transaction.transaction_type_exchange')"
           >
@@ -1975,9 +1976,9 @@
               <li :class="chainId === 3 ? 'active' : ''" @click="showChains(3)">
                 <a>ETH</a>
               </li>
-              <li :class="chainId === 4 ? 'active' : ''" @click="showChains(4)">
+              <!-- <li :class="chainId === 4 ? 'active' : ''" @click="showChains(4)">
                 <a>Tron</a>
-              </li>
+              </li> -->
               <li :class="chainId === 5 ? 'active' : ''" @click="showChains(5)">
                 <a>BSC</a>
               </li>
@@ -1989,7 +1990,7 @@
               <li :class="chainId === 1 ? 'active' : ''"><a>Heco</a></li>
               <li :class="chainId === 2 ? 'active' : ''"><a>OKEx</a></li>
               <li :class="chainId === 3 ? 'active' : ''"><a>ETH</a></li>
-              <li :class="chainId === 4 ? 'active' : ''"><a>Tron</a></li>
+              <!-- <li :class="chainId === 4 ? 'active' : ''"><a>Tron</a></li> -->
               <li :class="chainId === 5 ? 'active' : ''"><a>BSC</a></li>
               <li :class="chainId === 4 ? 'active' : ''"><a>...</a></li>
             </ul>
@@ -2960,14 +2961,14 @@ export default {
           value: 6,
           label: this.$t("transaction.transaction_type_emw_to_mw"),
         },
-        {
-          value: 7,
-          label: this.$t("transaction.transaction_type_mw_to_tmw"),
-        },
-        {
-          value: 8,
-          label: this.$t("transaction.transaction_type_tmw_to_mw"),
-        },
+        // {
+        //   value: 7,
+        //   label: this.$t("transaction.transaction_type_mw_to_tmw"),
+        // },
+        // {
+        //   value: 8,
+        //   label: this.$t("transaction.transaction_type_tmw_to_mw"),
+        // },
         {
           value: 9,
           label: this.$t("transaction.transaction_type_mw_to_bmw"),
@@ -3624,20 +3625,20 @@ export default {
       }
     },
     handleSizeChange(val) {
-        const _this = this;
-        if(_this.selectType != ""){
-            _this.getAccountTransactionList();
-        }else{
-            _this.getAccountExchangeTransactionList();
-        }
+      const _this = this;
+      if (_this.selectType != "") {
+        _this.getAccountTransactionList();
+      } else {
+        _this.getAccountExchangeTransactionList();
+      }
     },
     handleCurrentChange(val) {
-        const _this = this;
-        if(_this.selectType != ""){
-            _this.getAccountTransactionList();
-        }else{
-            _this.getAccountExchangeTransactionList();
-        }
+      const _this = this;
+      if (_this.selectType != "") {
+        _this.getAccountTransactionList();
+      } else {
+        _this.getAccountExchangeTransactionList();
+      }
     },
     displaySerialNo: function (clickType) {
       const _this = this;
@@ -5153,7 +5154,7 @@ export default {
       } else if (_this.selectType === 1) {
         params.append("type", "1");
         params.append("subtype", "0");
-      } 
+      }
 
       _this.loading = true;
       this.$http
@@ -5206,11 +5207,17 @@ export default {
       params.append("lastIndex", _this.currentPage * _this.pageSize - 1 - i);
 
       if (_this.exchangeSelectType === 1) {
-        params.append("recipientRS", _this.acrossChains.Heco.CosExchangeAddress);
+        params.append(
+          "recipientRS",
+          _this.acrossChains.Heco.CosExchangeAddress
+        );
       } else if (_this.exchangeSelectType === 2) {
         params.append("senderRS", _this.acrossChains.Heco.CosExchangeAddress);
       } else if (_this.exchangeSelectType === 3) {
-        params.append("recipientRS", _this.acrossChains.OKEx.CosExchangeAddress);
+        params.append(
+          "recipientRS",
+          _this.acrossChains.OKEx.CosExchangeAddress
+        );
       } else if (_this.exchangeSelectType === 4) {
         params.append("senderRS", _this.acrossChains.OKEx.CosExchangeAddress);
       } else if (_this.exchangeSelectType === 5) {
@@ -5218,14 +5225,17 @@ export default {
       } else if (_this.exchangeSelectType === 6) {
         params.append("senderRS", _this.acrossChains.ETH.CosExchangeAddress);
       } else if (_this.exchangeSelectType === 7) {
-        params.append("recipientRS", _this.acrossChains.Tron.CosExchangeAddress);
+        params.append(
+          "recipientRS",
+          _this.acrossChains.Tron.CosExchangeAddress
+        );
       } else if (_this.exchangeSelectType === 8) {
         params.append("senderRS", _this.acrossChains.Tron.CosExchangeAddress);
       } else if (_this.exchangeSelectType === 9) {
         params.append("recipientRS", _this.acrossChains.BSC.CosExchangeAddress);
       } else if (_this.exchangeSelectType === 10) {
         params.append("senderRS", _this.acrossChains.BSC.CosExchangeAddress);
-      } 
+      }
 
       _this.loading = true;
       this.$http
@@ -5406,7 +5416,7 @@ export default {
             switch (res1.data.code) {
               case "200":
                 var account = res1.data.body;
-                console.log(account);
+
                 _this.acrossChains.Heco.target_address = account.HecoAddress;
                 _this.acrossChains.Heco.old_address = account.HecoAddress;
                 _this.acrossChains.Heco.target_balance =
@@ -5414,8 +5424,8 @@ export default {
                 _this.acrossChains.Heco.convertible_balance =
                   account.HecoConvertibleQuantity / _this.$global.HecoUnitValue;
 
-                _this.acrossChains.OKEx.target_address = account.okExAddress;
-                _this.acrossChains.OKEx.old_address = account.okExAddress;
+                _this.acrossChains.OKEx.target_address = account.OKExAddress;
+                _this.acrossChains.OKEx.old_address = account.OKExAddress;
                 _this.acrossChains.OKEx.target_balance =
                   account.OKExBalance / _this.$global.OKExUnitValue;
                 _this.acrossChains.OKEx.convertible_balance =
@@ -5443,6 +5453,8 @@ export default {
                   account.BSCConvertibleQuantity / _this.$global.BSCUnitValue;
 
                 _this.acrossChains.id = account.id;
+
+                console.log(_this.acrossChains);
 
                 _this.$store.state.mask = true;
                 _this.AssetsAcrossChainsDialog = true;
@@ -5472,6 +5484,42 @@ export default {
     openExchangeDialog: function () {
       if (SSO.downloadingBlockchain) {
         return this.$message.warning(this.$t("account.synchronization_block"));
+      }
+
+      switch (this.chainId) {
+        case 1:
+          if (this.acrossChains.Heco.target_address === "") {
+            return this.$message.warning(
+              this.$t("acrossChains.no_HecoAddress")
+            );
+          }
+          break;
+        case 2:
+          if (this.acrossChains.OKEx.target_address === "") {
+            return this.$message.warning(
+              this.$t("acrossChains.no_OKExAddress")
+            );
+          }
+          break;
+        case 3:
+          if (this.acrossChains.ETH.target_address === "") {
+            return this.$message.warning(this.$t("acrossChains.no_ETHAddress"));
+          }
+          break;
+        case 4:
+          if (this.acrossChains.Tron.target_address === "") {
+            return this.$message.warning(
+              this.$t("acrossChains.no_TronAddress")
+            );
+          }
+          break;
+        case 5:
+          if (this.acrossChains.BSC.target_address === "") {
+            return this.$message.warning(this.$t("acrossChains.no_BSCAddress"));
+          }
+          break;
+        default:
+          break;
       }
       this.$store.state.mask = true;
       this.AssetsExchangeDialog = true;
@@ -6186,21 +6234,17 @@ export default {
         }
       });
     },
-
     showChains(_chainId) {
       this.chainId = _chainId;
     },
-
     bindAddress() {
       this.$store.state.mask = true;
       this.showChain = true;
     },
-
     cancel() {
       this.$store.state.mask = false;
       this.showChain = false;
     },
-
     bindChainAddress() {
       this.preventRepeatedClick();
       this.showChain = false;

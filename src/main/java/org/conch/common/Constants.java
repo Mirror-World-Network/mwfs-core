@@ -518,5 +518,14 @@ public final class Constants {
 
     public static final int HECO_HEIGHT = acrossChainsConf.getIntValue("HECO_HEIGHT");
 
+    public static final Map<String,String> chainIds = new HashMap<>();
+    static {
+        chainIds.put("1","Heco");
+        chainIds.put("2","OKEx");
+        chainIds.put("3","ETH");
+        chainIds.put("4","Tron");
+        chainIds.put("5","BSC");
+    }
+
 
 }

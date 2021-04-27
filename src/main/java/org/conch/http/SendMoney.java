@@ -67,35 +67,36 @@ public final class SendMoney extends CreateTransaction {
                 if(code.equals(rightCode)){
                     com.alibaba.fastjson.JSONObject contentObj =
                             (JSONObject) com.alibaba.fastjson.JSON.parseObject(content).get("body");
-                    com.alibaba.fastjson.JSONObject chainObj = null;
+                    String chainStr = null;
                     switch (chainId){
                         case "1":
-                            chainObj = (JSONObject) contentObj.get("Heco");
+                            chainStr = contentObj.getString("Heco");
                             break;
                         case "2":
-                            chainObj = (JSONObject) contentObj.get("OKEx");
+                            chainStr = contentObj.getString("OKEx");
                             break;
                         case "3":
-                            chainObj = (JSONObject) contentObj.get("ETH");
+                            chainStr = contentObj.getString("ETH");
                             break;
                         case "4":
-                            chainObj = (JSONObject) contentObj.get("Tron");
+                            chainStr = contentObj.getString("Tron");
                             break;
                         case "5":
-                            chainObj = (JSONObject) contentObj.get("BSC");
+                            chainStr = contentObj.getString("BSC");
                             break;
                         default:
                             break;
                     }
 
-                    assert chainObj != null;
-                    String CosRecipient = (String) chainObj.get("CosRecipient");
+                    assert chainStr != null;
+                    String CosRecipient = (String) JSONObject.parseObject(chainStr).get("CosRecipient");
                     if(CosRecipient.equals(account.getId()+"")) {
                         try {
                             response = RestfulHttpClient.getClient(url+"getDailyExchangeQuantity").get().request();
                             content = response.getContent();
                             contentObj = (JSONObject) com.alibaba.fastjson.JSON.parseObject(content).get("body");
                             code = (String) com.alibaba.fastjson.JSON.parseObject(content).get("code");
+                            JSONObject chainObj = null;
                             if(code.equals(rightCode)){
                                 switch (chainId){
                                     case "1":

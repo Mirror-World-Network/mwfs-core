@@ -11,9 +11,9 @@ const SHARDER_URL = process.env.NODE_ENV === 'development' ? "http://localhost:8
 // const MGR_URL = process.env.NODE_ENV === 'development' ? "http://192.168.3.247:8080" : "https://mw.run/admin"; 
 const MGR_URL = process.env.NODE_ENV === 'development' ? "http://127.0.0.1:8080" : "https://mw.run/admin"; 
 const HECO_URL = process.env.NODE_ENV === 'development' ? "https://testnet.hecoinfo.com/" : "https://hecoinfo.com/";
-const OKEX_URL = process.env.NODE_ENV === 'development' ? "https://testnet.hecoinfo.com" : "https://hecoinfo.com";
+const OKEX_URL = process.env.NODE_ENV === 'development' ? "https://www.oklink.com/okexchain-test/" : "https://www.oklink.com/okexchain/";
 const ETH_URL = process.env.NODE_ENV === 'development' ? "https://api-ropsten.etherscan.io/" : "https://api.etherscan.io/";
-const TRON_URL = process.env.NODE_ENV === 'development' ? "https://api.shasta.trongrid.io/" : "https://api.trongrid.io/";
+// const TRON_URL = process.env.NODE_ENV === 'development' ? "https://api.shasta.trongrid.io/" : "https://api.trongrid.io/";
 const BSC_URL = process.env.NODE_ENV === 'development' ? "https://api-testnet.bscscan.com/" : "https://api.bscscan.com/";
 
 
@@ -45,7 +45,7 @@ const api = {
     getHecoInfo:HECO_URL + "tx/",
     getOKExInfo:OKEX_URL + "tx/",
     getETHInfo:ETH_URL + "tx/",
-    getTronInfo:TRON_URL + "wallet/gettransactioninfobyid",
+    // getTronInfo:TRON_URL + "wallet/gettransactioninfobyid",
     getBSCInfo:BSC_URL + "tx/"
 };
 window.api = api;

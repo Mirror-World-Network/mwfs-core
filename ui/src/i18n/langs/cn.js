@@ -124,6 +124,7 @@ const cn = {
         'bindAddress_success_Heco':"heco地址绑定成功",
         'bindAddress_fail_Heco':"heco地址绑定失败",
         'no_HMWExchangeAddress':"接受地址为heco兑换地址,请通过资产兑换页面进行转账",
+        'no_HecoAddress':"请先绑定Heco地址！！！",
         
         'OKEx_target_address':"OKEx地址",
         'OKEx_address_tip':"请输入OKEx地址",
@@ -135,6 +136,7 @@ const cn = {
         'bindAddress_success_OKEx':"OKEx地址绑定成功",
         'bindAddress_fail_OKEx':"OKEx地址绑定失败",
         'no_OMWExchangeAddress':"接受地址为OKEx兑换地址,请通过资产兑换页面进行转账",
+        'no_OKExAddress':"请先绑定OKEx地址！！！",
 
         'ETH_target_address':"ETH地址",
         'ETH_address_tip':"请输入ETH地址",
@@ -146,6 +148,7 @@ const cn = {
         'bindAddress_success_ETH':"ETH地址绑定成功",
         'bindAddress_fail_ETH':"ETH地址绑定失败",
         'no_EMWExchangeAddress':"接受地址为ETH兑换地址,请通过资产兑换页面进行转账",
+        'no_ETHAddress':"请先绑定ETH地址！！！",
 
         'Tron_target_address':"Tron地址",
         'Tron_address_tip':"请输入Tron地址",
@@ -157,6 +160,7 @@ const cn = {
         'bindAddress_success_Tron':"Tron地址绑定成功",
         'bindAddress_fail_Tron':"Tron地址绑定失败",
         'no_TMWExchangeAddress':"接受地址为Tron兑换地址,请通过资产兑换页面进行转账",
+        'no_TronAddress':"请先绑定Tron地址！！！",
 
         'BSC_target_address':"BSC地址",
         'BSC_address_tip':"请输入BSC地址",
@@ -168,6 +172,7 @@ const cn = {
         'bindAddress_success_BSC':"BSC地址绑定成功",
         'bindAddress_fail_BSC':"BSC地址绑定失败",
         'no_BMWExchangeAddress':"接受地址为BSC兑换地址,请通过资产兑换页面进行转账",
+        'no_BSCAddress':"请先绑定BSC地址！！！",
         
         'more':"敬请期待更多资产链！！！",
         'tip-0':"温馨提示：",

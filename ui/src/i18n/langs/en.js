@@ -123,6 +123,7 @@ const en = {
         'bindAddress_success_Heco':"Heco address bound successfully",
         'bindAddress_fail_Heco':"Heco address bound failed",
         'no_HMWExchangeAddress':"The acceptance address is heco exchange address, please transfer through the Asset Exchange page",
+        'no_HecoAddress':"Please bind the Heco address first! ! !",
 
         'OKEx_target_address':"OKEx address",
         'OKEx_address_tip':"Please input the address on the OKEx chain",
@@ -134,6 +135,7 @@ const en = {
         'bindAddress_success_OKEx':"OKEx address bound successfully",
         'bindAddress_fail_OKEx':"OKEx address bound failed",
         'no_OMWExchangeAddress':"The acceptance address is OKEx exchange address, please transfer through the Asset Exchange page",
+        'no_OKExAddress':"Please bind the OKEx address first! ! !",
 
         'ETH_target_address':"ETH address",
         'ETH_address_tip':"Please input the address on the ETH chain",
@@ -145,6 +147,7 @@ const en = {
         'bindAddress_success_ETH':"ETH address bound successfully",
         'bindAddress_fail_ETH':"ETH address bound failed",
         'no_EMWExchangeAddress':"The acceptance address is ETH exchange address, please transfer through the Asset Exchange page",
+        'no_ETHAddress':"Please bind the ETH address first! ! !",
 
         'Tron_target_address':"Tron address",
         'Tron_address_tip':"Please input the address on the Tron chain",
@@ -156,6 +159,7 @@ const en = {
         'bindAddress_success_Tron':"Tron address bound successfully",
         'bindAddress_fail_Tron':"Tron address bound failed",
         'no_TMWExchangeAddress':"The acceptance address is Tron exchange address, please transfer through the Asset Exchange page",
+        'no_TronAddress':"Please bind the Tron address first! ! !",
 
         'BSC_target_address':"BSC address",
         'BSC_address_tip':"Please input the address on the BSC chain",
@@ -167,9 +171,8 @@ const en = {
         'bindAddress_success_BSC':"BSC address bound successfully",
         'bindAddress_fail_BSC':"BSC address bound failed",
         'no_BMWExchangeAddress':"The acceptance address is BSC exchange address, please transfer through the Asset Exchange page",
+        'no_BSCAddress':"Please bind the BSC address first! ! !",
 
-        
-        
         'more':"Please look forward to more asset chains！！！",
         'tip-0':"reminder：",
         'tip-1':"1. If you need to transfer assets, please bind your target chain address first. If you do not bind, you will bear the loss;",
