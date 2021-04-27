@@ -261,6 +261,11 @@ public final class ReConfig extends APIServlet.APIRequestHandler {
         }
     }
 
+    public static boolean isNormalNodeUpdateSetting(HttpServletRequest req) {
+        return req.getParameter("adminPassword") != null
+                && Peer.Type.NORMAL.getSimpleName().equals(String.valueOf(req.getParameter("nodeType")));
+    }
+
     /**
      * send request to foundation to :
      * 1. bind addr to the machine
@@ -278,27 +283,7 @@ public final class ReConfig extends APIServlet.APIRequestHandler {
              */
             String myAddress = Convert.nullToEmpty(req.getParameter("sharder.myAddress"));
             if(Conch.systemInfo == null) GetNodeHardware.readSystemInfo();
-            if (!Conch.permissionMode) {
-                Map<String, String[]> paramter = Maps.newHashMap();
-                paramter.put("ip", new String[]{myAddress});
-                paramter.put("network", new String[]{Conch.getNetworkType()});
-                paramter.put("serialNum", new String[]{Conch.getSerialNum()});
-                paramter.put("bindRs", new String[]{rsAddress});
-                paramter.put("diskCapacity", new String[]{String.valueOf(Conch.systemInfo.getHardDiskSize())});
-                paramter.put("type", new String[]{String.valueOf(req.getParameter("nodeType"))});
-                paramter.put("secretPhrase", new String[]{req.getParameter("sharder.HubBindPassPhrase")});
-                paramter.put("broadcast", new String[]{Boolean.TRUE.toString()});
-                paramter.put("deadline", new String[]{"10"});
-                paramter.put("feeNQT", new String[]{"0"});
-
-                BizParameterRequestWrapper reqWrapper = new BizParameterRequestWrapper(req, Maps.newHashMap(), paramter);
-                JSONStreamAware processRequest = PocTxApi.CreateNodeType.INSTANCE.processRequest(reqWrapper);
-
-                JSONObject responseObj =(JSONObject) JSONValue.parse(org.conch.util.JSON.toString(processRequest));
-                if (!(Boolean) responseObj.get(Constants.SUCCESS)) {
-                    throw new ConchException.NotValidException((String) responseObj.get("data"));
-                }
-            } else {
+            if (Conch.isPermissionMode("true".equalsIgnoreCase(req.getParameter("permissionMode")) && !isNormalNodeUpdateSetting(req))) {
                 RestfulHttpClient.HttpClient client = RestfulHttpClient.getClient(SF_BIND_URL)
                         .post()
                         .addPostParam("sharderAccount", req.getParameter("sharderAccount"))
@@ -318,6 +303,27 @@ public final class ReConfig extends APIServlet.APIRequestHandler {
                 com.alibaba.fastjson.JSONObject responseObj = com.alibaba.fastjson.JSONObject.parseObject(verifyResponse.getContent());
                 if(!responseObj.getBooleanValue(Constants.SUCCESS)) {
                     throw new ConchException.NotValidException(responseObj.getString("data"));
+                }
+            } else {
+                Map<String, String[]> paramter = Maps.newHashMap();
+                paramter.put("ip", new String[]{myAddress});
+                paramter.put("network", new String[]{Conch.getNetworkType()});
+                paramter.put("serialNum", new String[]{Conch.getSerialNum()});
+                paramter.put("bindRs", new String[]{rsAddress});
+//                paramter.put("diskCapacity", new String[]{String.valueOf(Conch.systemInfo.getHardDiskSize())});
+                paramter.put("diskCapacity", new String[]{String.valueOf(0L)});
+                paramter.put("type", new String[]{String.valueOf(req.getParameter("nodeType"))});
+                paramter.put("secretPhrase", new String[]{req.getParameter("sharder.HubBindPassPhrase")});
+                paramter.put("broadcast", new String[]{Boolean.TRUE.toString()});
+                paramter.put("deadline", new String[]{"10"});
+                paramter.put("feeNQT", new String[]{"0"});
+
+                BizParameterRequestWrapper reqWrapper = new BizParameterRequestWrapper(req, Maps.newHashMap(), paramter);
+                JSONStreamAware processRequest = PocTxApi.CreateNodeType.INSTANCE.processRequest(reqWrapper);
+
+                JSONObject responseObj =(JSONObject) JSONValue.parse(org.conch.util.JSON.toString(processRequest));
+                if (!(Boolean) responseObj.get(Constants.SUCCESS)) {
+                    throw new ConchException.NotValidException((String) responseObj.get("data"));
                 }
             }
         }  catch (IOException | ConchException e) {

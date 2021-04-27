@@ -136,6 +136,10 @@ public final class Conch {
 
     public static boolean permissionMode = basicConf.getBooleanValue("PERMISSION_MODE");
 
+    public static boolean isPermissionMode(boolean permissionModeCondition) {
+        return Conch.permissionMode && permissionModeCondition;
+    }
+
     /**
      * Load the JSON configuration with respect to Constants
      */

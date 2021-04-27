@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.conch.http.ReConfig.isNormalNodeUpdateSetting;
+
 /**
  * create various of PoC transactions
  *
@@ -162,17 +164,13 @@ public abstract class PocTxApi {
             try {
                 Account account = Optional.ofNullable(ParameterParser.getSenderAccount(request))
                         .orElseThrow(() -> new ConchException.AccountControlException("account info can not be null!"));;
-                if (Conch.permissionMode) {
+                JSONObject nodeTypeJson = new JSONObject();
+                if (Conch.isPermissionMode("true".equalsIgnoreCase(request.getParameter("permissionMode")) && !isNormalNodeUpdateSetting(request))) {
                     Preconditions.checkArgument(UrlManager.validFoundationHost(request), "Not valid host! ONLY foundation domain can do this operation!");
                     Account.checkApiAutoTxAccount(Account.rsAccount(account.getId()));
-                }
-
-                JSONObject nodeTypeJson = new JSONObject();
-                if (Conch.permissionMode) {
                     String nodeTypeJsonStr = Https.getPostData(request);
                     nodeTypeJson = Optional.ofNullable(JSONObject.parseObject(nodeTypeJsonStr))
                             .orElseThrow(() -> new ConchException.NotValidException("node type info can not be null!"));
-
                 } else {
                     Map<String, String[]> nodeTypeJsonMap = request.getParameterMap();
                     for (Map.Entry<String, String[]> entry : nodeTypeJsonMap.entrySet()) {

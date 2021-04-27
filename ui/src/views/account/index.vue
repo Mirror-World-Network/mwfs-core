@@ -761,6 +761,8 @@
                             inactive-color="#ff4949">
                         </el-switch>
                     </el-form-item>
+                    <el-divider  v-if="userConfig.permissionMode"><i class="el-icon-caret-top"></i></el-divider>
+
                     <el-form-item :label="$t('hubsetting.sharder_account')" prop="sharderAccount"
                                   v-if="!hubsetting.registerSiteAccount && userConfig.permissionMode">
                         <el-input v-model="userConfig.siteAccount" :placeholder="$t('hubsetting.sharder_account_des')"></el-input>
@@ -769,7 +771,6 @@
                                   v-if="!hubsetting.registerSiteAccount && userConfig.permissionMode">
                         <el-input type="password" v-model="hubsetting.sharderPwd" @blur="checkSiteAccount"></el-input>
                     </el-form-item>
-                    <el-divider  v-if="userConfig.permissionMode"><i class="el-icon-caret-top"></i></el-divider>
                     <el-form-item :label="$t('hubsetting.factory_num')" prop="factoryNum"  v-if="userConfig.permissionMode">
                         <el-input v-model="userConfig.factoryNum" :placeholder="$t('hubsetting.factory_des')" ></el-input>
                     </el-form-item>
@@ -850,10 +851,10 @@
                         <el-input v-model="this.formatDiskCapacity()" :disabled="true"></el-input>
                     </el-form-item>
 
-                    <el-form-item :label="$t('hubsetting.sharder_account')" prop="sharderAccount">
+                    <el-form-item :label="$t('hubsetting.sharder_account')" prop="sharderAccount" v-if="userConfig.permissionModeDisplay && userConfig.nodeType != 'Normal'">
                         <el-input v-model="userConfig.siteAccount"></el-input>
                     </el-form-item>
-                    <el-form-item :label="$t('hubsetting.sharder_account_password')" prop="sharderPwd">
+                    <el-form-item :label="$t('hubsetting.sharder_account_password')" prop="sharderPwd" v-if="userConfig.permissionModeDisplay && userConfig.nodeType != 'Normal'">
                         <el-input type="password" v-model="hubsetting.sharderPwd" @blur="checkSiteAccount"></el-input>
                     </el-form-item>
                     <el-form-item :label="$t('hubsetting.nat_traversal_address')" v-if="hubsetting.openPunchthrough">
@@ -2145,6 +2146,7 @@ export default {
             formData.append('registerStatus', _this.hubsetting.register_status);
             formData.append('nodeType', _this.userConfig.nodeType);
             formData.append("factoryNum", this.userConfig.factoryNum);
+            formData.append("permissionMode", this.userConfig.permissionMode);
 
             // nat settings
             if (_this.hubsetting.openPunchthrough) {
@@ -2210,6 +2212,10 @@ export default {
                 } else {
                     formData.append("newAdminPassword", _this.hubsetting.newPwd);
                 }
+            }
+            if (_this.userConfig.permissionMode && _this.userConfig.factoryNum == null && _this.operationType == 'init') {
+                _this.$message.warning(_this.$t('notification.hubsetting_factory_null'));
+                return false;
             }
             return formData;
         },
@@ -3076,9 +3082,6 @@ export default {
         sendTransfer: function (formData) {
             const _this = this;
             SSO.sendMoney(formData, function (res) {
-                console.log("res", res);
-                this.acrossChains.heco.convertible_balance -= this.transfer.exchangeNumber / 10;
-                 this.acrossChains.heco.target_balance += this.transfer.exchangeNumber * 10;
                 if (typeof res.errorDescription === 'undefined') {
                     if (res.broadcasted) {
                         _this.$message.success(_this.$t('notification.transfer_success'));

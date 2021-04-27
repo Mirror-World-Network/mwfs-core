@@ -40,7 +40,6 @@
     "PERMISSION_MODE": true
   },
   "feature": {
-    "QUICK_AUTH": true,
     "OPEN_HOLDINGS_COIN_API": true
   },
   "port": {
