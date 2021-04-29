@@ -379,16 +379,15 @@
               </span>
               <span>{{ $t("login.config_nat_server") }}</span>
             </button>
-
             <button
-              class="common_btn imgBtn"
+              class="common_btn imgBtn exchange"
               v-bind:class="{
                 disabledWriteBtn: !nonDownloading,
                 writeBtn: nonDownloading,
               }"
               v-if="whetherShowAssetsAcrossChainsBtn()"
               @click="openAssetsAcrossChainsDialog"
-              style="width: 150px"
+              style="width: 135px"
             >
               <span class="icon" style="color: #a6a9ad">
                 <svg
@@ -499,6 +498,7 @@
             </el-option>
           </el-select>
           <el-select
+            class="exchange"
             id="exchangeSelectType"
             v-model="exchangeSelectType"
             :placeholder="$t('transaction.transaction_type_exchange')"
@@ -1954,7 +1954,7 @@
 
     <!-- AssetsAcrossChainsDialog -->
     <div
-      class="modal"
+      class="modal exchange"
       id="assets_across_chains_modal"
       v-show="AssetsAcrossChainsDialog"
       v-bind:class="{ 'modal-hidden': showChain }"
@@ -2470,6 +2470,23 @@
             <br />
 
             {{ $t("acrossChains.tip-9") }}
+            <br />
+            {{ $t("acrossChains.tip-10") }}
+            <a>
+              {{
+                chainId === 1
+                  ? acrossChains.Heco.contractAddress
+                  : chainId === 2
+                  ? acrossChains.OKEx.contractAddress
+                  : chainId === 3
+                  ? acrossChains.ETH.contractAddress
+                  : chainId === 4
+                  ? acrossChains.Tron.contractAddress
+                  : chainId === 5
+                  ? acrossChains.BSC.contractAddress
+                  : ""
+              }}
+            </a>
           </div>
         </div>
       </div>
@@ -3214,6 +3231,7 @@ export default {
           CosExchangeAddressPublicKey: "",
           CosExchangeRate: 10,
           ExchangeAddress: "0x0Heco",
+          contractAddress: "0x0000Heco",
         },
         OKEx: {
           target_address: "",
@@ -3226,6 +3244,7 @@ export default {
           CosExchangeAddressPublicKey: "",
           CosExchangeRate: 10,
           ExchangeAddress: "0x0OKEx",
+          contractAddress: "0x0000OKEx",
         },
         ETH: {
           target_address: "",
@@ -3238,6 +3257,7 @@ export default {
           CosExchangeAddressPublicKey: "",
           CosExchangeRate: 10,
           ExchangeAddress: "0x0ETH",
+          contractAddress: "0x0000ETH",
         },
         Tron: {
           target_address: "",
@@ -3250,6 +3270,7 @@ export default {
           CosExchangeAddressPublicKey: "",
           CosExchangeRate: 10,
           ExchangeAddress: "0x0Tron",
+          contractAddress: "0x0000Tron",
         },
         BSC: {
           target_address: "",
@@ -3262,6 +3283,7 @@ export default {
           CosExchangeAddressPublicKey: "",
           CosExchangeRate: 10,
           ExchangeAddress: "0x0BSC",
+          contractAddress: "0x0000BSC",
         },
         balance: 0,
         id: "",
@@ -5349,6 +5371,7 @@ export default {
             result.Heco.CosExchangeAddressPublicKey;
           _this.acrossChains.Heco.CosExchangeRate = result.Heco.CosExchangeRate;
           _this.acrossChains.Heco.ExchangeAddress = result.Heco.ExchangeAddress;
+          _this.acrossChains.Heco.contractAddress = result.Heco.contractAddress;
 
           _this.acrossChains.OKEx.CosExchangeAddress =
             result.OKEx.CosExchangeAddress;
@@ -5356,6 +5379,7 @@ export default {
             result.OKEx.CosExchangeAddressPublicKey;
           _this.acrossChains.OKEx.CosExchangeRate = result.OKEx.CosExchangeRate;
           _this.acrossChains.OKEx.ExchangeAddress = result.OKEx.ExchangeAddress;
+          _this.acrossChains.OKEx.contractAddress = result.OKEx.contractAddress;
 
           _this.acrossChains.ETH.CosExchangeAddress =
             result.ETH.CosExchangeAddress;
@@ -5363,6 +5387,7 @@ export default {
             result.ETH.CosExchangeAddressPublicKey;
           _this.acrossChains.ETH.CosExchangeRate = result.ETH.CosExchangeRate;
           _this.acrossChains.ETH.ExchangeAddress = result.ETH.ExchangeAddress;
+          _this.acrossChains.ETH.contractAddress = result.ETH.contractAddress;
 
           _this.acrossChains.Tron.CosExchangeAddress =
             result.Tron.CosExchangeAddress;
@@ -5370,6 +5395,7 @@ export default {
             result.Tron.CosExchangeAddressPublicKey;
           _this.acrossChains.Tron.CosExchangeRate = result.Tron.CosExchangeRate;
           _this.acrossChains.Tron.ExchangeAddress = result.Tron.ExchangeAddress;
+          _this.acrossChains.Tron.contractAddress = result.Tron.contractAddress;
 
           _this.acrossChains.BSC.CosExchangeAddress =
             result.BSC.CosExchangeAddress;
@@ -5377,6 +5403,7 @@ export default {
             result.BSC.CosExchangeAddressPublicKey;
           _this.acrossChains.BSC.CosExchangeRate = result.BSC.CosExchangeRate;
           _this.acrossChains.BSC.ExchangeAddress = result.BSC.ExchangeAddress;
+          _this.acrossChains.BSC.contractAddress = result.BSC.contractAddress;
         }
       });
     },
@@ -6304,8 +6331,57 @@ export default {
       }
 
       const _this = this;
+      if (
+        _this.acrossChains.Heco.target_address ==
+          _this.acrossChains.Heco.CosExchangeAddress &&
+        _this.acrossChains.Heco.target_address ==
+          _this.acrossChains.OKEx.CosExchangeAddress &&
+        _this.acrossChains.Heco.target_address ==
+          _this.acrossChains.ETH.CosExchangeAddress &&
+        _this.acrossChains.Heco.target_address ==
+          _this.acrossChains.Tron.CosExchangeAddress &&
+        _this.acrossChains.Heco.target_address ==
+          _this.acrossChains.BSC.CosExchangeAddress &&
+        _this.acrossChains.OKEx.target_address ==
+          _this.acrossChains.Heco.CosExchangeAddress &&
+        _this.acrossChains.OKEx.target_address ==
+          _this.acrossChains.OKEx.CosExchangeAddress &&
+        _this.acrossChains.OKEx.target_address ==
+          _this.acrossChains.ETH.CosExchangeAddress &&
+        _this.acrossChains.OKEx.target_address ==
+          _this.acrossChains.Tron.CosExchangeAddress &&
+        _this.acrossChains.OKEx.target_address ==
+          _this.acrossChains.BSC.CosExchangeAddress &&
+        _this.acrossChains.ETH.target_address ==
+          _this.acrossChains.Heco.CosExchangeAddress &&
+        _this.acrossChains.ETH.target_address ==
+          _this.acrossChains.OKEx.CosExchangeAddress &&
+        _this.acrossChains.ETH.target_address ==
+          _this.acrossChains.ETH.CosExchangeAddress &&
+        _this.acrossChains.ETH.target_address ==
+          _this.acrossChains.Tron.CosExchangeAddress &&
+        _this.acrossChains.ETH.target_address ==
+          _this.acrossChains.BSC.CosExchangeAddress &&
+        _this.acrossChains.BSC.target_address ==
+          _this.acrossChains.Heco.CosExchangeAddress &&
+        _this.acrossChains.BSC.target_address ==
+          _this.acrossChains.OKEx.CosExchangeAddress &&
+        _this.acrossChains.BSC.target_address ==
+          _this.acrossChains.ETH.CosExchangeAddress &&
+        _this.acrossChains.BSC.target_address ==
+          _this.acrossChains.Tron.CosExchangeAddress &&
+        _this.acrossChains.BSC.target_address ==
+          _this.acrossChains.BSC.CosExchangeAddress
+      ) {
+        _this.$message.warning(_this.$t("acrossChains.address_error"));
+        return;
+      }
+      _this.acrossChains.Heco.target_address;
+
       let formData = new FormData();
       formData.append("accountRS", _this.accountInfo.accountRS);
+      formData.append("accountId", _this.accountInfo.accountId);
+      formData.append("publicKey", _this.accountInfo.publicKey);
       switch (_this.chainId) {
         case 1:
           formData.append("Address", _this.acrossChains.Heco.target_address);

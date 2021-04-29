@@ -58,6 +58,7 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.sql.*;
 import java.util.*;
+import java.util.Date;
 import java.util.concurrent.*;
 
 /**
@@ -2139,12 +2140,11 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
                                         }
                                     }
 
-
                                     if(flag){
                                         params.put("accountId",transaction.getSenderId()+"");
                                         params.put("recordType","1");
                                         params.put("amount",transaction.getAmountNQT()+"");
-                                        params.put("createDate",transaction.getTimestamp()+"");
+                                        params.put("createDate",new Date().toString());
                                         params.put("SourceTransactionHash",transaction.getFullHash());
                                         try {
                                             response = RestfulHttpClient.getClient(url+"saveRecord").post().postParams(params).request();
