@@ -75,6 +75,6 @@
     ]
   },
   "acrossChains": {
-    "MGR_URL": "https://mw.run/admin/api/front/acrossChain/"
+    "MGR_URL": "http://127.0.0.1:8080/api/front/acrossChain/"
   }
 }

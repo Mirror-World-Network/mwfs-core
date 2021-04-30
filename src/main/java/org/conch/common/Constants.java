@@ -450,7 +450,9 @@ public final class Constants {
     private static final String loadNetworkDefinition() {
 
         String networkInEnv = System.getProperty(RuntimeEnvironment.NETWORK_ARG);
-        if (StringUtils.isNotBlank(networkInEnv)) return networkInEnv;
+        if (StringUtils.isNotBlank(networkInEnv)) {
+            return networkInEnv;
+        }
 
         return networkInProperties;
     }
@@ -515,6 +517,15 @@ public final class Constants {
     public static final String MGR_URL = acrossChainsConf.getString("MGR_URL");
 
     public static final int HECO_HEIGHT = acrossChainsConf.getIntValue("HECO_HEIGHT");
+
+    public static final Map<String,String> chainIds = new HashMap<>();
+    static {
+        chainIds.put("1","Heco");
+        chainIds.put("2","OKEx");
+        chainIds.put("3","ETH");
+        chainIds.put("4","Tron");
+        chainIds.put("5","BSC");
+    }
 
 
 }

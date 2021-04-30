@@ -1,21 +1,14 @@
 package org.conch;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
-import org.conch.account.Account;
-import org.conch.common.Constants;
-import org.conch.util.RestfulHttpClient;
 
 import java.io.*;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import java.util.Map;
 
 
 public class Test {
@@ -172,5 +165,16 @@ public class Test {
 //                return;
 //            }
 //        }
+
+        Map<String,String> chainIds = new HashMap<>();
+        chainIds.put("1","Heco");
+        chainIds.put("2","OKEx");
+        chainIds.put("3","ETH");
+        chainIds.put("4","Tron");
+        chainIds.put("5","BSC");
+        chainIds.entrySet().forEach(chainId ->{
+            System.out.println(chainId.getKey());
+            System.out.println(chainId.getValue());
+        });
     }
 }

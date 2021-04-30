@@ -8,8 +8,14 @@ const SERVER_API = "http://localhost:7216";
 const SERVER_API_DEV = "http://localhost:9216";
 const SERVER_API_TEST = "http://localhost:7216";
 const SHARDER_URL = process.env.NODE_ENV === 'development' ? "http://localhost:8080" : (global.projectName === 'mw' ? "https://mw.run" : "https://sharder.org");
-const MGR_URL = process.env.NODE_ENV === 'development' ? "http://192.168.0.104:8080" : "https://mw.run/admin";
-const HECO_URL = process.env.NODE_ENV === 'development' ? "https://testnet.hecoinfo.com" : "https://hecoinfo.com";
+// const MGR_URL = process.env.NODE_ENV === 'development' ? "http://192.168.3.247:8080" : "https://mw.run/admin"; 
+const MGR_URL = process.env.NODE_ENV === 'development' ? "http://127.0.0.1:8080" : "https://mw.run/admin"; 
+const HECO_URL = process.env.NODE_ENV === 'development' ? "https://testnet.hecoinfo.com/" : "https://hecoinfo.com/";
+const OKEX_URL = process.env.NODE_ENV === 'development' ? "https://www.oklink.com/okexchain-test/" : "https://www.oklink.com/okexchain/";
+const ETH_URL = process.env.NODE_ENV === 'development' ? "https://api-ropsten.etherscan.io/" : "https://api.etherscan.io/";
+// const TRON_URL = process.env.NODE_ENV === 'development' ? "https://api.shasta.trongrid.io/" : "https://api.trongrid.io/";
+const BSC_URL = process.env.NODE_ENV === 'development' ? "https://api-testnet.bscscan.com/" : "https://api.bscscan.com/";
+
 
 function getUrl() {
     if (window.location.port === '4000') {
@@ -36,7 +42,11 @@ const api = {
     getAddress: MGR_URL + "/api/front/acrossChain/getAddress",
 
     //查询heco交易信息
-    getHecoInfo:HECO_URL + "/tx/"
+    getHecoInfo:HECO_URL + "tx/",
+    getOKExInfo:OKEX_URL + "tx/",
+    getETHInfo:ETH_URL + "tx/",
+    // getTronInfo:TRON_URL + "wallet/gettransactioninfobyid",
+    getBSCInfo:BSC_URL + "tx/"
 };
 window.api = api;
 
