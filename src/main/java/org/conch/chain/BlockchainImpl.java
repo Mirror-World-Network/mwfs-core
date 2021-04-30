@@ -827,10 +827,15 @@ public final class BlockchainImpl implements Blockchain {
             if (executedOnly && !nonPhasedOnly) {
                 buf.append(" LEFT JOIN phasing_poll_result ON transaction.id = phasing_poll_result.id ");
             }
+
             buf.append("WHERE recipient_id = ? AND sender_id <> ? ");
-            if(!StringUtils.isNullOrEmpty(recipientRS)){
+            if(!StringUtils.isNullOrEmpty(recipientRS)) {
                 buf.append("AND transaction.recipient_id = ? ");
             }
+            if(!StringUtils.isNullOrEmpty(senderRS)){
+                buf.append("AND transaction.sender_id = ? ");
+            }
+
             if (blockTimestamp > 0) {
                 buf.append("AND block_timestamp >= ? ");
             }
@@ -898,10 +903,14 @@ public final class BlockchainImpl implements Blockchain {
             PreparedStatement pstmt;
             int i = 0;
             pstmt = con.prepareStatement(buf.toString());
+
             pstmt.setLong(++i, accountId);
             pstmt.setLong(++i, accountId);
             if(!StringUtils.isNullOrEmpty(recipientRS)){
                 pstmt.setLong(++i, Account.rsAccountToId(recipientRS));
+            }
+            if(!StringUtils.isNullOrEmpty(senderRS)){
+                pstmt.setLong(++i, Account.rsAccountToId(senderRS));
             }
             if (blockTimestamp > 0) {
                 pstmt.setInt(++i, blockTimestamp);
