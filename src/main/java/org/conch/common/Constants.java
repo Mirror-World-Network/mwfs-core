@@ -282,6 +282,7 @@ public final class Constants {
     public static int NONE_PUBLICKEY_ACTIVE_HEIGHT = 0;
     public static int BLOCK_REWARD_VERIFY_HEIGHT = 0;
     public static int MINER_REMOVE_HIGHT = 0;
+    public static int HECO_HEIGHT = 0;
 
     public static RewardCalculator rewardCalculatorInstance;
 
@@ -307,6 +308,7 @@ public final class Constants {
                     MINER_REMOVE_HIGHT = heightConf.getIntValue("MINER_REMOVE_HEIGHT");
                     NONE_PUBLICKEY_ACTIVE_HEIGHT = heightConf.getIntValue("NONE_PUBLICKEY_ACTIVE_HEIGHT");
                     BLOCK_REWARD_VERIFY_HEIGHT = Constants.isDevnet() ? heightConf.getIntValue("BLOCK_REWARD_VERIFY_HEIGHT_IS_DEVNET") : heightConf.getIntValue("BLOCK_REWARD_VERIFY_HEIGHT_ID_TESTNET");
+                    HECO_HEIGHT = acrossChainsConf.getIntValue("HECO_HEIGHT");
                 }
                 break;
             case SHARDER_CHAIN:
@@ -516,7 +518,6 @@ public final class Constants {
 
     public static final String MGR_URL = acrossChainsConf.getString("MGR_URL");
 
-    public static final int HECO_HEIGHT = acrossChainsConf.getIntValue("HECO_HEIGHT");
 
     public static final Map<String,String> chainIds = new HashMap<>();
     static {

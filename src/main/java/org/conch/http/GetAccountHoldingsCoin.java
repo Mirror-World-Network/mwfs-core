@@ -1,5 +1,6 @@
 package org.conch.http;
 
+import org.conch.Conch;
 import org.conch.account.Account;
 import org.conch.common.Constants;
 import org.conch.db.Db;
@@ -68,8 +69,8 @@ public class GetAccountHoldingsCoin extends APIServlet.APIRequestHandler {
             DbUtils.close(con);
             response.put("holdingsCoinList", transferJsonArray);
             response.put("totalBalance", amountJson.get("totalBalance").toString() + "MW");
+            response.put("height", Conch.getHeight());
         }
-
         return response;
     }
 

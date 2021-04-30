@@ -36,10 +36,10 @@
     "APPLICATION": "COS",
     "FOUNDATION_URL": "mw.run",
     "FOUNDATION_TEST_URL": "test.mw.run",
-    "SERIAL_NUM": ""
+    "SERIAL_NUM": "",
+    "PERMISSION_MODE": true
   },
   "feature": {
-    "QUICK_AUTH": true,
     "OPEN_HOLDINGS_COIN_API": true
   },
   "port": {

@@ -69,6 +69,10 @@ const cnSharder = {
         'register_status_pending': "申请中",
         'register_status_approval': "有效",
         'create_account': "创建账户",
+        'quick_auth': "节点挖矿授权",
+        'factory_num': "矿机编号",
+        'factory_des': "执行安装矿机时生成的编号",
+        'sharder_account_des': "官网注册用户名",
     },
     upgrade: {
         'title': "COS版本升级",
