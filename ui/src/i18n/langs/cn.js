@@ -20,7 +20,7 @@ const cn = {
         'init_hub': "初始化",
         'use_nat_server': "穿透服务",
         'config_nat_server': "穿透服务",
-        'login_binding_hub_account_tip':"此节点已绑定地址 ",
+        'login_binding_hub_account_tip':"此节点已绑定MW地址 ",
     },
     hubsetting: {
         'register_nat_server': "申请穿透服务",
@@ -69,6 +69,10 @@ const cn = {
         'register_status_pending': "申请中",
         'register_status_approval': "有效",
         'create_account': "创建账户",
+        'quick_auth': "节点挖矿授权",
+        'factory_num': "矿机编号",
+        'factory_des': "执行安装矿机时生成的矿机编号",
+        'sharder_account_des': "官网注册用户名",
     },
     upgrade: {
         'title': "COS版本升级",
@@ -1052,6 +1056,7 @@ const cn = {
         'hubsetting_not_matched_mnemonic_word': "助记词和的登录用的助记词不一致",
         'hubsetting_login_again': "请使用助记词再次登录",
         'hubsetting_inconsistent_password': "两次输入的节点管理密码不一致！",
+        'hubsetting_factory_null': "矿机编码不能为空！",
         'new_account_warning': "您有一个全新的帐户，请先给它充值。",
         'null_information_warning': "请检查是否还有未填的信息",
         'sendmessage_null_account': "请输入接收者账户",

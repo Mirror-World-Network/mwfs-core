@@ -2105,7 +2105,6 @@ export default {
             let requestUrl = _this.requestUrl + "/official/register_.ss";
             _this.$global.registerSharderSite(requestUrl, data, function (res) {
                 if (res.success) {
-                    _this.hubsetting.registerSiteAccount = false;
                     _this.userConfig.siteAccount = sharderAccount;
                     _this.hubsetting.sharderPwd = setSharderPwd;
                     _this.bindNatService();
@@ -2362,6 +2361,8 @@ export default {
             formData.append('password', _this.hubsetting.sharderPwd);
             formData.append('registerStatus', _this.hubsetting.register_status);
             formData.append('nodeType', _this.userConfig.nodeType);
+            formData.append("factoryNum", this.userConfig.factoryNum);
+            formData.append("permissionMode", this.userConfig.permissionMode);
 
             // nat settings
             if (_this.hubsetting.openPunchthrough) {
@@ -2428,6 +2429,10 @@ export default {
                     formData.append("newAdminPassword", _this.hubsetting.newPwd);
                 }
             }
+            if (_this.userConfig.permissionMode && _this.userConfig.factoryNum == null && _this.operationType == 'init') {
+                _this.$message.warning(_this.$t('notification.hubsetting_factory_null'));
+                return false;
+            }
             return formData;
         },
         verifyHubSetting: function (type) {
@@ -2438,7 +2443,6 @@ export default {
             if (reConfigFormData !== false) {
                 reConfigFormData.append("isInit", "true");
             }
-
             if (type === 'init') {
                 this.operationType = 'init';
                 _this.$refs['initForm'].validate((valid) => {
@@ -2555,7 +2559,7 @@ export default {
                         (res1.data.failedReason ? res1.data.failedReason : 'error');
                     _this.$message.error(msg);
                     _this.closeDialog();
-                    console.log('failed to reconfigure settings...')
+                    console.log('failed to reconfigure settings...');
                 }
             }).catch(err => {
                 // _this.$message.error(err.message);
@@ -2628,7 +2632,7 @@ export default {
             _this.getAccount(SSO.account).then(res => {
                 if (res.errorDescription === "Unknown account") {
                     _this.$message.warning(_this.$t('notification.new_account_warning'));
-
+                    return;
                 }
             });
             if (_this.messageForm.receiver === this.$global.receiverPrefixStr ||
@@ -3213,7 +3217,6 @@ export default {
 
         },
         sendExchangeTransferInfo: function () {
-            console.log(123)
             const _this = this;
             _this.preventRepeatedClick();
             _this.transfer.executing = true;

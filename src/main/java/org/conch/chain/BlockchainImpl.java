@@ -646,6 +646,28 @@ public final class BlockchainImpl implements Blockchain {
         }
     }
 
+    @Override
+    public DbIterator<TransactionImpl> getTransactions(long senderId, long receiverId, byte type, int from, int to) {
+        Connection con = null;
+        PreparedStatement pstmt;
+        try {
+            StringBuilder buf = new StringBuilder();
+            buf.append("SELECT transaction.* FROM transaction where type=" + type + " ");
+            buf.append("And sender_id = ? And recipient_id = ? ");
+            buf.append("ORDER BY block_timestamp DESC, transaction_index DESC");
+            buf.append(DbUtils.limitsClause(from, to));
+            con = Db.db.getConnection();
+            int i = 0;
+            pstmt = con.prepareStatement(buf.toString());
+            pstmt.setLong(++i,senderId);
+            pstmt.setLong(++i,receiverId);
+            DbUtils.setLimits(++i, pstmt, from, to);
+            return getTransactions(con, pstmt);
+        }catch (SQLException e) {
+            throw new RuntimeException(e.toString(), e);
+        }
+    }
+
     /**
      * 查询指定交易集合
      * @return
