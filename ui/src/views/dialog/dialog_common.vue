@@ -786,6 +786,7 @@
                 }
                 return false;
             },
+
             httpGetAccountInfo(accountID) {
                 const _this = this;
                 _this.accountBind = accountID;
@@ -817,6 +818,7 @@
                     });
                 })
             },
+
             httpGetBlockInfo(height, BlockID) {
                 const _this = this;
                 _this.pocInfoList = [];
@@ -1213,7 +1215,7 @@
                                 break;
                             case 4:
                                 window.open(window.api.getTronInfo+tx, '_blank');
-                                break; 
+                                break;
                             case 5:
                                 window.open(window.api.getBSCInfo+tx, '_blank');
                                 break;
@@ -1226,6 +1228,8 @@
                 }).catch(err => {
                     _this.$message.error(_this.$t('acrossChains.error'));
                 });
+
+
             }
 
         },

@@ -129,7 +129,7 @@ const cn = {
         'bindAddress_fail_Heco':"heco地址绑定失败",
         'no_HMWExchangeAddress':"接受地址为heco兑换地址,请通过资产兑换页面进行转账",
         'no_HecoAddress':"请先绑定Heco地址！！！",
-        
+
         'OKEx_target_address':"OKEx地址",
         'OKEx_address_tip':"请输入OKEx地址",
         'OKEx_target_balance':"OKEx余额",
@@ -177,7 +177,7 @@ const cn = {
         'bindAddress_fail_BSC':"BSC地址绑定失败",
         'no_BMWExchangeAddress':"接受地址为BSC兑换地址,请通过资产兑换页面进行转账",
         'no_BSCAddress':"请先绑定BSC地址！！！",
-        
+
         'more':"敬请期待更多资产链！！！",
         'tip-0':"温馨提示：",
         'tip-1':"1.如果你需要进行资产转移，请先绑定好您的目标链地址，如未绑定产生损失，自行承担;",

@@ -194,8 +194,7 @@
 
                         <button class="common_btn imgBtn "
                                 v-bind:class="{'disabledWriteBtn': !nonDownloading,'writeBtn': nonDownloading}"
-                                v-if="whetherShowAssetsAcrossChainsBtn()"
-                                @click="openAssetsAcrossChainsDialog" style="width:150px;">
+                                v-if="whetherShowAssetsAcrossChainsBtn()"  @click="openAssetsAcrossChainsDialog" style="width: 135px">
                             <span class="icon" style="color:#A6A9AD">
                                 <svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg"
                                      xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -250,12 +249,7 @@
                     <span class="btn" :class="activeSelectType(9)" @click="selectType = 9">
                         {{ $t('transaction.transaction_type_system_reward') }}
                     </span>
-                    <span class="btn" :class="activeSelectType(19)" @click="selectType = 19">
-                        {{ $t('transaction.transaction_type_mw_to_hmw') }}
-                    </span>
-                    <span class="btn" :class="activeSelectType(20)" @click="selectType = 20">
-                        {{ $t('transaction.transaction_type_hmw_to_mw') }}
-                    </span>
+
                     <el-select v-model="selectType" :placeholder="$t('transaction.transaction_type_all')">
                         <el-option
                             v-for="item in transactionType"
@@ -264,6 +258,16 @@
                             :value="item.value">
                         </el-option>
                     </el-select>
+		            <el-select class="exchange" id="exchangeSelectType" v-model="exchangeSelectType"
+		            :placeholder="$t('transaction.transaction_type_exchange')">
+                        <el-option
+                          v-for="item in exchangeTransactionType"
+                          :key="item.value"
+                          :label="item.label"
+                          :value="item.value"
+                        >
+		            </el-option>
+		          </el-select>
                 </div>
                 <div class="list_table w br4" v-loading="loading">
                     <div class="list_content data_loading">
@@ -1136,18 +1140,30 @@
                     </div>
                     <div class="modal-body modal-message">
                         <ul class="title" v-if="!showChain">
-                            <li :class="chainId===1? 'active':''" @click="showChains(1)"><a>Heco</a></li>
-                            <li :class="chainId===2? 'active':''" @click="showChains(2)"><a>OKEx</a></li>
-                            <li :class="chainId===3? 'active':''" @click="showChains(3)"><a>ETH</a></li>
-                            <li :class="chainId===4? 'active':''" @click="showChains(4)"><a>Tron</a></li>
-                            <li :class="chainId===5? 'active':''" @click="showChains(5)"><a>BSC</a></li>
-                            <li :class="chainId===6? 'active':''" @click="showChains(6)"><a>...</a></li>
+		              <li :class="chainId === 1 ? 'active' : ''" @click="showChains(1)">
+		                <a>Heco</a>
+		              </li>
+		              <li :class="chainId === 2 ? 'active' : ''" @click="showChains(2)">
+		                <a>OKEx</a>
+		              </li>
+		              <li :class="chainId === 3 ? 'active' : ''" @click="showChains(3)">
+		                <a>ETH</a>
+		              </li>
+		              <!-- <li :class="chainId === 4 ? 'active' : ''" @click="showChains(4)">
+		                <a>Tron</a>
+		              </li> -->
+		              <li :class="chainId === 5 ? 'active' : ''" @click="showChains(5)">
+		                <a>BSC</a>
+		              </li>
+		              <li :class="chainId === 6 ? 'active' : ''" @click="showChains(6)">
+		                <a>...</a>
+		              </li>
                         </ul>
                         <ul class="title" v-else>
                             <li :class="chainId===1? 'active':''"><a>Heco</a></li>
                             <li :class="chainId===2? 'active':''"><a>OKEx</a></li>
                             <li :class="chainId===3? 'active':''"><a>ETH</a></li>
-                            <li :class="chainId===4? 'active':''"><a>Tron</a></li>
+                            <!-- <li :class="chainId === 4 ? 'active' : ''"><a>Tron</a></li> -->
                             <li :class="chainId===5? 'active':''"><a>BSC</a></li>
                             <li :class="chainId===4? 'active':''"><a>...</a></li>
                         </ul>
@@ -1376,7 +1392,24 @@
 
                         {{ $t('acrossChains.tip-9') }}
 
-                    </div>
+                    <br />
+	            {{ $t("acrossChains.tip-10") }}
+	            <a>
+	              {{
+	                chainId === 1
+	                  ? acrossChains.Heco.contractAddress
+	                  : chainId === 2
+	                  ? acrossChains.OKEx.contractAddress
+	                  : chainId === 3
+	                  ? acrossChains.ETH.contractAddress
+	                  : chainId === 4
+	                  ? acrossChains.Tron.contractAddress
+	                  : chainId === 5
+	                  ? acrossChains.BSC.contractAddress
+	                  : ""
+	              }}
+	            </a>
+		    </div>
                 </div>
             </div>
 
@@ -1693,14 +1726,55 @@ export default {
             }, {
                 value: 18,
                 label: this.$t('transaction.transaction_type_burn')
-            }, {
-                value: 19,
-                label: this.$t('transaction.transaction_type_mw_to_hmw')
-            }, {
-                value: 20,
-                label: this.$t('transaction.transaction_type_hmw_to_mw')
-            }
-            ],
+            },
+	   ],
+	   exchangeSelectType: '',
+	   exchangeTransactionType: [
+	{
+	  value: "",
+	  label: this.$t("transaction.transaction_type_exchange"),
+	},
+	{
+	  value: 1,
+	  label: this.$t("transaction.transaction_type_mw_to_hmw"),
+	},
+	{
+	  value: 2,
+	  label: this.$t("transaction.transaction_type_hmw_to_mw"),
+	},
+	{
+	  value: 3,
+	  label: this.$t("transaction.transaction_type_mw_to_omw"),
+	},
+	{
+	  value: 4,
+	  label: this.$t("transaction.transaction_type_omw_to_mw"),
+	},
+	{
+	  value: 5,
+	  label: this.$t("transaction.transaction_type_mw_to_emw"),
+	},
+	{
+	  value: 6,
+	  label: this.$t("transaction.transaction_type_emw_to_mw"),
+	},
+	// {
+	//   value: 7,
+	//   label: this.$t("transaction.transaction_type_mw_to_tmw"),
+	// },
+	// {
+	//   value: 8,
+	//   label: this.$t("transaction.transaction_type_tmw_to_mw"),
+	// },
+	{
+	  value: 9,
+	  label: this.$t("transaction.transaction_type_mw_to_bmw"),
+	},
+	{
+	  value: 10,
+	  label: this.$t("transaction.transaction_type_bmw_to_mw"),
+	},
+	],
             trading: '',
             accountTransactionList: [],
             //分页信息
@@ -1883,6 +1957,7 @@ export default {
                     CosExchangeAddressPublicKey: "",
                     CosExchangeRate: 10,
                     ExchangeAddress: "0x0Heco",
+		            contractAddress: "0x0000Heco",
                 },
                 OKEx: {
                     target_address: '',
@@ -1895,6 +1970,7 @@ export default {
                     CosExchangeAddressPublicKey: "",
                     CosExchangeRate: 10,
                     ExchangeAddress: "0x0OKEx",
+		            contractAddress: "0x0000OKEx",
                 },
                 ETH: {
                     target_address: '',
@@ -1907,6 +1983,7 @@ export default {
                     CosExchangeAddressPublicKey: "",
                     CosExchangeRate: 10,
                     ExchangeAddress: "0x0ETH",
+		            contractAddress: "0x0000ETH",
                 },
                 Tron: {
                     target_address: '',
@@ -1919,6 +1996,7 @@ export default {
                     CosExchangeAddressPublicKey: "",
                     CosExchangeRate: 10,
                     ExchangeAddress: "0x0Tron",
+		            contractAddress: "0x0000Tron",
                 },
                 BSC: {
                     target_address: '',
@@ -1931,6 +2009,7 @@ export default {
                     CosExchangeAddressPublicKey: "",
                     CosExchangeRate: 10,
                     ExchangeAddress: "0x0BSC",
+		            contractAddress: "0x0000BSC",
                 },
                 balance: 0,
                 id: ''
@@ -3452,15 +3531,6 @@ export default {
             } else if (_this.selectType === 1) {
                 params.append("type", "1");
                 params.append("subtype", "0");
-            } else if (_this.selectType === 19) {
-                //mw to hmw
-                params.append("recipientRS", _this.CosExchangeAddress);
-
-            } else if (_this.selectType === 20) {
-                //hmw to mw
-                params.append("senderRS", _this.CosExchangeAddress);
-            } else {
-                params.append("type", _this.selectType);
             }
 
             _this.loading = true;
@@ -3487,6 +3557,87 @@ export default {
                 _this.loading = false;
             });
         },
+	/**
+     * 得到兑换交易信息
+     */
+    getAccountExchangeTransactionList: function () {
+      const _this = this;
+      let params = new URLSearchParams();
+
+      params.append("account", _this.accountInfo.accountRS);
+
+      _this.unconfirmedTransactionsList =
+        _this.$store.state.unconfirmedTransactionsList.unconfirmedTransactions;
+
+      let i = 0;
+      if (typeof _this.unconfirmedTransactionsList !== "undefined") {
+        i = _this.unconfirmedTransactionsList.length;
+      }
+
+      params.append("firstIndex", (_this.currentPage - 1) * _this.pageSize);
+      params.append("lastIndex", _this.currentPage * _this.pageSize - 1 - i);
+
+      if (_this.exchangeSelectType === 1) {
+        params.append(
+          "recipientRS",
+          _this.acrossChains.Heco.CosExchangeAddress
+        );
+      } else if (_this.exchangeSelectType === 2) {
+        params.append("senderRS", _this.acrossChains.Heco.CosExchangeAddress);
+      } else if (_this.exchangeSelectType === 3) {
+        params.append(
+          "recipientRS",
+          _this.acrossChains.OKEx.CosExchangeAddress
+        );
+      } else if (_this.exchangeSelectType === 4) {
+        params.append("senderRS", _this.acrossChains.OKEx.CosExchangeAddress);
+      } else if (_this.exchangeSelectType === 5) {
+        params.append("recipientRS", _this.acrossChains.ETH.CosExchangeAddress);
+      } else if (_this.exchangeSelectType === 6) {
+        params.append("senderRS", _this.acrossChains.ETH.CosExchangeAddress);
+      } else if (_this.exchangeSelectType === 7) {
+        params.append(
+          "recipientRS",
+          _this.acrossChains.Tron.CosExchangeAddress
+        );
+      } else if (_this.exchangeSelectType === 8) {
+        params.append("senderRS", _this.acrossChains.Tron.CosExchangeAddress);
+      } else if (_this.exchangeSelectType === 9) {
+        params.append("recipientRS", _this.acrossChains.BSC.CosExchangeAddress);
+      } else if (_this.exchangeSelectType === 10) {
+        params.append("senderRS", _this.acrossChains.BSC.CosExchangeAddress);
+      }
+
+      _this.loading = true;
+      this.$http
+        .get(
+          _this.$global.urlPrefix() + "?requestType=getBlockchainTransactions",
+          { params }
+        )
+        .then(function (res1) {
+          _this.accountTransactionList = res1.data.transactions;
+          _this.totalSize = res1.data.count;
+          // params.delete("firstIndex");
+          // params.delete("lastIndex");
+          // _this.$http.get(_this.$global.urlPrefix() + '?requestType=getBlockchainTransactionsCount', {params}).then(function (res2) {
+          //
+          //     if (typeof res2.data.errorDescription === "undefined") {
+          //         _this.totalSize = res2.data.count;
+          //     } else {
+          //         _this.$message.error(res2.data.errorCode);
+          //     }
+          // }).catch(err => {
+          //     // _this.$message.error(err.message);
+          // });
+          _this.loading = false;
+          _this.getTotalList();
+          _this.getDrawData();
+          _this.updateMinerState();
+        })
+        .catch(function (err) {
+          _this.loading = false;
+        });
+    },
         updateMinerState() {
             let _this = this;
             _this.accountTransactionList.forEach(val => {
@@ -3567,27 +3718,31 @@ export default {
                     _this.acrossChains.Heco.CosExchangeAddressPublicKey = result.Heco.CosExchangeAddressPublicKey;
                     _this.acrossChains.Heco.CosExchangeRate = result.Heco.CosExchangeRate;
                     _this.acrossChains.Heco.ExchangeAddress = result.Heco.ExchangeAddress;
+		            _this.acrossChains.Heco.contractAddress = result.Heco.contractAddress;
 
                     _this.acrossChains.OKEx.CosExchangeAddress = result.OKEx.CosExchangeAddress;
                     _this.acrossChains.OKEx.CosExchangeAddressPublicKey = result.OKEx.CosExchangeAddressPublicKey;
                     _this.acrossChains.OKEx.CosExchangeRate = result.OKEx.CosExchangeRate;
                     _this.acrossChains.OKEx.ExchangeAddress = result.OKEx.ExchangeAddress;
+		            _this.acrossChains.OKEx.contractAddress = result.OKEx.contractAddress;
 
                     _this.acrossChains.ETH.CosExchangeAddress = result.ETH.CosExchangeAddress;
                     _this.acrossChains.ETH.CosExchangeAddressPublicKey = result.ETH.CosExchangeAddressPublicKey;
                     _this.acrossChains.ETH.CosExchangeRate = result.ETH.CosExchangeRate;
                     _this.acrossChains.ETH.ExchangeAddress = result.ETH.ExchangeAddress;
+                    _this.acrossChains.ETH.contractAddress = result.ETH.contractAddress;
 
                     _this.acrossChains.Tron.CosExchangeAddress = result.Tron.CosExchangeAddress;
                     _this.acrossChains.Tron.CosExchangeAddressPublicKey = result.Tron.CosExchangeAddressPublicKey;
                     _this.acrossChains.Tron.CosExchangeRate = result.Tron.CosExchangeRate;
                     _this.acrossChains.Tron.ExchangeAddress = result.Tron.ExchangeAddress;
+                    _this.acrossChains.Tron.contractAddress = result.Tron.contractAddress;
 
                     _this.acrossChains.BSC.CosExchangeAddress = result.BSC.CosExchangeAddress;
                     _this.acrossChains.BSC.CosExchangeAddressPublicKey = result.BSC.CosExchangeAddressPublicKey;
                     _this.acrossChains.BSC.CosExchangeRate = result.BSC.CosExchangeRate;
                     _this.acrossChains.BSC.ExchangeAddress = result.BSC.ExchangeAddress;
-
+                    _this.acrossChains.BSC.contractAddress = result.BSC.contractAddress;
                 }
             });
         },
@@ -3627,8 +3782,8 @@ export default {
                             _this.acrossChains.Heco.target_balance = account.HecoBalance / _this.$global.HecoUnitValue;
                             _this.acrossChains.Heco.convertible_balance = account.HecoConvertibleQuantity / _this.$global.HecoUnitValue;
 
-                            _this.acrossChains.OKEx.target_address = account.okExAddress;
-                            _this.acrossChains.OKEx.old_address = account.okExAddress;
+                            _this.acrossChains.OKEx.target_address = account.OKExAddress;
+                            _this.acrossChains.OKEx.old_address = account.OKExAddress;
                             _this.acrossChains.OKEx.target_balance = account.OKExBalance / _this.$global.OKExUnitValue;
                             _this.acrossChains.OKEx.convertible_balance = account.OKExConvertibleQuantity / _this.$global.OKExUnitValue;
 
@@ -3662,7 +3817,6 @@ export default {
                             break;
                     }
                 }).catch(err => {
-                    console.log(err + 123465)
                     _this.$message.error(_this.$t('acrossChains.error'));
                 });
             } else {
@@ -3673,6 +3827,42 @@ export default {
         openExchangeDialog: function () {
             if (SSO.downloadingBlockchain) {
                 return this.$message.warning(this.$t("account.synchronization_block"));
+	      }
+
+	      switch (this.chainId) {
+	        case 1:
+	          if (this.acrossChains.Heco.target_address === "") {
+	            return this.$message.warning(
+	              this.$t("acrossChains.no_HecoAddress")
+	            );
+	          }
+	          break;
+	        case 2:
+	          if (this.acrossChains.OKEx.target_address === "") {
+	            return this.$message.warning(
+	              this.$t("acrossChains.no_OKExAddress")
+	            );
+	          }
+	          break;
+	        case 3:
+	          if (this.acrossChains.ETH.target_address === "") {
+	            return this.$message.warning(this.$t("acrossChains.no_ETHAddress"));
+	          }
+	          break;
+	        case 4:
+	          if (this.acrossChains.Tron.target_address === "") {
+	            return this.$message.warning(
+	              this.$t("acrossChains.no_TronAddress")
+	            );
+	          }
+	          break;
+	        case 5:
+	          if (this.acrossChains.BSC.target_address === "") {
+	            return this.$message.warning(this.$t("acrossChains.no_BSCAddress"));
+	          }
+	          break;
+	        default:
+	          break;
             }
             this.$store.state.mask = true;
             this.AssetsExchangeDialog = true;
@@ -4386,8 +4576,56 @@ export default {
             }
 
             const _this = this;
+              if (
+                _this.acrossChains.Heco.target_address ==
+                  _this.acrossChains.Heco.CosExchangeAddress &&
+                _this.acrossChains.Heco.target_address ==
+                  _this.acrossChains.OKEx.CosExchangeAddress &&
+                _this.acrossChains.Heco.target_address ==
+                  _this.acrossChains.ETH.CosExchangeAddress &&
+                _this.acrossChains.Heco.target_address ==
+                  _this.acrossChains.Tron.CosExchangeAddress &&
+                _this.acrossChains.Heco.target_address ==
+                  _this.acrossChains.BSC.CosExchangeAddress &&
+                _this.acrossChains.OKEx.target_address ==
+                  _this.acrossChains.Heco.CosExchangeAddress &&
+                _this.acrossChains.OKEx.target_address ==
+                  _this.acrossChains.OKEx.CosExchangeAddress &&
+                _this.acrossChains.OKEx.target_address ==
+                  _this.acrossChains.ETH.CosExchangeAddress &&
+                _this.acrossChains.OKEx.target_address ==
+                  _this.acrossChains.Tron.CosExchangeAddress &&
+                _this.acrossChains.OKEx.target_address ==
+                  _this.acrossChains.BSC.CosExchangeAddress &&
+                _this.acrossChains.ETH.target_address ==
+                  _this.acrossChains.Heco.CosExchangeAddress &&
+                _this.acrossChains.ETH.target_address ==
+                  _this.acrossChains.OKEx.CosExchangeAddress &&
+                _this.acrossChains.ETH.target_address ==
+                  _this.acrossChains.ETH.CosExchangeAddress &&
+                _this.acrossChains.ETH.target_address ==
+                  _this.acrossChains.Tron.CosExchangeAddress &&
+                _this.acrossChains.ETH.target_address ==
+                  _this.acrossChains.BSC.CosExchangeAddress &&
+                _this.acrossChains.BSC.target_address ==
+                  _this.acrossChains.Heco.CosExchangeAddress &&
+                _this.acrossChains.BSC.target_address ==
+                  _this.acrossChains.OKEx.CosExchangeAddress &&
+                _this.acrossChains.BSC.target_address ==
+                  _this.acrossChains.ETH.CosExchangeAddress &&
+                _this.acrossChains.BSC.target_address ==
+                  _this.acrossChains.Tron.CosExchangeAddress &&
+                _this.acrossChains.BSC.target_address ==
+                  _this.acrossChains.BSC.CosExchangeAddress
+              ) {
+                _this.$message.warning(_this.$t("acrossChains.address_error"));
+                return;
+              }
+
             let formData = new FormData();
             formData.append("accountRS", _this.accountInfo.accountRS);
+            formData.append("accountId", _this.accountInfo.accountId);
+            formData.append("publicKey", _this.accountInfo.publicKey);
             switch (_this.chainId) {
                 case 1:
                     formData.append("Address", _this.acrossChains.Heco.target_address);
@@ -4530,7 +4768,14 @@ export default {
         selectType: function () {
             const _this = this;
             _this.currentPage = 1;
+            _this.exchangeSelectType = "";
             _this.getAccountTransactionList();
+        },
+        exchangeSelectType: function () {
+          const _this = this;
+          _this.currentPage = 1;
+          _this.selectType = "";
+          _this.getAccountExchangeTransactionList();
         },
         getLang: {
             handler: function (oldValue, newValue) {
