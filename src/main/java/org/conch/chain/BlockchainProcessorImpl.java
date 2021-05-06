@@ -58,6 +58,7 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.sql.*;
 import java.util.*;
+import java.util.Date;
 import java.util.concurrent.*;
 
 /**
@@ -2112,45 +2113,61 @@ public final class BlockchainProcessorImpl implements BlockchainProcessor {
              * @Author peifeng
              */
             if(blockchain.getHeight() >= Constants.HECO_HEIGHT){
-                block.getTransactions().forEach(transaction -> {
-                    if(transaction.getType().isType(TransactionType.TYPE_PAYMENT)){
-                        String url = Constants.MGR_URL;
-                        RestfulHttpClient.HttpResponse response = null;
-                        try {
-                            response = RestfulHttpClient.getClient(url+"getHecoExchangeAddress").get().request();
-                            String content = response.getContent();
-                            com.alibaba.fastjson.JSONObject contentObj = com.alibaba.fastjson.JSON.parseObject(content);
-                            String code = (String)contentObj.get("code");
-                            if(code.equals("200")){
-                                String recipientId = ((Long)contentObj.get("body")+"");
-                                if(recipientId.equals(transaction.getRecipientId()+"")) {
-                                    Map<String,String> params = new HashMap<>();
-                                    params.put("accountId",transaction.getSenderId()+"");
-                                    params.put("recordType","1");
-                                    params.put("amount",transaction.getAmountNQT()+"");
-                                    params.put("createDate",transaction.getTimestamp()+"");
-                                    params.put("SourceTransactionHash",transaction.getFullHash());
-                                    try {
-                                        response = RestfulHttpClient.getClient(url+"saveRecord").post().postParams(params).request();
-                                        content = response.getContent();
-                                        contentObj = com.alibaba.fastjson.JSON.parseObject(content);
-                                        code = (String)contentObj.get("code");
-                                        if(code.equals("200")){
-                                            Logger.logInfoMessage("Heco chain: Record save success");
-                                        }else{
-                                            com.alibaba.fastjson.JSONObject body = com.alibaba.fastjson.JSON.parseObject((String)contentObj.get("body"));;
-                                            Logger.logInfoMessage("Heco chain: "+(String)body.get("status"));
+                String rightCode = "200";
+                Map<String,String> chainIds = Constants.chainIds;
+                if(block.getTransactions().size() > 0){
+                    block.getTransactions().forEach(transaction -> {
+                        if(transaction.getType().isType(TransactionType.TYPE_PAYMENT)){
+                            String url = Constants.MGR_URL;
+                            RestfulHttpClient.HttpResponse response = null;
+                            try {
+                                response = RestfulHttpClient.getClient(url+"getExchangeAddress").get().request();
+                                String content = response.getContent();
+                                String code = (String)com.alibaba.fastjson.JSON.parseObject(content).get("code");
+                                com.alibaba.fastjson.JSONObject contentObj = (com.alibaba.fastjson.JSONObject) com.alibaba.fastjson.JSON.parseObject(content).get("body");
+                                if(code.equals(rightCode)){
+                                    com.alibaba.fastjson.JSONObject chainObj;
+                                    Map<String,String> params = new HashMap<>(6);
+                                    Boolean flag = false;
+
+                                    for(Map.Entry<String, String> entry : chainIds.entrySet()){
+                                        if(!flag){
+                                            chainObj = contentObj.getJSONObject(entry.getValue());
+                                            if(chainObj!=null && (transaction.getRecipientId()+"").equals(chainObj.getString("CosRecipient"))){
+                                                params.put("chainId",entry.getKey());
+                                                flag = true;
+                                            }
                                         }
-                                    }catch (IOException e) {
-                                        Logger.logDebugMessage("Heco chain:can't sendTransactin in hecoChain"+e.getMessage());
+                                    }
+
+                                    if(flag){
+                                        params.put("accountId",transaction.getSenderId()+"");
+                                        params.put("recordType","1");
+                                        params.put("amount",transaction.getAmountNQT()+"");
+                                        params.put("createDate",new Date().toString());
+                                        params.put("SourceTransactionHash",transaction.getFullHash());
+                                        try {
+                                            response = RestfulHttpClient.getClient(url+"saveRecord").post().postParams(params).request();
+                                            content = response.getContent();
+                                            contentObj = com.alibaba.fastjson.JSON.parseObject(content);
+                                            code = (String)contentObj.get("code");
+                                            if(code.equals(rightCode)){
+                                                Logger.logInfoMessage("Heco chain: Record save success");
+                                            }else{
+                                                com.alibaba.fastjson.JSONObject body = com.alibaba.fastjson.JSON.parseObject((String)contentObj.get("body"));;
+                                                Logger.logInfoMessage("Heco chain: "+(String)body.get("status"));
+                                            }
+                                        }catch (IOException e) {
+                                            Logger.logDebugMessage("Heco chain:can't sendTransactin in hecoChain"+e.getMessage());
+                                        }
                                     }
                                 }
+                            } catch (IOException e) {
+                                Logger.logDebugMessage("Heco chain: can't connect " + Constants.MGR_URL + " caused by: " + e.getMessage());
                             }
-                        } catch (IOException e) {
-                            Logger.logDebugMessage("Heco chain: can't connect " + Constants.MGR_URL + " caused by: " + e.getMessage());
                         }
-                    }
-                });
+                    });
+                }
             }
 
 

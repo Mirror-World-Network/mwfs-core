@@ -670,7 +670,7 @@
                     </tr>
                     </tbody>
                 </table>
-                <el-button v-show="($global.getSenderOrRecipient(transactionInfo) == MWLockAddress) || ($global.getSenderRSOrWo(transactionInfo) == MWLockAddress)" id="findTXInHecoChain"
+                <el-button v-show="isShowMore" id="findTXInHecoChain"
                 @click="findTXInHecoChain(transactionInfo.fullHash)">{{$t('acrossChains.tx_in_HecoChain')}}</el-button>
             </div>
         </div>
@@ -721,13 +721,35 @@
                 pageSize: 10,
                 currentPage: 1,
                 accountBind: null,
-                MWLockAddress:"CDW-J8RK-3ADG-2A7S-F9DV6",
+
+                 acrossChains: {
+                    Heco: {
+                        CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-Heco",
+                    },
+                    OKEx: {
+                        CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-OKEx",
+                    },
+                    ETH: {
+                        CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-ETH",
+                    },
+                    Tron: {
+                        CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-Tron",
+                    },
+                    BSC: {
+                        CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-BSC",
+                    },
+                },
+
+                chainId:1,
+                isShowMore:false,
+                recordType:1,
             }
         },
         created() {
             if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) { //移动端
                 this.isMobile = true
             }
+            this.getAddress();
         },
         methods: {
             handleSizeChange(val) {
@@ -764,7 +786,6 @@
                 }
                 return false;
             },
-
             httpGetAccountInfo(accountID) {
                 const _this = this;
                 _this.accountBind = accountID;
@@ -796,7 +817,6 @@
                     });
                 })
             },
-
             httpGetBlockInfo(height, BlockID) {
                 const _this = this;
                 _this.pocInfoList = [];
@@ -901,6 +921,48 @@
                         if (!res.data.errorDescription) {
                             _this.transactionInfo = res.data;
                             resolve("success");
+
+                            if(_this.$global.getSenderOrRecipient(_this.transactionInfo) === _this.acrossChains.Heco.CosExchangeAddress){
+                                _this.chainId = 1;
+                                _this.isShowMore = true;
+                                _this.recordType = 1;
+                            }else if(_this.$global.getSenderRSOrWo(_this.transactionInfo) === _this.acrossChains.Heco.CosExchangeAddress){
+                                _this.chainId = 1;
+                                _this.isShowMore = true
+                                _this.recordType = 2;
+                            }else if(_this.$global.getSenderOrRecipient(_this.transactionInfo) === _this.acrossChains.OKEx.CosExchangeAddress){
+                                _this.chainId = 2;
+                                _this.isShowMore = true
+                                _this.recordType = 1;
+                            }else if(_this.$global.getSenderRSOrWo(_this.transactionInfo) === _this.acrossChains.OKEx.CosExchangeAddress){
+                                _this.chainId = 2;
+                                _this.isShowMore = true
+                                _this.recordType = 2;
+                            }else if(_this.$global.getSenderOrRecipient(_this.transactionInfo) === _this.acrossChains.ETH.CosExchangeAddress){
+                                _this.chainId = 3;
+                                _this.isShowMore = true
+                                _this.recordType = 1;
+                            }else if(_this.$global.getSenderRSOrWo(_this.transactionInfo) === _this.acrossChains.ETH.CosExchangeAddress){
+                                _this.chainId = 3;
+                                _this.isShowMore = true
+                                _this.recordType = 2;
+                            }else if(_this.$global.getSenderOrRecipient(_this.transactionInfo) === _this.acrossChains.Tron.CosExchangeAddress){
+                                _this.chainId = 4;
+                                _this.isShowMore = true
+                                _this.recordType = 1;
+                            }else if(_this.$global.getSenderRSOrWo(_this.transactionInfo) === _this.acrossChains.Tron.CosExchangeAddress){
+                                _this.chainId = 4;
+                                _this.isShowMore = true
+                                _this.recordType = 2;
+                            }else if(_this.$global.getSenderOrRecipient(_this.transactionInfo) === _this.acrossChains.BSC.CosExchangeAddress){
+                                _this.chainId = 5;
+                                _this.isShowMore = true
+                                _this.recordType = 1;
+                            }else if(_this.$global.getSenderRSOrWo(_this.transactionInfo) === _this.acrossChains.BSC.CosExchangeAddress){
+                                _this.chainId = 5;
+                                _this.isShowMore = true
+                                _this.recordType = 2;
+                            }
                         } else {
                             resolve(res.data.errorDescription);
                         }
@@ -1118,27 +1180,52 @@
                 img.crossOrigin = 'anonymous';
                 img.src = window.api.apiUrl + this.$global.urlPrefix() + "?requestType=downloadStoredData&ssid="+row.fileInfo.ssid+"&filename="+row.fileInfo.name;
             },
+
+            getAddress(){
+                const _this = this;
+                _this.$http.get(window.api.getAddress).then(function (res1) {
+                    var result = res1.data.body;
+                    if (result) {
+                        _this.acrossChains.Heco.CosExchangeAddress = result.Heco.CosExchangeAddress;
+                        _this.acrossChains.OKEx.CosExchangeAddress = result.OKEx.CosExchangeAddress;
+                        _this.acrossChains.ETH.CosExchangeAddress = result.ETH.CosExchangeAddress;
+                        _this.acrossChains.Tron.CosExchangeAddress = result.Tron.CosExchangeAddress;
+                        _this.acrossChains.BSC.CosExchangeAddress = result.BSC.CosExchangeAddress;
+                    }
+                });
+            },
+
             findTXInHecoChain(fullHash){
                 const _this = this;
-                var recordType;
-                if(_this.$global.getSenderOrRecipient(_this.transactionInfo) == _this.MWLockAddress){
-                    recordType = 1;
-                }else if(_this.$global.getSenderRSOrWo(_this.transactionInfo) == _this.MWLockAddress){
-                    recordType = 2;
-                }
-                _this.$http.get(window.api.getRecordUrl,{params:{fullSource:fullHash,recordType:recordType}}).then(function (res1) {
+                _this.$http.get(window.api.getRecordUrl,{params:{fullSource:fullHash,recordType:_this.recordType}}).then(function (res1) {
                     console.log(res1.data.body.transactionHash);
                     var tx = res1.data.body.transactionHash;
                     if(tx){
-                       window.open(window.api.getHecoInfo+tx, '_blank');
+                        switch(_this.chainId){
+                            case 1:
+                                window.open(window.api.getHecoInfo+tx, '_blank');
+                                break;
+                            case 2:
+                                window.open(window.api.getOKExInfo+tx, '_blank');
+                                break;
+                            case 3:
+                                window.open(window.api.getETHInfo+tx, '_blank');
+                                break;
+                            case 4:
+                                window.open(window.api.getTronInfo+tx, '_blank');
+                                break; 
+                            case 5:
+                                window.open(window.api.getBSCInfo+tx, '_blank');
+                                break;
+                            default:
+                                break;
+                        }
                     }else{
                         _this.$message.error(_this.$t('acrossChains.tx_error'));
                     }
                 }).catch(err => {
                     _this.$message.error(_this.$t('acrossChains.error'));
                 });
-
-
             }
 
         },
