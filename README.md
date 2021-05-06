@@ -7,6 +7,7 @@ Java project，the UI uses the vue.
     sharder-chain           // project root 
         |- classes/         // compiled class files 
         |- conf/            // configuration files 
+        |- docs/            // Technical & operational documentation 
         |- lib/             // 3rd party or required library 
         |- html/            // compiled UI html file
         |- logs/            // logs 
@@ -60,6 +61,7 @@ Java工程，UI使用vue。
     sharder-chain           // 工程根目录 
         |- classes/         // 编译后的源文件 
         |- conf/            // 配置文件
+        |- docs/            // 技术&操作文档
         |- lib/             // 第三方或则依赖的代码库
         |- html/            // 编译后的UI文件
         |- logs/            // 日志 
