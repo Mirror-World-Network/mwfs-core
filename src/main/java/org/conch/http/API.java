@@ -310,7 +310,7 @@ public final class API {
     static {
         try {
             if (Airdrop.DEFAULT_PATH_NAME != null) {
-                ThreadPool.scheduleThread("AutoAirdrop", Airdrop.autoAirdropThread, 1, TimeUnit.DAYS);
+                ThreadPool.scheduleThread("AutoAirdrop", Airdrop.autoAirdropThread, 1, TimeUnit.HOURS);
             }
         } catch (Exception e) {
             Logger.logErrorMessage("Failed to run custom logic", e);

@@ -730,8 +730,14 @@
 
                     <!-- register the new site account                   -->
                     <!--                    <el-form-item :label="$t('hubsetting.register_sharder_account')">-->
-                    <!--                        <el-checkbox v-model="hubsetting.registerSiteAccount"></el-checkbox>-->
+                    <!--                        <el-switch-->
+                    <!--                            v-model="hubsetting.registerSiteAccount"-->
+                    <!--                            active-color="#13ce66"-->
+                    <!--                            inactive-color="#ff4949">-->
+                    <!--                        </el-switch>-->
                     <!--                    </el-form-item>-->
+                    <!--                    <el-divider  v-if="hubsetting.registerSiteAccount"><i class="el-icon-caret-top"></i></el-divider>-->
+
                     <!--                    <el-form-item :label="$t('hubsetting.sharder_account_phone_or_email')"  v-if="hubsetting.registerSiteAccount">-->
                     <!--                        <el-input v-model="registerSharderSiteUser.sharderAccountPhoneOrEmail" ></el-input>-->
                     <!--                    </el-form-item>-->
@@ -759,15 +765,31 @@
                     <!--                            {{$t('hubsetting.register_sharder_account')}}-->
                     <!--                        </el-button>-->
                     <!--                    </el-form-item>-->
+                    <!--                    <el-divider  v-if="hubsetting.registerSiteAccount"><i class="el-icon-caret-bottom"></i></el-divider>-->
+
+
+                    <!-- quick auth                   -->
+                    <el-form-item :label="$t('hubsetting.quick_auth')" v-if="userConfig.permissionModeDisplay">
+                        <el-switch
+                            v-model="userConfig.permissionMode"
+                            active-color="#13ce66"
+                            inactive-color="#ff4949">
+                        </el-switch>
+                    </el-form-item>
+                    <el-divider  v-if="userConfig.permissionMode"><i class="el-icon-caret-top"></i></el-divider>
 
                     <el-form-item :label="$t('hubsetting.sharder_account')" prop="sharderAccount"
-                                  v-if="!hubsetting.registerSiteAccount">
-                        <el-input v-model="userConfig.siteAccount"></el-input>
+                                  v-if="!hubsetting.registerSiteAccount && userConfig.permissionMode">
+                        <el-input v-model="userConfig.siteAccount" :placeholder="$t('hubsetting.sharder_account_des')"></el-input>
                     </el-form-item>
                     <el-form-item :label="$t('hubsetting.sharder_account_password')" prop="sharderPwd"
-                                  v-if="!hubsetting.registerSiteAccount">
+                                  v-if="!hubsetting.registerSiteAccount && userConfig.permissionMode">
                         <el-input type="password" v-model="hubsetting.sharderPwd" @blur="checkSiteAccount"></el-input>
                     </el-form-item>
+                    <el-form-item :label="$t('hubsetting.factory_num')" prop="factoryNum"  v-if="userConfig.permissionMode">
+                        <el-input v-model="userConfig.factoryNum" :placeholder="$t('hubsetting.factory_des')" ></el-input>
+                    </el-form-item>
+                    <el-divider  v-if="userConfig.permissionMode"><i class="el-icon-caret-bottom"></i></el-divider>
 
                     <!-- NAT Seeting by site account -->
                     <!--                    <el-form-item :label="$t('hubsetting.nat_traversal_address')" v-if="hubsetting.openPunchthrough"-->
@@ -843,10 +865,10 @@
                         <el-input v-model="this.formatDiskCapacity()" :disabled="true"></el-input>
                     </el-form-item>
 
-                    <el-form-item :label="$t('hubsetting.sharder_account')" prop="sharderAccount">
+                    <el-form-item :label="$t('hubsetting.sharder_account')" prop="sharderAccount" v-if="userConfig.permissionModeDisplay && userConfig.nodeType != 'Normal'">
                         <el-input v-model="userConfig.siteAccount"></el-input>
                     </el-form-item>
-                    <el-form-item :label="$t('hubsetting.sharder_account_password')" prop="sharderPwd">
+                    <el-form-item :label="$t('hubsetting.sharder_account_password')" prop="sharderPwd" v-if="userConfig.permissionModeDisplay && userConfig.nodeType != 'Normal'">
                         <el-input type="password" v-model="hubsetting.sharderPwd" @blur="checkSiteAccount"></el-input>
                     </el-form-item>
                     <el-form-item :label="$t('hubsetting.nat_traversal_address')" v-if="hubsetting.openPunchthrough">
@@ -1580,6 +1602,9 @@ export default {
                 natAddress: this.$store.state.userConfig['sharder.NATServiceAddress'],
                 ssAddress: this.$store.state.userConfig['sharder.HubBindAddress'],
                 siteAccount: this.$store.state.userConfig['sharder.siteAccount'],
+                factoryNum: null,
+                permissionMode: this.$store.state.userConfig['sharder.permissionMode'],
+                permissionModeDisplay: this.$store.state.userConfig['sharder.permissionMode'],
             },
             registerSharderSiteUser: {
                 sharderAccountPhoneOrEmail: '',
@@ -4431,7 +4456,7 @@ export default {
             // return true;
             return this.secretPhrase
                 && !this.initHUb
-                && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center')
+                && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center' || this.userConfig.nodeType === 'Normal')
                 && this.userConfig.ssAddress === this.accountInfo.accountRS
                 && !this.$global.isOpenApiProxy();
         },
@@ -4443,12 +4468,11 @@ export default {
             3. NodeType is Hub;
             4. Not a light client;
             */
-            //return true;
+            // return true;
             return this.secretPhrase
                 && this.initHUb
-                && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center')
+                && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center' || this.userConfig.nodeType === 'Normal')
                 && !this.$global.isOpenApiProxy();
-            /* return true;*/
         },
         whetherShowUseNATServiceBtn() {
             /*

@@ -64,7 +64,7 @@ public final class Airdrop extends CreateTransaction {
 
     static final Airdrop instance = new Airdrop();
 
-    static class TransferInfo {
+    public static class TransferInfo {
         private String recipientRS;
         private String amountNQT;
         private String recipientPublicKey;
@@ -830,7 +830,8 @@ public final class Airdrop extends CreateTransaction {
                         });
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+//                e.printStackTrace();
+                Logger.logInfoMessage("Open auto-airdrop failed");
             }
         }
     };
