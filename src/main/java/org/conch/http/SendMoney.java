@@ -57,7 +57,7 @@ public final class SendMoney extends CreateTransaction {
          */
 
         String rightCode = "200";
-        if(blockchain.getHeight()>Constants.HECO_HEIGHT && chainId != null){
+        if(blockchain.getHeight()>Constants.EXCHANGE_HEIGHT && chainId != null){
             String url = Constants.MGR_URL;
             RestfulHttpClient.HttpResponse response;
             try {
