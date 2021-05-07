@@ -4,7 +4,7 @@
             <el-row v-if="nonePublicKeyHint" class="notice-container">
                 <el-col :span="24">
                     <div class="notice" style="background: #ffffff">
-                        <div><a>{{$t('account.account_inactive')}}</a></div>
+                        <div><a>{{ $t('account.account_inactive') }}</a></div>
                     </div>
                 </el-col>
             </el-row>
@@ -18,9 +18,12 @@
                     <div class="account_address">
                         <span>{{ accountInfo.accountRS }}</span>
                         <img class="csp pc-i" src="../../assets/img/copy.svg" v-clipboard:copy="accountInfo.accountRS"
-                             v-clipboard:success="copySuccess" v-clipboard:error="copyError" v-if="projectName === 'mw'"/>
-                        <img class="csp pc-i" src="../../assets/img/sharder/copy.svg" v-clipboard:copy="accountInfo.accountRS"
-                             v-clipboard:success="copySuccess" v-clipboard:error="copyError" v-else-if="projectName === 'sharder'"/>
+                             v-clipboard:success="copySuccess" v-clipboard:error="copyError"
+                             v-if="projectName === 'mw'"/>
+                        <img class="csp pc-i" src="../../assets/img/sharder/copy.svg"
+                             v-clipboard:copy="accountInfo.accountRS"
+                             v-clipboard:success="copySuccess" v-clipboard:error="copyError"
+                             v-else-if="projectName === 'sharder'"/>
                     </div>
                     <p class="account_info" @click="isUserInfoDialog(true)">{{ $t('account.account_info') }}</p>
                     <p class="account_asset" v-loading="loading">
@@ -98,7 +101,8 @@
                             <div>
                                 <img src="../../assets/img/join_net.svg" style="vertical-align:middle" hspace="5"
                                      width="18" v-if="projectName === 'mw'">
-                                <img src="../../assets/img/sharder/join_net.svg" style="vertical-align:middle" hspace="5"
+                                <img src="../../assets/img/sharder/join_net.svg" style="vertical-align:middle"
+                                     hspace="5"
                                      width="18" v-else-if="projectName === 'sharder'">
                                 {{ $t('joinNet.join') }}
                             </div>
@@ -190,11 +194,12 @@
 
                         <button class="common_btn imgBtn "
                                 v-bind:class="{'disabledWriteBtn': !nonDownloading,'writeBtn': nonDownloading}"
-                                v-if="whetherShowAssetsAcrossChainsBtn()"
-                                @click="openAssetsAcrossChainsDialog" style="width:150px;">
+                                v-if="whetherShowAssetsAcrossChainsBtn()"  @click="openAssetsAcrossChainsDialog" style="width: 135px">
                             <span class="icon" style="color:#A6A9AD">
-                                <svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                                     viewBox="0 0 150 162.5" style="enable-background:new 0 0 150 162.5;" xml:space="preserve" >
+                                <svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg"
+                                     xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                                     viewBox="0 0 150 162.5" style="enable-background:new 0 0 150 162.5;"
+                                     xml:space="preserve">
 
                                 <path class="st0" d="M131.1,13.7c6.4,0,11.8,5.3,11.8,11.8v111.9c0,6.4-5.3,11.8-11.8,11.8h-112c-6.4,0-11.8-5.3-11.8-11.8V25.5
                                     c0-6.4,5.3-11.8,11.8-11.8H131.1 M131.1,6.6h-112C8.8,6.6,0.3,15.2,0.3,25.5v111.9c0,10.3,8.6,18.9,18.9,18.9h112
@@ -216,7 +221,8 @@
             <div class="block_receiptDisbursement mb20">
                 <p class="block_title">
                     <img src="../../assets/img/receipt&disbursementInfo.svg" v-if="projectName === 'mw'"/>
-                    <img src="../../assets/img/sharder/receipt&disbursementInfo.svg" v-else-if="projectName === 'sharder'"/>
+                    <img src="../../assets/img/sharder/receipt&disbursementInfo.svg"
+                         v-else-if="projectName === 'sharder'"/>
                     <span>{{ $t('account.income_and_expenditure_details') }}</span>
                 </p>
                 <div class="w">
@@ -229,7 +235,8 @@
             <div class="block_list">
                 <p class="block_title fl">
                     <img src="../../assets/img/transaction.svg" alt="transactionImg" v-if="projectName === 'mw'"/>
-                    <img src="../../assets/img/sharder/transaction.svg" alt="transactionImg" v-else-if="projectName === 'sharder'"/>
+                    <img src="../../assets/img/sharder/transaction.svg" alt="transactionImg"
+                         v-else-if="projectName === 'sharder'"/>
                     <span>{{ $t('transaction.transaction_record') }}</span>
                 </p>
                 <div class="transaction_type">
@@ -242,12 +249,7 @@
                     <span class="btn" :class="activeSelectType(9)" @click="selectType = 9">
                         {{ $t('transaction.transaction_type_system_reward') }}
                     </span>
-                    <span class="btn" :class="activeSelectType(19)" @click="selectType = 19">
-                        {{ $t('transaction.transaction_type_mw_to_hmw') }}
-                    </span>
-                    <span class="btn" :class="activeSelectType(20)" @click="selectType = 20">
-                        {{ $t('transaction.transaction_type_hmw_to_mw') }}
-                    </span>
+
                     <el-select v-model="selectType" :placeholder="$t('transaction.transaction_type_all')">
                         <el-option
                             v-for="item in transactionType"
@@ -256,6 +258,16 @@
                             :value="item.value">
                         </el-option>
                     </el-select>
+		            <el-select class="exchange" id="exchangeSelectType" v-model="exchangeSelectType"
+		            :placeholder="$t('transaction.transaction_type_exchange')">
+                        <el-option
+                          v-for="item in exchangeTransactionType"
+                          :key="item.value"
+                          :label="item.label"
+                          :value="item.value"
+                        >
+		            </el-option>
+		          </el-select>
                 </div>
                 <div class="list_table w br4" v-loading="loading">
                     <div class="list_content data_loading">
@@ -319,7 +331,8 @@
                                     </span>
 
                                     <img src="../../assets/img/right_arrow.svg" v-if="projectName === 'mw'"/>
-                                    <img src="../../assets/img/sharder/right_arrow.svg" v-else-if="projectName === 'sharder'"/>
+                                    <img src="../../assets/img/sharder/right_arrow.svg"
+                                         v-else-if="projectName === 'sharder'"/>
                                     <!-- tx recipient -->
                                     <span class="linker" @click="openAccountInfoDialog(transaction.senderRS)"
                                           v-if="transaction.type === 9">
@@ -408,7 +421,8 @@
                                 <masked-input id="receiver" mask="AAA-****-****-****-*****"
                                               v-model="messageForm.receiver"/>
                                 <img src="../../assets/img/account_directory.svg" v-if="projectName === 'mw'"/>
-                                <img src="../../assets/img/sharder/account_directory.svg" v-else-if="projectName === 'sharder'"/>
+                                <img src="../../assets/img/sharder/account_directory.svg"
+                                     v-else-if="projectName === 'sharder'"/>
                             </el-form-item>
                             <el-form-item :label="$t('sendMessage.receiver_publickey')" v-if="messageForm.hasPublicKey">
                                 <el-input v-model="messageForm.publicKey" type="password"></el-input>
@@ -589,7 +603,8 @@
                                 <masked-input id="tranfer_receiver" mask="AAA-****-****-****-*****"
                                               v-model="transfer.receiver"/>
                                 <img src="../../assets/img/account_directory.svg" v-if="projectName === 'mw'"/>
-                                <img src="../../assets/img/sharder/account_directory.svg" v-else-if="projectName === 'sharder'"/>
+                                <img src="../../assets/img/sharder/account_directory.svg"
+                                     v-else-if="projectName === 'sharder'"/>
                             </el-form-item>
                             <el-form-item :label="$t('transfer.receiver_public_key')" v-if="transfer.hasPublicKey">
                                 <el-input v-model="transfer.publicKey" type="password"></el-input>
@@ -714,68 +729,45 @@
                     </el-form-item>
 
                     <!-- register the new site account                   -->
-<!--                    <el-form-item :label="$t('hubsetting.register_sharder_account')">-->
-<!--                        <el-switch-->
-<!--                            v-model="hubsetting.registerSiteAccount"-->
-<!--                            active-color="#13ce66"-->
-<!--                            inactive-color="#ff4949">-->
-<!--                        </el-switch>-->
-<!--                    </el-form-item>-->
-<!--                    <el-divider  v-if="hubsetting.registerSiteAccount"><i class="el-icon-caret-top"></i></el-divider>-->
-
-<!--                    <el-form-item :label="$t('hubsetting.sharder_account_phone_or_email')"  v-if="hubsetting.registerSiteAccount">-->
-<!--                        <el-input v-model="registerSharderSiteUser.sharderAccountPhoneOrEmail" ></el-input>-->
-<!--                    </el-form-item>-->
-<!--                    <el-form-item :label="$t('hubsetting.verification_code')" v-if="hubsetting.registerSiteAccount">-->
-<!--                        <el-input v-model="registerSharderSiteUser.verificationCode" ></el-input><el-button type="primary" style="position: absolute;right:0px;top:0px " @click="sendVCode()" :disabled="sendSuccess">-->
-<!--                        {{sendSuccess?time+"s 可"+$t('hubsetting.resend_verification_code'):$t('hubsetting.send_verification_code')}}-->
-<!--                    </el-button>-->
-<!--                    </el-form-item>-->
-<!--                    <el-form-item :label="$t('hubsetting.set_sharder_account_password')"  v-if="hubsetting.registerSiteAccount">-->
-<!--                        <el-input type="password" v-model="registerSharderSiteUser.setSharderPwd"></el-input>-->
-<!--                    </el-form-item>-->
-<!--                    <el-form-item :label="$t('hubsetting.confirm_sharder_account_password')"  v-if="hubsetting.registerSiteAccount">-->
-<!--                        <el-input type="password" v-model="registerSharderSiteUser.confirmSharderPwd"></el-input>-->
-<!--                    </el-form-item>-->
-<!--                    <el-form-item :label="$t('hubsetting.picture_verification_code')"  v-if="hubsetting.registerSiteAccount">-->
-<!--                        <el-input v-model="registerSharderSiteUser.pictureVerificationCode" @blur="checkPicVerificationCode"></el-input>-->
-<!--                        <el-image :src="src" style="width:112px;height:38px;position: absolute;right:1px;top:1px " @click="getPicVCode()">-->
-<!--                            <div slot="placeholder" class="image-slot">-->
-<!--                                Loding<span class="dot">...</span>-->
-<!--                            </div>-->
-<!--                        </el-image>-->
-<!--                    </el-form-item>-->
-<!--                    <el-form-item >-->
-<!--                        <el-button type="primary" v-if="hubsetting.registerSiteAccount" style="float: right" @click="registerSharderSite()">-->
-<!--                            {{$t('hubsetting.register_sharder_account')}}-->
-<!--                        </el-button>-->
-<!--                    </el-form-item>-->
-<!--                    <el-divider  v-if="hubsetting.registerSiteAccount"><i class="el-icon-caret-bottom"></i></el-divider>-->
-
-
-                    <!-- quick auth                   -->
-                    <el-form-item :label="$t('hubsetting.quick_auth')" v-if="userConfig.permissionModeDisplay">
-                        <el-switch
-                            v-model="userConfig.permissionMode"
-                            active-color="#13ce66"
-                            inactive-color="#ff4949">
-                        </el-switch>
-                    </el-form-item>
-                    <el-divider  v-if="userConfig.permissionMode"><i class="el-icon-caret-top"></i></el-divider>
+                    <!--                    <el-form-item :label="$t('hubsetting.register_sharder_account')">-->
+                    <!--                        <el-checkbox v-model="hubsetting.registerSiteAccount"></el-checkbox>-->
+                    <!--                    </el-form-item>-->
+                    <!--                    <el-form-item :label="$t('hubsetting.sharder_account_phone_or_email')"  v-if="hubsetting.registerSiteAccount">-->
+                    <!--                        <el-input v-model="registerSharderSiteUser.sharderAccountPhoneOrEmail" ></el-input>-->
+                    <!--                    </el-form-item>-->
+                    <!--                    <el-form-item :label="$t('hubsetting.verification_code')" v-if="hubsetting.registerSiteAccount">-->
+                    <!--                        <el-input v-model="registerSharderSiteUser.verificationCode" ></el-input><el-button type="primary" style="position: absolute;right:0px;top:0px " @click="sendVCode()" :disabled="sendSuccess">-->
+                    <!--                        {{sendSuccess?time+"s 可"+$t('hubsetting.resend_verification_code'):$t('hubsetting.send_verification_code')}}-->
+                    <!--                    </el-button>-->
+                    <!--                    </el-form-item>-->
+                    <!--                    <el-form-item :label="$t('hubsetting.set_sharder_account_password')"  v-if="hubsetting.registerSiteAccount">-->
+                    <!--                        <el-input type="password" v-model="registerSharderSiteUser.setSharderPwd"></el-input>-->
+                    <!--                    </el-form-item>-->
+                    <!--                    <el-form-item :label="$t('hubsetting.confirm_sharder_account_password')"  v-if="hubsetting.registerSiteAccount">-->
+                    <!--                        <el-input type="password" v-model="registerSharderSiteUser.confirmSharderPwd"></el-input>-->
+                    <!--                    </el-form-item>-->
+                    <!--                    <el-form-item :label="$t('hubsetting.picture_verification_code')"  v-if="hubsetting.registerSiteAccount">-->
+                    <!--                        <el-input v-model="registerSharderSiteUser.pictureVerificationCode" @blur="checkPicVerificationCode"></el-input>-->
+                    <!--                        <el-image :src="src" style="width:112px;height:38px;position: absolute;right:1px;top:1px " @click="getPicVCode()">-->
+                    <!--                            <div slot="placeholder" class="image-slot">-->
+                    <!--                                Loding<span class="dot">...</span>-->
+                    <!--                            </div>-->
+                    <!--                        </el-image>-->
+                    <!--                    </el-form-item>-->
+                    <!--                    <el-form-item >-->
+                    <!--                        <el-button type="primary" v-if="hubsetting.registerSiteAccount" style="float: right" @click="registerSharderSite()">-->
+                    <!--                            {{$t('hubsetting.register_sharder_account')}}-->
+                    <!--                        </el-button>-->
+                    <!--                    </el-form-item>-->
 
                     <el-form-item :label="$t('hubsetting.sharder_account')" prop="sharderAccount"
-                                  v-if="!hubsetting.registerSiteAccount && userConfig.permissionMode">
-                        <el-input v-model="userConfig.siteAccount" :placeholder="$t('hubsetting.sharder_account_des')"></el-input>
+                                  v-if="!hubsetting.registerSiteAccount">
+                        <el-input v-model="userConfig.siteAccount"></el-input>
                     </el-form-item>
                     <el-form-item :label="$t('hubsetting.sharder_account_password')" prop="sharderPwd"
-                                  v-if="!hubsetting.registerSiteAccount && userConfig.permissionMode">
+                                  v-if="!hubsetting.registerSiteAccount">
                         <el-input type="password" v-model="hubsetting.sharderPwd" @blur="checkSiteAccount"></el-input>
                     </el-form-item>
-                    <el-form-item :label="$t('hubsetting.factory_num')" prop="factoryNum"  v-if="userConfig.permissionMode">
-                        <el-input v-model="userConfig.factoryNum" :placeholder="$t('hubsetting.factory_des')" ></el-input>
-                    </el-form-item>
-                    <el-divider  v-if="userConfig.permissionMode"><i class="el-icon-caret-bottom"></i></el-divider>
-
 
                     <!-- NAT Seeting by site account -->
                     <!--                    <el-form-item :label="$t('hubsetting.nat_traversal_address')" v-if="hubsetting.openPunchthrough"-->
@@ -851,10 +843,10 @@
                         <el-input v-model="this.formatDiskCapacity()" :disabled="true"></el-input>
                     </el-form-item>
 
-                    <el-form-item :label="$t('hubsetting.sharder_account')" prop="sharderAccount" v-if="userConfig.permissionModeDisplay && userConfig.nodeType != 'Normal'">
+                    <el-form-item :label="$t('hubsetting.sharder_account')" prop="sharderAccount">
                         <el-input v-model="userConfig.siteAccount"></el-input>
                     </el-form-item>
-                    <el-form-item :label="$t('hubsetting.sharder_account_password')" prop="sharderPwd" v-if="userConfig.permissionModeDisplay && userConfig.nodeType != 'Normal'">
+                    <el-form-item :label="$t('hubsetting.sharder_account_password')" prop="sharderPwd">
                         <el-input type="password" v-model="hubsetting.sharderPwd" @blur="checkSiteAccount"></el-input>
                     </el-form-item>
                     <el-form-item :label="$t('hubsetting.nat_traversal_address')" v-if="hubsetting.openPunchthrough">
@@ -1010,8 +1002,10 @@
                                       style="color:#999;font-weight: normal">{{
                                         $t('account_info.account_name_not_set')
                                     }}</span>
-                                <img src="../../assets/img/rewrite.svg" @click="isShowName = false" v-if="projectName === 'mw'"/>
-                                <img src="../../assets/img/sharder/rewrite.svg" @click="isShowName = false" v-else-if="projectName === 'sharder'"/>
+                                <img src="../../assets/img/rewrite.svg" @click="isShowName = false"
+                                     v-if="projectName === 'mw'"/>
+                                <img src="../../assets/img/sharder/rewrite.svg" @click="isShowName = false"
+                                     v-else-if="projectName === 'sharder'"/>
                             </div>
                             <div class="rewriteName" v-else>
                                 <el-input v-model="temporaryName"></el-input>
@@ -1146,282 +1140,381 @@
                     </div>
                     <div class="modal-body modal-message">
                         <ul class="title" v-if="!showChain">
-                            <li :class="chainShow==1? 'active':''" @click="showHecoChain" ><a>Heco Chain</a></li>
-                            <li :class="chainShow==2? 'active':''" @click="showOkExChain" ><a>OKEx Chain</a></li>
-                            <li :class="chainShow==3? 'active':''" @click="showMoreChain" ><a>...</a></li>
+		              <li :class="chainId === 1 ? 'active' : ''" @click="showChains(1)">
+		                <a>Heco</a>
+		              </li>
+		              <li :class="chainId === 2 ? 'active' : ''" @click="showChains(2)">
+		                <a>OKEx</a>
+		              </li>
+		              <li :class="chainId === 3 ? 'active' : ''" @click="showChains(3)">
+		                <a>ETH</a>
+		              </li>
+		              <!-- <li :class="chainId === 4 ? 'active' : ''" @click="showChains(4)">
+		                <a>Tron</a>
+		              </li> -->
+		              <li :class="chainId === 5 ? 'active' : ''" @click="showChains(5)">
+		                <a>BSC</a>
+		              </li>
+		              <li :class="chainId === 6 ? 'active' : ''" @click="showChains(6)">
+		                <a>...</a>
+		              </li>
                         </ul>
                         <ul class="title" v-else>
-                            <li :class="chainShow==1? 'active':''" ><a>Heco Chain</a></li>
-                            <li :class="chainShow==2? 'active':''" ><a>OKEx Chain</a></li>
-                            <li :class="chainShow==3? 'active':''" ><a>...</a></li>
+                            <li :class="chainId===1? 'active':''"><a>Heco</a></li>
+                            <li :class="chainId===2? 'active':''"><a>OKEx</a></li>
+                            <li :class="chainId===3? 'active':''"><a>ETH</a></li>
+                            <!-- <li :class="chainId === 4 ? 'active' : ''"><a>Tron</a></li> -->
+                            <li :class="chainId===5? 'active':''"><a>BSC</a></li>
+                            <li :class="chainId===4? 'active':''"><a>...</a></li>
                         </ul>
 
                         <div id="content">
-                            <el-form class="mod" v-if="chainShow==1">
-                                <el-form-item :label="$t('acrossChains.heco_target_address')" class="item_address">
-                                    <el-input id="acrossChains_target_address" v-model="acrossChains.heco.target_address" :placeholder="$t('acrossChains.heco_address_tip')">
-                                        <el-button  slot="append" style="background: #3fb09a;color:#000" @click="bindAddress(1)" :disabled="showChain">{{ $t('acrossChains.bind') }}</el-button>
+                            <!--Heco-->
+                            <el-form class="mod" v-if="chainId===1">
+                                <el-form-item :label="$t('acrossChains.Heco_target_address')" class="item_address">
+                                    <el-input v-model="acrossChains.Heco.target_address"
+                                              :placeholder="$t('acrossChains.Heco_address_tip')">
+                                        <el-button slot="append" style="background: #3fb09a;color:#fff"
+                                                   @click="bindAddress(1)" :disabled="showChain">
+                                            {{ $t('acrossChains.bind') }}
+                                        </el-button>
                                     </el-input>
                                 </el-form-item>
-                                <el-form-item :label="$t('acrossChains.heco_target_balance')" class="item_balance">
-                                    <input class="el-input__inner" id="acrossChains_target_balance"  v-model="acrossChains.heco.target_balance" type="number" disabled="disabled" />
-                                    <label class="input_suffix">{{ $global.hecoUnit }}</label>
+                                <el-form-item :label="$t('acrossChains.Heco_target_balance')" class="item_balance">
+                                    <input class="el-input__inner" v-model="acrossChains.Heco.target_balance"
+                                           type="number" disabled="disabled"/>
+                                    <label class="input_suffix">{{ $global.HecoUnit }}</label>
                                 </el-form-item>
-                                <el-form-item :label="$t('acrossChains.heco_convertible_balance')" class="balance">
-                                    <input class="el-input__inner" id="acrossChains_balance" v-model="acrossChains.heco.convertible_balance" type="number" disabled="disabled" />
-                                    <label class="input_suffix">{{ $global.hecoUnit }}</label>
+                                <el-form-item :label="$t('acrossChains.Heco_convertible_balance')" class="balance">
+                                    <input class="el-input__inner" v-model="acrossChains.Heco.convertible_balance"
+                                           type="number" disabled="disabled"/>
+                                    <label class="input_suffix">{{ $global.HecoUnit }}</label>
                                 </el-form-item>
-                                <el-form-item :label="$t('acrossChains.heco_rate')" class="rate" style="margin-bottom:0">
+                                <el-form-item :label="$t('acrossChains.Heco_rate')" class="rate"
+                                              style="margin-bottom:0">
 
                                 </el-form-item>
                                 <div style="width:100%;height:40px">
-                                    <input id="input__mw" v-model="acrossChains.heco.rateMW" type ="text" disabled="disabled" />
-                                    <label id="input_unit">{{ $global.unit }}</label>
-                                    <label id="input__equals">=</label>
-                                    <input id="input__heco" v-model="acrossChains.heco.rateHeco" type ="text" disabled="disabled" />
-                                    <label id="input_hecoUnit">{{ $global.hecoUnit }}</label>
-                                    <el-button  id="input_exchange" slot="append" @click="openExchangeDialog" :disabled="showChain">{{ $t('acrossChains.exchange') }}</el-button>
+                                    <input class="input__mw" v-model="acrossChains.Heco.rateMW" type="text"
+                                           disabled="disabled"/>
+                                    <label class="input_unit">{{ $global.unit }}</label>
+                                    <label class="input__equals">=</label>
+                                    <input class="input__heco" v-model="acrossChains.Heco.rateHeco" type="text"
+                                           disabled="disabled"/>
+                                    <label class="input_hecoUnit">{{ $global.HecoUnit }}</label>
+                                    <el-button class="input_exchange" slot="append" @click="openExchangeDialog"
+                                               :disabled="showChain" style="background: #3fb09a;color:#fff">
+                                        {{ $t('acrossChains.exchange') }}
+                                    </el-button>
                                 </div>
 
                             </el-form>
-                            <el-form class="mod" v-if="chainShow==2" >
-                                <!-- <el-form-item :label="$t('acrossChains.target_address')" class="item_address">
-                                    <el-input id="acrossChains_target_address" v-model="acrossChains.OKEx.target_address" :placeholder="$t('acrossChains.address_tip')">
-                                        <el-button slot="append" style="background: #3fb09a;color:#000" @click="bindAddress(2)" :disabled="showChain">{{ $t('acrossChains.bind') }}</el-button>
+                            <!--OKEx-->
+                            <el-form class="mod" v-if="chainId===2">
+                                <el-form-item :label="$t('acrossChains.OKEx_target_address')" class="item_address">
+                                    <el-input v-model="acrossChains.OKEx.target_address"
+                                              :placeholder="$t('acrossChains.OKEx_address_tip')">
+                                        <el-button slot="append" style="background: #3fb09a;color:#fff"
+                                                   @click="bindAddress(2)" :disabled="showChain">
+                                            {{ $t('acrossChains.bind') }}
+                                        </el-button>
                                     </el-input>
                                 </el-form-item>
-                                <el-form-item :label="$t('acrossChains.target_balance')" class="item_balance">
-                                    <input class="el-input__inner" id="acrossChains_target_balance"  v-model="acrossChains.OKEx.target_balance" type="number" disabled="disabled"/>
-                                    <label class="input_suffix">{{ $global.hecoUnit }}</label>
+                                <el-form-item :label="$t('acrossChains.OKEx_target_balance')" class="item_balance">
+                                    <input class="el-input__inner" v-model="acrossChains.OKEx.target_balance"
+                                           type="number" disabled="disabled"/>
+                                    <label class="input_suffix">{{ $global.OKExUnit }}</label>
                                 </el-form-item>
-                                <el-form-item :label="$t('acrossChains.balance')" class="balance">
-                                    <input class="el-input__inner" id="acrossChains_balance" v-model="acrossChains.balance" type="number" disabled="disabled"/>
-                                    <label class="input_suffix">{{ $global.unit }}</label>
-                                </el-form-item> -->
-                                {{$t('acrossChains.more')}}
+                                <el-form-item :label="$t('acrossChains.OKEx_convertible_balance')" class="balance">
+                                    <input class="el-input__inner" v-model="acrossChains.OKEx.convertible_balance"
+                                           type="number" disabled="disabled"/>
+                                    <label class="input_suffix">{{ $global.OKExUnit }}</label>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.OKEx_rate')" class="rate"
+                                              style="margin-bottom:0">
+
+                                </el-form-item>
+                                <div style="width:100%;height:40px">
+                                    <input class="input__mw" v-model="acrossChains.OKEx.rateMW" type="text"
+                                           disabled="disabled"/>
+                                    <label class="input_unit">{{ $global.unit }}</label>
+                                    <label class="input__equals">=</label>
+                                    <input class="input__heco" v-model="acrossChains.OKEx.rateOKEx" type="text"
+                                           disabled="disabled"/>
+                                    <label class="input_hecoUnit">{{ $global.OKExUnit }}</label>
+                                    <el-button class="input_exchange" slot="append" @click="openExchangeDialog"
+                                               :disabled="showChain" style="background: #3fb09a;color:#fff">
+                                        {{ $t('acrossChains.exchange') }}
+                                    </el-button>
+                                </div>
                             </el-form>
-                            <el-form class="mod" v-if="chainShow==3" >
-                                {{$t('acrossChains.more')}}
+                            <!--ETH-->
+                            <el-form class="mod" v-if="chainId===3">
+                                <el-form-item :label="$t('acrossChains.ETH_target_address')" class="item_address">
+                                    <el-input v-model="acrossChains.ETH.target_address"
+                                              :placeholder="$t('acrossChains.ETH_address_tip')">
+                                        <el-button slot="append" style="background: #3fb09a;color:#fff"
+                                                   @click="bindAddress(3)" :disabled="showChain">
+                                            {{ $t('acrossChains.bind') }}
+                                        </el-button>
+                                    </el-input>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.ETH_target_balance')" class="item_balance">
+                                    <input class="el-input__inner" v-model="acrossChains.ETH.target_balance"
+                                           type="number" disabled="disabled"/>
+                                    <label class="input_suffix">{{ $global.ETHUnit }}</label>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.ETH_convertible_balance')" class="balance">
+                                    <input class="el-input__inner" v-model="acrossChains.ETH.convertible_balance"
+                                           type="number" disabled="disabled"/>
+                                    <label class="input_suffix">{{ $global.ETHUnit }}</label>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.ETH_rate')" class="rate" style="margin-bottom:0">
+
+                                </el-form-item>
+                                <div style="width:100%;height:40px">
+                                    <input class="input__mw" v-model="acrossChains.ETH.rateMW" type="text"
+                                           disabled="disabled"/>
+                                    <label class="input_unit">{{ $global.unit }}</label>
+                                    <label class="input__equals">=</label>
+                                    <input class="input__heco" v-model="acrossChains.ETH.rateETH" type="text"
+                                           disabled="disabled"/>
+                                    <label class="input_hecoUnit">{{ $global.ETHUnit }}</label>
+                                    <el-button class="input_exchange" slot="append" @click="openExchangeDialog"
+                                               :disabled="showChain" style="background: #3fb09a;color:#fff">
+                                        {{ $t('acrossChains.exchange') }}
+                                    </el-button>
+                                </div>
+                            </el-form>
+                            <!--Tron-->
+                            <el-form class="mod" v-if="chainId===4">
+                                <el-form-item :label="$t('acrossChains.Tron_target_address')" class="item_address">
+                                    <el-input v-model="acrossChains.Tron.target_address"
+                                              :placeholder="$t('acrossChains.Tron_address_tip')">
+                                        <el-button slot="append" style="background: #3fb09a;color:#fff"
+                                                   @click="bindAddress(4)" :disabled="showChain">
+                                            {{ $t('acrossChains.bind') }}
+                                        </el-button>
+                                    </el-input>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.Tron_target_balance')" class="item_balance">
+                                    <input class="el-input__inner" v-model="acrossChains.Tron.target_balance"
+                                           type="number" disabled="disabled"/>
+                                    <label class="input_suffix">{{ $global.TronUnit }}</label>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.Tron_convertible_balance')" class="balance">
+                                    <input class="el-input__inner" v-model="acrossChains.Tron.convertible_balance"
+                                           type="number" disabled="disabled"/>
+                                    <label class="input_suffix">{{ $global.TronUnit }}</label>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.Tron_rate')" class="rate"
+                                              style="margin-bottom:0">
+
+                                </el-form-item>
+                                <div style="width:100%;height:40px">
+                                    <input class="input__mw" v-model="acrossChains.Tron.rateMW" type="text"
+                                           disabled="disabled"/>
+                                    <label class="input_unit">{{ $global.unit }}</label>
+                                    <label class="input__equals">=</label>
+                                    <input class="input__heco" v-model="acrossChains.Tron.rateTron" type="text"
+                                           disabled="disabled"/>
+                                    <label class="input_hecoUnit">{{ $global.TronUnit }}</label>
+                                    <el-button class="input_exchange" slot="append" @click="openExchangeDialog"
+                                               :disabled="showChain" style="background: #3fb09a;color:#fff">
+                                        {{ $t('acrossChains.exchange') }}
+                                    </el-button>
+                                </div>
+                            </el-form>
+                            <!--BSC-->
+                            <el-form class="mod" v-if="chainId===5">
+                                <el-form-item :label="$t('acrossChains.BSC_target_address')" class="item_address">
+                                    <el-input id="acrossChains_target_address" v-model="acrossChains.BSC.target_address"
+                                              :placeholder="$t('acrossChains.BSC_address_tip')">
+                                        <el-button slot="append" style="background: #3fb09a;color:#fff"
+                                                   @click="bindAddress(5)" :disabled="showChain">
+                                            {{ $t('acrossChains.bind') }}
+                                        </el-button>
+                                    </el-input>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.BSC_target_balance')" class="item_balance">
+                                    <input class="el-input__inner" v-model="acrossChains.BSC.target_balance"
+                                           type="number" disabled="disabled"/>
+                                    <label class="input_suffix">{{ $global.BSCUnit }}</label>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.BSC_convertible_balance')" class="balance">
+                                    <input class="el-input__inner" v-model="acrossChains.BSC.convertible_balance"
+                                           type="number" disabled="disabled"/>
+                                    <label class="input_suffix">{{ $global.BSCUnit }}</label>
+                                </el-form-item>
+                                <el-form-item :label="$t('acrossChains.BSC_rate')" class="rate" style="margin-bottom:0">
+
+                                </el-form-item>
+                                <div style="width:100%;height:40px">
+                                    <input class="input__mw" v-model="acrossChains.BSC.rateMW" type="text"
+                                           disabled="disabled"/>
+                                    <label class="input_unit">{{ $global.unit }}</label>
+                                    <label class="input__equals">=</label>
+                                    <input class="input__heco" v-model="acrossChains.BSC.rateBSC" type="text"
+                                           disabled="disabled"/>
+                                    <label class="input_hecoUnit">{{ $global.BSCUnit }}</label>
+                                    <el-button class="input_exchange" slot="append" @click="openExchangeDialog"
+                                               :disabled="showChain" style="background: #3fb09a;color:#fff">
+                                        {{ $t('acrossChains.exchange') }}
+                                    </el-button>
+                                </div>
+                            </el-form>
+                            <el-form class="mod" v-if="chainId===6">
+                                {{ $t('acrossChains.more') }}
                             </el-form>
                         </div>
                     </div>
                     <div class="modal-footer">
 
-                        {{$t('acrossChains.tip-0')}}
+                        {{ $t('acrossChains.tip-0') }}
                         <br>
 
-                        {{$t('acrossChains.tip-1')}}
+                        {{ $t('acrossChains.tip-1') }}
                         <br>
 
-                        {{$t('acrossChains.tip-2')}}
-                        <a>{{MWHecoExchangeAddress}}</a>
-                        {{$t('acrossChains.tip-3')}}{{chainShow == 1 ? "Heco" : "OKEx"}}
-                        {{$t('acrossChains.tip-4')}}{{chainShow == 1 ? "Heco" : "OKEx"}}
-                        {{$t('acrossChains.tip-5')}}{{chainShow == 1 ? "Heco" : "OKEx"}}
-                        {{$t('acrossChains.tip-6')}}
-                        <a>{{chainShow == 1 ? HecoExchangeAddress:OKExExchangeAddress}}</a>
-                        {{$t('acrossChains.tip-7')}}
+                        {{ $t('acrossChains.tip-2') }}
+                        <a>{{
+                                chainId === 1 ? acrossChains.Heco.CosExchangeAddress : chainId === 2 ? acrossChains.OKEx.CosExchangeAddress : chainId === 3 ? acrossChains.ETH.CosExchangeAddress : chainId === 4 ? acrossChains.Tron.CosExchangeAddress : chainId === 5 ? acrossChains.BSC.CosExchangeAddress : ""
+                            }}</a>
+                        {{ $t('acrossChains.tip-3') }}{{ chainId === 1 ? "Heco" : chainId === 2 ? "OKEx" : chainId === 3 ? "ETH" : chainId === 4 ? "Tron" : chainId === 5 ? "BSC" : "" }}
+                        {{ $t('acrossChains.tip-4') }}{{ chainId === 1 ? "Heco" : chainId === 2 ? "OKEx" : chainId === 3 ? "ETH" : chainId === 4 ? "Tron" : chainId === 5 ? "BSC" : "" }}
+                        {{ $t('acrossChains.tip-5') }}{{ chainId === 1 ? "Heco" : chainId === 2 ? "OKEx" : chainId === 3 ? "ETH" : chainId === 4 ? "Tron" : chainId === 5 ? "BSC" : "" }}
+                        {{ $t('acrossChains.tip-6') }}
+                        <a>{{ chainId === 1 ? acrossChains.Heco.ExchangeAddress : chainId === 2 ? acrossChains.OKEx.ExchangeAddress : chainId === 3 ? acrossChains.ETH.ExchangeAddress : chainId === 4 ? acrossChains.Tron.ExchangeAddress : chainId === 5 ? acrossChains.BSC.ExchangeAddress : "" }}</a>
+                        {{ $t('acrossChains.tip-7') }}
                         <br>
-                        {{$t('acrossChains.tip-8')}}
+                        {{ $t('acrossChains.tip-8') }}
                         <br>
 
-            {{ $t("acrossChains.tip-9") }}
-            <br />
-            {{ $t("acrossChains.tip-10") }}
-            <a>
-              {{
-                chainId === 1
-                  ? acrossChains.Heco.contractAddress
-                  : chainId === 2
-                  ? acrossChains.OKEx.contractAddress
-                  : chainId === 3
-                  ? acrossChains.ETH.contractAddress
-                  : chainId === 4
-                  ? acrossChains.Tron.contractAddress
-                  : chainId === 5
-                  ? acrossChains.BSC.contractAddress
-                  : ""
-              }}
-            </a>
-          </div>
+                        {{ $t('acrossChains.tip-9') }}
+
+                    <br />
+	            {{ $t("acrossChains.tip-10") }}
+	            <a>
+	              {{
+	                chainId === 1
+	                  ? acrossChains.Heco.contractAddress
+	                  : chainId === 2
+	                  ? acrossChains.OKEx.contractAddress
+	                  : chainId === 3
+	                  ? acrossChains.ETH.contractAddress
+	                  : chainId === 4
+	                  ? acrossChains.Tron.contractAddress
+	                  : chainId === 5
+	                  ? acrossChains.BSC.contractAddress
+	                  : ""
+	              }}
+	            </a>
+		    </div>
+                </div>
+            </div>
+
         </div>
-      </div>
-    </div>
 
-    <!-- view asset exchange dialog -->
-    <div class="modal" v-show="AssetsExchangeDialog">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button class="close" @click="closeDialog"></button>
-            <h4 class="modal-title">
-              {{
-                chainId === 1
-                  ? $t("acrossChains.hmw_exchange_title")
-                  : chainId === 2
-                  ? $t("acrossChains.omw_exchange_title")
-                  : chainId == 3
-                  ? $t("acrossChains.emw_exchange_title")
-                  : chainId == 4
-                  ? $t("acrossChains.tmw_exchange_title")
-                  : chainId == 5
-                  ? $t("acrossChains.bmw_exchange_title")
-                  : ""
-              }}
-            </h4>
-          </div>
-          <div class="modal-body modal-message">
-            <el-form>
-              <el-form-item
-                :label="$t('transfer.receiver')"
-                class="item_receiver"
-                v-if="chainId === 1"
-              >
-                <masked-input
-                  mask="AAA-****-****-****-*****"
-                  v-model="acrossChains.Heco.CosExchangeAddress"
-                  disabled
-                />
-                <img src="../../assets/img/account_directory.svg" />
-              </el-form-item>
-              <el-form-item
-                :label="$t('transfer.receiver')"
-                class="item_receiver"
-                v-else-if="chainId === 2"
-              >
-                <masked-input
-                  mask="AAA-****-****-****-*****"
-                  v-model="acrossChains.OKEx.CosExchangeAddress"
-                  disabled
-                />
-                <img src="../../assets/img/account_directory.svg" />
-              </el-form-item>
-              <el-form-item
-                :label="$t('transfer.receiver')"
-                class="item_receiver"
-                v-else-if="chainId === 3"
-              >
-                <masked-input
-                  mask="AAA-****-****-****-*****"
-                  v-model="acrossChains.ETH.CosExchangeAddress"
-                  disabled
-                />
-                <img src="../../assets/img/account_directory.svg" />
-              </el-form-item>
-              <el-form-item
-                :label="$t('transfer.receiver')"
-                class="item_receiver"
-                v-else-if="chainId === 4"
-              >
-                <masked-input
-                  mask="AAA-****-****-****-*****"
-                  v-model="acrossChains.Tron.CosExchangeAddress"
-                  disabled
-                />
-                <img src="../../assets/img/account_directory.svg" />
-              </el-form-item>
-              <el-form-item
-                :label="$t('transfer.receiver')"
-                class="item_receiver"
-                v-else-if="chainId === 5"
-              >
-                <masked-input
-                  mask="AAA-****-****-****-*****"
-                  v-model="acrossChains.BSC.CosExchangeAddress"
-                  disabled
-                />
-                <img src="../../assets/img/account_directory.svg" />
-              </el-form-item>
-              <el-form-item
-                :label="$t('transfer.receiver_public_key')"
-                v-if="transfer.hasPublicKey"
-              >
-                <el-input
-                  v-model="transfer.publicKey"
-                  type="password"
-                ></el-input>
-              </el-form-item>
-              <el-form-item :label="$t('transfer.amount')">
-                <el-button
-                  class="calculate_fee"
-                  id="MaxConvertibleBalance"
-                  @click="setMaxConvertibleBalance()"
-                >
-                  {{ $t("acrossChains.all_convertible_balance") }}
-                </el-button>
-                <input
-                  class="el-input__inner"
-                  v-model="transfer.exchangeNumber"
-                  type="number"
-                />
-                <label class="input_suffix">{{ $global.unit }}</label>
-              </el-form-item>
-              <el-form-item :label="$t('transfer.fee')">
-                <input
-                  class="el-input__inner"
-                  v-model="transfer.fee"
-                  type="number"
-                />
-                <label class="input_suffix">{{ $global.unit }}</label>
-              </el-form-item>
-              <el-form-item label="">
-                <el-checkbox v-model="transfer.hasMessage"
-                  >{{ $t("transfer.enable_add_info") }}
-                </el-checkbox>
-                <el-checkbox
-                  ref="encrypted2"
-                  v-model="transfer.isEncrypted"
-                  :disabled="!transfer.hasMessage"
-                  >{{ $t("transfer.encrypted_information") }}
-                </el-checkbox>
-                <el-input
-                  type="textarea"
-                  :autosize="{ minRows: 2, maxRows: 10 }"
-                  resize="none"
-                  :placeholder="$t('transfer.message_tip')"
-                  v-model="transfer.message"
-                  :disabled="!transfer.hasMessage"
-                >
-                </el-input>
-              </el-form-item>
-              <el-form-item
-                :label="$t('transfer.secret_key')"
-                v-if="!secretPhrase"
-              >
-                <el-input
-                  v-model="transfer.password"
-                  type="password"
-                ></el-input>
-              </el-form-item>
-            </el-form>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              v-loading="transfer.executing"
-              class="btn common_btn writeBtn"
-              @click="sendExchangeTransferInfo"
-              :disabled="isDisable"
-            >
-              {{ $t("transfer.transfer_send") }}
-            </button>
-          </div>
+        <!-- view asset exchange dialog -->
+        <div class="modal" v-show="AssetsExchangeDialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button class="close" @click="closeDialog"></button>
+                        <h4 class="modal-title">
+                            {{ chainId === 1 ? $t('acrossChains.hmw_exchange_title') : chainId === 2 ? $t('acrossChains.omw_exchange_title') : chainId == 3 ? $t('acrossChains.emw_exchange_title') : chainId == 4 ? $t('acrossChains.tmw_exchange_title') : chainId == 5 ? $t('acrossChains.bmw_exchange_title') : "" }}</h4>
+                    </div>
+                    <div class="modal-body modal-message">
+                        <el-form>
+                            <el-form-item :label="$t('transfer.receiver')" class="item_receiver" v-if="chainId === 1">
+                                <masked-input mask="AAA-****-****-****-*****"
+                                              v-model="acrossChains.Heco.CosExchangeAddress" disabled/>
+                                <img src="../../assets/img/account_directory.svg"/>
+                            </el-form-item>
+                            <el-form-item :label="$t('transfer.receiver')" class="item_receiver"
+                                          v-else-if="chainId === 2">
+                                <masked-input mask="AAA-****-****-****-*****"
+                                              v-model="acrossChains.OKEx.CosExchangeAddress" disabled/>
+                                <img src="../../assets/img/account_directory.svg"/>
+                            </el-form-item>
+                            <el-form-item :label="$t('transfer.receiver')" class="item_receiver"
+                                          v-else-if="chainId === 3">
+                                <masked-input mask="AAA-****-****-****-*****"
+                                              v-model="acrossChains.ETH.CosExchangeAddress" disabled/>
+                                <img src="../../assets/img/account_directory.svg"/>
+                            </el-form-item>
+                            <el-form-item :label="$t('transfer.receiver')" class="item_receiver"
+                                          v-else-if="chainId === 4">
+                                <masked-input mask="AAA-****-****-****-*****"
+                                              v-model="acrossChains.Tron.CosExchangeAddress" disabled/>
+                                <img src="../../assets/img/account_directory.svg"/>
+                            </el-form-item>
+                            <el-form-item :label="$t('transfer.receiver')" class="item_receiver"
+                                          v-else-if="chainId === 5">
+                                <masked-input mask="AAA-****-****-****-*****"
+                                              v-model="acrossChains.BSC.CosExchangeAddress" disabled/>
+                                <img src="../../assets/img/account_directory.svg"/>
+                            </el-form-item>
+                            <el-form-item :label="$t('transfer.receiver_public_key')" v-if="transfer.hasPublicKey">
+                                <el-input v-model="transfer.publicKey" type="password"></el-input>
+                            </el-form-item>
+                            <el-form-item :label="$t('transfer.amount')">
+                                <el-button class="calculate_fee" id="MaxConvertibleBalance"
+                                           @click="setMaxConvertibleBalance()">
+                                    {{ $t('acrossChains.all_convertible_balance') }}
+                                </el-button>
+                                <input class="el-input__inner" v-model="transfer.exchangeNumber" type="number"/>
+                                <label class="input_suffix">{{ $global.unit }}</label>
+                            </el-form-item>
+                            <el-form-item :label="$t('transfer.fee')">
+                                <input class="el-input__inner" v-model="transfer.fee" type="number"/>
+                                <label class="input_suffix">{{ $global.unit }}</label>
+                            </el-form-item>
+                            <el-form-item label="">
+                                <el-checkbox v-model="transfer.hasMessage">{{ $t('transfer.enable_add_info') }}
+                                </el-checkbox>
+                                <el-checkbox ref="encrypted2" v-model="transfer.isEncrypted"
+                                             :disabled="!transfer.hasMessage">{{ $t('transfer.encrypted_information') }}
+                                </el-checkbox>
+                                <el-input
+                                    type="textarea"
+                                    :autosize="{ minRows: 2, maxRows: 10}"
+                                    resize="none"
+                                    :placeholder="$t('transfer.message_tip')"
+                                    v-model="transfer.message"
+                                    :disabled="!transfer.hasMessage">
+                                </el-input>
+                            </el-form-item>
+                            <el-form-item :label="$t('transfer.secret_key')" v-if="!secretPhrase">
+                                <el-input v-model="transfer.password" type="password"></el-input>
+                            </el-form-item>
+                        </el-form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" v-loading="transfer.executing" class="btn common_btn writeBtn"
+                                @click="sendExchangeTransferInfo" :disabled="isDisable">
+                            {{ $t('transfer.transfer_send') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
 
         <div class="modal" id="showChain" v-show="showChain">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="content address">
-                        {{this.chainShow==1?$t('acrossChains.tipChian1'):$t('acrossChains.tipChian2')}}
-                        <a>{{this.chainShow==1?this.acrossChains.heco.target_address:this.acrossChains.OKEx.target_address}}</a>
+                        {{ chainId === 1 ? $t('acrossChains.tipChian1') : chainId === 2 ? $t('acrossChains.tipChian2') : chainId === 3 ? $t('acrossChains.tipChian3') : chainId === 4 ? $t('acrossChains.tipChian4') : chainId === 5 ? $t('acrossChains.tipChian5') : "" }}
+                        <a>{{ chainId === 1 ? acrossChains.Heco.target_address : chainId === 2 ? acrossChains.OKEx.target_address : chainId === 3 ? acrossChains.ETH.target_address : chainId === 4 ? acrossChains.Tron.target_address : chainId === 5 ? acrossChains.BSC.target_address : "" }}</a>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <el-button  class="sureButton" v-if="chainShow==1" slot="append" style="color:#000" @click="bindHecoAddress()">{{ $t('acrossChains.sure') }}</el-button>
-                    <el-button  class="sureButton" v-else slot="append" style="color:#000" @click="bindOKExAddress()">{{ $t('acrossChains.sure') }}</el-button>
-                    <el-button  class="cancelButton" slot="append" style="color:#000" @click="cancel()">{{ $t('acrossChains.cancel') }}</el-button>
+                    <el-button class="sureButton" slot="append" style="color:#000" @click="bindChainAddress()">
+                        {{ $t('acrossChains.sure') }}
+                    </el-button>
+                    <el-button class="cancelButton" slot="append" style="color:#000" @click="cancel()">
+                        {{ $t('acrossChains.cancel') }}
+                    </el-button>
                 </div>
             </div>
         </div>
@@ -1436,7 +1529,7 @@
 <script>
 import rules from "../../utils/rules";
 import {FoundationApiUrls, getCommonFoundationApiUrl} from "../../utils/apiUrl";
-import { BigNumber } from "bignumber.js";
+import {BigNumber} from "bignumber.js";
 
 export default {
     name: "Network",
@@ -1456,8 +1549,8 @@ export default {
             requestUrl: "https://mw.run",
             sendSuccess: false, //true验证码发送 false验证码未发送
             time: 60, //时间
-            AssetsAcrossChainsDialog:false,
-            AssetsExchangeDialog:false,
+            AssetsAcrossChainsDialog: false,
+            AssetsExchangeDialog: false,
             sendMessageDialog: false,
             storageFileDialog: false,
             onChainDialog: false,
@@ -1487,9 +1580,6 @@ export default {
                 natAddress: this.$store.state.userConfig['sharder.NATServiceAddress'],
                 ssAddress: this.$store.state.userConfig['sharder.HubBindAddress'],
                 siteAccount: this.$store.state.userConfig['sharder.siteAccount'],
-                factoryNum: null,
-                permissionMode: this.$store.state.userConfig['sharder.permissionMode'],
-                permissionModeDisplay: this.$store.state.userConfig['sharder.permissionMode'],
             },
             registerSharderSiteUser: {
                 sharderAccountPhoneOrEmail: '',
@@ -1609,93 +1699,82 @@ export default {
                 nodeTime: "--",
             }],
             selectType: '',
-            transactionType: [
-                {
-                    value: "",
-                    label: this.$t("transaction.transaction_type_all"),
-                },
-                {
-                    value: 0,
-                    label: this.$t("transaction.transaction_type_payment"),
-                },
-                {
-                    value: 1,
-                    label: this.$t("transaction.transaction_type_information"),
-                },
-                {
-                    value: 1.5,
-                    label: this.$t("transaction.transaction_type_account"),
-                },
-                {
-                    value: 11,
-                    label: this.$t("transaction.transaction_type_storage_service"),
-                },
-                {
-                    value: 8,
-                    label: this.$t("transaction.transaction_type_forge_pool"),
-                },
-                {
-                    value: 9,
-                    label: this.$t("transaction.transaction_type_system_reward"),
-                },
-                {
-                    value: 12,
-                    label: this.$t("transaction.transaction_type_poc"),
-                },
-                {
-                    value: 18,
-                    label: this.$t("transaction.transaction_type_burn"),
-                },
-            ],
-
-            exchangeSelectType: "",
-            exchangeTransactionType: [
-                {
-                    value: "",
-                    label: this.$t("transaction.transaction_type_exchange"),
-                },
-                {
-                    value: 1,
-                    label: this.$t("transaction.transaction_type_mw_to_hmw"),
-                },
-                {
-                    value: 2,
-                    label: this.$t("transaction.transaction_type_hmw_to_mw"),
-                },
-                {
-                    value: 3,
-                    label: this.$t("transaction.transaction_type_mw_to_omw"),
-                },
-                {
-                    value: 4,
-                    label: this.$t("transaction.transaction_type_omw_to_mw"),
-                },
-                {
-                    value: 5,
-                    label: this.$t("transaction.transaction_type_mw_to_emw"),
-                },
-                {
-                    value: 6,
-                    label: this.$t("transaction.transaction_type_emw_to_mw"),
-                },
-                // {
-                //   value: 7,
-                //   label: this.$t("transaction.transaction_type_mw_to_tmw"),
-                // },
-                // {
-                //   value: 8,
-                //   label: this.$t("transaction.transaction_type_tmw_to_mw"),
-                // },
-                {
-                    value: 9,
-                    label: this.$t("transaction.transaction_type_mw_to_bmw"),
-                },
-                {
-                    value: 10,
-                    label: this.$t("transaction.transaction_type_bmw_to_mw"),
-                },
-            ],
-
+            transactionType: [{
+                value: '',
+                label: this.$t('transaction.transaction_type_all')
+            }, {
+                value: 0,
+                label: this.$t('transaction.transaction_type_payment')
+            }, {
+                value: 1,
+                label: this.$t('transaction.transaction_type_information')
+            }, {
+                value: 1.5,
+                label: this.$t('transaction.transaction_type_account')
+            }, {
+                value: 11,
+                label: this.$t('transaction.transaction_type_storage_service')
+            }, {
+                value: 8,
+                label: this.$t('transaction.transaction_type_forge_pool')
+            }, {
+                value: 9,
+                label: this.$t('transaction.transaction_type_system_reward')
+            }, {
+                value: 12,
+                label: this.$t('transaction.transaction_type_poc')
+            }, {
+                value: 18,
+                label: this.$t('transaction.transaction_type_burn')
+            },
+	   ],
+	   exchangeSelectType: '',
+	   exchangeTransactionType: [
+	{
+	  value: "",
+	  label: this.$t("transaction.transaction_type_exchange"),
+	},
+	{
+	  value: 1,
+	  label: this.$t("transaction.transaction_type_mw_to_hmw"),
+	},
+	{
+	  value: 2,
+	  label: this.$t("transaction.transaction_type_hmw_to_mw"),
+	},
+	{
+	  value: 3,
+	  label: this.$t("transaction.transaction_type_mw_to_omw"),
+	},
+	{
+	  value: 4,
+	  label: this.$t("transaction.transaction_type_omw_to_mw"),
+	},
+	{
+	  value: 5,
+	  label: this.$t("transaction.transaction_type_mw_to_emw"),
+	},
+	{
+	  value: 6,
+	  label: this.$t("transaction.transaction_type_emw_to_mw"),
+	},
+	// {
+	//   value: 7,
+	//   label: this.$t("transaction.transaction_type_mw_to_tmw"),
+	// },
+	// {
+	//   value: 8,
+	//   label: this.$t("transaction.transaction_type_tmw_to_mw"),
+	// },
+	{
+	  value: 9,
+	  label: this.$t("transaction.transaction_type_mw_to_bmw"),
+	},
+	{
+	  value: 10,
+	  label: this.$t("transaction.transaction_type_bmw_to_mw"),
+	},
+	],
             trading: '',
             accountTransactionList: [],
             //分页信息
@@ -1703,306 +1782,253 @@ export default {
             totalSize: 0,
             pageSize: 10,
 
-      latesetVersion: "",
-      upgradeMode: "",
-      bakMode: "",
-      isUpdate: false,
-      loading: true,
+            latesetVersion: '',
+            upgradeMode: '',
+            bakMode: '',
+            isUpdate: false,
+            loading: true,
 
-      capacity: 0,
-      maxCapacity: 192,
-      diskPledge: 0,
-      accountSecret: "",
+            capacity: 0,
+            maxCapacity: 192,
+            diskPledge: 0,
+            accountSecret: "",
 
-      params: [],
-      temporaryName: "",
-      ssPublickey: SSO.publicKey,
+            params: [],
+            temporaryName: '',
+            ssPublickey: SSO.publicKey,
 
-      operationType: "init",
-      formRules: {},
-      registerSharderSiteUserRules: {
-        sharderAccountPhoneOrEmail: [
-          { required: true, message: this.$t("rules.mustRequired") },
-        ],
-        verificationCode: [
-          {
-            required: true,
-            message: this.$t("binding_validation.verification_title"),
-          },
-        ],
-        setSharderPwd: [
-          {
-            required: true,
-            validator: (rule, value, callback) => {
-              if (value) {
-                if (this.registerSharderSiteUser.setSharderPwd) {
-                  this.$refs["initForm"].validateField("confirmSharderPwd");
-                }
-                callback();
-              } else {
-                callback(new Error(this.$t("rules.plz_input_sharder_pwd")));
-              }
+            operationType: 'init',
+            formRules: {},
+            registerSharderSiteUserRules: {
+                sharderAccountPhoneOrEmail: [{required: true, message: this.$t('rules.mustRequired')}],
+                verificationCode: [{required: true, message: this.$t('binding_validation.verification_title')}],
+                setSharderPwd: [
+                    {
+                        required: true,
+                        validator: (rule, value, callback) => {
+                            if (value) {
+                                if (this.registerSharderSiteUser.setSharderPwd) {
+                                    this.$refs['initForm'].validateField('confirmSharderPwd');
+                                }
+                                callback();
+                            } else {
+                                callback(new Error(this.$t('rules.plz_input_sharder_pwd')));
+                            }
+                        },
+                        trigger: 'blur'
+                    }
+                ],
+                confirmSharderPwd: [
+                    {
+                        required: true,
+                        validator: (rule, value, callback) => {
+                            if (!value && this.registerSharderSiteUser.setSharderPwd) {
+                                callback(new Error(this.$t('rules.plz_input_sharder_pwd_again')));
+                            } else if (value !== this.registerSharderSiteUser.setSharderPwd) {
+                                callback(new Error(this.$t('rules.inconsistent_sharder_password')));
+                            } else {
+                                callback();
+                            }
+                        },
+                        trigger: 'blur'
+                    }
+                ],
+                pictureVerificationCode: [{required: true, message: this.$t('rules.mustRequired')}],
             },
-            trigger: "blur",
-          },
-        ],
-        confirmSharderPwd: [
-          {
-            required: true,
-            validator: (rule, value, callback) => {
-              if (!value && this.registerSharderSiteUser.setSharderPwd) {
-                callback(
-                  new Error(this.$t("rules.plz_input_sharder_pwd_again"))
-                );
-              } else if (value !== this.registerSharderSiteUser.setSharderPwd) {
-                callback(
-                  new Error(this.$t("rules.inconsistent_sharder_password"))
-                );
-              } else {
-                callback();
-              }
+            hubInitSettingRules: {
+                publicAddress: [{required: true, message: this.$t('rules.mustRequired')}],
+                sharderAccount: [{required: true, message: this.$t('rules.mustRequired')}],
+                sharderPwd: [{required: true, message: this.$t('rules.mustRequired')}],
+                modifyMnemonicWord: [{
+                    required: true,
+                    // message: this.$t('rules.mustRequired')
+                    validator: (rule, value, callback) => {
+                        if (value) {
+                            if (this.hubsetting.modifyMnemonicWord !== SSO.secretPhrase) {
+                                callback(new Error(this.$t('notification.hubsetting_not_matched_mnemonic_word')));
+                            }
+                        } else {
+                            callback(new Error(this.$t('rules.mustRequired')));
+                        }
+                    },
+                    trigger: 'blur'
+                }],
+                address: [{required: true, message: this.$t('rules.mustRequired')}],
+                port: [{required: true, message: this.$t('rules.mustRequired')}],
+                clientSecretkey: [{required: true, message: this.$t('rules.mustRequired')}],
+                newPwd: [
+                    {
+                        required: true,
+                        validator: (rule, value, callback) => {
+                            if (value) {
+                                if (this.hubsetting.confirmPwd) {
+                                    this.$refs['initForm'].validateField('confirmPwd');
+                                }
+                                callback();
+                            } else {
+                                callback(new Error(this.$t('rules.plz_input_admin_pwd')));
+                            }
+                        },
+                        trigger: 'blur'
+                    }
+                ],
+                confirmPwd: [
+                    {
+                        required: true,
+                        validator: (rule, value, callback) => {
+                            if (!value && this.hubsetting.newPwd) {
+                                callback(new Error(this.$t('rules.plz_input_admin_pwd_again')));
+                            } else if (value !== this.hubsetting.newPwd) {
+                                callback(new Error(this.$t('rules.inconsistent_admin_password')));
+                            } else {
+                                callback();
+                            }
+                        },
+                        trigger: 'blur'
+                    }
+                ],
             },
-            trigger: "blur",
-          },
-        ],
-        pictureVerificationCode: [
-          { required: true, message: this.$t("rules.mustRequired") },
-        ],
-      },
-      hubInitSettingRules: {
-        publicAddress: [
-          { required: true, message: this.$t("rules.mustRequired") },
-        ],
-        sharderAccount: [
-          { required: true, message: this.$t("rules.mustRequired") },
-        ],
-        sharderPwd: [
-          { required: true, message: this.$t("rules.mustRequired") },
-        ],
-        modifyMnemonicWord: [
-          {
-            required: true,
-            // message: this.$t('rules.mustRequired')
-            validator: (rule, value, callback) => {
-              if (value) {
-                if (this.hubsetting.modifyMnemonicWord !== SSO.secretPhrase) {
-                  callback(
-                    new Error(
-                      this.$t(
-                        "notification.hubsetting_not_matched_mnemonic_word"
-                      )
-                    )
-                  );
-                }
-              } else {
-                callback(new Error(this.$t("rules.mustRequired")));
-              }
+            hubReconfigureSettingRules: {
+                sharderAccount: [{required: true, message: this.$t('rules.mustRequired')}],
+                sharderPwd: [{required: true, message: this.$t('rules.mustRequired')}],
+                modifyMnemonicWord: [{
+                    required: true,
+                    // message: this.$t('rules.mustRequired')
+                    validator: (rule, value, callback) => {
+                        if (value) {
+                            if (this.hubsetting.modifyMnemonicWord !== SSO.secretPhrase) {
+                                callback(new Error(this.$t('notification.hubsetting_not_matched_mnemonic_word')));
+                            }
+                        } else {
+                            callback(new Error(this.$t('rules.mustRequired')));
+                        }
+                    },
+                    trigger: 'blur'
+                }],
+                address: [{required: true, message: this.$t('rules.mustRequired')}],
+                port: [{required: true, message: this.$t('rules.mustRequired')}],
+                clientSecretkey: [{required: true, message: this.$t('rules.mustRequired')}],
+                publicAddress: [{required: true, message: this.$t('rules.mustRequired')}],
+                newPwd: [
+                    {
+                        required: true,
+                        validator: (rule, value, callback) => {
+                            if (value) {
+                                if (this.hubsetting.confirmPwd) {
+                                    this.$refs['reconfigureForm'].validateField('confirmPwd');
+                                }
+                            }
+                            callback();
+                        },
+                        trigger: 'blur'
+                    }
+                ],
+                confirmPwd: [
+                    {
+                        required: true,
+                        validator: (rule, value, callback) => {
+                            if (!value && this.hubsetting.newPwd) {
+                                callback(new Error(this.$t('rules.plz_input_admin_pwd_again')));
+                            } else if (value !== this.hubsetting.newPwd) {
+                                callback(new Error(this.$t('rules.inconsistent_admin_password')));
+                            } else {
+                                callback();
+                            }
+                        },
+                        trigger: 'blur'
+                    }
+                ],
             },
-            trigger: "blur",
-          },
-        ],
-        address: [{ required: true, message: this.$t("rules.mustRequired") }],
-        port: [{ required: true, message: this.$t("rules.mustRequired") }],
-        clientSecretkey: [
-          { required: true, message: this.$t("rules.mustRequired") },
-        ],
-        newPwd: [
-          {
-            required: true,
-            validator: (rule, value, callback) => {
-              if (value) {
-                if (this.hubsetting.confirmPwd) {
-                  this.$refs["initForm"].validateField("confirmPwd");
-                }
-                callback();
-              } else {
-                callback(new Error(this.$t("rules.plz_input_admin_pwd")));
-              }
+            resettingRules: {
+                sharderPwd: [{required: true, message: this.$t('rules.mustRequired')}],
+                sharderAccount: [{required: true, message: this.$t('rules.mustRequired')}],
             },
-            trigger: "blur",
-          },
-        ],
-        confirmPwd: [
-          {
-            required: true,
-            validator: (rule, value, callback) => {
-              if (!value && this.hubsetting.newPwd) {
-                callback(new Error(this.$t("rules.plz_input_admin_pwd_again")));
-              } else if (value !== this.hubsetting.newPwd) {
-                callback(
-                  new Error(this.$t("rules.inconsistent_admin_password"))
-                );
-              } else {
-                callback();
-              }
-            },
-            trigger: "blur",
-          },
-        ],
-      },
-      hubReconfigureSettingRules: {
-        sharderAccount: [
-          { required: true, message: this.$t("rules.mustRequired") },
-        ],
-        sharderPwd: [
-          { required: true, message: this.$t("rules.mustRequired") },
-        ],
-        modifyMnemonicWord: [
-          {
-            required: true,
-            // message: this.$t('rules.mustRequired')
-            validator: (rule, value, callback) => {
-              if (value) {
-                if (this.hubsetting.modifyMnemonicWord !== SSO.secretPhrase) {
-                  callback(
-                    new Error(
-                      this.$t(
-                        "notification.hubsetting_not_matched_mnemonic_word"
-                      )
-                    )
-                  );
-                }
-              } else {
-                callback(new Error(this.$t("rules.mustRequired")));
-              }
-            },
-            trigger: "blur",
-          },
-        ],
-        address: [{ required: true, message: this.$t("rules.mustRequired") }],
-        port: [{ required: true, message: this.$t("rules.mustRequired") }],
-        clientSecretkey: [
-          { required: true, message: this.$t("rules.mustRequired") },
-        ],
-        publicAddress: [
-          { required: true, message: this.$t("rules.mustRequired") },
-        ],
-        newPwd: [
-          {
-            required: true,
-            validator: (rule, value, callback) => {
-              if (value) {
-                if (this.hubsetting.confirmPwd) {
-                  this.$refs["reconfigureForm"].validateField("confirmPwd");
-                }
-              }
-              callback();
-            },
-            trigger: "blur",
-          },
-        ],
-        confirmPwd: [
-          {
-            required: true,
-            validator: (rule, value, callback) => {
-              if (!value && this.hubsetting.newPwd) {
-                callback(new Error(this.$t("rules.plz_input_admin_pwd_again")));
-              } else if (value !== this.hubsetting.newPwd) {
-                callback(
-                  new Error(this.$t("rules.inconsistent_admin_password"))
-                );
-              } else {
-                callback();
-              }
-            },
-            trigger: "blur",
-          },
-        ],
-      },
-      resettingRules: {
-        sharderPwd: [
-          { required: true, message: this.$t("rules.mustRequired") },
-        ],
-        sharderAccount: [
-          { required: true, message: this.$t("rules.mustRequired") },
-        ],
-      },
-      airdropFlag: false,
+            airdropFlag: false,
 
-      acrossChains: {
-        Heco: {
-          target_address: "",
-          target_balance: 0,
-          old_address: "",
-          convertible_balance: 0,
-          rateMW: 10,
-          rateHeco: 1,
-          CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-Heco",
-          CosExchangeAddressPublicKey: "",
-          CosExchangeRate: 10,
-          ExchangeAddress: "0x0Heco",
-          contractAddress: "0x0000Heco",
-        },
-        OKEx: {
-          target_address: "",
-          target_balance: 0,
-          old_address: "",
-          convertible_balance: 0,
-          rateMW: 10,
-          rateOKEx: 1,
-          CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-OKEx",
-          CosExchangeAddressPublicKey: "",
-          CosExchangeRate: 10,
-          ExchangeAddress: "0x0OKEx",
-          contractAddress: "0x0000OKEx",
-        },
-        ETH: {
-          target_address: "",
-          target_balance: 0,
-          old_address: "",
-          convertible_balance: 0,
-          rateMW: 10,
-          rateETH: 1,
-          CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-ETH",
-          CosExchangeAddressPublicKey: "",
-          CosExchangeRate: 10,
-          ExchangeAddress: "0x0ETH",
-          contractAddress: "0x0000ETH",
-        },
-        Tron: {
-          target_address: "",
-          target_balance: 0,
-          old_address: "",
-          convertible_balance: 0,
-          rateMW: 10,
-          rateTron: 1,
-          CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-Tron",
-          CosExchangeAddressPublicKey: "",
-          CosExchangeRate: 10,
-          ExchangeAddress: "0x0Tron",
-          contractAddress: "0x0000Tron",
-        },
-        BSC: {
-          target_address: "",
-          target_balance: 0,
-          old_address: "",
-          convertible_balance: 0,
-          rateMW: 10,
-          rateBSC: 1,
-          CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-BSC",
-          CosExchangeAddressPublicKey: "",
-          CosExchangeRate: 10,
-          ExchangeAddress: "0x0BSC",
-          contractAddress: "0x0000BSC",
-        },
-        balance: 0,
-        id: "",
-      },
+            acrossChains: {
+                Heco: {
+                    target_address: '',
+                    target_balance: 0,
+                    old_address: '',
+                    convertible_balance: 0,
+                    rateMW: 10,
+                    rateHeco: 1,
+                    CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-Heco",
+                    CosExchangeAddressPublicKey: "",
+                    CosExchangeRate: 10,
+                    ExchangeAddress: "0x0Heco",
+		            contractAddress: "0x0000Heco",
+                },
+                OKEx: {
+                    target_address: '',
+                    target_balance: 0,
+                    old_address: '',
+                    convertible_balance: 0,
+                    rateMW: 10,
+                    rateOKEx: 1,
+                    CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-OKEx",
+                    CosExchangeAddressPublicKey: "",
+                    CosExchangeRate: 10,
+                    ExchangeAddress: "0x0OKEx",
+		            contractAddress: "0x0000OKEx",
+                },
+                ETH: {
+                    target_address: '',
+                    target_balance: 0,
+                    old_address: '',
+                    convertible_balance: 0,
+                    rateMW: 10,
+                    rateETH: 1,
+                    CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-ETH",
+                    CosExchangeAddressPublicKey: "",
+                    CosExchangeRate: 10,
+                    ExchangeAddress: "0x0ETH",
+		            contractAddress: "0x0000ETH",
+                },
+                Tron: {
+                    target_address: '',
+                    target_balance: 0,
+                    old_address: '',
+                    convertible_balance: 0,
+                    rateMW: 10,
+                    rateTron: 1,
+                    CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-Tron",
+                    CosExchangeAddressPublicKey: "",
+                    CosExchangeRate: 10,
+                    ExchangeAddress: "0x0Tron",
+		            contractAddress: "0x0000Tron",
+                },
+                BSC: {
+                    target_address: '',
+                    target_balance: 0,
+                    old_address: '',
+                    convertible_balance: 0,
+                    rateMW: 10,
+                    rateBSC: 1,
+                    CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-BSC",
+                    CosExchangeAddressPublicKey: "",
+                    CosExchangeRate: 10,
+                    ExchangeAddress: "0x0BSC",
+		            contractAddress: "0x0000BSC",
+                },
+                balance: 0,
+                id: ''
+            },
 
-      chainId: 1,
+            chainId: 1,
 
-      showChain: false,
-    };
-  },
-  created() {
-    this.init();
-  },
-  methods: {
-    init() {
-      if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
-        //移动端
-        this.isMobile = true;
-      }
+            showChain: false,
+
+        };
+    },
+    created() {
+        this.init();
+    },
+    methods: {
+        init() {
+            if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) { //移动端
+                this.isMobile = true
+            }
 
             const _this = this;
             let publicKey = null;
@@ -2526,60 +2552,6 @@ export default {
             console.log("registering nat service for normal node...");
             const _this = this;
             _this.registerNatLoading = true;
-      if (
-        _this.hubsetting.newPwd !== "" ||
-        _this.hubsetting.confirmPwd !== ""
-      ) {
-        if (_this.hubsetting.newPwd !== _this.hubsetting.confirmPwd) {
-          _this.$message.warning(
-            _this.$t("notification.hubsetting_inconsistent_password")
-          );
-          return false;
-        } else {
-          formData.append("newAdminPassword", _this.hubsetting.newPwd);
-        }
-      }
-      return formData;
-    },
-    verifyHubSetting: function (type) {
-      this.hubsetting.executing = true;
-      const _this = this;
-      _this.preventRepeatedClick();
-      let reConfigFormData = _this.verifyAndGenerateHubSettingFormData();
-      if (reConfigFormData !== false) {
-        reConfigFormData.append("isInit", "true");
-      }
-
-      if (type === "init") {
-        this.operationType = "init";
-        _this.$refs["initForm"].validate((valid) => {
-          if (valid) {
-            _this.reconfigure(reConfigFormData);
-          } else {
-            console.log("init dialog error submit!!");
-            return false;
-          }
-        });
-      } else if (type === "register") {
-        if (this.whetherShowConfigureNATServiceBtn()) {
-          this.operationType = "reConfigNormal";
-        } else {
-          this.operationType = "initNormal";
-        }
-        _this.$refs["useNATForm"].validate((valid) => {
-          if (valid) {
-            _this.reconfigure(reConfigFormData);
-          } else {
-            console.log("register dialog error submit!!");
-            return false;
-          }
-        });
-      }
-    },
-    registerNatService() {
-      console.log("registering nat service for normal node...");
-      const _this = this;
-      _this.registerNatLoading = true;
 
             // linked ss address > logged ss address
             let ssAddr = this.userConfig.ssAddress;
@@ -3231,8 +3203,29 @@ export default {
                 _this.transfer.executing = false;
                 return;
             }
-            if(_this.transfer.receiver === _this.MWHecoExchangeAddress){
-                _this.$message.warning(_this.$t('acrossChains.no_MWLockAddress'));
+
+            if (_this.transfer.receiver === _this.acrossChains.Heco.CosExchangeAddress) {
+                _this.$message.warning(_this.$t('acrossChains.no_HMWExchangeAddress'));
+                _this.transfer.executing = false;
+                return;
+            }
+            if (_this.transfer.receiver === _this.acrossChains.OKEx.CosExchangeAddress) {
+                _this.$message.warning(_this.$t('acrossChains.no_OMWExchangeAddress'));
+                _this.transfer.executing = false;
+                return;
+            }
+            if (_this.transfer.receiver === _this.acrossChains.ETH.CosExchangeAddress) {
+                _this.$message.warning(_this.$t('acrossChains.no_EMWExchangeAddress'));
+                _this.transfer.executing = false;
+                return;
+            }
+            if (_this.transfer.receiver === _this.acrossChains.Tron.CosExchangeAddress) {
+                _this.$message.warning(_this.$t('acrossChains.no_TMWExchangeAddress'));
+                _this.transfer.executing = false;
+                return;
+            }
+            if (_this.transfer.receiver === _this.acrossChains.BSC.CosExchangeAddress) {
+                _this.$message.warning(_this.$t('acrossChains.no_BMWExchangeAddress'));
                 _this.transfer.executing = false;
                 return;
             }
@@ -3309,21 +3302,39 @@ export default {
             let options = {};
             let encrypted = {};
             let formData = new FormData();
-            if (_this.MWHecoExchangeAddress === this.$global.receiverPrefixStr ||
-                _this.MWHecoExchangeAddress === this.$global.receiverEmptyStr ||
-                _this.MWHecoExchangeAddress === this.$global.projectPrefixStr ||
-                _this.MWHecoExchangeAddress === ""
-                ) {
+            var ChainObj;
+            switch (_this.chainId) {
+                case 1:
+                    ChainObj = _this.acrossChains.Heco;
+                    break;
+                case 2:
+                    ChainObj = _this.acrossChains.OKEx;
+                    break;
+                case 3:
+                    ChainObj = _this.acrossChains.ETH;
+                    break;
+                case 4:
+                    ChainObj = _this.acrossChains.Tron;
+                    break;
+                case 5:
+                    ChainObj = _this.acrossChains.BSC;
+                    break;
+            }
+            if (ChainObj.CosExchangeAddress === this.$global.receiverPrefixStr ||
+                ChainObj.CosExchangeAddress === this.$global.receiverEmptyStr ||
+                ChainObj.CosExchangeAddress === this.$global.projectPrefixStr ||
+                ChainObj.CosExchangeAddress === ""
+            ) {
                 _this.$message.warning(_this.$t('notification.sendmessage_null_account'));
                 _this.transfer.executing = false;
                 return;
             }
-            if (!_this.MWHecoExchangeAddress.toUpperCase().match(_this.$global.pattern)) {
+            if (!ChainObj.CosExchangeAddress.toUpperCase().match(_this.$global.pattern)) {
                 _this.$message.warning(_this.$t('notification.sendmessage_account_error_format'));
                 _this.transfer.executing = false;
                 return;
             }
-            if (_this.MWHecoExchangeAddressPublicKey === "") {
+            if (ChainObj.CosExchangeAddressPublicKey === "") {
                 _this.$message.warning(_this.$t('notification.sendmessage_null_account_public'));
                 _this.transfer.executing = false;
                 return;
@@ -3348,7 +3359,7 @@ export default {
                     _this.transfer.executing = false;
                     return;
                 }
-                if (_this.transfer.exchangeNumber > _this.acrossChains.heco.convertible_balance * _this.MWTOHecoRate) {
+                if (_this.transfer.exchangeNumber > ChainObj.convertible_balance * ChainObj.CosExchangeRate) {
                     _this.$message.warning(_this.$t('acrossChains.convertible_balance_not_enough'));
                     _this.transfer.executing = false;
                     return;
@@ -3363,8 +3374,8 @@ export default {
                     _this.transfer.executing = false;
                     return;
                 }
-                formData.append("recipient", _this.MWHecoExchangeAddress);
-                formData.append("recipientPublicKey", _this.MWHecoExchangeAddressPublicKey);
+                formData.append("recipient", ChainObj.CosExchangeAddress);
+                formData.append("recipientPublicKey", ChainObj.CosExchangeAddressPublicKey);
                 formData.append("deadline", "1440");
                 formData.append("phased", 'false');
                 formData.append("phasingLinkedFullHash", '');
@@ -3375,128 +3386,97 @@ export default {
                 formData.append("amountNQT", _this.transfer.exchangeNumber * _this.$global.unitValue);
                 formData.append("secretPhrase", _this.secretPhrase || _this.transfer.password);
 
-        formData.append("chainId", _this.chainId);
-        if (_this.transfer.hasMessage && _this.transfer.message !== "") {
-          if (_this.transfer.isEncrypted) {
-            options.account = ChainObj.CosExchangeAddress;
-            options.publicKey = ChainObj.CosExchangeAddressPublicKey;
-            encrypted = SSO.encryptNote(
-              _this.transfer.message,
-              options,
-              _this.secretPhrase || _this.transfer.password
-            );
-            formData.append("encrypt_message", "1");
-            formData.append("encryptedMessageData", encrypted.message);
-            formData.append("encryptedMessageNonce", encrypted.nonce);
-            formData.append("messageToEncryptIsText", "true");
-            formData.append("encryptedMessageIsPrunable", "true");
-          } else {
-            formData.append("message", _this.transfer.message);
-            formData.append("messageIsText", "true");
-          }
-        }
-        _this.sendTransfer(formData);
-        _this.transfer.executing = false;
-      });
-    },
-    /**
-     * 最大今日可兑换量
-     */
-    setMaxConvertibleBalance: function () {
-      var ChainObj;
-      const _this = this;
-      switch (_this.chainId) {
-        case 1:
-          ChainObj = _this.acrossChains.Heco;
-          break;
-        case 2:
-          ChainObj = _this.acrossChains.OKEx;
-          break;
-        case 3:
-          ChainObj = _this.acrossChains.ETH;
-          break;
-        case 4:
-          ChainObj = _this.acrossChains.Tron;
-          break;
-        case 5:
-          ChainObj = _this.acrossChains.BSC;
-          break;
-        default:
-          break;
-      }
-      this.transfer.exchangeNumber =
-        ChainObj.convertible_balance * ChainObj.CosExchangeRate <
-        _this.acrossChains.balance
-          ? ChainObj.convertible_balance * ChainObj.CosExchangeRate
-          : _this.acrossChains.balance;
-    },
+                formData.append("chainId",_this.chainId);
+                if (_this.transfer.hasMessage && _this.transfer.message !== "") {
+                    if (_this.transfer.isEncrypted) {
 
-    sendTransfer: function (formData) {
-      const _this = this;
-      SSO.sendMoney(formData, function (res) {
-        if (formData.recipient === _this.acrossChains.Heco.CosExchangeAddress) {
-          _this.acrossChains.Heco.convertible_balance -=
-            _this.transfer.exchangeNumber /
-            _this.acrossChains.Heco.CosExchangeRate;
-          _this.acrossChains.Heco.target_balance +=
-            _this.transfer.exchangeNumber *
-            _this.acrossChains.Heco.CosExchangeRate;
-        } else if (_this.acrossChains.OKEx.CosExchangeRate) {
-          _this.acrossChains.OKEx.convertible_balance -=
-            _this.transfer.exchangeNumber /
-            _this.acrossChains.OKEx.CosExchangeRate;
-          _this.acrossChains.OKEx.target_balance +=
-            _this.transfer.exchangeNumber *
-            _this.acrossChains.OKEx.CosExchangeRate;
-        } else if (_this.acrossChains.ETH.CosExchangeRate) {
-          _this.acrossChains.ETH.convertible_balance -=
-            _this.transfer.exchangeNumber /
-            _this.acrossChains.ETH.CosExchangeRate;
-          _this.acrossChains.ETH.target_balance +=
-            _this.transfer.exchangeNumber *
-            _this.acrossChains.ETH.CosExchangeRate;
-        } else if (_this.acrossChains.Tron.CosExchangeRate) {
-          _this.acrossChains.Tron.convertible_balance -=
-            _this.transfer.exchangeNumber /
-            _this.acrossChains.Tron.CosExchangeRate;
-          _this.acrossChains.Tron.target_balance +=
-            _this.transfer.exchangeNumber *
-            _this.acrossChains.Tron.CosExchangeRate;
-        } else if (_this.acrossChains.BSC.CosExchangeRate) {
-          _this.acrossChains.BSC.convertible_balance -=
-            _this.transfer.exchangeNumber /
-            _this.acrossChains.BSC.CosExchangeRate;
-          _this.acrossChains.BSC.target_balance +=
-            _this.transfer.exchangeNumber *
-            _this.acrossChains.BSC.CosExchangeRate;
-        }
+                        options.account = ChainObj.CosExchangeAddress;
+                        options.publicKey = ChainObj.CosExchangeAddressPublicKey;
+                        encrypted = SSO.encryptNote(_this.transfer.message, options, _this.secretPhrase || _this.transfer.password);
+                        formData.append("encrypt_message", '1');
+                        formData.append("encryptedMessageData", encrypted.message);
+                        formData.append("encryptedMessageNonce", encrypted.nonce);
+                        formData.append("messageToEncryptIsText", 'true');
+                        formData.append("encryptedMessageIsPrunable", 'true');
+                    } else {
+                        formData.append("message", _this.transfer.message);
+                        formData.append("messageIsText", "true");
+                    }
+                }
+                _this.sendTransfer(formData);
+                _this.transfer.executing = false;
+            });
 
-        if (typeof res.errorDescription === "undefined") {
-          if (res.broadcasted) {
-            _this.$message.success(_this.$t("notification.transfer_success"));
-            _this.closeDialog();
-            _this.$global
-              .setUnconfirmedTransactions(_this, SSO.account)
-              .then((res) => {
-                _this.$store.commit("setUnconfirmedNotificationsList", res);
-              });
-          } else {
-            _this.transfer.fee =
-              res.transactionJSON.feeNQT / _this.$global.unitValue;
-          }
-        } else {
-          if (res.errorDescription.indexOf("$.t") != -1) {
-            _this.$message.error(
-              _this.$global.escape2Html(_this.$t(res.errorDescription.slice(3)))
-            );
-          } else {
-            _this.$message.error(
-              _this.$global.escape2Html(res.errorDescription)
-            );
-          }
-        }
-        _this.transfer.executing = false;
-      });
+        },
+        /**
+         * 最大今日可兑换量
+         */
+        setMaxConvertibleBalance: function () {
+            var ChainObj;
+            const _this = this;
+            switch (_this.chainId) {
+                case 1:
+                    ChainObj = _this.acrossChains.Heco;
+                    break;
+                case 2:
+                    ChainObj = _this.acrossChains.OKEx;
+                    break;
+                case 3:
+                    ChainObj = _this.acrossChains.ETH;
+                    break;
+                case 4:
+                    ChainObj = _this.acrossChains.Tron;
+                    break;
+                case 5:
+                    ChainObj = _this.acrossChains.BSC;
+                    break;
+                default:
+                    break;
+            }
+            this.transfer.exchangeNumber = ChainObj.convertible_balance * ChainObj.CosExchangeRate < _this.acrossChains.balance ? ChainObj.convertible_balance * ChainObj.CosExchangeRate : _this.acrossChains.balance;
+
+        },
+
+        sendTransfer: function (formData) {
+            const _this = this;
+            SSO.sendMoney(formData, function (res) {
+                if(formData.recipient === _this.acrossChains.Heco.CosExchangeAddress){
+                    _this.acrossChains.Heco.convertible_balance -= this.transfer.exchangeNumber / _this.acrossChains.Heco.CosExchangeRate;
+                    _this.acrossChains.Heco.target_balance += this.transfer.exchangeNumber * _this.acrossChains.Heco.CosExchangeRate;
+                }else if(_this.acrossChains.OKEx.CosExchangeRate){
+                    _this.acrossChains.OKEx.convertible_balance -= this.transfer.exchangeNumber / _this.acrossChains.OKEx.CosExchangeRate;
+                    _this.acrossChains.OKEx.target_balance += this.transfer.exchangeNumber * _this.acrossChains.OKEx.CosExchangeRate;
+                }else if(_this.acrossChains.ETH.CosExchangeRate){
+                    _this.acrossChains.ETH.convertible_balance -= this.transfer.exchangeNumber / _this.acrossChains.ETH.CosExchangeRate;
+                    _this.acrossChains.ETH.target_balance += this.transfer.exchangeNumber * _this.acrossChains.ETH.CosExchangeRate;
+                }else if(_this.acrossChains.Tron.CosExchangeRate){
+                    _this.acrossChains.Tron.convertible_balance -= this.transfer.exchangeNumber / _this.acrossChains.Tron.CosExchangeRate;
+                    _this.acrossChains.Tron.target_balance += this.transfer.exchangeNumber * _this.acrossChains.Tron.CosExchangeRate;
+                }else if(_this.acrossChains.BSC.CosExchangeRate){
+                    _this.acrossChains.BSC.convertible_balance -= this.transfer.exchangeNumber / _this.acrossChains.BSC.CosExchangeRate;
+                    _this.acrossChains.BSC.target_balance += this.transfer.exchangeNumber * _this.acrossChains.BSC.CosExchangeRate;
+                }
+
+
+                if (typeof res.errorDescription === 'undefined') {
+                    if (res.broadcasted) {
+                        _this.$message.success(_this.$t('notification.transfer_success'));
+                        _this.closeDialog();
+                        _this.$global.setUnconfirmedTransactions(_this, SSO.account).then(res => {
+                            _this.$store.commit("setUnconfirmedNotificationsList", res);
+                        });
+                    } else {
+                        _this.transfer.fee = res.transactionJSON.feeNQT / _this.$global.unitValue;
+                    }
+                } else {
+                    if (res.errorDescription.indexOf("$.t") != -1) {
+                        _this.$message.error(_this.$global.escape2Html(_this.$t(res.errorDescription.slice(3))));
+                    } else {
+                        _this.$message.error(_this.$global.escape2Html(res.errorDescription));
+                    }
+                }
+                _this.transfer.executing = false;
+            });
 
             /*return new Promise(function (resolve, reject) {
                 let config = {
@@ -3551,16 +3531,6 @@ export default {
             } else if (_this.selectType === 1) {
                 params.append("type", "1");
                 params.append("subtype", "0");
-            } else if(_this.selectType === 19){
-                //mw to hmw
-                params.append("recipientRS", _this.MWHecoExchangeAddress);
-
-            } else if(_this.selectType === 20){
-                //hmw to mw
-                params.append("senderRS", _this.MWHecoExchangeAddress);
-            }
-            else {
-                params.append("type", _this.selectType);
             }
 
             _this.loading = true;
@@ -3587,6 +3557,87 @@ export default {
                 _this.loading = false;
             });
         },
+	/**
+     * 得到兑换交易信息
+     */
+    getAccountExchangeTransactionList: function () {
+      const _this = this;
+      let params = new URLSearchParams();
+
+      params.append("account", _this.accountInfo.accountRS);
+
+      _this.unconfirmedTransactionsList =
+        _this.$store.state.unconfirmedTransactionsList.unconfirmedTransactions;
+
+      let i = 0;
+      if (typeof _this.unconfirmedTransactionsList !== "undefined") {
+        i = _this.unconfirmedTransactionsList.length;
+      }
+
+      params.append("firstIndex", (_this.currentPage - 1) * _this.pageSize);
+      params.append("lastIndex", _this.currentPage * _this.pageSize - 1 - i);
+
+      if (_this.exchangeSelectType === 1) {
+        params.append(
+          "recipientRS",
+          _this.acrossChains.Heco.CosExchangeAddress
+        );
+      } else if (_this.exchangeSelectType === 2) {
+        params.append("senderRS", _this.acrossChains.Heco.CosExchangeAddress);
+      } else if (_this.exchangeSelectType === 3) {
+        params.append(
+          "recipientRS",
+          _this.acrossChains.OKEx.CosExchangeAddress
+        );
+      } else if (_this.exchangeSelectType === 4) {
+        params.append("senderRS", _this.acrossChains.OKEx.CosExchangeAddress);
+      } else if (_this.exchangeSelectType === 5) {
+        params.append("recipientRS", _this.acrossChains.ETH.CosExchangeAddress);
+      } else if (_this.exchangeSelectType === 6) {
+        params.append("senderRS", _this.acrossChains.ETH.CosExchangeAddress);
+      } else if (_this.exchangeSelectType === 7) {
+        params.append(
+          "recipientRS",
+          _this.acrossChains.Tron.CosExchangeAddress
+        );
+      } else if (_this.exchangeSelectType === 8) {
+        params.append("senderRS", _this.acrossChains.Tron.CosExchangeAddress);
+      } else if (_this.exchangeSelectType === 9) {
+        params.append("recipientRS", _this.acrossChains.BSC.CosExchangeAddress);
+      } else if (_this.exchangeSelectType === 10) {
+        params.append("senderRS", _this.acrossChains.BSC.CosExchangeAddress);
+      }
+
+      _this.loading = true;
+      this.$http
+        .get(
+          _this.$global.urlPrefix() + "?requestType=getBlockchainTransactions",
+          { params }
+        )
+        .then(function (res1) {
+          _this.accountTransactionList = res1.data.transactions;
+          _this.totalSize = res1.data.count;
+          // params.delete("firstIndex");
+          // params.delete("lastIndex");
+          // _this.$http.get(_this.$global.urlPrefix() + '?requestType=getBlockchainTransactionsCount', {params}).then(function (res2) {
+          //
+          //     if (typeof res2.data.errorDescription === "undefined") {
+          //         _this.totalSize = res2.data.count;
+          //     } else {
+          //         _this.$message.error(res2.data.errorCode);
+          //     }
+          // }).catch(err => {
+          //     // _this.$message.error(err.message);
+          // });
+          _this.loading = false;
+          _this.getTotalList();
+          _this.getDrawData();
+          _this.updateMinerState();
+        })
+        .catch(function (err) {
+          _this.loading = false;
+        });
+    },
         updateMinerState() {
             let _this = this;
             _this.accountTransactionList.forEach(val => {
@@ -3658,15 +3709,40 @@ export default {
         /**
          * 得到系统跨链兑换地址信息
          */
-        getAddress: function(){
+        getAddress: function () {
             const _this = this;
             _this.$http.get(window.api.getAddress).then(function (res1) {
-                console.log(res1.data.body);
-                if(res1.data.body.MWHecoExchangeAddress){
-                    _this.MWHecoExchangeAddress = res1.data.body.MWHecoExchangeAddress;
-                    _this.MWHecoExchangeAddressPublicKey = res1.data.body.MWHecoExchangeAddressPublicKey;
-                    _this.MWTOHecoRate = res1.data.body.MwHmwRate;
-                    _this.HecoExchangeAddress = res1.data.body.HecoExchangeAddress;
+                var result = res1.data.body;
+                if (result) {
+                    _this.acrossChains.Heco.CosExchangeAddress = result.Heco.CosExchangeAddress;
+                    _this.acrossChains.Heco.CosExchangeAddressPublicKey = result.Heco.CosExchangeAddressPublicKey;
+                    _this.acrossChains.Heco.CosExchangeRate = result.Heco.CosExchangeRate;
+                    _this.acrossChains.Heco.ExchangeAddress = result.Heco.ExchangeAddress;
+		            _this.acrossChains.Heco.contractAddress = result.Heco.contractAddress;
+
+                    _this.acrossChains.OKEx.CosExchangeAddress = result.OKEx.CosExchangeAddress;
+                    _this.acrossChains.OKEx.CosExchangeAddressPublicKey = result.OKEx.CosExchangeAddressPublicKey;
+                    _this.acrossChains.OKEx.CosExchangeRate = result.OKEx.CosExchangeRate;
+                    _this.acrossChains.OKEx.ExchangeAddress = result.OKEx.ExchangeAddress;
+		            _this.acrossChains.OKEx.contractAddress = result.OKEx.contractAddress;
+
+                    _this.acrossChains.ETH.CosExchangeAddress = result.ETH.CosExchangeAddress;
+                    _this.acrossChains.ETH.CosExchangeAddressPublicKey = result.ETH.CosExchangeAddressPublicKey;
+                    _this.acrossChains.ETH.CosExchangeRate = result.ETH.CosExchangeRate;
+                    _this.acrossChains.ETH.ExchangeAddress = result.ETH.ExchangeAddress;
+                    _this.acrossChains.ETH.contractAddress = result.ETH.contractAddress;
+
+                    _this.acrossChains.Tron.CosExchangeAddress = result.Tron.CosExchangeAddress;
+                    _this.acrossChains.Tron.CosExchangeAddressPublicKey = result.Tron.CosExchangeAddressPublicKey;
+                    _this.acrossChains.Tron.CosExchangeRate = result.Tron.CosExchangeRate;
+                    _this.acrossChains.Tron.ExchangeAddress = result.Tron.ExchangeAddress;
+                    _this.acrossChains.Tron.contractAddress = result.Tron.contractAddress;
+
+                    _this.acrossChains.BSC.CosExchangeAddress = result.BSC.CosExchangeAddress;
+                    _this.acrossChains.BSC.CosExchangeAddressPublicKey = result.BSC.CosExchangeAddressPublicKey;
+                    _this.acrossChains.BSC.CosExchangeRate = result.BSC.CosExchangeRate;
+                    _this.acrossChains.BSC.ExchangeAddress = result.BSC.ExchangeAddress;
+                    _this.acrossChains.BSC.contractAddress = result.BSC.contractAddress;
                 }
             });
         },
@@ -3676,7 +3752,7 @@ export default {
         openAssetsAcrossChainsDialog: function () {
             const _this = this;
 
-            if(typeof(this.secretPhrase)　=== 'undefined'){
+            if (typeof (this.secretPhrase) === 'undefined') {
                 this.$message.warning(this.$t("acrossChains.use_secretPhrase_tip"));
                 return;
             }
@@ -3685,27 +3761,47 @@ export default {
                 return;
             }
 
-            if(!this.MWHecoExchangeAddressPublicKey){
-                _this.$message.info(_this.$t('acrossChains.not_yet_open'));
-                return;
-            }
+            // if(!this.CosExchangeAddressPublicKey){
+            //     _this.$message.info(_this.$t('acrossChains.not_yet_open'));
+            //     return;
+            // }
             //发起网关请求，查找当前帐号绑定的信息
 
             var str = _this.$global.formatNQTMoney(_this.accountInfo.effectiveBalanceNQT, 2);
-            _this.acrossChains.balance = parseFloat(str.substring(0,str.length-2));
+            _this.acrossChains.balance = parseFloat(str.substring(0, str.length - 2));
 
-            if(_this.accountInfo.accountRS){
-                _this.$http.get(window.api.getAccountInfoUrl,{params:{accountRS:_this.accountInfo.accountRS}}).then(function (res1) {
+            if (_this.accountInfo.accountRS) {
+                _this.$http.get(window.api.getAccountInfoUrl, {params: {accountRS: _this.accountInfo.accountRS}}).then(function (res1) {
+
                     switch (res1.data.code) {
                         case "200":
-                            var account = JSON.parse(res1.data.body[0]); ;
-                            _this.acrossChains.heco.target_address = account.hecoAddress;
-                            _this.acrossChains.heco.old_address = account.hecoAddress;
-                            _this.acrossChains.heco.target_balance = account.hecoBalance / _this.$global.hecoUnitValue;
-                            _this.acrossChains.heco.convertible_balance = account.hecoConvertibleQuantity / _this.$global.hecoUnitValue;
-                            _this.acrossChains.OKEx.target_address = account.okExAddress;
-                            _this.acrossChains.OKEx.old_address = account.okExAddress;
-                            _this.acrossChains.OKEx.convertible_balance = account.okExConvertibleQuantity;
+                            var account = res1.data.body;
+                            console.log(account)
+                            _this.acrossChains.Heco.target_address = account.HecoAddress;
+                            _this.acrossChains.Heco.old_address = account.HecoAddress;
+                            _this.acrossChains.Heco.target_balance = account.HecoBalance / _this.$global.HecoUnitValue;
+                            _this.acrossChains.Heco.convertible_balance = account.HecoConvertibleQuantity / _this.$global.HecoUnitValue;
+
+                            _this.acrossChains.OKEx.target_address = account.OKExAddress;
+                            _this.acrossChains.OKEx.old_address = account.OKExAddress;
+                            _this.acrossChains.OKEx.target_balance = account.OKExBalance / _this.$global.OKExUnitValue;
+                            _this.acrossChains.OKEx.convertible_balance = account.OKExConvertibleQuantity / _this.$global.OKExUnitValue;
+
+                            _this.acrossChains.ETH.target_address = account.ETHAddress;
+                            _this.acrossChains.ETH.old_address = account.ETHAddress;
+                            _this.acrossChains.ETH.target_balance = account.ETHBalance / _this.$global.ETHUnitValue;
+                            _this.acrossChains.ETH.convertible_balance = account.ETHConvertibleQuantity / _this.$global.ETHUnitValue;
+
+                            _this.acrossChains.Tron.target_address = account.TronAddress;
+                            _this.acrossChains.Tron.old_address = account.TronAddress;
+                            _this.acrossChains.Tron.target_balance = account.TronBalance / _this.$global.TronUnitValue;
+                            _this.acrossChains.Tron.convertible_balance = account.TronConvertibleQuantity / _this.$global.TronUnitValue;
+
+                            _this.acrossChains.BSC.target_address = account.BSCAddress;
+                            _this.acrossChains.BSC.old_address = account.BSCAddress;
+                            _this.acrossChains.BSC.target_balance = account.BSCBalance / _this.$global.BSCUnitValue;
+                            _this.acrossChains.BSC.convertible_balance = account.BSCConvertibleQuantity / _this.$global.BSCUnitValue;
+
                             _this.acrossChains.id = account.id;
 
                             _this.$store.state.mask = true;
@@ -3723,7 +3819,7 @@ export default {
                 }).catch(err => {
                     _this.$message.error(_this.$t('acrossChains.error'));
                 });
-            }else{
+            } else {
                 _this.$message.error(_this.$t('acrossChains.no_accountId'));
             }
 
@@ -3731,6 +3827,42 @@ export default {
         openExchangeDialog: function () {
             if (SSO.downloadingBlockchain) {
                 return this.$message.warning(this.$t("account.synchronization_block"));
+	      }
+
+	      switch (this.chainId) {
+	        case 1:
+	          if (this.acrossChains.Heco.target_address === "") {
+	            return this.$message.warning(
+	              this.$t("acrossChains.no_HecoAddress")
+	            );
+	          }
+	          break;
+	        case 2:
+	          if (this.acrossChains.OKEx.target_address === "") {
+	            return this.$message.warning(
+	              this.$t("acrossChains.no_OKExAddress")
+	            );
+	          }
+	          break;
+	        case 3:
+	          if (this.acrossChains.ETH.target_address === "") {
+	            return this.$message.warning(this.$t("acrossChains.no_ETHAddress"));
+	          }
+	          break;
+	        case 4:
+	          if (this.acrossChains.Tron.target_address === "") {
+	            return this.$message.warning(
+	              this.$t("acrossChains.no_TronAddress")
+	            );
+	          }
+	          break;
+	        case 5:
+	          if (this.acrossChains.BSC.target_address === "") {
+	            return this.$message.warning(this.$t("acrossChains.no_BSCAddress"));
+	          }
+	          break;
+	        default:
+	          break;
             }
             this.$store.state.mask = true;
             this.AssetsExchangeDialog = true;
@@ -3941,7 +4073,7 @@ export default {
             this.onChainDialog = false;
             this.joinNetDialog = false;
             this.AssetsAcrossChainsDialog = false;
-            if(this.AssetsExchangeDialog){
+            if (this.AssetsExchangeDialog) {
                 this.AssetsExchangeDialog = false;
                 this.AssetsAcrossChainsDialog = true;
             }
@@ -4299,7 +4431,7 @@ export default {
             // return true;
             return this.secretPhrase
                 && !this.initHUb
-                && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center' || this.userConfig.nodeType === 'Normal')
+                && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center')
                 && this.userConfig.ssAddress === this.accountInfo.accountRS
                 && !this.$global.isOpenApiProxy();
         },
@@ -4311,11 +4443,12 @@ export default {
             3. NodeType is Hub;
             4. Not a light client;
             */
-            // return true;
+            //return true;
             return this.secretPhrase
                 && this.initHUb
-                && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center' || this.userConfig.nodeType === 'Normal')
+                && (this.userConfig.nodeType === 'Hub' || this.userConfig.nodeType === 'Soul' || this.userConfig.nodeType === 'Center')
                 && !this.$global.isOpenApiProxy();
+            /* return true;*/
         },
         whetherShowUseNATServiceBtn() {
             /*
@@ -4384,62 +4517,164 @@ export default {
                 }
             });
         },
-        showHecoChain(){
-            this.chainShow = 1;
-        },
-        showOkExChain(){
-            this.chainShow = 2;
-        },
-        showMoreChain(){
-            this.chainShow = 3;
+
+        showChains(_chainId) {
+            this.chainId = _chainId;
         },
 
-        bindAddress(){
+        bindAddress() {
             this.$store.state.mask = true;
             this.showChain = true;
         },
 
-        cancel(){
+        cancel() {
             this.$store.state.mask = false;
             this.showChain = false;
         },
 
-        /**
-         * 绑定heco地址
-         */
-        bindHecoAddress(){
+        bindChainAddress() {
             this.preventRepeatedClick();
             this.showChain = false;
-
-            if(typeof(this.secretPhrase)　=== 'undefined'){
+            if (typeof (this.secretPhrase) === 'undefined') {
                 this.$message.warning(this.$t("acrossChains.use_secretPhrase_tip"));
                 return;
             }
 
-            // var web3Utils = require("web3-utils");
-            // console.log(web3Utils.isAddress(this.acrossChains.heco.target_address))
-            // if(!web3Utils.isAddress(this.acrossChains.heco.target_address)){
-            //     this.$message.warning(this.$t("acrossChains.notRightAddress"));
-            //     return;
-            // }
-            if(this.acrossChains.heco.target_address == this.acrossChains.heco.old_address){
+            var sameAddressFlag;
+            switch (this.chainId) {
+                case 1:
+                    if (this.acrossChains.Heco.target_address == this.acrossChains.Heco.old_address) {
+                        sameAddressFlag = true;
+                    }
+                    break;
+                case 2:
+                    if (this.acrossChains.OKEx.target_address == this.acrossChains.OKEx.old_address) {
+                        sameAddressFlag = true;
+                    }
+                    break;
+                case 3:
+                    if (this.acrossChains.ETH.target_address == this.acrossChains.ETH.old_address) {
+                        sameAddressFlag = true;
+                    }
+                    break;
+                case 4:
+                    if (this.acrossChains.Tron.target_address == this.acrossChains.Tron.old_address) {
+                        sameAddressFlag = true;
+                    }
+                    break;
+                case 5:
+                    if (this.acrossChains.BSC.target_address == this.acrossChains.BSC.old_address) {
+                        sameAddressFlag = true;
+                    }
+                    break;
+                default:
+                    break;
+            }
+            if (sameAddressFlag) {
                 this.$message.warning(this.$t("acrossChains.sameAddress"));
                 return;
             }
 
             const _this = this;
+              if (
+                _this.acrossChains.Heco.target_address ==
+                  _this.acrossChains.Heco.CosExchangeAddress &&
+                _this.acrossChains.Heco.target_address ==
+                  _this.acrossChains.OKEx.CosExchangeAddress &&
+                _this.acrossChains.Heco.target_address ==
+                  _this.acrossChains.ETH.CosExchangeAddress &&
+                _this.acrossChains.Heco.target_address ==
+                  _this.acrossChains.Tron.CosExchangeAddress &&
+                _this.acrossChains.Heco.target_address ==
+                  _this.acrossChains.BSC.CosExchangeAddress &&
+                _this.acrossChains.OKEx.target_address ==
+                  _this.acrossChains.Heco.CosExchangeAddress &&
+                _this.acrossChains.OKEx.target_address ==
+                  _this.acrossChains.OKEx.CosExchangeAddress &&
+                _this.acrossChains.OKEx.target_address ==
+                  _this.acrossChains.ETH.CosExchangeAddress &&
+                _this.acrossChains.OKEx.target_address ==
+                  _this.acrossChains.Tron.CosExchangeAddress &&
+                _this.acrossChains.OKEx.target_address ==
+                  _this.acrossChains.BSC.CosExchangeAddress &&
+                _this.acrossChains.ETH.target_address ==
+                  _this.acrossChains.Heco.CosExchangeAddress &&
+                _this.acrossChains.ETH.target_address ==
+                  _this.acrossChains.OKEx.CosExchangeAddress &&
+                _this.acrossChains.ETH.target_address ==
+                  _this.acrossChains.ETH.CosExchangeAddress &&
+                _this.acrossChains.ETH.target_address ==
+                  _this.acrossChains.Tron.CosExchangeAddress &&
+                _this.acrossChains.ETH.target_address ==
+                  _this.acrossChains.BSC.CosExchangeAddress &&
+                _this.acrossChains.BSC.target_address ==
+                  _this.acrossChains.Heco.CosExchangeAddress &&
+                _this.acrossChains.BSC.target_address ==
+                  _this.acrossChains.OKEx.CosExchangeAddress &&
+                _this.acrossChains.BSC.target_address ==
+                  _this.acrossChains.ETH.CosExchangeAddress &&
+                _this.acrossChains.BSC.target_address ==
+                  _this.acrossChains.Tron.CosExchangeAddress &&
+                _this.acrossChains.BSC.target_address ==
+                  _this.acrossChains.BSC.CosExchangeAddress
+              ) {
+                _this.$message.warning(_this.$t("acrossChains.address_error"));
+                return;
+              }
+
             let formData = new FormData();
-            formData.append("id", _this.acrossChains.id);
-            formData.append("accountId", _this.accountInfo.accountId);
             formData.append("accountRS", _this.accountInfo.accountRS);
+            formData.append("accountId", _this.accountInfo.accountId);
             formData.append("publicKey", _this.accountInfo.publicKey);
-            formData.append("hecoAddress", _this.acrossChains.heco.target_address);
-            this.$http.post(window.api.updateChainAccountUrl,formData)
+            switch (_this.chainId) {
+                case 1:
+                    formData.append("Address", _this.acrossChains.Heco.target_address);
+                    break;
+                case 2:
+                    formData.append("Address", _this.acrossChains.OKEx.target_address);
+                    break;
+                case 3:
+                    formData.append("Address", _this.acrossChains.ETH.target_address);
+                    break;
+                case 4:
+                    formData.append("Address", _this.acrossChains.Tron.target_address);
+                    break;
+                case 5:
+                    formData.append("Address", _this.acrossChains.BSC.target_address);
+                    break;
+                default:
+                    break;
+            }
+            formData.append("chainId", _this.chainId);
+
+            this.$http.post(window.api.updateChainAccountUrl, formData)
                 .then(function (res1) {
                     switch (res1.data.code) {
                         case "200":
-                            _this.acrossChains.heco.old_address = _this.acrossChains.heco.target_address;
-                            _this.$message.success(_this.$t('acrossChains.bindAddress_success_heco'));
+                            switch (_this.chainId) {
+                                case 1:
+                                    _this.acrossChains.Heco.old_address = _this.acrossChains.Heco.target_address;
+                                    _this.$message.success(_this.$t('acrossChains.bindAddress_success_Heco'));
+                                    break;
+                                case 2:
+                                    _this.acrossChains.OKEx.old_address = _this.acrossChains.OKEx.target_address;
+                                    _this.$message.success(_this.$t('acrossChains.bindAddress_success_OKEx'));
+                                    break;
+                                case 3:
+                                    _this.acrossChains.ETH.old_address = _this.acrossChains.ETH.target_address;
+                                    _this.$message.success(_this.$t('acrossChains.bindAddress_success_ETH'));
+                                    break;
+                                case 4:
+                                    _this.acrossChains.Tron.old_address = _this.acrossChains.Tron.target_address;
+                                    _this.$message.success(_this.$t('acrossChains.bindAddress_success_Tron'));
+                                    break;
+                                case 5:
+                                    _this.acrossChains.BSC.old_address = _this.acrossChains.BSC.target_address;
+                                    _this.$message.success(_this.$t('acrossChains.bindAddress_success_BSC'));
+                                    break;
+                                default:
+                                    break;
+                            }
                             break;
                         case "209":
                             _this.$message.warning(_this.$t('acrossChains.bindAddress_incomplete'));
@@ -4455,44 +4690,26 @@ export default {
                     }
                 })
                 .catch(err => {
-                    _this.$message.warning(_this.$t('acrossChains.bindAddress_fail_heco'));
+                    switch (_this.chainId) {
+                        case 1:
+                            _this.$message.warning(_this.$t('acrossChains.bindAddress_fail_Heco'));
+                            break;
+                        case 2:
+                            _this.$message.warning(_this.$t('acrossChains.bindAddress_fail_OKEx'));
+                            break;
+                        case 3:
+                            _this.$message.warning(_this.$t('acrossChains.bindAddress_fail_ETH'));
+                            break;
+                        case 4:
+                            _this.$message.warning(_this.$t('acrossChains.bindAddress_fail_Tron'));
+                            break;
+                        case 5:
+                            _this.$message.warning(_this.$t('acrossChains.bindAddress_fail_BSC'));
+                            break;
+                        default:
+                            break;
+                    }
                 });
-
-        },
-        /**
-         * 绑定OKEX地址　
-         */
-        bindOKExAddress(){
-            this.preventRepeatedClick();
-            this.showChain = false;
-
-            // var web3Utils = require("web3-utils");
-            // if(!web3Utils.isAddress(this.acrossChains.OKEx.target_address)){
-            //     this.$message.warning(this.$t("acrossChains.notRightAddress"));
-            //     return;
-            // }
-            if(this.acrossChains.OKEx.target_address == this.acrossChains.OKEx.old_address){
-                this.$message.warning(this.$t("acrossChains.sameAddress"));
-                return;
-            }
-
-            const _this = this;
-            let formData = new FormData();
-            formData.append("id", _this.acrossChains.id);
-            formData.append("accountId", _this.accountInfo.accountId);
-            formData.append("publicKey", _this.accountInfo.publicKey);
-            formData.append("accountRS", _this.accountInfo.accountRS);
-            formData.append("hecoAddress", _this.acrossChains.heco.target_address);
-            formData.append("okExAddress", _this.acrossChains.OKEx.target_address);
-            this.$http.post(window.api.saveOrupdateChainAccountUrl,formData)
-                .then(function (res1) {
-                    _this.$message.success(_this.$t('acrossChains.bindAddress_success_OKEx'));
-                    _this.acrossChains.OKEx.old_address = _this.acrossChains.OKEx.target_address;
-                })
-                .catch(err => {
-                    _this.$message.warning(_this.$t('acrossChains.bindAddress_fail_OKEx'));
-                });
-
         }
 
     },
@@ -4551,7 +4768,14 @@ export default {
         selectType: function () {
             const _this = this;
             _this.currentPage = 1;
+            _this.exchangeSelectType = "";
             _this.getAccountTransactionList();
+        },
+        exchangeSelectType: function () {
+          const _this = this;
+          _this.currentPage = 1;
+          _this.selectType = "";
+          _this.getAccountExchangeTransactionList();
         },
         getLang: {
             handler: function (oldValue, newValue) {

@@ -15,6 +15,7 @@ const OKEX_URL = process.env.NODE_ENV === 'development' ? "https://www.oklink.co
 const ETH_URL = process.env.NODE_ENV === 'development' ? "https://api-ropsten.etherscan.io/" : "https://api.etherscan.io/";
 // const TRON_URL = process.env.NODE_ENV === 'development' ? "https://api.shasta.trongrid.io/" : "https://api.trongrid.io/";
 const BSC_URL = process.env.NODE_ENV === 'development' ? "https://api-testnet.bscscan.com/" : "https://api.bscscan.com/";
+
 const MGR_API_URL = process.env.NODE_ENV === 'development' ? "http://localhost:8080/sc" :  "https://mw.run/sc";
 
 function getUrl() {
