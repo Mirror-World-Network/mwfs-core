@@ -1114,7 +1114,8 @@ const en = {
         'passphrase_at_risk': 'Please open in local or private network',
     },
     enter: {
-        'enter_tip': "Your mnemonic phrase is very important, in order to be sure that you have saved it! Please enter your mnemonic phrase below",
+        'enter_tip': "Your mnemonic phrase is very important, in order to be sure that you have saved it! Please enter your mnemonic phrase below, and check your address after login:",
+        'address_is_null': "Registration information has expired, please re-register",
         'enter_cancel': "Cancel",
         'enter_client': "Enter",
     },

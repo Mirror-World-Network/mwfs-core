@@ -1114,7 +1114,8 @@ const cn = {
         'passphrase_at_risk':'请在本地或私有网开启',
     },
     enter: {
-        'enter_tip': "您的密钥非常重要，请确保您已妥善备份！请填写上一步生成的密钥",
+        'enter_tip': "您的密钥非常重要，请确保您已妥善备份！请填写上一步生成的密钥，并在登陆后核对您的地址：",
+        'address_is_null': "注册信息已失效，请重新注册",
         'enter_cancel': "取消",
         'enter_client': "进入客户端",
     },

@@ -225,6 +225,7 @@
                 }
 
                 this.passPhrase = phraseWords.join(" ");
+                this.address = encryption.getRSAddress(this.passPhrase);
             },
             enter: function () {
                 // this.$router.push({name:"/enter",params:{passPhrase: this.passPhrase}});
@@ -232,7 +233,8 @@
                 this.$router.push({
                     name:"Enter",
                     params:{
-                        passPhrase: this.passPhrase
+                        passPhrase: this.passPhrase,
+                        address: this.address
                     }
                 });
             }
