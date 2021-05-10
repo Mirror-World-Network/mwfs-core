@@ -59,6 +59,10 @@ var NRS = (function (NRS, $) {
 		return NRS.getAccountIdFromPublicKey(NRS.getPublicKey(converters.stringToHexString(secretPhrase)));
 	};
 
+    NRS.getRSAddress = function (secretPhrase) {
+        return NRS.getAccountIdFromPublicKey(NRS.getPublicKey(converters.stringToHexString(secretPhrase)), true);
+    };
+
 	NRS.getAccountIdFromPublicKey = function (publicKey, RSFormat) {
 		var hex = converters.hexStringToByteArray(publicKey);
 		var account = simpleHash(hex);

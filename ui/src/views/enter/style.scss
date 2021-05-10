@@ -11,6 +11,17 @@
     }
     .tip{
         margin-top: 38px;
+        .text{
+            color: #333333;
+        }
+        .address{
+            color: $primary_color;
+            font-weight: bold;
+        }
+        .warning{
+            color: red;
+            font-weight: bold;
+        }
     }
     .input{
         margin-top: 10px;
