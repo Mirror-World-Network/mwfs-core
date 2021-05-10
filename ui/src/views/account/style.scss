@@ -308,7 +308,8 @@
     }
     .title .active{
         background:  #3fb09a;
-        a:hover{color :#ffffff}
+        a:hover{color :#ffffff};
+        color :#ffffff;
     }
     #content{
         margin-top: 20px;
@@ -505,10 +506,7 @@
     z-index: 100000;
 }
 
-#MaxConvertibleBalance{
-    width: 73px;
-    font-size: 2px;
-}
+
 
 #exchangeSelectType{
     width: 120px;
