@@ -3273,6 +3273,7 @@ export default {
       _this.getPicVCode();
 
       _this.getAddress();
+
     },
     // menuAdapter() {
     //     document.getElementsByClassName('header')[0].style.display = 'block'
@@ -4951,11 +4952,14 @@ export default {
           _this.acrossChains.BSC.CosExchangeRate = result.BSC.CosExchangeRate;
           _this.acrossChains.BSC.ExchangeAddress = result.BSC.ExchangeAddress;
           _this.acrossChains.BSC.contractAddress = result.BSC.contractAddress;
-          _this.exchangeOpenButton = false;
+          if(_this.projectName !== 'sharder'){
+            _this.exchangeOpenButton = false;
+          }
         }
       }).catch(err => {
           _this.$message.error(_this.$t('acrossChains.error'));
       });
+
     },
     /**
      * 打开跨链资产页面

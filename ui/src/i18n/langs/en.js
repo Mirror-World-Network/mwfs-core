@@ -147,7 +147,7 @@ const en = {
         'ETH_convertible_balance': "ETH convertible quota today",
         'ETH_rate': "ETH rate",
         'emw_exchange_title': "EMW Exchange",
-        'tipChian３': "Make sure the binding ETH address is:",
+        'tipChian3': "Make sure the binding ETH address is:",
         'bindAddress_success_ETH': "ETH address bound successfully",
         'bindAddress_fail_ETH': "ETH address bound failed",
         'no_EMWExchangeAddress': "The acceptance address is ETH exchange address, please transfer through the Asset Exchange page",
