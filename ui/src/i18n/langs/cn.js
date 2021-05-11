@@ -194,7 +194,7 @@ const cn = {
         'cancel': "取消",
         'sameAddress': "此地址与旧地址相同",
         'notRightAddress': "地址格式错误",
-        'bindAddress_incomplete': "该账户未被授权，暂时不能绑定！",
+        'bindAddress_incomplete': "该账户未被授权,暂不能进行资产兑换",
         'use_secretPhrase_tip': "请使用密钥登录！",
         'error': "无法连接网关服务！",
         'bindAddress_double': "地址绑定信息重复，请联系社区人员修改！",
