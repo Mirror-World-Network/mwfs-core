@@ -518,7 +518,7 @@ public final class Constants {
 
     public static final String MGR_URL = acrossChainsConf.getString("MGR_URL");
 
-    public static final Boolean OPEN_BUTTON = acrossChainsConf.getBoolean("OPEN_BUTTON");
+    public static final Boolean EXCHANGE_OPEN_BUTTON = acrossChainsConf.getBoolean("OPEN_BUTTON");
 
     public static final Map<String,String> chainIds = new HashMap<>();
     static {

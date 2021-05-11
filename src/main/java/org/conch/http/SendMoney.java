@@ -52,94 +52,95 @@ public final class SendMoney extends CreateTransaction {
         long amountNQT = ParameterParser.getAmountNQT(req);
         Account account = ParameterParser.getSenderAccount(req);
         String chainId = req.getParameter("chainId");
-        /*
-          限制MW锁仓地址每天的转出量
-         */
+        if(Constants.EXCHANGE_OPEN_BUTTON){
+             /*
+              限制MW锁仓地址每天的转出量
+             */
+            String rightCode = "200";
+            if(blockchain.getHeight()>Constants.EXCHANGE_HEIGHT && chainId != null){
+                String url = Constants.MGR_URL;
+                RestfulHttpClient.HttpResponse response;
+                try {
+                    response = RestfulHttpClient.getClient(url+"getExchangeAddress").get().request();
+                    String content = response.getContent();
+                    String code = (String)com.alibaba.fastjson.JSON.parseObject(content).get("code");
+                    if(code.equals(rightCode)){
+                        com.alibaba.fastjson.JSONObject contentObj =
+                                (JSONObject) com.alibaba.fastjson.JSON.parseObject(content).get("body");
+                        String chainStr = null;
+                        switch (chainId){
+                            case "1":
+                                chainStr = contentObj.getString("Heco");
+                                break;
+                            case "2":
+                                chainStr = contentObj.getString("OKEx");
+                                break;
+                            case "3":
+                                chainStr = contentObj.getString("ETH");
+                                break;
+                            case "4":
+                                chainStr = contentObj.getString("Tron");
+                                break;
+                            case "5":
+                                chainStr = contentObj.getString("BSC");
+                                break;
+                            default:
+                                break;
+                        }
 
-        String rightCode = "200";
-        if(blockchain.getHeight()>Constants.EXCHANGE_HEIGHT && chainId != null){
-            String url = Constants.MGR_URL;
-            RestfulHttpClient.HttpResponse response;
-            try {
-                response = RestfulHttpClient.getClient(url+"getExchangeAddress").get().request();
-                String content = response.getContent();
-                String code = (String)com.alibaba.fastjson.JSON.parseObject(content).get("code");
-                if(code.equals(rightCode)){
-                    com.alibaba.fastjson.JSONObject contentObj =
-                            (JSONObject) com.alibaba.fastjson.JSON.parseObject(content).get("body");
-                    String chainStr = null;
-                    switch (chainId){
-                        case "1":
-                            chainStr = contentObj.getString("Heco");
-                            break;
-                        case "2":
-                            chainStr = contentObj.getString("OKEx");
-                            break;
-                        case "3":
-                            chainStr = contentObj.getString("ETH");
-                            break;
-                        case "4":
-                            chainStr = contentObj.getString("Tron");
-                            break;
-                        case "5":
-                            chainStr = contentObj.getString("BSC");
-                            break;
-                        default:
-                            break;
-                    }
+                        assert chainStr != null;
+                        String CosRecipient = (String) JSONObject.parseObject(chainStr).get("CosRecipient");
+                        if(CosRecipient.equals(account.getId()+"")) {
+                            try {
+                                response = RestfulHttpClient.getClient(url+"getDailyExchangeQuantity").get().request();
+                                content = response.getContent();
+                                contentObj = (JSONObject) com.alibaba.fastjson.JSON.parseObject(content).get("body");
+                                code = (String) com.alibaba.fastjson.JSON.parseObject(content).get("code");
+                                JSONObject chainObj = null;
+                                if(code.equals(rightCode)){
+                                    switch (chainId){
+                                        case "1":
+                                            chainObj = (JSONObject) contentObj.get("Heco");
+                                            break;
+                                        case "2":
+                                            chainObj = (JSONObject) contentObj.get("OKEx");
+                                            break;
+                                        case "3":
+                                            chainObj = (JSONObject) contentObj.get("ETH");
+                                            break;
+                                        case "4":
+                                            chainObj = (JSONObject) contentObj.get("Tron");
+                                            break;
+                                        case "5":
+                                            chainObj = (JSONObject) contentObj.get("BSC");
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                    assert chainObj != null;
+                                    Long dailyExchangeQuantity = (Long) chainObj.get("DailyExchangeQuantity");
+                                    BigDecimal bigDecimal = new BigDecimal(dailyExchangeQuantity);
+                                    BigDecimal bigDecimal1 = new BigDecimal(amountNQT);
+                                    if(bigDecimal1.compareTo(bigDecimal) > 0){
+                                        amountNQT = dailyExchangeQuantity;
+                                    }
+                                    String dailyExchangeQuantity1 = bigDecimal.subtract(new BigDecimal(amountNQT)).stripTrailingZeros().toPlainString();
 
-                    assert chainStr != null;
-                    String CosRecipient = (String) JSONObject.parseObject(chainStr).get("CosRecipient");
-                    if(CosRecipient.equals(account.getId()+"")) {
-                        try {
-                            response = RestfulHttpClient.getClient(url+"getDailyExchangeQuantity").get().request();
-                            content = response.getContent();
-                            contentObj = (JSONObject) com.alibaba.fastjson.JSON.parseObject(content).get("body");
-                            code = (String) com.alibaba.fastjson.JSON.parseObject(content).get("code");
-                            JSONObject chainObj = null;
-                            if(code.equals(rightCode)){
-                                switch (chainId){
-                                    case "1":
-                                        chainObj = (JSONObject) contentObj.get("Heco");
-                                        break;
-                                    case "2":
-                                        chainObj = (JSONObject) contentObj.get("OKEx");
-                                        break;
-                                    case "3":
-                                        chainObj = (JSONObject) contentObj.get("ETH");
-                                        break;
-                                    case "4":
-                                        chainObj = (JSONObject) contentObj.get("Tron");
-                                        break;
-                                    case "5":
-                                        chainObj = (JSONObject) contentObj.get("BSC");
-                                        break;
-                                    default:
-                                        break;
+                                    Map<String,String> params = new HashMap<>(2);
+                                    params.put("chainId",chainId);
+                                    params.put("dailyExchangeQuantity",dailyExchangeQuantity1);
+                                    RestfulHttpClient.getClient(url+"setDailyExchangeQuantity").post().postParams(params).request();
                                 }
-                                assert chainObj != null;
-                                Long dailyExchangeQuantity = (Long) chainObj.get("DailyExchangeQuantity");
-                                BigDecimal bigDecimal = new BigDecimal(dailyExchangeQuantity);
-                                BigDecimal bigDecimal1 = new BigDecimal(amountNQT);
-                                if(bigDecimal1.compareTo(bigDecimal) > 0){
-                                    amountNQT = dailyExchangeQuantity;
-                                }
-                                String dailyExchangeQuantity1 = bigDecimal.subtract(new BigDecimal(amountNQT)).stripTrailingZeros().toPlainString();
-
-                                Map<String,String> params = new HashMap<>(2);
-                                params.put("chainId",chainId);
-                                params.put("dailyExchangeQuantity",dailyExchangeQuantity1);
-                                RestfulHttpClient.getClient(url+"setDailyExchangeQuantity").post().postParams(params).request();
+                            }catch (IOException e) {
+                                Logger.logDebugMessage("Assets cross chain: can't connect " + Constants.MGR_URL + e.getMessage());
+                                return createTransaction(req, account, recipient, amountNQT);
                             }
-                        }catch (IOException e) {
-                            Logger.logDebugMessage("Assets cross chain: can't connect " + Constants.MGR_URL + e.getMessage());
-                            return createTransaction(req, account, recipient, amountNQT);
                         }
                     }
+                }catch (IOException e) {
+                    Logger.logDebugMessage("Assets cross chain: can't connect " + Constants.MGR_URL + " caused by: " + e.getMessage());
+                    return createTransaction(req, account, recipient, amountNQT);
                 }
-            }catch (IOException e) {
-                Logger.logDebugMessage("Assets cross chain: can't connect " + Constants.MGR_URL + " caused by: " + e.getMessage());
-                return createTransaction(req, account, recipient, amountNQT);
             }
         }
         return createTransaction(req, account, recipient, amountNQT);

@@ -472,11 +472,7 @@
           >
             {{ $t("transaction.transaction_type_payment") }}
           </span>
-          <span
-            class="btn"
-            :class="activeSelectType(8)"
-            @click="selectType = 8"
-          >
+          <span class="btn" :class="activeSelectType(8)" @click="selectType = 8">
             {{ $t("transaction.transaction_type_forge_pool") }}
           </span>
           <span
@@ -487,30 +483,12 @@
             {{ $t("transaction.transaction_type_system_reward") }}
           </span>
 
-          <el-select
-            v-model="selectType"
-            :placeholder="$t('transaction.transaction_type_all')"
-          >
-            <el-option
-              v-for="item in transactionType"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            >
+          <el-select v-model="selectType" :placeholder="$t('transaction.transaction_type_all')">
+            <el-option v-for="item in transactionType" :key="item.value" :label="item.label" :value="item.value">
             </el-option>
           </el-select>
-          <el-select
-            class="exchange"
-            id="exchangeSelectType"
-            v-model="exchangeSelectType"
-            :placeholder="$t('transaction.transaction_type_exchange')"
-          >
-            <el-option
-              v-for="item in exchangeTransactionType"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            >
+          <el-select class="exchange" id="exchangeSelectType" v-model="exchangeSelectType" :placeholder="$t('transaction.transaction_type_exchange')">
+            <el-option v-for="item in exchangeTransactionType" :key="item.value" :label="item.label" :value="item.value">
             </el-option>
           </el-select>
         </div>
