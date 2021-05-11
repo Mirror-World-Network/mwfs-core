@@ -12,9 +12,9 @@ const SHARDER_URL = process.env.NODE_ENV === 'development' ? "http://localhost:8
 const MGR_URL = process.env.NODE_ENV === 'development' ? "http://127.0.0.1:8080" : "https://mw.run/admin";
 const HECO_URL = process.env.NODE_ENV === 'development' ? "https://testnet.hecoinfo.com/" : "https://hecoinfo.com/";
 const OKEX_URL = process.env.NODE_ENV === 'development' ? "https://www.oklink.com/okexchain-test/" : "https://www.oklink.com/okexchain/";
-const ETH_URL = process.env.NODE_ENV === 'development' ? "https://api-ropsten.etherscan.io/" : "https://api.etherscan.io/";
+const ETH_URL = process.env.NODE_ENV === 'development' ? "https://ropsten.etherscan.io/" : "https://cn.etherscan.com/";
 // const TRON_URL = process.env.NODE_ENV === 'development' ? "https://api.shasta.trongrid.io/" : "https://api.trongrid.io/";
-const BSC_URL = process.env.NODE_ENV === 'development' ? "https://api-testnet.bscscan.com/" : "https://api.bscscan.com/";
+const BSC_URL = process.env.NODE_ENV === 'development' ? "https://testnet.bscscan.com/" : "https://bscscan.com/";
 
 const MGR_API_URL = process.env.NODE_ENV === 'development' ? "http://localhost:8080/sc" :  "https://mw.run/sc";
 

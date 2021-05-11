@@ -203,8 +203,8 @@ const en = {
         'convertible_balance_not_enough': "The convertibility limit is insufficient today",
         'all_convertible_balance': "MAX convertible",
         'medium_convertible_balance': "Medium convertible",
-        'tx_in_HecoChain': "Query heco chain transaction results",
-        'tx_error': "Transaction TX on heco chain not found",
+        'tx_in_chain': "Query transaction results on chain",
+        'tx_error': "Transaction on chain not found",
         'not_yet_open': "Cross chain asset exchange not yet open",
 
     },

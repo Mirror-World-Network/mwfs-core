@@ -204,8 +204,8 @@ const cn = {
         'convertible_balance_not_enough': "今日可兑换额度不足",
         'all_convertible_balance': "全仓",
         'medium_convertible_balance': "半仓",
-        'tx_in_HecoChain': "查询heco链上交易结果",
-        'tx_error': "未查询到heco链上交易tx",
+        'tx_in_chain': "查询链上交易结果",
+        'tx_error': "未查询到链上交易",
         'not_yet_open': "跨链资产兑换暂未开放",
     },
     transaction: {
