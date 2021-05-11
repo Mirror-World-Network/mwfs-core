@@ -20,7 +20,7 @@ import java.util.Map;
 public final class ExchangeProcessor implements Listener<Block> {
 
     // close dividend distribution
-    final static boolean exchangeOpen = Constants.OPEN_BUTTON;
+    final static boolean exchangeOpen = Constants.EXCHANGE_OPEN_BUTTON;
 
     static int debugCount = 0;
 

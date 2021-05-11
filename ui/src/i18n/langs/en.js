@@ -119,7 +119,7 @@ const en = {
         'bind': "Binding address",
         'Heco_target_address': "heco address",
         'Heco_address_tip': "Please input the address on the heco chain",
-        'Heco_target_balance': "heco balance",
+        'Heco_target_balance': "heco amount redeemed",
         'Heco_convertible_balance': "Heco convertible quota today",
         'Heco_rate': "heco rate",
         'hmw_exchange_title': "HMW Exchange",
@@ -131,7 +131,7 @@ const en = {
 
         'OKEx_target_address': "OKEx address",
         'OKEx_address_tip': "Please input the address on the OKEx chain",
-        'OKEx_target_balance': "OKEx balance",
+        'OKEx_target_balance': "OKEx amount redeemed",
         'OKEx_convertible_balance': "OKEx convertible quota today",
         'OKEx_rate': "OKEx rate",
         'omw_exchange_title': "OMW Exchange",
@@ -143,7 +143,7 @@ const en = {
 
         'ETH_target_address': "ETH address",
         'ETH_address_tip': "Please input the address on the ETH chain",
-        'ETH_target_balance': "ETH balance",
+        'ETH_target_balance': "ETH amount redeemed",
         'ETH_convertible_balance': "ETH convertible quota today",
         'ETH_rate': "ETH rate",
         'emw_exchange_title': "EMW Exchange",
@@ -155,7 +155,7 @@ const en = {
 
         'Tron_target_address': "Tron address",
         'Tron_address_tip': "Please input the address on the Tron chain",
-        'Tron_target_balance': "Tron balance",
+        'Tron_target_balance': "Tron amount redeemed",
         'Tron_convertible_balance': "Tron convertible quota today",
         'Tron_rate': "Tron rate",
         'tmw_exchange_title': "TMW Exchange",
@@ -167,7 +167,7 @@ const en = {
 
         'BSC_target_address': "BSC address",
         'BSC_address_tip': "Please input the address on the BSC chain",
-        'BSC_target_balance': "BSC balance",
+        'BSC_target_balance': "BSC amount redeemed",
         'BSC_convertible_balance': "BSC convertible quota today",
         'BSC_rate': "BSC rate",
         'bmw_exchange_title': "BMW Exchange",
@@ -201,10 +201,10 @@ const en = {
         'no_accountId': "Account information is not loaded, please click refresh button to get account information again!",
         'exchange': "exchange",
         'convertible_balance_not_enough': "The convertibility limit is insufficient today",
-
         'all_convertible_balance': "MAX convertible",
-        'tx_in_HecoChain': "Query heco chain transaction results",
-        'tx_error': "Transaction TX on heco chain not found",
+        'medium_convertible_balance': "Medium convertible",
+        'tx_in_chain': "Query transaction results on chain",
+        'tx_error': "Transaction on chain not found",
         'not_yet_open': "Cross chain asset exchange not yet open",
 
     },

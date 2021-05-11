@@ -671,7 +671,9 @@
                     </tbody>
                 </table>
                 <el-button v-show="isShowMore" id="findTXInHecoChain"
-                @click="findTXInHecoChain(transactionInfo.fullHash)">{{$t('acrossChains.tx_in_HecoChain')}}</el-button>
+                           @click="findTXInHecoChain(transactionInfo.fullHash)">
+                    {{$t('acrossChains.tx_in_chain')}}
+                </el-button>
             </div>
         </div>
     </div>
@@ -722,7 +724,7 @@
                 currentPage: 1,
                 accountBind: null,
 
-                 acrossChains: {
+                acrossChains: {
                     Heco: {
                         CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-Heco",
                     },
@@ -1200,7 +1202,6 @@
             findTXInHecoChain(fullHash){
                 const _this = this;
                 _this.$http.get(window.api.getRecordUrl,{params:{fullSource:fullHash,recordType:_this.recordType}}).then(function (res1) {
-                    console.log(res1.data.body.transactionHash);
                     var tx = res1.data.body.transactionHash;
                     if(tx){
                         switch(_this.chainId){
@@ -1664,7 +1665,7 @@
     }
 
     #findTXInHecoChain{
-        color: #000;
+        color: #FFF;
         background: #3fb09a;
         margin-top: 20px;
     }
