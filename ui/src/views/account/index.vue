@@ -385,6 +385,7 @@
               v-bind:class="{
                 disabledWriteBtn: !nonDownloading,
                 writeBtn: nonDownloading,
+                disabledExchangeBtn: exchangeOpenButton,
               }"
               v-if="whetherShowAssetsAcrossChainsBtn()"
               @click="openAssetsAcrossChainsDialog"
@@ -3129,7 +3130,6 @@ export default {
         sharderAccount: [{ required: true, message: this.$t('rules.mustRequired') }],
       },
       airdropFlag: false,
-
       acrossChains: {
         Heco: {
           target_address: '',
@@ -3199,11 +3199,9 @@ export default {
         balance: 0,
         id: ''
       },
-
       chainId: 1,
-
       showChain: false,
-
+      exchangeOpenButton: true,
     };
   },
   created() {
@@ -4953,7 +4951,10 @@ export default {
           _this.acrossChains.BSC.CosExchangeRate = result.BSC.CosExchangeRate;
           _this.acrossChains.BSC.ExchangeAddress = result.BSC.ExchangeAddress;
           _this.acrossChains.BSC.contractAddress = result.BSC.contractAddress;
+          _this.exchangeOpenButton = false;
         }
+      }).catch(err => {
+          _this.$message.error(_this.$t('acrossChains.error'));
       });
     },
     /**
