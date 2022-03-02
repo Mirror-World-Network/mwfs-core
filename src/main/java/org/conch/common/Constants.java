@@ -516,7 +516,8 @@ public final class Constants {
 
     public static final int HeartBeat_Time = Conch.getIntProperty("sharder.heartBeatTime",5*60*1000);
 
-    public static final String MGR_URL = acrossChainsConf.getString("MGR_URL");
+//    public static final String MGR_URL = isTestnetOrDevnet() ? acrossChainsConf.getString("MGR_URL_DEV") : acrossChainsConf.getString("MGR_URL");
+    public static final String MGR_URL = acrossChainsConf.getString("MGR_URL_DEV");
 
     public static final Boolean EXCHANGE_OPEN_BUTTON = acrossChainsConf.getBoolean("OPEN_BUTTON");
 
@@ -527,6 +528,7 @@ public final class Constants {
         chainIds.put("3","ETH");
         chainIds.put("4","Tron");
         chainIds.put("5","BSC");
+        chainIds.put("6","Polygon");
     }
 
 

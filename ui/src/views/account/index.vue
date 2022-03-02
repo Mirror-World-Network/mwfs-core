@@ -4920,6 +4920,8 @@ export default {
      */
     getAddress: function () {
       const _this = this;
+        console.log('--------------into function');
+        console.log('--------------',window.api);
       _this.$http.get(window.api.getAddress).then(function (res1) {
         var result = res1.data.body;
         if (result) {
@@ -4965,6 +4967,8 @@ export default {
      * 打开跨链资产页面
      */
     openAssetsAcrossChainsDialog: function () {
+        console.log('--------------into function');
+        console.log('--------------',window.api);
       const _this = this;
 
       if (typeof (this.secretPhrase) === 'undefined') {
@@ -4985,7 +4989,9 @@ export default {
       var str = _this.$global.formatNQTMoney(_this.accountInfo.effectiveBalanceNQT, 2);
       _this.acrossChains.balance = parseFloat(str.substring(0, str.length - 2));
 
+      console.log('--------------',window.api);
       if (_this.accountInfo.accountRS) {
+          console.log('--------------',window.api);
         _this.$http.get(window.api.getAccountInfoUrl, { params: { accountRS: _this.accountInfo.accountRS } }).then(function (res1) {
           switch (res1.data.code) {
             case "200":

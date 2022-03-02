@@ -75,9 +75,9 @@
     ]
   },
   "acrossChains": {
-    "EXCHANGE_HEIGHT": 10000,
+    "EXCHANGE_HEIGHT": 60000,
     "OPEN_BUTTON": true,
     "MGR_URL_DEV": "http://127.0.0.1:8080/api/front/acrossChain/",
-    "MGR_URL": "https://mw.run/api/front/acrossChain/"
+    "MGR_URL": "http://127.0.0.1:8080/api/front/acrossChain/"
   }
 }
