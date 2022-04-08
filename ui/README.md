@@ -40,3 +40,22 @@ ui/static/img/*
 > Replace with the corresponding icon
 ```
 After the configuration is complete, the UI will be automatically switched
+
+## notice
+if npm run dev : webpack: Failed to compile.
+You can install windows-build-tools 
+```cmd
+npm install -g windows-build-tools
+``` 
+in your node environment first, if you still get an error after installation, execute 
+```cmd
+npm install --save-dev pngquant
+``` 
+, and finally try to execute 
+```cmd
+yarn install --ignore-engines
+``` 
+
+Another thing to note is that you need to use the compiler to open the ui directory separately
+
+

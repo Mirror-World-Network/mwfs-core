@@ -49,7 +49,7 @@ public final class ExchangeProcessor implements Listener<Block> {
                             response = RestfulHttpClient.getClient(url+"getExchangeAddress").get().request();
                             String content = response.getContent();
                             String code = (String)com.alibaba.fastjson.JSON.parseObject(content).get("code");
-                            com.alibaba.fastjson.JSONObject contentObj = (com.alibaba.fastjson.JSONObject) com.alibaba.fastjson.JSON.parseObject(content).get("body");
+                            com.alibaba.fastjson.JSONObject contentObj = (com.alibaba.fastjson.JSONObject) com.alibaba.fastjson.JSON.parseObject(content).get("data");
                             if(code.equals(rightCode)){
                                 com.alibaba.fastjson.JSONObject chainObj;
                                 Map<String,String> params = new HashMap<>(6);
@@ -76,18 +76,18 @@ public final class ExchangeProcessor implements Listener<Block> {
                                         contentObj = com.alibaba.fastjson.JSON.parseObject(content);
                                         code = (String)contentObj.get("code");
                                         if(code.equals(rightCode)){
-                                            Logger.logInfoMessage("Heco chain: Record save success");
+                                            Logger.logInfoMessage("accrossChain: Record save success");
                                         }else{
-                                            com.alibaba.fastjson.JSONObject body = com.alibaba.fastjson.JSON.parseObject((String)contentObj.get("body"));;
-                                            Logger.logInfoMessage("Heco chain: "+(String)body.get("status"));
+                                            com.alibaba.fastjson.JSONObject data = com.alibaba.fastjson.JSON.parseObject((String)contentObj.get("data"));;
+                                            Logger.logInfoMessage("accrossChain: "+(String)data.get("status"));
                                         }
                                     }catch (IOException e) {
-                                        Logger.logDebugMessage("Heco chain:can't sendTransactin in hecoChain"+e.getMessage());
+                                        Logger.logDebugMessage("accrossChain:can't sendTransactin in hecoChain"+e.getMessage());
                                     }
                                 }
                             }
                         } catch (IOException e) {
-                            Logger.logDebugMessage("Heco chain: can't connect " + Constants.MGR_URL + " caused by: " + e.getMessage());
+                            Logger.logDebugMessage("accrossChain: can't connect " + Constants.MGR_URL + " caused by: " + e.getMessage());
                         }
                     }
                 });

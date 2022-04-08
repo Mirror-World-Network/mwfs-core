@@ -725,20 +725,23 @@
                 accountBind: null,
 
                 acrossChains: {
-                    Heco: {
-                        CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-Heco",
-                    },
-                    OKEx: {
-                        CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-OKEx",
-                    },
-                    ETH: {
-                        CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-ETH",
-                    },
-                    Tron: {
-                        CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-Tron",
-                    },
-                    BSC: {
-                        CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-BSC",
+                    // Heco: {
+                    //     CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-Heco",
+                    // },
+                    // OKEx: {
+                    //     CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-OKEx",
+                    // },
+                    // ETH: {
+                    //     CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-ETH",
+                    // },
+                    // Tron: {
+                    //     CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-Tron",
+                    // },
+                    // BSC: {
+                    //     CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-BSC",
+                    // },
+                   Polygon: {
+                        CosExchangeAddress: "CDW-XXXX-XXXX-XXXX-Polygon",
                     },
                 },
 
@@ -926,46 +929,52 @@
                             _this.transactionInfo = res.data;
                             resolve("success");
 
-                            if(_this.$global.getSenderOrRecipient(_this.transactionInfo) === _this.acrossChains.Heco.CosExchangeAddress){
-                                _this.chainId = 1;
+                            // if(_this.$global.getSenderOrRecipient(_this.transactionInfo) === _this.acrossChains.Heco.CosExchangeAddress){
+                            //     _this.chainId = 1;
+                            //     _this.isShowMore = true;
+                            //     _this.recordType = 1;
+                            // }else if(_this.$global.getSenderRSOrWo(_this.transactionInfo) === _this.acrossChains.Heco.CosExchangeAddress){
+                            //     _this.chainId = 1;
+                            //     _this.isShowMore = true
+                            //     _this.recordType = 2;
+                            // }else if(_this.$global.getSenderOrRecipient(_this.transactionInfo) === _this.acrossChains.OKEx.CosExchangeAddress){
+                            //     _this.chainId = 2;
+                            //     _this.isShowMore = true
+                            //     _this.recordType = 1;
+                            // }else if(_this.$global.getSenderRSOrWo(_this.transactionInfo) === _this.acrossChains.OKEx.CosExchangeAddress){
+                            //     _this.chainId = 2;
+                            //     _this.isShowMore = true
+                            //     _this.recordType = 2;
+                            // }else if(_this.$global.getSenderOrRecipient(_this.transactionInfo) === _this.acrossChains.ETH.CosExchangeAddress){
+                            //     _this.chainId = 3;
+                            //     _this.isShowMore = true
+                            //     _this.recordType = 1;
+                            // }else if(_this.$global.getSenderRSOrWo(_this.transactionInfo) === _this.acrossChains.ETH.CosExchangeAddress){
+                            //     _this.chainId = 3;
+                            //     _this.isShowMore = true
+                            //     _this.recordType = 2;
+                            // }else if(_this.$global.getSenderOrRecipient(_this.transactionInfo) === _this.acrossChains.Tron.CosExchangeAddress){
+                            //     _this.chainId = 4;
+                            //     _this.isShowMore = true
+                            //     _this.recordType = 1;
+                            // }else if(_this.$global.getSenderRSOrWo(_this.transactionInfo) === _this.acrossChains.Tron.CosExchangeAddress){
+                            //     _this.chainId = 4;
+                            //     _this.isShowMore = true
+                            //     _this.recordType = 2;
+                            // }else if(_this.$global.getSenderOrRecipient(_this.transactionInfo) === _this.acrossChains.BSC.CosExchangeAddress){
+                            //     _this.chainId = 5;
+                            //     _this.isShowMore = true
+                            //     _this.recordType = 1;
+                            // }else if(_this.$global.getSenderRSOrWo(_this.transactionInfo) === _this.acrossChains.BSC.CosExchangeAddress){
+                            //     _this.chainId = 5;
+                            //     _this.isShowMore = true
+                            //     _this.recordType = 2;
+                            // }
+
+                            if(_this.$global.getSenderOrRecipient(_this.transactionInfo) === _this.acrossChains.Polygon.CosExchangeAddress){
+                                _this.chainId = 6;
                                 _this.isShowMore = true;
                                 _this.recordType = 1;
-                            }else if(_this.$global.getSenderRSOrWo(_this.transactionInfo) === _this.acrossChains.Heco.CosExchangeAddress){
-                                _this.chainId = 1;
-                                _this.isShowMore = true
-                                _this.recordType = 2;
-                            }else if(_this.$global.getSenderOrRecipient(_this.transactionInfo) === _this.acrossChains.OKEx.CosExchangeAddress){
-                                _this.chainId = 2;
-                                _this.isShowMore = true
-                                _this.recordType = 1;
-                            }else if(_this.$global.getSenderRSOrWo(_this.transactionInfo) === _this.acrossChains.OKEx.CosExchangeAddress){
-                                _this.chainId = 2;
-                                _this.isShowMore = true
-                                _this.recordType = 2;
-                            }else if(_this.$global.getSenderOrRecipient(_this.transactionInfo) === _this.acrossChains.ETH.CosExchangeAddress){
-                                _this.chainId = 3;
-                                _this.isShowMore = true
-                                _this.recordType = 1;
-                            }else if(_this.$global.getSenderRSOrWo(_this.transactionInfo) === _this.acrossChains.ETH.CosExchangeAddress){
-                                _this.chainId = 3;
-                                _this.isShowMore = true
-                                _this.recordType = 2;
-                            }else if(_this.$global.getSenderOrRecipient(_this.transactionInfo) === _this.acrossChains.Tron.CosExchangeAddress){
-                                _this.chainId = 4;
-                                _this.isShowMore = true
-                                _this.recordType = 1;
-                            }else if(_this.$global.getSenderRSOrWo(_this.transactionInfo) === _this.acrossChains.Tron.CosExchangeAddress){
-                                _this.chainId = 4;
-                                _this.isShowMore = true
-                                _this.recordType = 2;
-                            }else if(_this.$global.getSenderOrRecipient(_this.transactionInfo) === _this.acrossChains.BSC.CosExchangeAddress){
-                                _this.chainId = 5;
-                                _this.isShowMore = true
-                                _this.recordType = 1;
-                            }else if(_this.$global.getSenderRSOrWo(_this.transactionInfo) === _this.acrossChains.BSC.CosExchangeAddress){
-                                _this.chainId = 5;
-                                _this.isShowMore = true
-                                _this.recordType = 2;
                             }
                         } else {
                             resolve(res.data.errorDescription);
@@ -1188,13 +1197,14 @@
             getAddress(){
                 const _this = this;
                 _this.$http.get(window.api.getAddress).then(function (res1) {
-                    var result = res1.data.body;
+                    var result = res1.data.data;
                     if (result) {
-                        _this.acrossChains.Heco.CosExchangeAddress = result.Heco.CosExchangeAddress;
-                        _this.acrossChains.OKEx.CosExchangeAddress = result.OKEx.CosExchangeAddress;
-                        _this.acrossChains.ETH.CosExchangeAddress = result.ETH.CosExchangeAddress;
-                        _this.acrossChains.Tron.CosExchangeAddress = result.Tron.CosExchangeAddress;
-                        _this.acrossChains.BSC.CosExchangeAddress = result.BSC.CosExchangeAddress;
+                        // _this.acrossChains.Heco.CosExchangeAddress = result.Heco.CosExchangeAddress;
+                        // _this.acrossChains.OKEx.CosExchangeAddress = result.OKEx.CosExchangeAddress;
+                        // _this.acrossChains.ETH.CosExchangeAddress = result.ETH.CosExchangeAddress;
+                        // _this.acrossChains.Tron.CosExchangeAddress = result.Tron.CosExchangeAddress;
+                        // _this.acrossChains.BSC.CosExchangeAddress = result.BSC.CosExchangeAddress;
+                        _this.acrossChains.Polygon.CosExchangeAddress = result.Polygon.CosExchangeAddress;
                     }
                 });
             },
@@ -1202,23 +1212,28 @@
             findTXInHecoChain(fullHash){
                 const _this = this;
                 _this.$http.get(window.api.getRecordUrl,{params:{fullSource:fullHash,recordType:_this.recordType}}).then(function (res1) {
-                    var tx = res1.data.body.transactionHash;
-                    if(tx){
+                    console.log('res1--------',res1)
+                    var code = res1.data.code;
+                    if(code === 200){
+                        var tx = res1.data.data.transactionHash
                         switch(_this.chainId){
-                            case 1:
-                                window.open(window.api.getHecoInfo+tx, '_blank');
-                                break;
-                            case 2:
-                                window.open(window.api.getOKExInfo+tx, '_blank');
-                                break;
-                            case 3:
-                                window.open(window.api.getETHInfo+tx, '_blank');
-                                break;
-                            case 4:
-                                window.open(window.api.getTronInfo+tx, '_blank');
-                                break;
-                            case 5:
-                                window.open(window.api.getBSCInfo+tx, '_blank');
+                            // case 1:
+                            //     window.open(window.api.getHecoInfo+tx, '_blank');
+                            //     break;
+                            // case 2:
+                            //     window.open(window.api.getOKExInfo+tx, '_blank');
+                            //     break;
+                            // case 3:
+                            //     window.open(window.api.getETHInfo+tx, '_blank');
+                            //     break;
+                            // case 4:
+                            //     window.open(window.api.getTronInfo+tx, '_blank');
+                            //     break;
+                            // case 5:
+                            //     window.open(window.api.getBSCInfo+tx, '_blank');
+                            //     break;
+                            case 6:
+                                window.open(window.api.getPolygonInfo+tx, '_blank');
                                 break;
                             default:
                                 break;

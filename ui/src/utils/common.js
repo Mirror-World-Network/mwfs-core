@@ -34,12 +34,14 @@ export default {
     ETHUnit: "EMW",
     TronUnit: "TMW",
     BSCUnit: "BMW",
+    PolygonUnit: "MW(Polygon)",
     unitValue: 100000000,
     HecoUnitValue: 100000000,
     OKExUnitValue: 100000000,
     ETHUnitValue: 100000000,
     TronUnitValue: 100000000,
     BSCUnitValue: 100000000,
+    PolygonUnitValue: 100000000,
     poolPledgeAmount: 10000000000000, // pledge amount of pool creator
     optHeight: {join: 0, quit: 0, destroy: 0, create: 0},
     validPeerPercentage: 0.7, // Less than this value filter display mode, greater than or equal to close

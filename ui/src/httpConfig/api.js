@@ -9,7 +9,7 @@ const SERVER_API_DEV = "http://localhost:9216";
 const SERVER_API_TEST = "http://localhost:7216";
 const SHARDER_URL = process.env.NODE_ENV === 'development' ? "http://localhost:8080" : (global.projectName === 'mw' ? "https://mw.run" : "https://sharder.org");
 // const MGR_URL = process.env.NODE_ENV === 'development' ? "http://192.168.3.247:8080" : "https://mw.run/admin";
-const MGR_URL = process.env.NODE_ENV === 'development' ? "http://127.0.0.1:8080" : "http://127.0.0.1:8080";//https://mw.run
+const MGR_URL = process.env.NODE_ENV === 'development' ? "http://127.0.0.1:8800/chain" : "https://mw.run:8800/chain";
 const HECO_URL = process.env.NODE_ENV === 'development' ? "https://testnet.hecoinfo.com" : "https://hecoinfo.com";
 const OKEX_URL = process.env.NODE_ENV === 'development' ? "https://www.oklink.com/okexchain-test" : "https://www.oklink.com/okexchain";
 const ETH_URL = process.env.NODE_ENV === 'development' ? "https://ropsten.etherscan.io" : "https://cn.etherscan.com";
@@ -38,10 +38,10 @@ const api = {
     simulatedPositioningUrl:SHARDER_URL +"/coordinates/getSPUrl.ss",
 
     //跨链请求
-    getAccountInfoUrl: MGR_URL + "/api/front/acrossChain/getAccountInfo",
-    updateChainAccountUrl: MGR_URL + "/api/front/acrossChain/updateChainAccount",
-    getRecordUrl: MGR_URL + "/api/front/acrossChain/getRecord",
-    getAddress: MGR_URL + "/api/front/acrossChain/getAddress",
+    getAccountInfoUrl: MGR_URL + "/api/getAccountInfo",
+    updateChainAccountUrl: MGR_URL + "/api/updateChainAccount",
+    getRecordUrl: MGR_URL + "/api/getRecord",
+    getAddress: MGR_URL + "/api/getAddress",
     //查询heco交易信息
     getHecoInfo:HECO_URL + "/tx",
     getOKExInfo:OKEX_URL + "/tx",
