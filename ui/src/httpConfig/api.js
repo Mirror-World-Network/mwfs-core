@@ -9,7 +9,7 @@ const SERVER_API_DEV = "http://localhost:9216";
 const SERVER_API_TEST = "http://localhost:7216";
 const SHARDER_URL = process.env.NODE_ENV === 'development' ? "http://localhost:8080" : (global.projectName === 'mw' ? "https://mw.run" : "https://sharder.org");
 // const MGR_URL = process.env.NODE_ENV === 'development' ? "http://192.168.3.247:8080" : "https://mw.run/admin";
-const MGR_URL = process.env.NODE_ENV === 'development' ? "http://127.0.0.1:8800/chain" : "https://mw.run:8800/chain";
+const MGR_URL = process.env.NODE_ENV === 'development' ? "http://127.0.0.1:8800/chain" : "http://47.57.235.8:8800/chain";
 const HECO_URL = process.env.NODE_ENV === 'development' ? "https://testnet.hecoinfo.com" : "https://hecoinfo.com";
 const OKEX_URL = process.env.NODE_ENV === 'development' ? "https://www.oklink.com/okexchain-test" : "https://www.oklink.com/okexchain";
 const ETH_URL = process.env.NODE_ENV === 'development' ? "https://ropsten.etherscan.io" : "https://cn.etherscan.com";
@@ -48,7 +48,7 @@ const api = {
     getETHInfo:ETH_URL + "/tx",
     // getTronInfo:TRON_URL + "wallet/gettransactioninfobyid",
     getBSCInfo:BSC_URL + "/tx",
-    getPolygonInfo:POLYGON_URL + "/tx",
+    getPolygonInfo:POLYGON_URL + "/tx/",
     // 快捷授权相关
     updateHardwareProduct: + MGR_API_URL + "/ssHardwareProduct/update"
 };

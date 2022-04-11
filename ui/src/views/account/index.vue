@@ -4065,31 +4065,6 @@ export default {
         return;
       }
 
-      if (_this.transfer.receiver === _this.acrossChains.Heco.CosExchangeAddress) {
-        _this.$message.warning(_this.$t('acrossChains.no_HMWExchangeAddress'));
-        _this.transfer.executing = false;
-        return;
-      }
-      if (_this.transfer.receiver === _this.acrossChains.OKEx.CosExchangeAddress) {
-        _this.$message.warning(_this.$t('acrossChains.no_OMWExchangeAddress'));
-        _this.transfer.executing = false;
-        return;
-      }
-      if (_this.transfer.receiver === _this.acrossChains.ETH.CosExchangeAddress) {
-        _this.$message.warning(_this.$t('acrossChains.no_EMWExchangeAddress'));
-        _this.transfer.executing = false;
-        return;
-      }
-      if (_this.transfer.receiver === _this.acrossChains.Tron.CosExchangeAddress) {
-        _this.$message.warning(_this.$t('acrossChains.no_TMWExchangeAddress'));
-        _this.transfer.executing = false;
-        return;
-      }
-      if (_this.transfer.receiver === _this.acrossChains.BSC.CosExchangeAddress) {
-        _this.$message.warning(_this.$t('acrossChains.no_BMWExchangeAddress'));
-        _this.transfer.executing = false;
-        return;
-      }
       if (_this.transfer.publicKey === "") {
         _this.$message.warning(_this.$t('notification.sendmessage_null_account_public'));
         _this.transfer.executing = false;
@@ -4160,27 +4135,6 @@ export default {
     sendTransfer: function (formData) {
       const _this = this;
       SSO.sendMoney(formData, function (res) {
-        // if (formData.recipient === _this.acrossChains.Heco.CosExchangeAddress) {
-        //   _this.acrossChains.Heco.convertible_balance -= this.transfer.exchangeNumber / _this.acrossChains.Heco.CosExchangeRate;
-        //   _this.acrossChains.Heco.target_balance += this.transfer.exchangeNumber * _this.acrossChains.Heco.CosExchangeRate;
-        // } else if (formData.recipient === _this.acrossChains.OKEx.CosExchangeAddress) {
-        //   _this.acrossChains.OKEx.convertible_balance -= this.transfer.exchangeNumber / _this.acrossChains.OKEx.CosExchangeRate;
-        //   _this.acrossChains.OKEx.target_balance += this.transfer.exchangeNumber * _this.acrossChains.OKEx.CosExchangeRate;
-        // } else if (formData.recipient === _this.acrossChains.ETH.CosExchangeAddress) {
-        //   _this.acrossChains.ETH.convertible_balance -= this.transfer.exchangeNumber / _this.acrossChains.ETH.CosExchangeRate;
-        //   _this.acrossChains.ETH.target_balance += this.transfer.exchangeNumber * _this.acrossChains.ETH.CosExchangeRate;
-        // } else if (formData.recipient === _this.acrossChains.Tron.CosExchangeAddress) {
-        //   _this.acrossChains.Tron.convertible_balance -= this.transfer.exchangeNumber / _this.acrossChains.Tron.CosExchangeRate;
-        //   _this.acrossChains.Tron.target_balance += this.transfer.exchangeNumber * _this.acrossChains.Tron.CosExchangeRate;
-        // } else if (formData.recipient === _this.acrossChains.BSC.CosExchangeAddress) {
-        //   _this.acrossChains.BSC.convertible_balance -= this.transfer.exchangeNumber / _this.acrossChains.BSC.CosExchangeRate;
-        //   _this.acrossChains.BSC.target_balance += this.transfer.exchangeNumber * _this.acrossChains.BSC.CosExchangeRate;
-        // }else 
-        // if (formData.recipient === _this.acrossChains.Polygon.CosExchangeAddress) {
-        //   _this.acrossChains.Polygon.convertible_balance -= this.transfer.exchangeNumber / _this.acrossChains.Polygon.CosExchangeRate;
-        //   _this.acrossChains.Polygon.target_balance += this.transfer.exchangeNumber * _this.acrossChains.Polygon.CosExchangeRate;
-        // }
-
         if (typeof res.errorDescription === 'undefined') {
           if (res.broadcasted) {
             _this.$message.success(_this.$t('notification.transfer_success'));
@@ -5423,7 +5377,7 @@ export default {
         //   formData.append("Address", _this.acrossChains.BSC.target_address);
         //   break;
         case 6:
-          formData.append("Address", _this.acrossChains.Polygon.target_address);
+          formData.append("address", _this.acrossChains.Polygon.target_address);
           break;
         default:
           break;

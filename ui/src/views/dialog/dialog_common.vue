@@ -1214,8 +1214,8 @@
                 _this.$http.get(window.api.getRecordUrl,{params:{fullSource:fullHash,recordType:_this.recordType}}).then(function (res1) {
                     console.log('res1--------',res1)
                     var code = res1.data.code;
-                    if(code === 200){
-                        var tx = res1.data.data.transactionHash
+                    if(code == 200){
+                        var tx = res1.data.data
                         switch(_this.chainId){
                             // case 1:
                             //     window.open(window.api.getHecoInfo+tx, '_blank');
