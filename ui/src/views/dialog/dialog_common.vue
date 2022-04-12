@@ -1242,7 +1242,7 @@
                         _this.$message.error(_this.$t('acrossChains.tx_error'));
                     }
                 }).catch(err => {
-                    _this.$message.error(_this.$t('acrossChains.error'));
+                    _this.$message.warning(_this.$t('acrossChains.error'));
                 });
 
 

@@ -5092,7 +5092,7 @@ export default {
           }
         }
       }).catch(err => {
-        _this.$message.error(_this.$t('acrossChains.error'));
+        _this.$message.warning(_this.$t('acrossChains.error'));
       });
 
     },
@@ -5181,7 +5181,7 @@ export default {
               break;
           }
         }).catch(err => {
-          _this.$message.error(_this.$t('acrossChains.error'));
+          _this.$message.warning(_this.$t('acrossChains.error'));
         });
       } else {
         _this.$message.error(_this.$t('acrossChains.no_accountId'));
