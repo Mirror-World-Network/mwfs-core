@@ -59,3 +59,13 @@ yarn install --ignore-engines
 Another thing to note is that you need to use the compiler to open the ui directory separately
 
 
+## Version suggestions
+
+The node version runs normally when
+```shell
+$ node -v
+10.16.2
+
+$ npm -v
+6.9.0
+```
